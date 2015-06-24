@@ -1,6 +1,6 @@
 p5.play is a p5.js library for the creation of games and playthings.
 
-You can find examples and more information at [p5play.molleindustria.org] (p5play.molleindustria.org)
+You can find examples and more information at [p5play.molleindustria.org] (http://p5play.molleindustria.org)
 
 p5.play provides a Sprite class to manage visual objects in 2D space and features such as animation support, basic collision detection and resolution, sprite grouping, helpers for mouse and keyboard interactions, and a virtual camera. 
 
