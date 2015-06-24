@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>theme/helpers/helpers.js - p5.play</title>
+    <link rel="stylesheet" href="">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="stylesheet" href="../assets/css/custom.css">
+    <link rel="stylesheet" href="../assets/css/lucid.css">
+    <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.css">
+    <link rel="shortcut icon" type="image/png" href="../assets/favicon.png">
+</head>
+<body class="yui3-skin-sam">
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
+	    <img alt="p5.play" src="../../asterisk.png" style="max-height: 65%;" title="p5.play">
+            p5.play
+        </h1>
+	<div class="nav">
+            <li class="divider-vertical"></li>
+            <li>
+                <p class="navbar-text">
+                    API Docs for Version: <b>1.0.0</b>
+                </p>
+            </li>
+        </div>
+        <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Animation", "classes/Camera", "classes/Group", "classes/p5.play", "classes/Sprite", "modules/p5.play"]'>
+        </form>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="span3">
+	    <div>
+	        <div id="sidebar">
+	        <div id="classes">
+	            <ul id="api-classes" class="nav nav-list">
+	                    <li><a href="../classes/Animation.html">Animation</a></li>
+	                    <li><a href="../classes/Camera.html">Camera</a></li>
+	                    <li><a href="../classes/Group.html">Group</a></li>
+	                    <li><a href="../classes/p5.play.html">p5.play</a></li>
+	                    <li><a href="../classes/Sprite.html">Sprite</a></li>
+	            </ul>
+	        </div>
+	        </div>
+	    </div>
+        </div>
+        <div class="span9">
+                <form id="options-form" class="form-inline pull-right">
+                    Show:
+                    <label for="api-show-inherited" class="checkbox">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected" class="checkbox">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private" class="checkbox">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated" class="checkbox">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </form>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+                        <div class="page-header">
+                            <h1>theme/helpers/helpers.js <small>File</small></h1>
+                        </div>
+                        
+                        <div class="file">
+                            <pre class="prettyprint linenums">
+                        module.exports = {
+                        	publicClasses: function(context, options) {
+                        		&#x27;use strict&#x27;;
+                        		var ret = &quot;&quot;;
+                        
+                        		for(var i=0; i &lt; context.length; i++) {
+                        			if(!context[i].itemtype &amp;&amp; context[i].access === &#x27;public&#x27;) {
+                        				ret = ret + options.fn(context[i]);
+                        			} else if (context[i].itemtype) {
+                        				ret = ret + options.fn(context[i]);
+                        			}
+                        		}
+                        
+                        		return ret;
+                        	},
+                        	/**
+                        	 * Hack for:
+                        	 * https://github.com/yui/yuidoc/issues/198
+                        	 *
+                        	 * Usage:
+                        	 *   {{#crossLinkWrapper type}}{{#crossLink type}}{{/crossLink}}{{/crossLinkWrapper}}
+                        	 */
+                        	crossLinkWrapper: function(context, options) {
+                        		if (!context) return &#x27;&#x27;;
+                        		var types_raw = context.split(&#x27;|&#x27;);
+                        		var types_linked = options.fn(this).split(&#x27;|&#x27;);
+                        
+                        		return types_raw.map(function(type, i) {
+                        			if (/\[\]/.test(type)) {
+                        				if (/&lt;\/a&gt;/.test(types_linked[i])) {
+                        					return types_linked[i].replace(&#x27;&lt;/a&gt;&#x27;, &#x27;[]&lt;/a&gt;&#x27;);
+                        				} else {
+                        					return types_linked[i].trim() + &#x27;[]&#x27;;
+                        				}
+                        			} else {
+                        				return types_linked[i];
+                        			}
+                        		}).join(&#x27; | &#x27;);
+                        	},
+                        	notEmpty: function(context, options) {
+                        		&#x27;use strict&#x27;;
+                        		if (!context || !String(context).replace(/\s/g, &#x27;&#x27;)) return options.inverse(this);
+                        		return options.fn(this);
+                        	},
+                        	hasStaticMethods: function(context, options) {
+                        		&#x27;use strict&#x27;;
+                        		var hasStatic = false;
+                        		if (!context) return &#x27;&#x27;;
+                        		for(var i=0; i &lt; context.length; i++) {
+                        			if (context[i][&#x27;static&#x27;]) {
+                        				hasStatic = true;
+                        				break;
+                        			}
+                        		}
+                        		if (hasStatic) {
+                        			return options.fn(this);
+                        		}
+                        		return &#x27;&#x27;;
+                        	},
+                        	hasInstanceMethods: function(context, options) {
+                        		&#x27;use strict&#x27;;
+                        		var hasInstance = false;
+                        		if (!context) return &#x27;&#x27;;
+                        		for(var i=0; i &lt; context.length; i++) {
+                        			if (!context[i][&#x27;static&#x27;]) {
+                        				hasInstance = true;
+                        				break;
+                        			}
+                        		}
+                        		if (hasInstance) {
+                        			return options.fn(this);
+                        		}
+                        		return &#x27;&#x27;;
+                        	},
+                        	search : function(classes, modules) {
+                        		&#x27;use strict&#x27;;
+                        		var ret = &#x27;&#x27;;
+                        
+                        		for(var i=0; i &lt; classes.length; i++) {
+                        			if(i &gt; 0) {
+                        				ret += &#x27;, &#x27;;
+                        			}
+                        			ret += &quot;\&quot;&quot; + &#x27;classes/&#x27; + classes[i].displayName + &quot;\&quot;&quot;;
+                        		}
+                        
+                        		if(ret.length &gt; 0 &amp;&amp; modules.length &gt; 0) {
+                        			ret += &#x27;, &#x27;;
+                        		}
+                        
+                        		for(var j=0; j &lt; modules.length; j++) {
+                        			if(j &gt; 0) {
+                        				ret += &#x27;, &#x27;;
+                        			}
+                        			ret += &quot;\&quot;&quot; + &#x27;modules/&#x27; + modules[j].displayName + &quot;\&quot;&quot;;
+                        		}
+                        
+                        		return ret;
+                        	}
+                        };
+                        
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/jquery/jquery-1.8.2.min.js"></script>
+<script src="../assets/vendor/bootstrap/js/bootstrap.js"></script>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script src="../assets/js/yuidoc-bootstrap.js"></script>
+<script>prettyPrint();</script>
+</body>
+</html>
