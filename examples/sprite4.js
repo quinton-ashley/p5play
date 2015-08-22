@@ -23,7 +23,7 @@ function draw() {
   //speed, angle
   circle.setSpeed(3, direction);
   
-  //you can rotate the sprite according the directio it is moving
+  //you can rotate the sprite according the direction it is moving
   //uncomment this
   //circle.rotateToDirection = true;
   
