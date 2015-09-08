@@ -17,6 +17,11 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "docs",
+    "examples",
+    "theme",
+    "asterisk.png",
+    "yuidoc.json"
   ]
 }
