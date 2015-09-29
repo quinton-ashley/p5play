@@ -194,6 +194,7 @@ p5.prototype.drawSprites = function(group) {
 * @param {Sprite} sprite Sprite to be displayed
 */
 p5.prototype.drawSprite = function(sprite) {
+  if(sprite!=null)
   sprite.display();
 }
 
@@ -3011,6 +3012,15 @@ function Animation() {
   */
   this.images = [];
 
+  /**
+   * If animation is a sprite sheet this will be the image of the sprite sheet
+   * @type {p5.Image}
+   */
+  this.sheet_image = null;
+  this.sheet_frame_width = 0;
+  this.sheet_frame_height = 0;
+  this.sheet_num_frames = 0;
+
   var frame = 0;
   var cycles = 0;
   var targetFrame = -1;
@@ -3067,6 +3077,23 @@ function Animation() {
   //is the collider defined manually or defined 
   //by the current frame size
   this.imageCollider = false;
+
+  ////TODO: document
+  this._generateSheetFrames = function() {
+    //TODO: handle case where sheet_num_frames isn't specified use width/height
+    var sX = 0, sY = 0;
+    for (var i = 0; i < this.sheet_num_frames; i++) {
+      this.images.push({'frame_num': i, 'sX': sX, 'sY': sY, 'sW': this.sheet_frame_width, 'sH': this.sheet_frame_height});
+      sX += this.sheet_frame_width;
+      if (sX >= this.sheet_image.width) {
+        sX = 0;
+        sY += this.sheet_frame_height;
+        if (sY >= this.sheet_image.height) {
+          sY = 0;
+        }
+      }
+    }
+  };
 
   //sequence mode
   if(arguments.length == 2 && typeof arguments[0] == "string" && typeof arguments[1] == "string")
@@ -3160,6 +3187,22 @@ function Animation() {
     }//end no ext error
 
   }//end sequence mode
+  // Sprite sheet mode
+  else if(arguments.length === 4 && (typeof arguments[0] == 'string' ||
+    arguments[0] instanceof p5.Image) && typeof arguments[1] == 'number' &&
+    typeof arguments[2] == 'number' && typeof arguments[3] == 'number')
+  {
+    this.sheet_frame_width = arguments[1];
+    this.sheet_frame_height = arguments[2];
+    this.sheet_num_frames = arguments[3];
+
+    if(arguments[0] instanceof p5.Image) {
+      this.sheet_image = arguments[0];
+      this._generateSheetFrames();
+    } else {
+      this.sheet_image = loadImage(arguments[0], this._generateSheetFrames.bind(this));
+    }
+  }
   else if(arguments.length != 0)//arbitrary list of images
   {
     //print("Animation arbitrary mode");
@@ -3170,7 +3213,6 @@ function Animation() {
       else 
         this.images.push(loadImage(arguments[i]));
     }
-
   }
 
   /**
@@ -3229,7 +3271,12 @@ function Animation() {
 
       if(this.images[frame]!==undefined)
       {
-        image(this.images[frame], this.offX, this.offY);
+        if (this.sheet_image) {
+          var frame_info = this.images[frame];
+          image(this.sheet_image, frame_info.sX, frame_info.sY, frame_info.sW, frame_info.sH, this.offX, this.offY, frame_info.sW, frame_info.sH);
+        } else {
+          image(this.images[frame], this.offX, this.offY);
+        }
       }
       else 
       {
