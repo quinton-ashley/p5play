@@ -1,4 +1,4 @@
-/*! p5.js v0.4.13 September 28, 2015 */
+/*! p5.js v0.4.13 October 02, 2015 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.p5 = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
 },{}],2:[function(_dereq_,module,exports){
@@ -12743,6 +12743,7 @@ var p5 = function(sketch, node, sync) {
       }
 
       userPreload();
+      this._runIfPreloadsAreDone();
     } else {
       this._setup();
       this._runFrames();
@@ -12750,9 +12751,8 @@ var p5 = function(sketch, node, sync) {
     }
   }.bind(this);
 
-  this._decrementPreload = function(){
+  this._runIfPreloadsAreDone = function(){
     var context = this._isGlobal ? window : this;
-    context._setProperty('_preloadCount', context._preloadCount - 1);
     if (context._preloadCount === 0) {
       var loadingScreen = document.getElementById(context._loadingScreenId);
       if (loadingScreen) {
@@ -12762,6 +12762,12 @@ var p5 = function(sketch, node, sync) {
       context._runFrames();
       context._draw();
     }
+  };
+
+  this._decrementPreload = function(){
+    var context = this._isGlobal ? window : this;
+    context._setProperty('_preloadCount', context._preloadCount - 1);
+    context._runIfPreloadsAreDone();
   };
 
   this._wrapPreload = function(obj, fnName){
@@ -20783,6 +20789,13 @@ _dereq_('../core/error_helpers');
 p5.prototype.loadImage = function(path, successCallback, failureCallback) {
   var img = new Image();
   var pImg = new p5.Image(1, 1, this);
+  var decrementPreload;
+
+  // when in preload decrementPreload will always be the last arg as it is set
+  // with args.push() before invocation in _wrapPreload
+  if ((this && this.preload) || window.preload) {
+    decrementPreload = arguments[arguments.length - 1];
+  }
 
   img.onload = function() {
     pImg.width = pImg.canvas.width = img.width;
@@ -20794,10 +20807,16 @@ p5.prototype.loadImage = function(path, successCallback, failureCallback) {
     if (typeof successCallback === 'function') {
       successCallback(pImg);
     }
+    if ((successCallback !== decrementPreload) &&
+      (typeof decrementPreload === 'function')) {
+      decrementPreload();
+    }
   };
   img.onerror = function(e) {
     p5._friendlyFileLoadError(0,img.src);
-    if (typeof failureCallback === 'function') {
+    // don't get failure callback mixed up with decrementPreload
+    if ((typeof failureCallback === 'function') &&
+      (failureCallback !== decrementPreload)) {
       failureCallback(e);
     }
   };
@@ -22181,12 +22200,19 @@ _dereq_('../core/error_helpers');
 p5.prototype.loadFont = function(path, onSuccess, onError) {
 
   var p5Font = new p5.Font(this);
+  var decrementPreload;
+
+  // when in preload decrementPreload will always be the last arg as it is set
+  // with args.push() before invocation in _wrapPreload
+  if ((this && this.preload) || window.preload) {
+    decrementPreload = arguments[arguments.length - 1];
+  }
 
   opentype.load(path, function(err, font) {
 
     if (err) {
 
-      if (typeof onError !== 'undefined') {
+      if ((typeof onError !== 'undefined') && (onError !== decrementPreload)) {
         return onError(err);
       }
       throw err;
@@ -22197,6 +22223,11 @@ p5.prototype.loadFont = function(path, onSuccess, onError) {
     if (typeof onSuccess !== 'undefined') {
       onSuccess(p5Font);
     }
+    if ((onSuccess !== decrementPreload) &&
+      (typeof decrementPreload === 'function')) {
+      decrementPreload();
+    }
+
   });
 
   return p5Font;
@@ -22283,6 +22314,14 @@ p5.prototype.loadBytes = function() {
 p5.prototype.loadJSON = function() {
   var path = arguments[0];
   var callback = arguments[1];
+  var decrementPreload;
+
+  // when in preload decrementPreload will always be the last arg as it is set
+  // with args.push() before invocation in _wrapPreload
+  if ((this && this.preload) || window.preload) {
+    decrementPreload = arguments[arguments.length - 1];
+  }
+
   var ret = []; // array needed for preload
   // assume jsonp for URLs
   var t = 'json'; //= path.indexOf('http') === -1 ? 'json' : 'jsonp';
@@ -22301,6 +22340,10 @@ p5.prototype.loadJSON = function() {
       }
       if (typeof callback !== 'undefined') {
         callback(resp);
+      }
+      if ((callback !== decrementPreload) &&
+        (typeof decrementPreload === 'function')) {
+        decrementPreload();
       }
     });
   return ret;
@@ -22361,6 +22404,14 @@ p5.prototype.loadJSON = function() {
 p5.prototype.loadStrings = function (path, callback) {
   var ret = [];
   var req = new XMLHttpRequest();
+  var decrementPreload;
+
+  // when in preload decrementPreload will always be the last arg as it is set
+  // with args.push() before invocation in _wrapPreload
+  if ((this && this.preload) || window.preload) {
+    decrementPreload = arguments[arguments.length - 1];
+  }
+
   req.open('GET', path, true);
   req.onreadystatechange = function () {
     if (req.readyState === 4 && (req.status === 200 )) {
@@ -22370,6 +22421,10 @@ p5.prototype.loadStrings = function (path, callback) {
       }
       if (typeof callback !== 'undefined') {
         callback(ret);
+      }
+      if ((callback !== decrementPreload) &&
+        (typeof decrementPreload === 'function')) {
+        decrementPreload();
       }
     }
     else{
@@ -22465,8 +22520,17 @@ p5.prototype.loadTable = function (path) {
   var header = false;
   var sep = ',';
   var separatorSet = false;
+  var decrementPreload;
+
+  // when in preload decrementPreload will always be the last arg as it is set
+  // with args.push() before invocation in _wrapPreload
+  if ((this && this.preload) || window.preload) {
+    decrementPreload = arguments[arguments.length - 1];
+  }
+
   for (var i = 1; i < arguments.length; i++) {
-    if (typeof(arguments[i]) === 'function' ){
+    if ((typeof(arguments[i]) === 'function') &&
+      (arguments[i] !== decrementPreload)) {
       callback = arguments[i];
     }
     else if (typeof(arguments[i]) === 'string') {
@@ -22631,10 +22695,16 @@ p5.prototype.loadTable = function (path) {
       if (callback !== null) {
         callback(t);
       }
+      if ((callback !== decrementPreload) &&
+        (typeof decrementPreload === 'function')) {
+        decrementPreload();
+      }
     })
     .fail(function(err,msg){
       p5._friendlyFileLoadError(2,path);
-      if (typeof callback !== 'undefined') {
+      // don't get error callback mixed up with decrementPreload
+      if ((typeof callback !== 'undefined') &&
+        (callback !== decrementPreload)) {
         callback(false);
       }
     });
@@ -22683,6 +22753,14 @@ function makeObject(row, headers) {
  */
 p5.prototype.loadXML = function(path, callback) {
   var ret = document.implementation.createDocument(null, null);
+  var decrementPreload;
+
+  // when in preload decrementPreload will always be the last arg as it is set
+  // with args.push() before invocation in _wrapPreload
+  if ((this && this.preload) || window.preload) {
+    decrementPreload = arguments[arguments.length - 1];
+  }
+
   reqwest({
     url: path,
     type: 'xml',
@@ -22696,6 +22774,10 @@ p5.prototype.loadXML = function(path, callback) {
       ret.appendChild(x);
       if (typeof callback !== 'undefined') {
         callback(resp);
+      }
+      if ((callback !== decrementPreload) &&
+        (typeof decrementPreload === 'function')) {
+        decrementPreload();
       }
     });
   return ret;
@@ -23391,6 +23473,7 @@ function destroyClickedElement(event) {
 }
 
 module.exports = p5;
+
 },{"../core/core":50,"../core/error_helpers":53,"opentype.js":8,"reqwest":29}],73:[function(_dereq_,module,exports){
 /**
  * @module IO
@@ -24653,7 +24736,7 @@ var p5 = _dereq_('../core/core');
  *   print(x); // -3
  *   print(y); // 3
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.abs = Math.abs;
 
@@ -24689,7 +24772,7 @@ p5.prototype.abs = Math.abs;
  *   text(nfc(ax, 2,2), ax, ay - 5);
  *   text(nfc(bx,1,1), bx, by - 5);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.ceil = Math.ceil;
 
@@ -24727,7 +24810,7 @@ p5.prototype.ceil = Math.ceil;
  *   fill(0);
  *   ellipse(xc, 66, 9,9); // Constrained
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.constrain = function(n, low, high) {
   return Math.max(Math.min(n, high), low);
@@ -24771,7 +24854,7 @@ p5.prototype.constrain = function(n, low, high) {
  *   pop();
  *   // Fancy!
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.dist = function(x1, y1, x2, y2) {
   return Math.sqrt( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) );
@@ -24819,7 +24902,7 @@ p5.prototype.dist = function(x1, y1, x2, y2) {
  *   line(0, 0, 0, height);
  *   line(0, height-1, width, height-1);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.exp = Math.exp;
 
@@ -24854,7 +24937,7 @@ p5.prototype.exp = Math.exp;
  *   text(nfc(ax, 2,2), ax, ay - 5);
  *   text(nfc(bx,1,1), bx, by - 5);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.floor = Math.floor;
 
@@ -24892,7 +24975,7 @@ p5.prototype.floor = Math.floor;
  *   point(d, y);
  *   point(e, y);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.lerp = function(start, stop, amt) {
   return amt*(stop-start)+start;
@@ -24934,7 +25017,7 @@ p5.prototype.lerp = function(start, stop, amt) {
  *   noFill();
  *   stroke(0);
  *   beginShape();
- *   for(var x=0; x<width; x++) {
+ *   for(var x=0; x < width; x++) {
  *     xValue = map(x, 0, width, 0, maxX);
  *     yValue = log(xValue);
  *     y = map(yValue, -maxY, maxY, height, 0);
@@ -24944,7 +25027,7 @@ p5.prototype.lerp = function(start, stop, amt) {
  *   line(0,0,0,height);
  *   line(0,height/2,width, height/2);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.log = Math.log;
 
@@ -24976,7 +25059,7 @@ p5.prototype.log = Math.log;
  *   line(0, 0, x2, y2);
  *   print(mag(x2, y2));  // Prints "106.30146"
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.mag = function(x, y) {
   return Math.sqrt(x*x+y*y);
@@ -25016,7 +25099,7 @@ p5.prototype.mag = function(x, y) {
  *       var x2 = map(mouseX, 0, width, 0, 200);
  *       ellipse(x2, 125, 50, 50);
  *     }
- *   </div></code>
+ *   </code></div>
  */
 p5.prototype.map = function(n, start1, stop1, start2, stop2) {
   return ((n-start1)/(stop1-start1))*(stop2-start2)+start2;
@@ -25051,7 +25134,7 @@ p5.prototype.map = function(n, start1, stop1, start2, stop2) {
  *   textSize(32);
  *   text(max(numArray), maxX, maxY);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.max = function() {
   if (arguments[0] instanceof Array) {
@@ -25090,7 +25173,7 @@ p5.prototype.max = function() {
  *   textSize(32);
  *   text(min(numArray), maxX, maxY);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.min = function() {
   if (arguments[0] instanceof Array) {
@@ -25142,7 +25225,7 @@ p5.prototype.min = function() {
  *   normalX = 20;
  *   text(normalized, normalX, normalY);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.norm = function(n, start, stop) {
   return this.map(n, start, stop, 0, 1);
@@ -25174,7 +25257,7 @@ p5.prototype.norm = function(n, start, stop) {
  *
  *   ellipse(eLoc*8, eLoc*8, pow(eSize, 4), pow(eSize, 4));
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.pow = Math.pow;
 
@@ -25209,7 +25292,7 @@ p5.prototype.pow = Math.pow;
  *   text(nfc(ax, 2,2), ax, ay - 5);
  *   text(nfc(bx,1,1), bx, by - 5);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.round = Math.round;
 
@@ -25249,7 +25332,7 @@ p5.prototype.round = Math.round;
  *   text("x = " + x1, 0, y1 + spacing);
  *   text("sqrt(x) = " + x2, 0, y2 + spacing);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.sq = function(n) { return n*n; };
 
@@ -25291,7 +25374,7 @@ p5.prototype.sq = function(n) { return n*n; };
  *   text("x = " + x1, 0, y1 + spacing);
  *   text("sqrt(x) = " + x2, 0, y2 + spacing);
  * }
- * </div></code>
+ * </code></div>
  */
 p5.prototype.sqrt = Math.sqrt;
 

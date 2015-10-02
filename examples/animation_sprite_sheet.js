@@ -2,14 +2,16 @@
 var sprite_sheet;
 var sheet_animation;
 
-function setup() {
-  createCanvas(800, 225);
-
+function preload() {
   // specify width and height of each frame and number of frames
   sheet_animation = loadAnimation('assets/explode_sprite_sheet.png', 171, 158, 11);
 
   // load the full sprite sheet for example reference only
   sprite_sheet = loadImage('assets/explode_sprite_sheet.png');
+}
+
+function setup() {
+  createCanvas(800, 225);
 }
 
 function draw() {
