@@ -1,7 +1,8 @@
 //Creating sprite using sprite sheets for animation
+var explode_sprite_sheet;
+var player_sprite_sheet;
 var explode_sprite;
 var player_walk;
-var frames_json = '[{"x":0,"y":0,"width":171,"height":158},{"x":171,"y":0,"width":171,"height":158},{"x":342,"y":0,"width":171,"height":158},{"x":513,"y":0,"width":171,"height":158},{"x":684,"y":0,"width":171,"height":158},{"x":855,"y":0,"width":171,"height":158},{"x":0,"y":158,"width":171,"height":158},{"x":171,"y":158,"width":171,"height":158},{"x":342,"y":158,"width":171,"height":158},{"x":513,"y":158,"width":171,"height":158},{"x":684,"y":158,"width":171,"height":158}]';
 var player_sprite;
 var player_frames = [
   {"name":"p2_walk01", "x":0, "y": 0, "width": 70, "height": 94},
@@ -19,9 +20,11 @@ var player_frames = [
 
 
 function preload() {
-  // specify width and height of each frame and number of frames
-  sheet_animation = loadAnimation('assets/explode_sprite_sheet.png', JSON.parse(frames_json));
-  player_walk = loadAnimation('assets/p2_spritesheet.png', player_frames);
+  explode_sprite_sheet = loadSpriteSheet('assets/explode_sprite_sheet.png', 171, 158, 11);
+  player_sprite_sheet = loadSpriteSheet('assets/p2_spritesheet.png', player_frames);
+
+  sheet_animation = loadAnimation(explode_sprite_sheet);
+  player_walk = loadAnimation(player_sprite_sheet);
 }
 
 function setup() {
