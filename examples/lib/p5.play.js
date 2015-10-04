@@ -3504,6 +3504,7 @@ function SpriteSheet() {
 
   if (arguments.length === 2 && Array.isArray(arguments[1])) {
     this.frames = arguments[1];
+    this.num_frames = this.frames.length;
   } else if (arguments.length === 4 &&
     (typeof arguments[1] == 'number') &&
     (typeof arguments[2] == 'number') &&
@@ -3524,6 +3525,27 @@ function SpriteSheet() {
     } else if (arguments.length === 4) {
       this.image = loadImage(arguments[0], this._generateSheetFrames.bind(this));
     }
+  }
+
+  /**
+   *
+   * @param frame_name
+   * @param x
+   * @param y
+   * @param [width]
+   * @param [height]
+   */
+  this.drawFrame = function (frame_name, x, y, width, height) {
+    var frame;
+    for (var i = 0; i < this.frames.length; i++) {
+      if (this.frames[i].name === frame_name) {
+        frame = this.frames[i];
+        break;
+      }
+    }
+    var dWidth = width || frame.width;
+    var dHeight = height || frame.height;
+    image(this.image, frame.x, frame.y, frame.width, frame.height, x, y, dWidth, dHeight);
   }
 }
 

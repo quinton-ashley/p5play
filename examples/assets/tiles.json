@@ -1,0 +1,1206 @@
+[
+  {
+    "name": "box.png",
+    "x": "0",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxAlt.png",
+    "x": "0",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxCoin.png",
+    "x": "0",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxCoinAlt.png",
+    "x": "0",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxCoinAltdisabled.png",
+    "x": "0",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxCoindisabled.png",
+    "x": "0",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxEmpty.png",
+    "x": "0",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxExplosive.png",
+    "x": "0",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxExplosiveAlt.png",
+    "x": "0",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxExplosivedisabled.png",
+    "x": "0",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxItem.png",
+    "x": "0",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxItemAlt.png",
+    "x": "0",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxItemAltdisabled.png",
+    "x": "432",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxItemdisabled.png",
+    "x": "0",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "boxWarning.png",
+    "x": "72",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "brickWall.png",
+    "x": "216",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "bridge.png",
+    "x": "216",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "bridgeLogs.png",
+    "x": "288",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castle.png",
+    "x": "288",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleCenter.png",
+    "x": "504",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleCenterrounded.png",
+    "x": "504",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleCliffLeft.png",
+    "x": "504",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleCliffLeftAlt.png",
+    "x": "648",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleCliffRight.png",
+    "x": "648",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleCliffRightAlt.png",
+    "x": "792",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleHalf.png",
+    "x": "792",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleHalfLeft.png",
+    "x": "432",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleHalfMid.png",
+    "x": "648",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleHalfRight.png",
+    "x": "792",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleHillLeft.png",
+    "x": "648",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleHillLeft2.png",
+    "x": "792",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleHillRight.png",
+    "x": "792",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleHillRight2.png",
+    "x": "792",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleLedgeLeft.png",
+    "x": "856",
+    "y": "868",
+    "width": "5",
+    "height": "22"
+  },
+  {
+    "name": "castleLedgeRight.png",
+    "x": "842",
+    "y": "868",
+    "width": "5",
+    "height": "22"
+  },
+  {
+    "name": "castleLeft.png",
+    "x": "792",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleMid.png",
+    "x": "792",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "castleRight.png",
+    "x": "792",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirt.png",
+    "x": "792",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtCenter.png",
+    "x": "720",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtCenterrounded.png",
+    "x": "720",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtCliffLeft.png",
+    "x": "720",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtCliffLeftAlt.png",
+    "x": "720",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtCliffRight.png",
+    "x": "720",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtCliffRightAlt.png",
+    "x": "720",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtHalf.png",
+    "x": "720",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtHalfLeft.png",
+    "x": "720",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtHalfMid.png",
+    "x": "720",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtHalfRight.png",
+    "x": "720",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtHillLeft.png",
+    "x": "720",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtHillLeft2.png",
+    "x": "720",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtHillRight.png",
+    "x": "720",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtHillRight2.png",
+    "x": "648",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtLedgeLeft.png",
+    "x": "842",
+    "y": "892",
+    "width": "5",
+    "height": "18"
+  },
+  {
+    "name": "dirtLedgeRight.png",
+    "x": "842",
+    "y": "912",
+    "width": "5",
+    "height": "18"
+  },
+  {
+    "name": "dirtLeft.png",
+    "x": "504",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtMid.png",
+    "x": "504",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dirtRight.png",
+    "x": "648",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "doorclosedMid.png",
+    "x": "648",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "doorclosedTop.png",
+    "x": "648",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dooropenMid.png",
+    "x": "648",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "dooropenTop.png",
+    "x": "648",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "fence.png",
+    "x": "648",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "fenceBroken.png",
+    "x": "648",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grass.png",
+    "x": "648",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassCenter.png",
+    "x": "576",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassCenterrounded.png",
+    "x": "576",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassCliffLeft.png",
+    "x": "576",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassCliffLeftAlt.png",
+    "x": "576",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassCliffRight.png",
+    "x": "576",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassCliffRightAlt.png",
+    "x": "576",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassHalf.png",
+    "x": "576",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassHalfLeft.png",
+    "x": "576",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassHalfMid.png",
+    "x": "576",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassHalfRight.png",
+    "x": "576",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassHillLeft.png",
+    "x": "576",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassHillLeft2.png",
+    "x": "576",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassHillRight.png",
+    "x": "576",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassHillRight2.png",
+    "x": "504",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassLedgeLeft.png",
+    "x": "849",
+    "y": "868",
+    "width": "5",
+    "height": "24"
+  },
+  {
+    "name": "grassLedgeRight.png",
+    "x": "849",
+    "y": "894",
+    "width": "5",
+    "height": "24"
+  },
+  {
+    "name": "grassLeft.png",
+    "x": "504",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassMid.png",
+    "x": "504",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "grassRight.png",
+    "x": "504",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "hilllarge.png",
+    "x": "842",
+    "y": "720",
+    "width": "48",
+    "height": "146"
+  },
+  {
+    "name": "hilllargeAlt.png",
+    "x": "864",
+    "y": "0",
+    "width": "48",
+    "height": "146"
+  },
+  {
+    "name": "hillsmall.png",
+    "x": "792",
+    "y": "828",
+    "width": "48",
+    "height": "106"
+  },
+  {
+    "name": "hillsmallAlt.png",
+    "x": "792",
+    "y": "720",
+    "width": "48",
+    "height": "106"
+  },
+  {
+    "name": "laddermid.png",
+    "x": "504",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "laddertop.png",
+    "x": "504",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "liquidLava.png",
+    "x": "504",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "liquidLavaTop.png",
+    "x": "432",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "liquidLavaTopmid.png",
+    "x": "432",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "liquidWater.png",
+    "x": "504",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "liquidWaterTop.png",
+    "x": "432",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "liquidWaterTopmid.png",
+    "x": "432",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "lockblue.png",
+    "x": "432",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "lockgreen.png",
+    "x": "72",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "lockred.png",
+    "x": "432",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "lockyellow.png",
+    "x": "432",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "rockHillLeft.png",
+    "x": "432",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "rockHillRight.png",
+    "x": "432",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "ropeAttached.png",
+    "x": "432",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "ropeHorizontal.png",
+    "x": "432",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "ropeVertical.png",
+    "x": "360",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sand.png",
+    "x": "360",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandCenter.png",
+    "x": "576",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandCenterrounded.png",
+    "x": "576",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandCliffLeft.png",
+    "x": "360",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandCliffLeftAlt.png",
+    "x": "360",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandCliffRight.png",
+    "x": "360",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandCliffRightAlt.png",
+    "x": "360",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandHalf.png",
+    "x": "360",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandHalfLeft.png",
+    "x": "360",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandHalfMid.png",
+    "x": "360",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandHalfRight.png",
+    "x": "360",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandHillLeft.png",
+    "x": "360",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandHillLeft2.png",
+    "x": "360",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandHillRight.png",
+    "x": "360",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandHillRight2.png",
+    "x": "288",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandLedgeLeft.png",
+    "x": "856",
+    "y": "892",
+    "width": "5",
+    "height": "18"
+  },
+  {
+    "name": "sandLedgeRight.png",
+    "x": "856",
+    "y": "912",
+    "width": "5",
+    "height": "18"
+  },
+  {
+    "name": "sandLeft.png",
+    "x": "288",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandMid.png",
+    "x": "288",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sandRight.png",
+    "x": "288",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "sign.png",
+    "x": "288",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "signExit.png",
+    "x": "288",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "signLeft.png",
+    "x": "288",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "signRight.png",
+    "x": "288",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snow.png",
+    "x": "288",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowCenter.png",
+    "x": "720",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowCenterrounded.png",
+    "x": "288",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowCliffLeft.png",
+    "x": "288",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowCliffLeftAlt.png",
+    "x": "216",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowCliffRight.png",
+    "x": "216",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowCliffRightAlt.png",
+    "x": "216",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowHalf.png",
+    "x": "216",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowHalfLeft.png",
+    "x": "216",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowHalfMid.png",
+    "x": "216",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowHalfRight.png",
+    "x": "216",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowHillLeft.png",
+    "x": "216",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowHillLeft2.png",
+    "x": "216",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowHillRight.png",
+    "x": "216",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowHillRight2.png",
+    "x": "216",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowLedgeLeft.png",
+    "x": "863",
+    "y": "868",
+    "width": "5",
+    "height": "18"
+  },
+  {
+    "name": "snowLedgeRight.png",
+    "x": "863",
+    "y": "888",
+    "width": "5",
+    "height": "18"
+  },
+  {
+    "name": "snowLeft.png",
+    "x": "144",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowMid.png",
+    "x": "144",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "snowRight.png",
+    "x": "144",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stone.png",
+    "x": "144",
+    "y": "648",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneCenter.png",
+    "x": "144",
+    "y": "576",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneCenterrounded.png",
+    "x": "144",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneCliffLeft.png",
+    "x": "144",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneCliffLeftAlt.png",
+    "x": "144",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneCliffRight.png",
+    "x": "144",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneCliffRightAlt.png",
+    "x": "144",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneHalf.png",
+    "x": "144",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneHalfLeft.png",
+    "x": "144",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneHalfMid.png",
+    "x": "144",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneHalfRight.png",
+    "x": "72",
+    "y": "864",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneHillLeft2.png",
+    "x": "72",
+    "y": "792",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneHillRight2.png",
+    "x": "72",
+    "y": "720",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneLedgeLeft.png",
+    "x": "863",
+    "y": "908",
+    "width": "5",
+    "height": "24"
+  },
+  {
+    "name": "stoneLedgeRight.png",
+    "x": "864",
+    "y": "148",
+    "width": "5",
+    "height": "24"
+  },
+  {
+    "name": "stoneLeft.png",
+    "x": "72",
+    "y": "504",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneMid.png",
+    "x": "72",
+    "y": "432",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneRight.png",
+    "x": "72",
+    "y": "360",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "stoneWall.png",
+    "x": "72",
+    "y": "288",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "tochLit.png",
+    "x": "72",
+    "y": "216",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "tochLit2.png",
+    "x": "72",
+    "y": "144",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "torch.png",
+    "x": "72",
+    "y": "72",
+    "width": "70",
+    "height": "70"
+  },
+  {
+    "name": "window.png",
+    "x": "72",
+    "y": "0",
+    "width": "70",
+    "height": "70"
+  }
+]
