@@ -1,4 +1,4 @@
-/*! p5.js v0.4.13 October 02, 2015 */
+/*! p5.js v0.4.13 October 04, 2015 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.p5 = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
 },{}],2:[function(_dereq_,module,exports){
@@ -12988,13 +12988,17 @@ var p5 = function(sketch, node, sync) {
     }
   }
 
-  var self = this;
-  window.addEventListener('focus', function() {
-    self._setProperty('focused', true);
-  });
-
-  window.addEventListener('blur', function() {
-    self._setProperty('focused', false);
+  var focusHandler = function() {
+    this._setProperty('focused', true);
+  }.bind(this);
+  var blurHandler = function() {
+    this._setProperty('focused', false);
+  }.bind(this);
+  window.addEventListener('focus', focusHandler);
+  window.addEventListener('blur', blurHandler);
+  this.registerMethod('remove', function() {
+    window.removeEventListener(focusHandler);
+    window.removeEventListener(blurHandler);
   });
 
   // TODO: ???
@@ -20747,8 +20751,8 @@ _dereq_('../core/error_helpers');
  * <br><br>
  * The image may not be immediately available for rendering
  * If you want to ensure that the image is ready before doing
- * anything with it you can do perform those operations in the
- * callback, or place the loadImage() call in preload().
+ * anything with it, place the loadImage() call in preload().
+ * You may also supply a callback function to handle the image when it's ready.
  * <br><br>
  * The path to the image should be relative to the HTML file
  * that links in your sketch. Loading an from a URL or other
@@ -20789,13 +20793,7 @@ _dereq_('../core/error_helpers');
 p5.prototype.loadImage = function(path, successCallback, failureCallback) {
   var img = new Image();
   var pImg = new p5.Image(1, 1, this);
-  var decrementPreload;
-
-  // when in preload decrementPreload will always be the last arg as it is set
-  // with args.push() before invocation in _wrapPreload
-  if ((this && this.preload) || window.preload) {
-    decrementPreload = arguments[arguments.length - 1];
-  }
+  var decrementPreload = p5._getDecrementPreload(arguments);
 
   img.onload = function() {
     pImg.width = pImg.canvas.width = img.width;
@@ -20807,8 +20805,7 @@ p5.prototype.loadImage = function(path, successCallback, failureCallback) {
     if (typeof successCallback === 'function') {
       successCallback(pImg);
     }
-    if ((successCallback !== decrementPreload) &&
-      (typeof decrementPreload === 'function')) {
+    if (decrementPreload && (successCallback !== decrementPreload)) {
       decrementPreload();
     }
   };
@@ -22150,6 +22147,25 @@ var opentype = _dereq_('opentype.js');
 _dereq_('../core/error_helpers');
 
 /**
+ * Checks if we are in preload and returns the last arg which will be the
+ * _decrementPreload function if called from a loadX() function.  Should
+ * only be used in loadX() functions.
+ * @private
+ */
+p5._getDecrementPreload = function (args) {
+  var decrementPreload = args[args.length - 1];
+
+  // when in preload decrementPreload will always be the last arg as it is set
+  // with args.push() before invocation in _wrapPreload
+  if (((this && this.preload) || window.preload) &&
+    typeof decrementPreload === 'function') {
+    return decrementPreload;
+  }
+
+  return null;
+};
+
+/**
  * Loads an opentype font file (.otf, .ttf) from a file or a URL,
  * and returns a PFont Object. This method is asynchronous,
  * meaning it may not finish before the next line in your sketch
@@ -22180,8 +22196,7 @@ _dereq_('../core/error_helpers');
  * }
  * </code></div>
  *
- * <p>Outside preload(), you may supply a callback function to handle the
- * object:</p>
+ * <p>You may supply a callback function to handle the object:</p>
  *
  * <div><code>
  * function setup() {
@@ -22200,13 +22215,7 @@ _dereq_('../core/error_helpers');
 p5.prototype.loadFont = function(path, onSuccess, onError) {
 
   var p5Font = new p5.Font(this);
-  var decrementPreload;
-
-  // when in preload decrementPreload will always be the last arg as it is set
-  // with args.push() before invocation in _wrapPreload
-  if ((this && this.preload) || window.preload) {
-    decrementPreload = arguments[arguments.length - 1];
-  }
+  var decrementPreload = p5._getDecrementPreload(arguments);
 
   opentype.load(path, function(err, font) {
 
@@ -22223,8 +22232,7 @@ p5.prototype.loadFont = function(path, onSuccess, onError) {
     if (typeof onSuccess !== 'undefined') {
       onSuccess(p5Font);
     }
-    if ((onSuccess !== decrementPreload) &&
-      (typeof decrementPreload === 'function')) {
+    if (decrementPreload && (onSuccess !== decrementPreload)) {
       decrementPreload();
     }
 
@@ -22288,8 +22296,7 @@ p5.prototype.loadBytes = function() {
  * }
  * </code></div>
  *
- * <p>Outside preload(), you may supply a callback function to handle the
- * object:</p>
+ * <p>You may supply a callback function to handle the object:</p>
 
  * <div><code>
  * function setup() {
@@ -22314,13 +22321,7 @@ p5.prototype.loadBytes = function() {
 p5.prototype.loadJSON = function() {
   var path = arguments[0];
   var callback = arguments[1];
-  var decrementPreload;
-
-  // when in preload decrementPreload will always be the last arg as it is set
-  // with args.push() before invocation in _wrapPreload
-  if ((this && this.preload) || window.preload) {
-    decrementPreload = arguments[arguments.length - 1];
-  }
+  var decrementPreload = p5._getDecrementPreload(arguments);
 
   var ret = []; // array needed for preload
   // assume jsonp for URLs
@@ -22333,19 +22334,31 @@ p5.prototype.loadJSON = function() {
     }
   }
 
-  reqwest({url: path, type: t, crossOrigin: true})
-    .then(function(resp) {
+  reqwest({
+    url: path,
+    type: t,
+    crossOrigin: true,
+    error: function (resp, msg, err) {
+      if (msg) {
+        console.log(msg);
+      }
+      if (err && err.message) {
+        console.log(err.message);
+      }
+    },
+    success: function(resp) {
       for (var k in resp) {
         ret[k] = resp[k];
       }
       if (typeof callback !== 'undefined') {
         callback(resp);
       }
-      if ((callback !== decrementPreload) &&
-        (typeof decrementPreload === 'function')) {
+      if (decrementPreload && (callback !== decrementPreload)) {
         decrementPreload();
       }
-    });
+    }
+  });
+
   return ret;
 };
 
@@ -22386,8 +22399,7 @@ p5.prototype.loadJSON = function() {
  * }
  * </code></div>
  *
- * <p>Outside preload(), you may supply a callback function to handle the
- * object:</p>
+ * <p>You may supply a callback function to handle the object:</p>
  *
  * <div><code>
  * function setup() {
@@ -22404,33 +22416,34 @@ p5.prototype.loadJSON = function() {
 p5.prototype.loadStrings = function (path, callback) {
   var ret = [];
   var req = new XMLHttpRequest();
-  var decrementPreload;
+  var decrementPreload = p5._getDecrementPreload(arguments);
 
-  // when in preload decrementPreload will always be the last arg as it is set
-  // with args.push() before invocation in _wrapPreload
-  if ((this && this.preload) || window.preload) {
-    decrementPreload = arguments[arguments.length - 1];
-  }
+  req.addEventListener('error', function () {
+    var foo = 'hello';
+    console.log(foo);
+    p5._friendlyFileLoadError(3,path);
+  });
 
   req.open('GET', path, true);
   req.onreadystatechange = function () {
-    if (req.readyState === 4 && (req.status === 200 )) {
-      var arr = req.responseText.match(/[^\r\n]+/g);
-      for (var k in arr) {
-        ret[k] = arr[k];
+    if (req.readyState === 4) {
+      if (req.status === 200) {
+        var arr = req.responseText.match(/[^\r\n]+/g);
+        for (var k in arr) {
+          ret[k] = arr[k];
+        }
+        if (typeof callback !== 'undefined') {
+          callback(ret);
+        }
+        if (decrementPreload && (callback !== decrementPreload)) {
+          decrementPreload();
+        }
+      } else {
+        console.log('Failed: non-200 request status: ' + req.status);
       }
-      if (typeof callback !== 'undefined') {
-        callback(ret);
-      }
-      if ((callback !== decrementPreload) &&
-        (typeof decrementPreload === 'function')) {
-        decrementPreload();
-      }
-    }
-    else{
-      p5._friendlyFileLoadError(3,path);
     }
   };
+
   req.send(null);
   return ret;
 };
@@ -22464,7 +22477,7 @@ p5.prototype.loadStrings = function (path, callback) {
  * <p>This method is asynchronous, meaning it may not finish before the next
  * line in your sketch is executed. Calling loadTable() inside preload()
  * guarantees to complete the operation before setup() and draw() are called.
- * Outside preload(), you may supply a callback function to handle the object.
+ * You may supply a callback function to handle the object.
  * </p>
  *
  * @method loadTable
@@ -22520,13 +22533,7 @@ p5.prototype.loadTable = function (path) {
   var header = false;
   var sep = ',';
   var separatorSet = false;
-  var decrementPreload;
-
-  // when in preload decrementPreload will always be the last arg as it is set
-  // with args.push() before invocation in _wrapPreload
-  if ((this && this.preload) || window.preload) {
-    decrementPreload = arguments[arguments.length - 1];
-  }
+  var decrementPreload = p5._getDecrementPreload(arguments);
 
   for (var i = 1; i < arguments.length; i++) {
     if ((typeof(arguments[i]) === 'function') &&
@@ -22695,8 +22702,7 @@ p5.prototype.loadTable = function (path) {
       if (callback !== null) {
         callback(t);
       }
-      if ((callback !== decrementPreload) &&
-        (typeof decrementPreload === 'function')) {
+      if (decrementPreload && (callback !== decrementPreload)) {
         decrementPreload();
       }
     })
@@ -22742,7 +22748,7 @@ function makeObject(row, headers) {
  * This method is asynchronous, meaning it may not finish before the next
  * line in your sketch is executed. Calling loadXML() inside preload()
  * guarantees to complete the operation before setup() and draw() are called.
- * Outside preload(), you may supply a callback function to handle the object.
+ * You may supply a callback function to handle the object.
  *
  * @method loadXML
  * @param  {String}   filename   name of the file or URL to load
@@ -22753,13 +22759,7 @@ function makeObject(row, headers) {
  */
 p5.prototype.loadXML = function(path, callback) {
   var ret = document.implementation.createDocument(null, null);
-  var decrementPreload;
-
-  // when in preload decrementPreload will always be the last arg as it is set
-  // with args.push() before invocation in _wrapPreload
-  if ((this && this.preload) || window.preload) {
-    decrementPreload = arguments[arguments.length - 1];
-  }
+  var decrementPreload = p5._getDecrementPreload(arguments);
 
   reqwest({
     url: path,
@@ -22775,8 +22775,7 @@ p5.prototype.loadXML = function(path, callback) {
       if (typeof callback !== 'undefined') {
         callback(resp);
       }
-      if ((callback !== decrementPreload) &&
-        (typeof decrementPreload === 'function')) {
+      if (decrementPreload && (callback !== decrementPreload)) {
         decrementPreload();
       }
     });

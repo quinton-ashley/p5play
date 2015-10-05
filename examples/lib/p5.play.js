@@ -1613,7 +1613,8 @@ function Sprite(_x, _y, _w, _h) {
     {
 
       var sourceAnimation = arguments[1];
-      var newAnimation = _.clone(sourceAnimation);
+
+      var newAnimation = sourceAnimation.clone();
 
       animations[label] = newAnimation;
 
@@ -3175,8 +3176,8 @@ function Animation() {
   // Sprite sheet mode
   else if (arguments.length === 1 && (arguments[0] instanceof SpriteSheet))
   {
-    this.SpriteSheet = arguments[0];
-    this.images = this.SpriteSheet.frames;
+    this.spriteSheet = arguments[0];
+    this.images = this.spriteSheet.frames;
   }
   else if(arguments.length != 0)//arbitrary list of images
   {
@@ -3208,6 +3209,10 @@ function Animation() {
     myClone.frameDelay = this.frameDelay;
     myClone.playing = this.playing;
     myClone.looping = this.looping;
+
+    if (this.spriteSheet) {
+      myClone.spriteSheet = this.spriteSheet.clone();
+    }
 
     return myClone;
   }
@@ -3246,9 +3251,9 @@ function Animation() {
 
       if(this.images[frame]!==undefined)
       {
-        if (this.SpriteSheet) {
+        if (this.spriteSheet) {
           var frame_info = this.images[frame];
-          image(this.SpriteSheet.image, frame_info.x, frame_info.y, frame_info.width,
+          image(this.spriteSheet.image, frame_info.x, frame_info.y, frame_info.width,
             frame_info.height, this.offX, this.offY, frame_info.width, frame_info.height);
         } else {
           image(this.images[frame], this.offX, this.offY);
@@ -3536,7 +3541,7 @@ function SpriteSheet() {
    * @param [height]
    */
   this.drawFrame = function (frame_name, x, y, width, height) {
-    var frame;
+    //TODO: if frame_name is a number, use it as a direct index into frames[]
     for (var i = 0; i < this.frames.length; i++) {
       if (this.frames[i].name === frame_name) {
         frame = this.frames[i];
@@ -3546,7 +3551,39 @@ function SpriteSheet() {
     var dWidth = width || frame.width;
     var dHeight = height || frame.height;
     image(this.image, frame.x, frame.y, frame.width, frame.height, x, y, dWidth, dHeight);
-  }
+  };
+
+  /**
+   * Objects are passed by reference so to have different sprites
+   * using the same animation you need to clone it.
+   *
+   * @method clone
+   * @return {SpriteSheet} A clone of the current SpriteSheet
+   */
+  this.clone = function() {
+    var myClone = new SpriteSheet(); //empty
+
+    // Deep clone the frames by value not reference
+    for(var i = 0; i < this.frames.length; i++) {
+      var frame = this.frames[i];
+      var cloneFrame = {
+        "name":frame.name,
+        "x":frame.x,
+        "y":frame.y,
+        "width":frame.width,
+        "height":frame.height
+      };
+      myClone.frames.push(cloneFrame);
+    }
+
+    // clone other fields
+    myClone.image = this.image;
+    myClone.frame_width = this.frame_width;
+    myClone.frame_height = this.frame_height;
+    myClone.num_frames = this.num_frames;
+
+    return myClone;
+  };
 }
 
 //general constructor to be able to feed arguments as array
