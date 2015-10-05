@@ -27,7 +27,7 @@
             </li>
         </div>
         <form class="navbar-form pull-right" style="line-height: 40px; height: 40px;">
-            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Animation", "classes/Camera", "classes/Group", "classes/p5.play", "classes/Sprite", "modules/p5.play"]'>
+            <input style="margin-top: 0;" type="text" class="search-query" placeholder="Search for classes/modules..." data-obj='["classes/Animation", "classes/Camera", "classes/Group", "classes/p5.play", "classes/Sprite", "classes/SpriteSheet", "modules/p5.play"]'>
         </form>
     </div>
 </div>
@@ -43,6 +43,7 @@
 	                    <li><a href="../classes/Group.html">Group</a></li>
 	                    <li><a href="../classes/p5.play.html">p5.play</a></li>
 	                    <li><a href="../classes/Sprite.html">Sprite</a></li>
+	                    <li><a href="../classes/SpriteSheet.html">SpriteSheet</a></li>
 	            </ul>
 	        </div>
 	        </div>
@@ -179,7 +180,7 @@
                                 	<div class="meta">
                                 				<p>
                                 				Defined in
-                                		<a href="../files/lib_p5.play.js.html#l2960"><code>lib&#x2F;p5.play.js:2960</code></a>
+                                		<a href="../files/lib_p5.play.js.html#l2972"><code>lib&#x2F;p5.play.js:2972</code></a>
                                 		</p>
                                 
                                 
@@ -228,23 +229,22 @@
                                 			<h4>Example:</h4>
                                 
                                 			<div class="example-content">
-                                				<p><code>
+                                				<code>
                                 var sequenceAnimation;<br>
                                 var glitch;<br><br>
                                 function preload() {<br>
-                                sequenceAnimation = loadAnimation("data/walking0001.png", "data/walking0005.png");<br>
-                                glitch = loadAnimation("data/dog.png", "data/horse.png", "data/cat.png", "data/snake.png");<br>
+                                  sequenceAnimation = loadAnimation("data/walking0001.png", "data/walking0005.png");<br>
+                                  glitch = loadAnimation("data/dog.png", "data/horse.png", "data/cat.png", "data/snake.png");<br>
                                 }<br><br>
                                 function setup() {<br>
-                                createCanvas(800, 600);<br>
+                                  createCanvas(800, 600);<br>
                                 }<br><br>
                                 function draw() {<br>
-                                background(0);<br>
-                                animation(sequenceAnimation, 100, 100);<br>
-                                animation(glitch, 200, 100);<br>
+                                  background(0);<br>
+                                  animation(sequenceAnimation, 100, 100);<br>
+                                  animation(glitch, 200, 100);<br>
                                 }
-                                </code></p>
-                                
+                                </code>
                                 			</div>
                                 		</div>
                                 </div>
@@ -269,7 +269,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3354"><code>lib&#x2F;p5.play.js:3354</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3382"><code>lib&#x2F;p5.play.js:3382</code></a>
                                     		</p>
                                     
                                     
@@ -297,7 +297,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3338"><code>lib&#x2F;p5.play.js:3338</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3366"><code>lib&#x2F;p5.play.js:3366</code></a>
                                     		</p>
                                     
                                     
@@ -331,7 +331,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3322"><code>lib&#x2F;p5.play.js:3322</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3350"><code>lib&#x2F;p5.play.js:3350</code></a>
                                     		</p>
                                     
                                     
@@ -377,7 +377,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3176"><code>lib&#x2F;p5.play.js:3176</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3194"><code>lib&#x2F;p5.play.js:3194</code></a>
                                     		</p>
                                     
                                     
@@ -424,7 +424,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3198"><code>lib&#x2F;p5.play.js:3198</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3220"><code>lib&#x2F;p5.play.js:3220</code></a>
                                     		</p>
                                     
                                     
@@ -480,7 +480,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3386"><code>lib&#x2F;p5.play.js:3386</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3414"><code>lib&#x2F;p5.play.js:3414</code></a>
                                     		</p>
                                     
                                     
@@ -520,7 +520,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3406"><code>lib&#x2F;p5.play.js:3406</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3434"><code>lib&#x2F;p5.play.js:3434</code></a>
                                     		</p>
                                     
                                     
@@ -560,7 +560,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3437"><code>lib&#x2F;p5.play.js:3437</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3465"><code>lib&#x2F;p5.play.js:3465</code></a>
                                     		</p>
                                     
                                     
@@ -606,7 +606,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3416"><code>lib&#x2F;p5.play.js:3416</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3444"><code>lib&#x2F;p5.play.js:3444</code></a>
                                     		</p>
                                     
                                     
@@ -661,7 +661,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3396"><code>lib&#x2F;p5.play.js:3396</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3424"><code>lib&#x2F;p5.play.js:3424</code></a>
                                     		</p>
                                     
                                     
@@ -701,7 +701,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3427"><code>lib&#x2F;p5.play.js:3427</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3455"><code>lib&#x2F;p5.play.js:3455</code></a>
                                     		</p>
                                     
                                     
@@ -744,7 +744,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3370"><code>lib&#x2F;p5.play.js:3370</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3398"><code>lib&#x2F;p5.play.js:3398</code></a>
                                     		</p>
                                     
                                     
@@ -787,7 +787,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3294"><code>lib&#x2F;p5.play.js:3294</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3322"><code>lib&#x2F;p5.play.js:3322</code></a>
                                     		</p>
                                     
                                     
@@ -815,7 +815,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3313"><code>lib&#x2F;p5.play.js:3313</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3341"><code>lib&#x2F;p5.play.js:3341</code></a>
                                     		</p>
                                     
                                     
@@ -843,7 +843,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3304"><code>lib&#x2F;p5.play.js:3304</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l3332"><code>lib&#x2F;p5.play.js:3332</code></a>
                                     		</p>
                                     
                                     
@@ -874,7 +874,7 @@
                                         <div class="meta">
                                                     <p>
                                                     Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3059"><code>lib&#x2F;p5.play.js:3059</code></a>
+                                            <a href="../files/lib_p5.play.js.html#l3071"><code>lib&#x2F;p5.play.js:3071</code></a>
                                             </p>
                                     
                                     
@@ -899,7 +899,7 @@
                                         <div class="meta">
                                                     <p>
                                                     Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3021"><code>lib&#x2F;p5.play.js:3021</code></a>
+                                            <a href="../files/lib_p5.play.js.html#l3033"><code>lib&#x2F;p5.play.js:3033</code></a>
                                             </p>
                                     
                                     
@@ -927,7 +927,7 @@
                                         <div class="meta">
                                                     <p>
                                                     Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3006"><code>lib&#x2F;p5.play.js:3006</code></a>
+                                            <a href="../files/lib_p5.play.js.html#l3018"><code>lib&#x2F;p5.play.js:3018</code></a>
                                             </p>
                                     
                                     
@@ -952,7 +952,7 @@
                                         <div class="meta">
                                                     <p>
                                                     Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3050"><code>lib&#x2F;p5.play.js:3050</code></a>
+                                            <a href="../files/lib_p5.play.js.html#l3062"><code>lib&#x2F;p5.play.js:3062</code></a>
                                             </p>
                                     
                                     
@@ -978,7 +978,7 @@
                                         <div class="meta">
                                                     <p>
                                                     Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3032"><code>lib&#x2F;p5.play.js:3032</code></a>
+                                            <a href="../files/lib_p5.play.js.html#l3044"><code>lib&#x2F;p5.play.js:3044</code></a>
                                             </p>
                                     
                                     
@@ -1004,7 +1004,7 @@
                                         <div class="meta">
                                                     <p>
                                                     Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3041"><code>lib&#x2F;p5.play.js:3041</code></a>
+                                            <a href="../files/lib_p5.play.js.html#l3053"><code>lib&#x2F;p5.play.js:3053</code></a>
                                             </p>
                                     
                                     
