@@ -3560,9 +3560,31 @@
                         
                         /**
                          * Represents a sprite sheet and all it&#x27;s frames.  To be used with Animation,
-                         * or static drawing.
+                         * or static drawing single frames.
+                         *
+                         *  There are two different ways to load a SpriteSheet
+                         *
+                         * 1. Given width, height that will be used for every frame and the
+                         *    number of frames to cycle through. The sprite sheet must have a
+                         *    uniform grid with consistent rows and columns.
+                         *
+                         * 2. Given an array of frame objects that define the position and
+                         *    dimensions of each frame.  This is Flexible because you can use
+                         *    sprite sheets that don&#x27;t have uniform rows and columns.
+                         *
+                         * @example
+                         * &lt;code&gt;
+                         *   // Method 1 - Using width, height for each frame and number of frames&lt;br/&gt;
+                         *   explode_sprite_sheet = loadSpriteSheet(&#x27;assets/explode_sprite_sheet.png&#x27;, 171, 158, 11);
+                         *   &lt;br/&gt;&lt;br/&gt;
+                         *   // Method 2 - Using an array of objects that define each frame
+                         *   var player_frames = loadJSON(&#x27;assets/tiles.json&#x27;);&lt;br/&gt;
+                         *   player_sprite_sheet = loadSpriteSheet(&#x27;assets/player_spritesheet.png&#x27;, player_frames);&lt;br/&gt;
+                         * &lt;/code&gt;
+                         *
                          * @class SpriteSheet
                          * @constructor
+                         * @param image String image path or p5.Image object
                          */
                         function SpriteSheet() {
                           this.image = null;
@@ -3623,6 +3645,7 @@
                            * @param y   y position to draw the frame at
                            * @param [width]   optional width to draw the frame
                            * @param [height]  optional height to draw the frame
+                           * @method drawFrame
                            */
                           this.drawFrame = function (frame_name, x, y, width, height) {
                             var frameToDraw;

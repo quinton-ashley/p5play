@@ -201,8 +201,17 @@
             "namespace": "",
             "file": "lib/p5.play.js",
             "line": 3477,
-            "description": "Represents a sprite sheet and all it's frames.  To be used with Animation,\nor static drawing.",
-            "is_constructor": 1
+            "description": "Represents a sprite sheet and all it's frames.  To be used with Animation,\nor static drawing single frames.\n\n There are two different ways to load a SpriteSheet\n\n1. Given width, height that will be used for every frame and the\n   number of frames to cycle through. The sprite sheet must have a\n   uniform grid with consistent rows and columns.\n\n2. Given an array of frame objects that define the position and\n   dimensions of each frame.  This is Flexible because you can use\n   sprite sheets that don't have uniform rows and columns.",
+            "example": [
+                "\n<code>\n  // Method 1 - Using width, height for each frame and number of frames<br/>\n  explode_sprite_sheet = loadSpriteSheet('assets/explode_sprite_sheet.png', 171, 158, 11);\n  <br/><br/>\n  // Method 2 - Using an array of objects that define each frame\n  var player_frames = loadJSON('assets/tiles.json');<br/>\n  player_sprite_sheet = loadSpriteSheet('assets/player_spritesheet.png', player_frames);<br/>\n</code>"
+            ],
+            "is_constructor": 1,
+            "params": [
+                {
+                    "name": "image",
+                    "description": "String image path or p5.Image object"
+                }
+            ]
         }
     },
     "elements": {},
@@ -2118,7 +2127,7 @@
         },
         {
             "file": "lib/p5.play.js",
-            "line": 3490,
+            "line": 3512,
             "description": "Generate the frames data for this sprite sheet baesd on user params",
             "access": "private",
             "tagname": "",
@@ -2128,7 +2137,7 @@
         },
         {
             "file": "lib/p5.play.js",
-            "line": 3535,
+            "line": 3557,
             "description": "Draws a specific frame to the canvas.",
             "params": [
                 {
@@ -2154,13 +2163,15 @@
                     "optional": true
                 }
             ],
+            "itemtype": "method",
+            "name": "drawFrame",
             "class": "SpriteSheet",
             "module": "p5.play",
             "submodule": "p5.play"
         },
         {
             "file": "lib/p5.play.js",
-            "line": 3561,
+            "line": 3584,
             "description": "Objects are passed by reference so to have different sprites\nusing the same animation you need to clone it.",
             "itemtype": "method",
             "name": "clone",
@@ -2264,11 +2275,7 @@
         },
         {
             "message": "Missing item type\nGenerate the frames data for this sprite sheet baesd on user params",
-            "line": " lib/p5.play.js:3490"
-        },
-        {
-            "message": "Missing item type\nDraws a specific frame to the canvas.",
-            "line": " lib/p5.play.js:3535"
+            "line": " lib/p5.play.js:3512"
         }
     ]
 }
