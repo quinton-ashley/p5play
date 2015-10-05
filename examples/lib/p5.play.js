@@ -3533,24 +3533,29 @@ function SpriteSheet() {
   }
 
   /**
-   *
-   * @param frame_name
-   * @param x
-   * @param y
-   * @param [width]
-   * @param [height]
+   * Draws a specific frame to the canvas.
+   * @param frame_name  Can either be a string name, or a numeric index.
+   * @param x   x position to draw the frame at
+   * @param y   y position to draw the frame at
+   * @param [width]   optional width to draw the frame
+   * @param [height]  optional height to draw the frame
    */
   this.drawFrame = function (frame_name, x, y, width, height) {
-    //TODO: if frame_name is a number, use it as a direct index into frames[]
-    for (var i = 0; i < this.frames.length; i++) {
-      if (this.frames[i].name === frame_name) {
-        frame = this.frames[i];
-        break;
+    var frameToDraw;
+    if (typeof frame_name === 'number') {
+      frameToDraw = this.frames[frame_name];
+    } else {
+      for (var i = 0; i < this.frames.length; i++) {
+        if (this.frames[i].name === frame_name) {
+          frameToDraw = this.frames[i];
+          break;
+        }
       }
     }
-    var dWidth = width || frame.width;
-    var dHeight = height || frame.height;
-    image(this.image, frame.x, frame.y, frame.width, frame.height, x, y, dWidth, dHeight);
+    var dWidth = width || frameToDraw.width;
+    var dHeight = height || frameToDraw.height;
+    image(this.image, frameToDraw.x, frameToDraw.y, frameToDraw.width,
+      frameToDraw.height, x, y, dWidth, dHeight);
   };
 
   /**
