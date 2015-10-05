@@ -3201,18 +3201,20 @@ function Animation() {
   this.clone = function() {
     var myClone = new Animation(); //empty
     myClone.images = [];
-    for(var i=0; i<this.images.length; i++)
-      myClone.images.push(this.images[i]);
+
+    if (this.spriteSheet) {
+      myClone.spriteSheet = this.spriteSheet.clone();
+      myClone.images = myClone.spriteSheet.frames;
+    } else {
+      for (var i = 0; i < this.images.length; i++)
+        myClone.images.push(this.images[i]);
+    }
 
     myClone.offX = this.offX;
     myClone.offY = this.offY;
     myClone.frameDelay = this.frameDelay;
     myClone.playing = this.playing;
     myClone.looping = this.looping;
-
-    if (this.spriteSheet) {
-      myClone.spriteSheet = this.spriteSheet.clone();
-    }
 
     return myClone;
   }
@@ -3476,9 +3478,31 @@ function Animation() {
 
 /**
  * Represents a sprite sheet and all it's frames.  To be used with Animation,
- * or static drawing.
+ * or static drawing single frames.
+ *
+ *  There are two different ways to load a SpriteSheet
+ *
+ * 1. Given width, height that will be used for every frame and the
+ *    number of frames to cycle through. The sprite sheet must have a
+ *    uniform grid with consistent rows and columns.
+ *
+ * 2. Given an array of frame objects that define the position and
+ *    dimensions of each frame.  This is Flexible because you can use
+ *    sprite sheets that don't have uniform rows and columns.
+ *
+ * @example
+ * <code>
+ *   // Method 1 - Using width, height for each frame and number of frames<br/>
+ *   explode_sprite_sheet = loadSpriteSheet('assets/explode_sprite_sheet.png', 171, 158, 11);
+ *   <br/><br/>
+ *   // Method 2 - Using an array of objects that define each frame
+ *   var player_frames = loadJSON('assets/tiles.json');<br/>
+ *   player_sprite_sheet = loadSpriteSheet('assets/player_spritesheet.png', player_frames);<br/>
+ * </code>
+ *
  * @class SpriteSheet
  * @constructor
+ * @param image String image path or p5.Image object
  */
 function SpriteSheet() {
   this.image = null;
@@ -3539,6 +3563,7 @@ function SpriteSheet() {
    * @param y   y position to draw the frame at
    * @param [width]   optional width to draw the frame
    * @param [height]  optional height to draw the frame
+   * @method drawFrame
    */
   this.drawFrame = function (frame_name, x, y, width, height) {
     var frameToDraw;

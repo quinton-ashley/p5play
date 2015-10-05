@@ -1,4 +1,4 @@
-/*! p5.js v0.4.13 October 04, 2015 */
+/*! p5.js v0.4.14 October 05, 2015 */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.p5 = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
 },{}],2:[function(_dereq_,module,exports){
@@ -6651,9 +6651,9 @@ exports.sizeOf = sizeOf;
 
 },{}],30:[function(_dereq_,module,exports){
 /**
- * module Shape
- * submodule 3D Primitives
- * for p5
+ * @module Shape
+ * @submodule 3D Primitives
+ * @for p5
  * @requires core
  * @requires p5.Geometry3D
  */
@@ -6664,23 +6664,22 @@ var p5 = _dereq_('../core/core');
 _dereq_('./p5.Geometry3D');
 
 /**
- * draw a plane with given a width and height
- * method plane
+ * Draw a plane with given a width and height
+ * @method plane
  * @param  {Number} width      width of the plane
  * @param  {Number} height     height of the plane
- * @return {p5}
+ * @return {p5}                the p5 object
  * @example
  * <div>
  * <code>
- * //draw a spining plane with width 100 and height 100
+ * //draw a plane with width 200 and height 200
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  *
  * function draw(){
- *   background(255);
- *   rotateY(frameCount * 0.02);
- *   plane(100, 100);
+ *   background(200);
+ *   plane(200, 200);
  * }
  * </code>
  * </div>
@@ -6720,24 +6719,24 @@ p5.prototype.plane = function(width, height){
 };
 
 /**
- * draw a sphere with given raduis
- * method sphere
+ * Draw a sphere with given raduis
+ * @method sphere
  * @param  {Number} radius            radius of circle
  * @param  {Number} [detail]          optional: number of segments,
  *                                    the more segments the smoother geometry
  *                                    default is 24
- * @return {p5}
+ * @return {p5}                       the p5 object
  * @example
  * <div>
  * <code>
- * // draw a sphere with radius 100
+ * // draw a sphere with radius 200
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  *
  * function draw(){
- *   background(255);
- *   sphere(100);
+ *   background(200);
+ *   sphere(200);
  * }
  * </code>
  * </div>
@@ -6777,25 +6776,27 @@ p5.prototype.sphere = function(radius, detail){
 };
 
 /**
- * draw a cylinder with given radius and height
- * method  cylinder
+ * Draw a cylinder with given radius and height
+ * @method  cylinder
  * @param  {Number} radius            radius of the surface
  * @param  {Number} height            height of the cylinder
  * @param  {Number} [detail]          optional: number of segments,
  *                                    the more segments the smoother geometry
  *                                    default is 24
- * @return {p5}
+ * @return {p5}                       the p5 object
  * @example
  * <div>
  * <code>
- * //draw a spining sylinder with radius 100 and height 100
+ * //draw a spining sylinder with radius 200 and height 200
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
+ *
  * function draw(){
- *   background(255);
- *   rotateX(frameCount * 0.02);
- *   cylinder(100, 100);
+ *   background(200);
+ *   rotateX(frameCount * 0.01);
+ *   rotateZ(frameCount * 0.01);
+ *   cylinder(200, 200);
  * }
  * </code>
  * </div>
@@ -6868,25 +6869,27 @@ p5.prototype.cylinder = function(radius, height, detail){
 
 
 /**
- * draw a cone with given radius and height
- * method cone
+ * Draw a cone with given radius and height
+ * @method cone
  * @param  {Number} radius            radius of the bottom surface
  * @param  {Number} height            height of the cone
  * @param  {Number} [detail]          optional: number of segments,
  *                                    the more segments the smoother geometry
  *                                    default is 24
- * @return {p5}
+ * @return {p5}                       the p5 object
  * @example
  * <div>
  * <code>
- * //draw a spining cone with radius 100 and height 100
+ * //draw a spining cone with radius 200 and height 200
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
+ *
  * function draw(){
- *   background(255);
- *   rotateX(frameCount * 0.02);
- *   cone(100, 200);
+ *   background(200);
+ *   rotateX(frameCount * 0.01);
+ *   rotateZ(frameCount * 0.01);
+ *   cone(200, 200);
  * }
  * </code>
  * </div>
@@ -6939,27 +6942,27 @@ p5.prototype.cone = function(radius, height, detail){
 
 
 /**
- * draw a torus with given radius and tube radius
- * method torus
+ * Draw a torus with given radius and tube radius
+ * @method torus
  * @param  {Number} radius            radius of the whole ring
  * @param  {Number} tubeRadius        radius of the tube
  * @param  {Number} [detail]          optional: number of segments,
  *                                    the more segments the smoother geometry
  *                                    default is 24
- * @return {p5}
+ * @return {p5}                       the p5 object
  * @example
  * <div>
  * <code>
- * //draw a spining torus with radius 100 and tube radius 20
+ * //draw a spining torus with radius 200 and tube radius 60
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  *
  * function draw(){
- *   background(255);
- *   rotateX(frameCount * 0.02);
- *   rotateY(frameCount * 0.02);
- *   torus(100, 20);
+ *   background(200);
+ *   rotateX(frameCount * 0.01);
+ *   rotateY(frameCount * 0.01);
+ *   torus(200, 60);
  * }
  * </code>
  * </div>
@@ -7000,25 +7003,25 @@ p5.prototype.torus = function(radius, tubeRadius, detail){
 };
 
 /**
- * draw a box with given width, height and depth
- * method  box
+ * Draw a box with given width, height and depth
+ * @method  box
  * @param  {Number} width  width of the box
  * @param  {Number} height height of the box
  * @param  {Number} depth  depth of the box
- * @return {p5}
+ * @return {p5}            the p5 object
  * @example
  * <div>
  * <code>
- * //draw a spining box with width, height and depth 100
+ * //draw a spining box with width, height and depth 200
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  *
  * function draw(){
- *   background(255);
- *   rotateX(frameCount * 0.02);
- *   rotateY(frameCount * 0.02);
- *   box(100, 100, 100);
+ *   background(200);
+ *   rotateX(frameCount * 0.01);
+ *   rotateY(frameCount * 0.01);
+ *   box(200, 200, 200);
  * }
  * </code>
  * </div>
@@ -7101,12 +7104,11 @@ p5.prototype.box = function(width, height, depth){
 };
 
 module.exports = p5;
-
 },{"../core/core":50,"./p5.Geometry3D":36}],31:[function(_dereq_,module,exports){
 /**
- * module Lights, Camera
- * submodule Camera
- * for p5
+ * @module Lights, Camera
+ * @submodule Camera
+ * @for p5
  * @requires core
  */
 
@@ -7115,21 +7117,22 @@ module.exports = p5;
 var p5 = _dereq_('../core/core');
 
 /**
- * sets camera position
- * method camera
+ * Sets camera position
+ * @method camera
  * @param  {Number} x  camera postion value on x axis
  * @param  {Number} y  camera postion value on y axis
  * @param  {Number} z  camera postion value on z axis
- * @return {p5}
+ * @return {p5}        the p5 object
  * @example
  * <div>
  * <code>
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  * function draw(){
- *  camera(0, 0, 800);
- *  sphere(100);
+ *  //move the camera away from the plane by a sin wave
+ *  camera(0, 0, sin(frameCount * 0.01) * 100);
+ *  plane(120, 120);
  * }
  * </code>
  * </div>
@@ -7149,31 +7152,31 @@ p5.prototype.camera = function(x, y, z){
 };
 
 /**
- * sets perspective camera
- * method  perspective
+ * Sets perspective camera
+ * @method  perspective
  * @param  {Number} fovy   camera frustum vertical field of view,
  *                         from bottom to top of view, in degrees
  * @param  {Number} aspect camera frustum aspect ratio
  * @param  {Number} near   frustum near plane length
  * @param  {Number} far    frustum far plane length
- * @return {p5}
+ * @return {p5}            the p5 object
  * @example
  * <div>
  * <code>
- * //drag mouse to toggle the world
+ * //drag mouse to toggle the world!
  * //you will see there's a vanish point
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  *   perspective(60 / 180 * PI, width/height, 0.1, 100);
  * }
  * function draw(){
- *  background(0);
+ *  background(200);
  *  orbitControl();
- *  for(var i = -5; i < 6; i++){
- *     for(var j = -5; j < 6; j++){
+ *  for(var i = -1; i < 2; i++){
+ *     for(var j = -2; j < 3; j++){
  *       push();
- *       translate(i*100, 0, j*100);
- *       sphere(20);
+ *       translate(i*160, 0, j*160);
+ *       box(40, 40, 40);
  *       pop();
  *     }
  *   }
@@ -7197,30 +7200,32 @@ p5.prototype.perspective = function(fovy,aspect,near,far) {
 };
 
 /**
- * setup ortho camera
- * method  ortho
+ * Setup ortho camera
+ * @method  ortho
  * @param  {Number} left   camera frustum left plane
  * @param  {Number} right  camera frustum right plane
  * @param  {Number} bottom camera frustum bottom plane
  * @param  {Number} top    camera frustum top plane
  * @param  {Number} near   camera frustum near plane
  * @param  {Number} far    camera frustum far plane
- * @return {p5}
+ * @return {p5}            the p5 object
  * @example
  * <div>
  * <code>
+ * //drag mouse to toggle the world!
+ * //there's no vanish point
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  *   ortho(-width/2, width/2, height/2, -height/2, 0.1, 100);
  * }
  * function draw(){
- *  background(0);
+ *  background(200);
  *  orbitControl();
- *  for(var i = -5; i < 6; i++){
- *     for(var j = -5; j < 6; j++){
+ *  for(var i = -1; i < 2; i++){
+ *     for(var j = -2; j < 3; j++){
  *       push();
- *       translate(i*100, 0, j*100);
- *       sphere(20);
+ *       translate(i*160, 0, j*160);
+ *       box(40, 40, 40);
  *       pop();
  *     }
  *   }
@@ -7436,9 +7441,9 @@ p5.prototype.orbitControl = function(){
 module.exports = p5;
 },{"../core/core":50}],34:[function(_dereq_,module,exports){
 /**
- * module Lights, Camera
- * submodule Lights
- * for p5
+ * @module Lights, Camera
+ * @submodule Lights
+ * @for p5
  * @requires core
  */
 
@@ -7447,26 +7452,26 @@ module.exports = p5;
 var p5 = _dereq_('../core/core');
 
 /**
- * creates an ambient light with a color
- * method  ambientLight
+ * Creates an ambient light with a color
+ * @method  ambientLight
  * @param  {Number|Array|String|p5.Color} v1  gray value,
  * red or hue value (depending on the current color mode),
  * or color Array, or CSS color string
  * @param  {Number}            [v2] optional: green or saturation value
  * @param  {Number}            [v3] optional: blue or brightness value
  * @param  {Number}            [a]  optional: opacity
- * @return {p5}
+ * @return {p5}                the p5 object
  * @example
  * <div>
  * <code>
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  * function draw(){
  *   background(0);
  *   ambientLight(150);
  *   ambientMaterial(250);
- *   sphere(100);
+ *   sphere(200);
  * }
  * </code>
  * </div>
@@ -7474,7 +7479,7 @@ var p5 = _dereq_('../core/core');
 p5.prototype.ambientLight = function(v1, v2, v3, a){
   var gl = this._renderer.GL;
   var shaderProgram = this._renderer._getShader(
-    'lightVert', 'lightFrag');
+    'lightVert', 'lightTextureFrag');
 
   gl.useProgram(shaderProgram);
   shaderProgram.uAmbientColor = gl.getUniformLocation(
@@ -7503,8 +7508,8 @@ p5.prototype.ambientLight = function(v1, v2, v3, a){
 };
 
 /**
- * creates a directional light with a color and a direction
- * method  directionalLight
+ * Creates a directional light with a color and a direction
+ * @method  directionalLight
  * @param  {Number|Array|String|p5.Color} v1   gray value,
  * red or hue value (depending on the current color mode),
  * or color Array, or CSS color string
@@ -7514,12 +7519,12 @@ p5.prototype.ambientLight = function(v1, v2, v3, a){
  * @param  {Number|p5.Vector} x   x axis direction or a p5.Vector
  * @param  {Number}          [y]  optional: y axis direction
  * @param  {Number}          [z]  optional: z axis direction
- * @return {p5}
+ * @return {p5}              the p5 object
  * @example
  * <div>
  * <code>
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  * function draw(){
  *   background(0);
@@ -7528,7 +7533,7 @@ p5.prototype.ambientLight = function(v1, v2, v3, a){
  *   var dirY = (mouseY / height - 0.5) *(-2);
  *   directionalLight(250, 250, 250, dirX, dirY, 0.25);
  *   ambientMaterial(250);
- *   sphere(100, 128);
+ *   sphere(200, 128);
  * }
  * </code>
  * </div>
@@ -7570,7 +7575,7 @@ p5.prototype.directionalLight = function(v1, v2, v3, a, x, y, z) {
 
   var gl = this._renderer.GL;
   var shaderProgram = this._renderer._getShader(
-    'lightVert', 'lightFrag');
+    'lightVert', 'lightTextureFrag');
 
   gl.useProgram(shaderProgram);
   shaderProgram.uDirectionalColor = gl.getUniformLocation(
@@ -7623,8 +7628,8 @@ p5.prototype.directionalLight = function(v1, v2, v3, a, x, y, z) {
 };
 
 /**
- * creates a point light with a color and a light position
- * method  pointLight
+ * Creates a point light with a color and a light position
+ * @method  pointLight
  * @param  {Number|Array|String|p5.Color} v1   gray value,
  * red or hue value (depending on the current color mode),
  * or color Array, or CSS color string
@@ -7634,12 +7639,12 @@ p5.prototype.directionalLight = function(v1, v2, v3, a, x, y, z) {
  * @param  {Number|p5.Vector} x   x axis position or a p5.Vector
  * @param  {Number}          [y]  optional: y axis position
  * @param  {Number}          [z]  optional: z axis position
- * @return {p5}
+ * @return {p5}              the p5 object
  * @example
  * <div>
  * <code>
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  * function draw(){
  *   background(0);
@@ -7655,7 +7660,7 @@ p5.prototype.directionalLight = function(v1, v2, v3, a, x, y, z) {
  *   // -1,-1---------1,-1
  *   pointLight(250, 250, 250, locX, locY, 0);
  *   ambientMaterial(250);
- *   sphere(100, 128);
+ *   sphere(200, 128);
  * }
  * </code>
  * </div>
@@ -7697,7 +7702,7 @@ p5.prototype.pointLight = function(v1, v2, v3, a, x, y, z) {
 
   var gl = this._renderer.GL;
   var shaderProgram = this._renderer._getShader(
-    'lightVert', 'lightFrag');
+    'lightVert', 'lightTextureFrag');
 
   gl.useProgram(shaderProgram);
   shaderProgram.uPointLightColor = gl.getUniformLocation(
@@ -7753,9 +7758,9 @@ module.exports = p5;
 
 },{"../core/core":50}],35:[function(_dereq_,module,exports){
 /**
- * module Lights, Camera
- * submodule Material
- * for p5
+ * @module Lights, Camera
+ * @submodule Material
+ * @for p5
  * @requires core
  */
 
@@ -7765,20 +7770,20 @@ var p5 = _dereq_('../core/core');
 //require('./p5.Texture');
 
 /**
- * normal material for geometry
- * method normalMaterial
- * @return {p5}
+ * Normal material for geometry
+ * @method normalMaterial
+ * @return {p5}                the p5 object
  * @example
  * <div>
  * <code>
- * //please call this function before doing any transformation
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
+ *
  * function draw(){
- *  background(255);
+ *  background(0);
  *  normalMaterial();
- *  sphere(100);
+ *  sphere(200);
  * }
  * </code>
  * </div>
@@ -7789,33 +7794,34 @@ p5.prototype.normalMaterial = function(){
 };
 
 /**
- * texture for geometry
- * method texture
- * @return {p5}
+ * Texture for geometry
+ * @method texture
+ * @return {p5}                the p5 object
  * @example
  * <div>
  * <code>
  * var img;
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  *   img = loadImage("assets/cat.jpg");
  * }
+ *
  * function draw(){
- *   background(255);
- *   rotateZ(frameCount * 0.02);
- *   rotateX(frameCount * 0.02);
- *   rotateY(frameCount * 0.02);
- *   // pass image as texture
+ *   background(0);
+ *   rotateZ(frameCount * 0.01);
+ *   rotateX(frameCount * 0.01);
+ *   rotateY(frameCount * 0.01);
+ *   //pass image as texture
  *   texture(img);
- *   box(60);
+ *   box(200, 200, 200);
  * }
  * </code>
  * </div>
  */
 p5.prototype.texture = function(image){
   var gl = this._renderer.GL;
-  var shaderProgram = this._renderer._getShader('normalVert',
-    'textureFrag');
+  var shaderProgram = this._renderer._getShader('lightVert',
+    'lightTextureFrag');
   gl.useProgram(shaderProgram);
   var tex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -7862,6 +7868,7 @@ p5.prototype.texture = function(image){
   gl.activeTexture(gl.TEXTURE0 + 0);
   gl.bindTexture(gl.TEXTURE_2D, tex);
   gl.uniform1i(gl.getUniformLocation(shaderProgram, 'uSampler'), 0);
+  gl.uniform1i(gl.getUniformLocation(shaderProgram, 'isTexture'), true);
   return this;
 };
 
@@ -7890,27 +7897,29 @@ function _nextHighestPOT (value){
 }
 
 /**
- * basic material for geometry with a given color
- * method  basicMaterial
+ * Basic material for geometry with a given color
+ * @method  basicMaterial
  * @param  {Number|Array|String|p5.Color} v1  gray value,
  * red or hue value (depending on the current color mode),
  * or color Array, or CSS color string
  * @param  {Number}            [v2] optional: green or saturation value
  * @param  {Number}            [v3] optional: blue or brightness value
  * @param  {Number}            [a]  optional: opacity
- * @return {p5}
+ * @return {p5}                the p5 object
  * @example
  * <div>
  * <code>
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
+ *
  * function draw(){
  *  background(0);
- *  rotateX(frameCount * 0.02);
- *  rotateZ(frameCount * 0.02);
  *  basicMaterial(250, 0, 0);
- *  box(100);
+ *  rotateX(frameCount * 0.01);
+ *  rotateY(frameCount * 0.01);
+ *  rotateZ(frameCount * 0.01);
+ *  box(200, 200, 200);
  * }
  * </code>
  * </div>
@@ -7936,33 +7945,35 @@ p5.prototype.basicMaterial = function(v1, v2, v3, a){
 };
 
 /**
- * ambient material for geometry with a given color
- * method  ambientMaterial
+ * Ambient material for geometry with a given color
+ * @method  ambientMaterial
  * @param  {Number|Array|String|p5.Color} v1  gray value,
  * red or hue value (depending on the current color mode),
  * or color Array, or CSS color string
  * @param  {Number}            [v2] optional: green or saturation value
  * @param  {Number}            [v3] optional: blue or brightness value
  * @param  {Number}            [a]  optional: opacity
- * @return {p5}
+* @return {p5}                 the p5 object
  * @example
  * <div>
  * <code>
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  * function draw(){
  *  background(0);
+ *  ambientLight(100);
  *  pointLight(250, 250, 250, 100, 100, 0);
  *  ambientMaterial(250);
- *  sphere(100, 128);
+ *  sphere(200, 128);
  * }
  * </code>
  * </div>
  */
 p5.prototype.ambientMaterial = function(v1, v2, v3, a) {
   var gl = this._renderer.GL;
-  var shaderProgram = this._renderer._getShader('lightVert', 'lightFrag');
+  var shaderProgram =
+    this._renderer._getShader('lightVert', 'lightTextureFrag');
 
   gl.useProgram(shaderProgram);
   shaderProgram.uMaterialColor = gl.getUniformLocation(
@@ -7979,37 +7990,41 @@ p5.prototype.ambientMaterial = function(v1, v2, v3, a) {
     shaderProgram, 'uSpecular' );
   gl.uniform1i(shaderProgram.uSpecular, false);
 
+  gl.uniform1i(gl.getUniformLocation(shaderProgram, 'isTexture'), false);
+
   return this;
 };
 
 /**
- * specular material for geometry with a given color
- * method specularMaterial
+ * Specular material for geometry with a given color
+ * @method specularMaterial
  * @param  {Number|Array|String|p5.Color} v1  gray value,
  * red or hue value (depending on the current color mode),
  * or color Array, or CSS color string
  * @param  {Number}            [v2] optional: green or saturation value
  * @param  {Number}            [v3] optional: blue or brightness value
  * @param  {Number}            [a]  optional: opacity
- * @return {p5}
+ * @return {p5}                the p5 object
  * @example
  * <div>
  * <code>
  * function setup(){
- *   createCanvas(windowWidth, windowHeight, 'webgl');
+ *   createCanvas(100, 100, WEBGL);
  * }
  * function draw(){
  *  background(0);
+ *  ambientLight(100);
  *  pointLight(250, 250, 250, 100, 100, 0);
  *  specularMaterial(250);
- *  sphere(100, 128);
+ *  sphere(200, 128);
  * }
  * </code>
  * </div>
  */
 p5.prototype.specularMaterial = function(v1, v2, v3, a) {
   var gl = this._renderer.GL;
-  var shaderProgram = this._renderer._getShader('lightVert', 'lightFrag');
+  var shaderProgram =
+    this._renderer._getShader('lightVert', 'lightTextureFrag');
 
   gl.useProgram(shaderProgram);
   shaderProgram.uMaterialColor = gl.getUniformLocation(
@@ -8026,11 +8041,15 @@ p5.prototype.specularMaterial = function(v1, v2, v3, a) {
     shaderProgram, 'uSpecular' );
   gl.uniform1i(shaderProgram.uSpecular, true);
 
+  gl.uniform1i(gl.getUniformLocation(shaderProgram, 'isTexture'), false);
+
   return this;
 };
 
 module.exports = p5;
 },{"../core/core":50}],36:[function(_dereq_,module,exports){
+//functions are adjusted from Three.js(http://threejs.org)
+
 'use strict';
 
 var p5 = _dereq_('../core/core');
@@ -9323,6 +9342,7 @@ module.exports = p5.Renderer3D;
 'use strict';
 
 var p5 = _dereq_('../core/core');
+var hashCount = 0;
 
 /**
  * createBuffer
@@ -9330,6 +9350,14 @@ var p5 = _dereq_('../core/core');
  * @param  {String} obj [description]
  */
 p5.Renderer3D.prototype.createBuffer = function(gId, obj) {
+
+  hashCount ++;
+  if(hashCount > 1000){
+    var key = Object.keys(this.gHash)[0];
+    delete this.gHash[key];
+    hashCount --;
+  }
+
   var gl = this.GL;
   this.gHash[gId] = {};
   this.gHash[gId].len = obj.len;
@@ -9426,12 +9454,10 @@ module.exports = {
     "precision mediump float;\nvarying vec3 vVertexNormal;\nvoid main(void) {\n  gl_FragColor = vec4(vVertexNormal, 1.0);\n}",
   basicFrag:
     "precision mediump float;\nvarying vec3 vVertexNormal;\nuniform vec4 uMaterialColor;\nvoid main(void) {\n  gl_FragColor = uMaterialColor;\n}",
-  textureFrag:
-    "precision mediump float;\nvarying highp vec2 vVertTexCoord;\nuniform sampler2D uSampler;\nvoid main(void) {\n  gl_FragColor = texture2D(uSampler, vec2(vVertTexCoord.s,vVertTexCoord.t));\n}",
   lightVert:
     "attribute vec3 aPosition;\nattribute vec3 aNormal;\nattribute vec2 aTexCoord;\n\nuniform mat4 uModelViewMatrix;\nuniform mat4 uProjectionMatrix;\nuniform mat4 uNormalMatrix;\nuniform float uResolution;\nuniform int uAmbientLightCount;\nuniform int uDirectionalLightCount;\nuniform int uPointLightCount;\n\nuniform vec3 uAmbientColor[8];\nuniform vec3 uLightingDirection[8];\nuniform vec3 uDirectionalColor[8];\nuniform vec3 uPointLightLocation[8];\nuniform vec3 uPointLightColor[8];\nuniform bool uSpecular;\n\nvarying vec3 vVertexNormal;\nvarying vec2 vVertTexCoord;\nvarying vec3 vLightWeighting;\n\nvec3 ambientLightFactor = vec3(0.0, 0.0, 0.0);\nvec3 directionalLightFactor = vec3(0.0, 0.0, 0.0);\nvec3 pointLightFactor = vec3(0.0, 0.0, 0.0);\nvec3 pointLightFactor2 = vec3(0.0, 0.0, 0.0);\n\nvoid main(void){\n\n  vec4 positionVec4 = vec4(aPosition / uResolution, 1.0);\n  gl_Position = uProjectionMatrix * uModelViewMatrix * positionVec4;\n\n  vec3 vertexNormal = vec3( uNormalMatrix * vec4( aNormal, 1.0 ) );\n  vVertexNormal = vertexNormal;\n  vVertTexCoord = aTexCoord;\n\n  vec4 mvPosition = uModelViewMatrix * vec4(aPosition / uResolution, 1.0);\n  vec3 eyeDirection = normalize(-mvPosition.xyz);\n\n  float shininess = 32.0;\n  float specularFactor = 2.0;\n  float diffuseFactor = 0.3;\n\n  for(int i = 0; i < 8; i++){\n    if(uAmbientLightCount == i) break;\n    ambientLightFactor += uAmbientColor[i];\n  }\n\n  for(int j = 0; j < 8; j++){\n    if(uDirectionalLightCount == j) break;\n    vec3 dir = uLightingDirection[j];\n    float directionalLightWeighting = max(dot(vertexNormal, dir), 0.0);\n    directionalLightFactor += uDirectionalColor[j] * directionalLightWeighting;\n  }\n\n  for(int k = 0; k < 8; k++){\n    if(uPointLightCount == k) break;\n    vec3 loc = uPointLightLocation[k];\n    //loc = loc / uResolution;\n    vec3 lightDirection = normalize(loc - mvPosition.xyz);\n\n    float directionalLightWeighting = max(dot(vertexNormal, lightDirection), 0.0);\n    pointLightFactor += uPointLightColor[k] * directionalLightWeighting;\n\n    //factor2 for specular\n    vec3 reflectionDirection = reflect(-lightDirection, vertexNormal);\n    float specularLightWeighting = pow(max(dot(reflectionDirection, eyeDirection), 0.0), shininess);\n\n    pointLightFactor2 += uPointLightColor[k] * (specularFactor * specularLightWeighting\n      +  directionalLightWeighting * diffuseFactor);\n  }\n  \n  if(!uSpecular){\n    vLightWeighting =  ambientLightFactor + directionalLightFactor + pointLightFactor;\n  }else{\n    vLightWeighting = ambientLightFactor + directionalLightFactor + pointLightFactor2;\n  }\n\n}",
-  lightFrag:
-    "precision mediump float;\n\nuniform vec4 uMaterialColor;\nvarying vec3 vLightWeighting;\n\nvoid main(void) {\n  gl_FragColor = vec4(vec3(uMaterialColor.rgb * vLightWeighting), uMaterialColor.a);\n}"
+  lightTextureFrag:
+    "precision mediump float;\n\nuniform vec4 uMaterialColor;\nuniform sampler2D uSampler;\nuniform bool isTexture;\n\nvarying vec3 vLightWeighting;\nvarying highp vec2 vVertTexCoord;\n\nvoid main(void) {\n  if(!isTexture){\n    gl_FragColor = vec4(vec3(uMaterialColor.rgb * vLightWeighting), uMaterialColor.a);\n  }else{\n    vec4 textureColor = texture2D(uSampler, vec2(vVertTexCoord.s,vVertTexCoord.t));\n    if(vLightWeighting == vec3(0., 0., 0.)){\n      gl_FragColor = textureColor;\n    }else{\n      gl_FragColor = vec4(vec3(textureColor.rgb * vLightWeighting), textureColor.a); \n    }\n  }\n}"
 };
 },{}],41:[function(_dereq_,module,exports){
 
@@ -16891,17 +16917,17 @@ p5.prototype.loop = function() {
 p5.prototype.push = function () {
   this._renderer.push();
   this._styles.push({
-    doStroke: this._renderer._doStroke,
-    doFill: this._renderer._doFill,
-    tint: this._renderer._tint,
-    imageMode: this._renderer._imageMode,
-    rectMode: this._renderer._rectMode,
-    ellipseMode: this._renderer._ellipseMode,
-    colorMode: this._renderer._colorMode,
-    textFont: this._renderer._textFont,
-    textLeading: this._renderer._textLeading,
-    textSize: this._renderer._textSize,
-    textStyle: this._renderer._textStyle
+    _doStroke: this._renderer._doStroke,
+    _doFill: this._renderer._doFill,
+    _tint: this._renderer._tint,
+    _imageMode: this._renderer._imageMode,
+    _rectMode: this._renderer._rectMode,
+    _ellipseMode: this._renderer._ellipseMode,
+    _colorMode: this._renderer._colorMode,
+    _textFont: this._renderer._textFont,
+    _textLeading: this._renderer._textLeading,
+    _textSize: this._renderer._textSize,
+    _textStyle: this._renderer._textStyle
   });
 };
 
@@ -16959,17 +16985,9 @@ p5.prototype.push = function () {
 p5.prototype.pop = function () {
   this._renderer.pop();
   var lastS = this._styles.pop();
-  this._renderer._doStroke = lastS.doStroke;
-  this._renderer._doFill = lastS.doFill;
-  this._renderer._tint = lastS.tint;
-  this._renderer._imageMode = lastS.imageMode;
-  this._renderer._rectMode = lastS.rectMode;
-  this._renderer._ellipseMode = lastS.ellipseMode;
-  this._renderer._colorMode = lastS.colorMode;
-  this._renderer._textFont = lastS.textFont;
-  this._renderer._textLeading = lastS.textLeading;
-  this._renderer._textSize = lastS.textSize;
-  this._renderer._textStyle = lastS.textStyle;
+  for(var prop in lastS){
+    this._renderer[prop] = lastS[prop];
+  }
 };
 
 p5.prototype.pushStyle = function() {
@@ -20793,7 +20811,7 @@ _dereq_('../core/error_helpers');
 p5.prototype.loadImage = function(path, successCallback, failureCallback) {
   var img = new Image();
   var pImg = new p5.Image(1, 1, this);
-  var decrementPreload = p5._getDecrementPreload(arguments);
+  var decrementPreload = p5._getDecrementPreload(arguments, this);
 
   img.onload = function() {
     pImg.width = pImg.canvas.width = img.width;
@@ -22152,12 +22170,12 @@ _dereq_('../core/error_helpers');
  * only be used in loadX() functions.
  * @private
  */
-p5._getDecrementPreload = function (args) {
+p5._getDecrementPreload = function (args, this_p5) {
   var decrementPreload = args[args.length - 1];
 
   // when in preload decrementPreload will always be the last arg as it is set
   // with args.push() before invocation in _wrapPreload
-  if (((this && this.preload) || window.preload) &&
+  if (((this_p5 && this_p5.preload) || window.preload) &&
     typeof decrementPreload === 'function') {
     return decrementPreload;
   }
@@ -22170,6 +22188,11 @@ p5._getDecrementPreload = function (args) {
  * and returns a PFont Object. This method is asynchronous,
  * meaning it may not finish before the next line in your sketch
  * is executed.
+ * <br><br>
+ * The path to the font should be relative to the HTML file
+ * that links in your sketch. Loading an from a URL or other
+ * remote location may be blocked due to your browser's built-in
+ * security.
  *
  * @method loadFont
  * @param  {String}        path       name of the file or url to load
@@ -22196,7 +22219,8 @@ p5._getDecrementPreload = function (args) {
  * }
  * </code></div>
  *
- * <p>You may supply a callback function to handle the object:</p>
+ * <p>Outside of preload(), you may supply a callback function to handle the
+ * object:</p>
  *
  * <div><code>
  * function setup() {
@@ -22215,7 +22239,7 @@ p5._getDecrementPreload = function (args) {
 p5.prototype.loadFont = function(path, onSuccess, onError) {
 
   var p5Font = new p5.Font(this);
-  var decrementPreload = p5._getDecrementPreload(arguments);
+  var decrementPreload = p5._getDecrementPreload(arguments, this);
 
   opentype.load(path, function(err, font) {
 
@@ -22296,8 +22320,9 @@ p5.prototype.loadBytes = function() {
  * }
  * </code></div>
  *
- * <p>You may supply a callback function to handle the object:</p>
-
+ *
+ * <p>Outside of preload(), you may supply a callback function to handle the
+ * object:</p>
  * <div><code>
  * function setup() {
  *   noLoop();
@@ -22321,7 +22346,7 @@ p5.prototype.loadBytes = function() {
 p5.prototype.loadJSON = function() {
   var path = arguments[0];
   var callback = arguments[1];
-  var decrementPreload = p5._getDecrementPreload(arguments);
+  var decrementPreload = p5._getDecrementPreload(arguments, this);
 
   var ret = []; // array needed for preload
   // assume jsonp for URLs
@@ -22399,7 +22424,8 @@ p5.prototype.loadJSON = function() {
  * }
  * </code></div>
  *
- * <p>You may supply a callback function to handle the object:</p>
+ * <p>Outside of preload(), you may supply a callback function to handle the
+ * object:</p>
  *
  * <div><code>
  * function setup() {
@@ -22416,12 +22442,10 @@ p5.prototype.loadJSON = function() {
 p5.prototype.loadStrings = function (path, callback) {
   var ret = [];
   var req = new XMLHttpRequest();
-  var decrementPreload = p5._getDecrementPreload(arguments);
+  var decrementPreload = p5._getDecrementPreload(arguments, this);
 
   req.addEventListener('error', function () {
-    var foo = 'hello';
-    console.log(foo);
-    p5._friendlyFileLoadError(3,path);
+    console.log('An error occurred loading strings: ' + path);
   });
 
   req.open('GET', path, true);
@@ -22439,11 +22463,10 @@ p5.prototype.loadStrings = function (path, callback) {
           decrementPreload();
         }
       } else {
-        console.log('Failed: non-200 request status: ' + req.status);
+        p5._friendlyFileLoadError(3, path);
       }
     }
   };
-
   req.send(null);
   return ret;
 };
@@ -22477,7 +22500,8 @@ p5.prototype.loadStrings = function (path, callback) {
  * <p>This method is asynchronous, meaning it may not finish before the next
  * line in your sketch is executed. Calling loadTable() inside preload()
  * guarantees to complete the operation before setup() and draw() are called.
- * You may supply a callback function to handle the object.
+ * <p>Outside of preload(), you may supply a callback function to handle the
+ * object:</p>
  * </p>
  *
  * @method loadTable
@@ -22533,7 +22557,7 @@ p5.prototype.loadTable = function (path) {
   var header = false;
   var sep = ',';
   var separatorSet = false;
-  var decrementPreload = p5._getDecrementPreload(arguments);
+  var decrementPreload = p5._getDecrementPreload(arguments, this);
 
   for (var i = 1; i < arguments.length; i++) {
     if ((typeof(arguments[i]) === 'function') &&
@@ -22748,7 +22772,9 @@ function makeObject(row, headers) {
  * This method is asynchronous, meaning it may not finish before the next
  * line in your sketch is executed. Calling loadXML() inside preload()
  * guarantees to complete the operation before setup() and draw() are called.
- * You may supply a callback function to handle the object.
+ *
+ * <p>Outside of preload(), you may supply a callback function to handle the
+ * object:</p>
  *
  * @method loadXML
  * @param  {String}   filename   name of the file or URL to load
@@ -22759,7 +22785,7 @@ function makeObject(row, headers) {
  */
 p5.prototype.loadXML = function(path, callback) {
   var ret = document.implementation.createDocument(null, null);
-  var decrementPreload = p5._getDecrementPreload(arguments);
+  var decrementPreload = p5._getDecrementPreload(arguments, this);
 
   reqwest({
     url: path,
