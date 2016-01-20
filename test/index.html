@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- encoding must be set for mocha's special characters to render properly -->
+    <link rel="stylesheet" href="mocha.css" />
+  </head>
+  <body>
+    <div id="mocha"></div>
+    <script src="js/bind.js"></script>
+    <script src="js/mocha.js"></script>
+    <script src="js/chai.js"></script>
+    <script>
+      mocha.ui('bdd')
+      expect = chai.expect;
+    </script>
+    <script src="../examples/lib/p5.js"></script>
+    <script src="../lib/p5.play.js"></script>
+    <script src="unit/group.js"></script>
+    <script>
+      // p5.play currently only works in global mode, not instance mode,
+      // so we'll need to use that.
+      function setup() {}
+      function draw() {}
+
+      window.addEventListener("load", function() {
+        // There's actually code in p5 that cancels global mode if
+        // window.mocha is detected, so we'll explicitly initialize
+        // it here.
+        new p5();
+
+        mocha.run();
+      }, false);
+    </script>
+  </body>
+</html>
