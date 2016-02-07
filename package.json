@@ -5,6 +5,7 @@
   "dependencies": {
   },
   "devDependencies": {
+    "jshint": "^2.9.1",
     "mocha-phantomjs": "^4.0.1"
   },
   "scripts": {

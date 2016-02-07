@@ -1,0 +1,11 @@
+{
+  "eqnull": true,
+  "asi": true,
+  "undef": true,
+  "globals": {
+    "p5": true,
+    "define": false,
+    "require": false
+  },
+  "maxerr": 1000000
+}
