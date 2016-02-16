@@ -72,24 +72,24 @@ describe('keyCodeFromAlias_', function() {
       }
     });
 
-    it("should alias 'MINUT' to 'MINUS'", function() {
+    it("aliases 'MINUT' to 'MINUS'", function() {
       expect(keyCodeFromAlias_('MINUT'))
         .to.equal(keyCodeFromAlias_('MINUS'));
     });
 
-    it("should warn when using MINUT", function () {
+    it("warns when using MINUT", function () {
       keyCodeFromAlias_('MINUT');
       expect(lastConsoleMessage)
         .to.equal('Key literal "MINUT" is deprecated and may be removed in a ' +
                   'future version of p5.play. Please use "MINUS" instead.');
     });
 
-    it("should alias 'COMA' to 'COMMA'", function() {
+    it("aliases 'COMA' to 'COMMA'", function() {
       expect(keyCodeFromAlias_('COMA'))
         .to.equal(keyCodeFromAlias_('COMMA'));
     });
 
-    it("should warn when using COMA", function () {
+    it("warns when using COMA", function () {
       keyCodeFromAlias_('COMA');
       expect(lastConsoleMessage)
         .to.equal('Key literal "COMA" is deprecated and may be removed in a ' +
