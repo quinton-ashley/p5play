@@ -4,6 +4,7 @@
   "undef": true,
   "globals": {
     "p5": true,
+    "window": true,
     "define": false,
     "require": false
   },
