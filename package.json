@@ -5,9 +5,11 @@
   "dependencies": {
   },
   "devDependencies": {
+    "jshint": "^2.9.1",
     "mocha-phantomjs": "^4.0.1"
   },
   "scripts": {
+    "lint": "jshint lib/",
     "test": "mocha-phantomjs test/index.html"
   },
   "repository": {
