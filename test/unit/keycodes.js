@@ -1,20 +1,15 @@
 describe('_keyCodeFromAlias', function() {
-  var lastConsoleMessage, originalWarnFunction;
+  var _warn;
 
   beforeEach(function () {
     // Stub p5.prototype._warn to hide console output during tests
     // and allow sensing console output as needed.
-    originalWarnFunction = p5.prototype._warn;
-    p5.prototype._warn = function (msg) {
-      lastConsoleMessage = msg;
-    };
-
-    lastConsoleMessage = undefined;
+    _warn = sinon.stub(p5.prototype, '_warn');
   });
 
   afterEach(function () {
     // Restore original p5.prototype._warn so we don't affect other tests.
-    p5.prototype._warn = originalWarnFunction;
+    _warn.restore();
   });
 
   describe("key aliases", function () {
@@ -46,7 +41,7 @@ describe('_keyCodeFromAlias', function() {
     it("does not warn when looking up a regular alias", function () {
       for (var alias in KEY) {
         _keyCodeFromAlias(alias);
-        expect(lastConsoleMessage).to.be.undefined;
+        expect(_warn.callCount).to.equal(0);
       }
     });
 
@@ -79,7 +74,7 @@ describe('_keyCodeFromAlias', function() {
 
     it("warns when using MINUT", function () {
       _keyCodeFromAlias('MINUT');
-      expect(lastConsoleMessage)
+      expect(_warn.firstCall.args[0])
         .to.equal('Key literal "MINUT" is deprecated and may be removed in a ' +
                   'future version of p5.play. Please use "MINUS" instead.');
     });
@@ -91,7 +86,7 @@ describe('_keyCodeFromAlias', function() {
 
     it("warns when using COMA", function () {
       _keyCodeFromAlias('COMA');
-      expect(lastConsoleMessage)
+      expect(_warn.firstCall.args[0])
         .to.equal('Key literal "COMA" is deprecated and may be removed in a ' +
                   'future version of p5.play. Please use "COMMA" instead.');
     });
