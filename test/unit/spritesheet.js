@@ -1,29 +1,23 @@
 describe('SpriteSheet', function() {
-  var pInst, _warn;
+  var pInst;
 
   beforeEach(function () {
     pInst = new p5(function() {});
-    _warn = sinon.stub(p5.prototype, '_warn');
   });
 
   afterEach(function () {
-    _warn.restore();
     pInst.remove();
   });
 
-  it('does not log warning when created with p5 instance', function() {
-    new pInst.SpriteSheet(pInst);
+  it('can be instantiated via constructor', function() {
+    var sheet = new pInst.SpriteSheet();
 
-    expect(_warn.callCount).to.equal(0);
+    expect(sheet).to.be.an.instanceOf(pInst.SpriteSheet);
   });
 
-  it('logs warning when created without p5 instance', function() {
-    new pInst.SpriteSheet();
+  it('can be instantiated via loadSpriteSheet()', function() {
+    var sheet = pInst.loadSpriteSheet();
 
-    expect(_warn.callCount).to.equal(1);
-    expect(_warn.firstCall.args[0]).to.equal(
-      'SpriteSheet() is deprecated; please use ' +
-      'p5.prototype.loadSpriteSheet() instead.'
-    );
+    expect(sheet).to.be.an.instanceOf(pInst.SpriteSheet);
   });
 });
