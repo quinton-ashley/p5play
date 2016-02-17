@@ -10,13 +10,13 @@ describe('SpriteSheet', function() {
   });
 
   it('does not log warning when created with p5 instance', function() {
-    var Spritesheet = new SpriteSheet(new p5(function() {}));
+    new SpriteSheet(new p5(function() {}));
 
     expect(_warn.callCount).to.equal(0);
   });
 
   it('logs warning when created without p5 instance', function() {
-    var Spritesheet = new SpriteSheet();
+    new SpriteSheet();
 
     expect(_warn.callCount).to.equal(1);
     expect(_warn.firstCall.args[0]).to.equal(
