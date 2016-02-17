@@ -1,11 +1,11 @@
-describe('keyCodeFromAlias_', function() {
+describe('_keyCodeFromAlias', function() {
   var lastConsoleMessage, originalWarnFunction;
 
   beforeEach(function () {
-    // Stub p5.prototype.warn_ to hide console output during tests
+    // Stub p5.prototype._warn to hide console output during tests
     // and allow sensing console output as needed.
-    originalWarnFunction = p5.prototype.warn_;
-    p5.prototype.warn_ = function (msg) {
+    originalWarnFunction = p5.prototype._warn;
+    p5.prototype._warn = function (msg) {
       lastConsoleMessage = msg;
     };
 
@@ -13,14 +13,14 @@ describe('keyCodeFromAlias_', function() {
   });
 
   afterEach(function () {
-    // Restore original p5.prototype.warn_ so we don't affect other tests.
-    p5.prototype.warn_ = originalWarnFunction;
+    // Restore original p5.prototype._warn so we don't affect other tests.
+    p5.prototype._warn = originalWarnFunction;
   });
 
   describe("key aliases", function () {
     it("maps every alias to a numeric keycode", function () {
       for (var alias in KEY) {
-        expect(typeof keyCodeFromAlias_(alias)).to.equal('number');
+        expect(typeof _keyCodeFromAlias(alias)).to.equal('number');
       }
     });
 
@@ -37,25 +37,25 @@ describe('keyCodeFromAlias_', function() {
           }
         }).join('');
 
-        expect(keyCodeFromAlias_(upperCaseAlias))
-          .to.equal(keyCodeFromAlias_(lowerCaseAlias))
-          .to.equal(keyCodeFromAlias_(randomCaseAlias));
+        expect(_keyCodeFromAlias(upperCaseAlias))
+          .to.equal(_keyCodeFromAlias(lowerCaseAlias))
+          .to.equal(_keyCodeFromAlias(randomCaseAlias));
       }
     });
 
     it("does not warn when looking up a regular alias", function () {
       for (var alias in KEY) {
-        keyCodeFromAlias_(alias);
+        _keyCodeFromAlias(alias);
         expect(lastConsoleMessage).to.be.undefined;
       }
     });
 
     it("maps MINUS to 109", function () {
-      expect(keyCodeFromAlias_('MINUS')).to.equal(109);
+      expect(_keyCodeFromAlias('MINUS')).to.equal(109);
     });
 
     it("maps COMMA to 188", function () {
-      expect(keyCodeFromAlias_('COMMA')).to.equal(188);
+      expect(_keyCodeFromAlias('COMMA')).to.equal(188);
     });
   });
 
@@ -73,24 +73,24 @@ describe('keyCodeFromAlias_', function() {
     });
 
     it("aliases 'MINUT' to 'MINUS'", function() {
-      expect(keyCodeFromAlias_('MINUT'))
-        .to.equal(keyCodeFromAlias_('MINUS'));
+      expect(_keyCodeFromAlias('MINUT'))
+        .to.equal(_keyCodeFromAlias('MINUS'));
     });
 
     it("warns when using MINUT", function () {
-      keyCodeFromAlias_('MINUT');
+      _keyCodeFromAlias('MINUT');
       expect(lastConsoleMessage)
         .to.equal('Key literal "MINUT" is deprecated and may be removed in a ' +
                   'future version of p5.play. Please use "MINUS" instead.');
     });
 
     it("aliases 'COMA' to 'COMMA'", function() {
-      expect(keyCodeFromAlias_('COMA'))
-        .to.equal(keyCodeFromAlias_('COMMA'));
+      expect(_keyCodeFromAlias('COMA'))
+        .to.equal(_keyCodeFromAlias('COMMA'));
     });
 
     it("warns when using COMA", function () {
-      keyCodeFromAlias_('COMA');
+      _keyCodeFromAlias('COMA');
       expect(lastConsoleMessage)
         .to.equal('Key literal "COMA" is deprecated and may be removed in a ' +
                   'future version of p5.play. Please use "COMMA" instead.');
