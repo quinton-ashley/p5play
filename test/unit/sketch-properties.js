@@ -22,4 +22,14 @@ describe('p5 sketch instances', function() {
     expect(pInstA.allSprites.length).to.equal(1);
     expect(pInstB.allSprites.length).to.equal(0);
   });
+
+  it('have their own spriteUpdate property', function() {
+    expect(pInstA.spriteUpdate).to.be.true;
+    expect(pInstB.spriteUpdate).to.be.true;
+
+    pInstA.updateSprites(false);
+
+    expect(pInstA.spriteUpdate).to.be.false;
+    expect(pInstB.spriteUpdate).to.be.true;
+  });
 });
