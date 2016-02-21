@@ -2,11 +2,11 @@ describe('Example sketches', function() {
   // These tests don't yet work in PhantomJS, so disable if we're in it.
   if (/PhantomJS/.test(navigator.userAgent)) return;
 
-  var FILENAME_RE = /index\.html\?fileName=([A-Za-z0-9_.]+)/g;
   var FRAMES_TO_DRAW = 3;
 
   var iframe;
   var examples = (function findExamples() {
+    var FILENAME_RE = /index\.html\?fileName=([A-Za-z0-9_.]+)/g;
     var examples = [];
     var req = new XMLHttpRequest();
 
