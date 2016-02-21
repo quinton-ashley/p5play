@@ -1,7 +1,4 @@
 describe('Example sketches', function() {
-  // These tests don't yet work in PhantomJS, so disable if we're in it.
-  if (/PhantomJS/.test(navigator.userAgent)) return;
-
   var FRAMES_TO_DRAW = 3;
 
   var iframe;
