@@ -24,15 +24,19 @@ describe('Example sketches', function() {
   // and evaluated in an iframe; it is NOT executed directly!
   var iframeScript = function(parentWindowCbName, framesToDraw) {
     var framesDrawn = 0;
-    var errorsLogged = 0;
+    var done = window.parent[parentWindowCbName];
 
-    window.onerror = function() {
-      errorsLogged++;
+    window.onerror = function(msg, source, lineno, colno, error) {
+      if (!error) {
+        // Some browsers, like PhantomJS, don't pass an error argument.
+        return done(new Error(msg + " @ " + source + ":" + lineno));
+      }
+      done(error);
     };
 
     p5.prototype.registerMethod('post', function() {
       if (++framesDrawn === framesToDraw) {
-        window.parent[parentWindowCbName](errorsLogged);
+        done();
       }
     });
   }.toString();
@@ -52,7 +56,7 @@ describe('Example sketches', function() {
   examples.forEach(function(fileName) {
     var testName = fileName + ' runs for ' + FRAMES_TO_DRAW + ' frames';
     it(testName, function(done) {
-      var windowCbName = 'example_' + fileName.slice(0, -3) + '_is_done';
+      var windowCbName = 'example_' + fileName.slice(0, -3) + '_done';
       var iframeScriptArgs = [
         windowCbName,
         FRAMES_TO_DRAW
@@ -61,10 +65,7 @@ describe('Example sketches', function() {
         '(' +  iframeScript + ').apply(window, ' +
         JSON.stringify(iframeScriptArgs) + ');'
       );
-      window[windowCbName] = function exampleIsDone(errorsLogged) {
-        expect(errorsLogged).to.equal(0);
-        done();
-      };
+      window[windowCbName] = done;
 
       iframe.contentDocument.open();
       iframe.contentDocument.write([
@@ -74,6 +75,7 @@ describe('Example sketches', function() {
         '<title>Example: ' + fileName + '</title>',
         '<h1>Example: ' + fileName + '</h1>',
         '<div id="myP5"></div>',
+        '<script src="../test/js/bind.js"></script>',
         '<script src="lib/p5.js"></script>',
         '<script>' + iframeScriptCode + '</script>',
         '<script src="../lib/p5.play.js"></script>',
