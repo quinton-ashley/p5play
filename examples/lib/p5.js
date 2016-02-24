@@ -15226,7 +15226,6 @@ p5.Renderer2D.prototype.shearY = function(angle) {
 };
 
 p5.Renderer2D.prototype.translate = function(x, y) {
-    console.log(x, y)
   this.drawingContext.translate(x, y);
   return this;
 };
@@ -16518,7 +16517,6 @@ p5.prototype.translate = function(x, y, z) {
     args[i] = arguments[i];
   }
 
-  console.log(x, y)
   if (this._renderer.isP3D) {
     this._validateParameters(
       'translate',
