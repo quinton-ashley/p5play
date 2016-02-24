@@ -1,7 +1,11 @@
 describe('_keyCodeFromAlias', function() {
-  var _warn;
+  var pInst, _warn, _keyCodeFromAlias;
+  var KEY = p5.prototype.KEY;
 
   beforeEach(function () {
+    pInst = new p5(function() {});
+    _keyCodeFromAlias = pInst._keyCodeFromAlias.bind(pInst);
+
     // Stub p5.prototype._warn to hide console output during tests
     // and allow sensing console output as needed.
     _warn = sinon.stub(p5.prototype, '_warn');
@@ -10,6 +14,7 @@ describe('_keyCodeFromAlias', function() {
   afterEach(function () {
     // Restore original p5.prototype._warn so we don't affect other tests.
     _warn.restore();
+    pInst.remove();
   });
 
   describe("key aliases", function () {
@@ -55,6 +60,8 @@ describe('_keyCodeFromAlias', function() {
   });
 
   describe("deprecated aliases", function() {
+    var KEY_DEPRECATIONS = p5.prototype.KEY_DEPRECATIONS;
+
     it("maps every deprecated alias to a valid key alias", function () {
       for (var alias in KEY_DEPRECATIONS) {
         expect(KEY).to.include.keys(KEY_DEPRECATIONS[alias]);
