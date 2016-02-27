@@ -5,11 +5,13 @@
   "dependencies": {
   },
   "devDependencies": {
+    "http-server": "^0.9.0",
     "jshint": "^2.9.1",
     "mocha-phantomjs": "^4.0.1"
   },
   "scripts": {
     "lint": "jshint lib/",
+    "start": "http-server ./examples -o",
     "test": "mocha-phantomjs test/index.html"
   },
   "repository": {
