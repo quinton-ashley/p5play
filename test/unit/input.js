@@ -34,6 +34,23 @@ describe('Input', function() {
     myp5.readPresses();
   }
 
+  it('reports mouseUp() properly', function() {
+    mousedown(LEFT);
+    nextFrame();
+
+    expect(myp5.mouseUp(LEFT)).to.be.false;
+
+    mouseup(LEFT);
+    nextFrame();
+
+    // TODO: Is this actually the expected behavior?
+    expect(myp5.mouseUp(LEFT)).to.be.false;
+
+    nextFrame();
+
+    expect(myp5.mouseUp(LEFT)).to.be.true;
+  });
+
   it('reports mouseDown() properly', function() {
     mouseup(LEFT);
     nextFrame();
@@ -61,6 +78,11 @@ describe('Input', function() {
     nextFrame();
 
     expect(myp5.mouseWentDown(LEFT)).to.be.true;
+
+    mouseup(LEFT);
+    nextFrame();
+
+    expect(myp5.mouseWentDown(LEFT)).to.be.false;
   });
 
   it('reports mouseWentUp() properly', function() {
@@ -102,6 +124,11 @@ describe('Input', function() {
     nextFrame();
 
     expect(myp5.keyWentDown(LEFT_ARROW)).to.be.true;
+
+    keyup(LEFT_ARROW);
+    nextFrame();
+
+    expect(myp5.keyWentDown(LEFT_ARROW)).to.be.false;
   });
 
   it('reports keyWentUp() properly', function() {
