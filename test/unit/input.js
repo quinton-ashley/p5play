@@ -44,6 +44,7 @@ describe('Input', function() {
     nextFrame();
 
     // TODO: Is this actually the expected behavior?
+    // See https://github.com/molleindustria/p5.play/issues/43 for details.
     expect(myp5.mouseUp(LEFT)).to.be.false;
 
     nextFrame();
@@ -61,6 +62,7 @@ describe('Input', function() {
     nextFrame();
 
     // TODO: Is this actually the expected behavior?
+    // See https://github.com/molleindustria/p5.play/issues/43 for details.
     expect(myp5.mouseDown(LEFT)).to.be.false;
 
     nextFrame();
@@ -107,6 +109,7 @@ describe('Input', function() {
     nextFrame();
 
     // TODO: Is this actually the expected behavior?
+    // See https://github.com/molleindustria/p5.play/issues/43 for details.
     expect(myp5.keyDown(LEFT_ARROW)).to.be.false;
 
     nextFrame();
