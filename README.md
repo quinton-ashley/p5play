@@ -27,7 +27,7 @@ http://localhost:8080/ in your browser.
 
 ### Unit Tests
 
-To run the unit tests in your browser, visit `test/index.html`.
+To run the unit tests in your browser, visit `http://localhost:8080/test/`.
 
 If you want to run them from the command-line, you can run
 `npm test`.
