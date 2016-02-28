@@ -11,7 +11,7 @@
   },
   "scripts": {
     "lint": "jshint lib/",
-    "start": "http-server ./examples -o",
+    "start": "http-server -o",
     "test": "mocha-phantomjs test/index.html"
   },
   "repository": {
