@@ -81,7 +81,6 @@ describe('Input', function() {
 
     expect(myp5.mouseWentDown(LEFT)).to.be.true;
 
-    mouseup(LEFT);
     nextFrame();
 
     expect(myp5.mouseWentDown(LEFT)).to.be.false;
@@ -128,7 +127,6 @@ describe('Input', function() {
 
     expect(myp5.keyWentDown(LEFT_ARROW)).to.be.true;
 
-    keyup(LEFT_ARROW);
     nextFrame();
 
     expect(myp5.keyWentDown(LEFT_ARROW)).to.be.false;
