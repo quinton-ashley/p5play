@@ -192,6 +192,137 @@ describe('collisions', function() {
         });
       });
     });
+
+    describe('displace(sprite)', function () {
+      it('false if sprites do not overlap', function () {
+        expect(spriteA.displace(spriteB)).to.be.false;
+        expect(spriteB.displace(spriteA)).to.be.false;
+      });
+
+      it('true if sprites overlap', function () {
+        moveAToB(spriteA, spriteB);
+        expect(spriteA.displace(spriteB)).to.be.true;
+
+        moveAToB(spriteA, spriteB);
+        expect(spriteB.displace(spriteA)).to.be.true;
+      });
+
+      it('calls callback once if sprites overlap', function () {
+        expect(callCount).to.equal(0);
+
+        moveAToB(spriteA, spriteB);
+        spriteA.displace(spriteB, testCallback);
+        expect(callCount).to.equal(1);
+
+        moveAToB(spriteA, spriteB);
+        spriteB.displace(spriteA, testCallback);
+        expect(callCount).to.equal(2);
+      });
+
+      it('does not call callback if sprites do not overlap', function () {
+        expect(callCount).to.equal(0);
+        spriteA.displace(spriteB, testCallback);
+        expect(callCount).to.equal(0);
+        spriteB.displace(spriteA, testCallback);
+        expect(callCount).to.equal(0);
+      });
+
+      describe('passes collider and collidee to callback', function () {
+        it('A-B', function () {
+          moveAToB(spriteA, spriteB);
+          spriteA.displace(spriteB, testCallback);
+          expect(pairs).to.deep.equal([[spriteA.name, spriteB.name]]);
+        });
+
+        it('B-A', function () {
+          moveAToB(spriteA, spriteB);
+          spriteB.displace(spriteA, testCallback);
+          expect(pairs).to.deep.equal([[spriteB.name, spriteA.name]]);
+        });
+      });
+    });
+
+    describe('displace(group)', function () {
+      it('false if sprite does not overlap any sprites in group', function () {
+        expect(spriteA.displace(groupCD)).to.be.false;
+      });
+
+      it('does not check against sprites not in target group', function () {
+        moveAToB(spriteA, spriteB);
+        expect(spriteA.displace(groupCD)).to.be.false;
+      });
+
+      it('does not care if sprites in target group overlap each other', function () {
+        moveAToB(spriteC, spriteD);
+        expect(spriteA.displace(groupCD)).to.be.false;
+      });
+
+      it('true if sprite overlaps first sprite in group', function () {
+        moveAToB(spriteA, spriteC);
+        expect(spriteA.displace(groupCD)).to.be.true;
+      });
+
+      it('true if sprite overlaps last sprite in group', function () {
+        moveAToB(spriteA, spriteD);
+        expect(spriteA.displace(groupCD)).to.be.true;
+      });
+
+      it('true if sprite overlaps every sprite in group', function () {
+        moveAToB(spriteC, spriteA);
+        moveAToB(spriteD, spriteA);
+        expect(spriteA.displace(groupCD)).to.be.true;
+      });
+
+      it('does not overlap self when checking own group', function () {
+        expect(spriteA.displace(groupAB)).to.be.false;
+      });
+
+      it('can overlap with other sprites in own group', function () {
+        moveAToB(spriteA, spriteB);
+        expect(spriteA.displace(groupAB)).to.be.true;
+      });
+
+      it('does not call callback when not overlapping any sprites', function () {
+        spriteA.displace(groupCD, testCallback);
+        expect(callCount).to.equal(0);
+      });
+
+      it('calls callback once when overlapping one sprite', function () {
+        moveAToB(spriteC, spriteA);
+        spriteA.displace(groupCD, testCallback);
+        expect(callCount).to.equal(1);
+      });
+
+      it('calls callback twice when overlapping two sprites', function () {
+        moveAToB(spriteC, spriteA);
+        moveAToB(spriteD, spriteA);
+        spriteA.displace(groupCD, testCallback);
+        expect(callCount).to.equal(2);
+      });
+
+      describe('passes collider and collidee to callback', function () {
+        it('A-C', function () {
+          moveAToB(spriteA, spriteC);
+          spriteA.displace(groupCD, testCallback);
+          expect(pairs).to.deep.equal([[spriteA.name, spriteC.name]]);
+        });
+
+        it('A-D', function () {
+          moveAToB(spriteA, spriteD);
+          spriteA.displace(groupCD, testCallback);
+          expect(pairs).to.deep.equal([[spriteA.name, spriteD.name]]);
+        });
+
+        it('A-C-D', function () {
+          moveAToB(spriteC, spriteA);
+          moveAToB(spriteD, spriteA);
+          spriteA.displace(groupCD, testCallback);
+          expect(pairs).to.deep.equal([
+            [spriteA.name, spriteC.name],
+            [spriteA.name, spriteD.name]]);
+        });
+      });
+    });
   });
 
   describe('group', function () {
