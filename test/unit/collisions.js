@@ -290,10 +290,80 @@ describe('collisions', function() {
         groupA.overlap(groupB, countingCallback);
         expect(countingCallback.callCount).to.equal(1);
 
+        // None overlap
         countingCallback.callCount = 0;
-        spriteC.position.x += 2 * SIZE;
-        spriteA.overlap(groupA, countingCallback);
+        spriteD.position.x = THERE;
+        groupA.overlap(groupB, countingCallback);
         expect(countingCallback.callCount).to.equal(0);
+      });
+
+      it('passes collider and collidee to callback', function () {
+        spriteA.name = 'spriteA';
+        spriteB.name = 'spriteB';
+        spriteC.name = 'spriteC';
+        spriteD.name = 'spriteD';
+
+        var pairs;
+        function recordPairs(a, b) {
+          pairs.push([a.name, b.name]);
+        }
+
+        // 2 overlap 2
+        pairs = [];
+        groupA.overlap(groupB, recordPairs);
+        expect(pairs).to.deep.equal([
+          [spriteA.name, spriteC.name],
+          [spriteA.name, spriteD.name],
+          [spriteB.name, spriteC.name],
+          [spriteB.name, spriteD.name]]);
+
+        // 2 overlap 2 (inverse)
+        pairs = [];
+        groupB.overlap(groupA, recordPairs);
+        expect(pairs).to.deep.equal([
+          [spriteC.name, spriteA.name],
+          [spriteC.name, spriteB.name],
+          [spriteD.name, spriteA.name],
+          [spriteD.name, spriteB.name]]);
+
+        // 1 overlap 2
+        spriteB.position.x = -THERE;
+        pairs = [];
+        groupA.overlap(groupB, recordPairs);
+        expect(pairs).to.deep.equal([
+          [spriteA.name, spriteC.name],
+          [spriteA.name, spriteD.name]]);
+
+        // 2 overlap 1
+        pairs = [];
+        groupB.overlap(groupA, recordPairs);
+        expect(pairs).to.deep.equal([
+          [spriteC.name, spriteA.name],
+          [spriteD.name, spriteA.name]]);
+
+        // 1 overlap 1
+        spriteC.position.x = THERE;
+        pairs = [];
+        groupA.overlap(groupB, recordPairs);
+        expect(pairs).to.deep.equal([
+          [spriteA.name, spriteD.name]]);
+
+        // 1 overlap 1, twice
+        spriteB.position.x = THERE;
+        pairs = [];
+        groupA.overlap(groupB, recordPairs);
+        expect(pairs).to.deep.equal([
+          [spriteA.name, spriteD.name],
+          [spriteB.name, spriteC.name]]);
+
+        // none overlap
+        spriteA.position.x = HERE;
+        spriteB.position.x = HERE;
+        spriteC.position.x = THERE;
+        spriteD.position.x = THERE;
+        pairs = [];
+        groupA.overlap(groupB, recordPairs);
+        expect(pairs).to.be.empty;
       });
     });
   });
