@@ -1,12 +1,21 @@
+/** @file Tests for collision methods and how they report out.
+ *
+ * There are four 'collision' methods in p5.play:
+ * - overlap (a check with no automatic response)
+ * - displace (the caller pushes the callee out of the way)
+ * - collide (the callee resists the caller, opposite of displace)
+ * - bounce (motion of both callee and caller are affected)
+ */
+// The following jshint options stop it from complaining about chai expectations
+/* jshint -W024 */
+/* jshint expr:true */
+/* global afterEach, beforeEach, describe, expect, it*/
+
 describe('collisions', function() {
-  const SIZE = 10;
-  const HERE = 0;
-  const THERE = SIZE * 2;
+  var SIZE = 10;
   var pInst;
   var spriteA, spriteB, spriteC, spriteD;
   var groupAB, groupCD;
-  var countingCallback;
-
   var callCount, pairs;
 
   function testCallback(a, b) {
