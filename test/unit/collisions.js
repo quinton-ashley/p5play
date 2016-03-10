@@ -534,5 +534,62 @@ describe('collisions', function() {
         });
       });
     });
+
+    describe('displace(sprite)', function () {
+      it('false if no sprites overlap', function () {
+        expect(groupAB.displace(spriteC)).to.be.false;
+      });
+
+      it('false if no sprite in group overlaps target sprite', function () {
+        moveAToB(spriteA, spriteB);
+        expect(groupAB.displace(spriteC)).to.be.false;
+      });
+
+      it('true if all sprites in group overlap target sprite', function () {
+        moveAToB(spriteA, spriteC);
+        moveAToB(spriteB, spriteC);
+        expect(groupAB.displace(spriteC)).to.be.true;
+      });
+
+      describe('true if any sprites in group overlap target sprite', function () {
+        it('A overlaps C', function () {
+          moveAToB(spriteA, spriteC);
+          expect(groupAB.displace(spriteC)).to.be.true;
+        });
+
+        it('B overlaps C', function () {
+          moveAToB(spriteB, spriteC);
+          expect(groupAB.displace(spriteC)).to.be.true;
+        });
+      });
+
+      it('does not call callback when not overlapping sprite', function () {
+        groupAB.displace(spriteC, testCallback);
+        expect(callCount).to.equal(0);
+      });
+
+      describe('passes collider and collidee to callback for each overlap', function () {
+        it('A-C', function () {
+          moveAToB(spriteA, spriteC);
+          groupAB.displace(spriteC, testCallback);
+          expect(pairs).to.deep.equal([[spriteA.name, spriteC.name]]);
+        });
+
+        it('B-C', function () {
+          moveAToB(spriteB, spriteC);
+          groupAB.displace(spriteC, testCallback);
+          expect(pairs).to.deep.equal([[spriteB.name, spriteC.name]]);
+        });
+
+        it('A-B-C', function () {
+          moveAToB(spriteA, spriteC);
+          moveAToB(spriteB, spriteC);
+          groupAB.displace(spriteC, testCallback);
+          expect(pairs).to.deep.equal([[spriteA.name, spriteC.name]]);
+          // Note: First collision (A-C) displaces C away from A and B,
+          //       so the second collision (B-C) never happens.
+        });
+      });
+    });
   });
 });
