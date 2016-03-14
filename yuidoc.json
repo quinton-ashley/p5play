@@ -7,7 +7,7 @@
     "options": {
         "outdir": "docs",
       
-        "exclude": "examples,docs",
+        "exclude": "examples,docs,test,theme",
         "themedir": "theme",
         "helpers": ["theme/helpers/helpers.js"]
     }
