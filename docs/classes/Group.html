@@ -63,7 +63,7 @@
                     </label>
             
                     <label for="api-show-private" class="checkbox">
-                        <input type="checkbox" id="api-show-private">
+                        <input type="checkbox" id="api-show-private" checked>
                         Private
                     </label>
                     <label for="api-show-deprecated" class="checkbox">
@@ -110,7 +110,8 @@
                         		<li>
                         			<strong>Methods</strong>
                         			<ul>
-                        				<li><a href="#method-add"><span class="im">add</span>(<span class="ia">sprite</span>)</a></li>
+                        				<li><a href="#method-_groupCollide"><span class="im">_groupCollide</span>(<span class="ia">type</span><span class="ia">target</span><span class="ia">callback</span>)</a></li>
+                        				<li><a href="#method-add"><span class="im">add</span>(<span class="ia">s</span>)</a></li>
                         				<li><a href="#method-bounce"><span class="im">bounce</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
                         				<li><a href="#method-clear"><span class="im">clear</span>()</a></li>
                         				<li><a href="#method-clear"><span class="im">clear</span>()</a></li>
@@ -118,11 +119,14 @@
                         				<li><a href="#method-displace"><span class="im">displace</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
                         				<li><a href="#method-draw"><span class="im">draw</span>()</a></li>
                         				<li><a href="#method-get"><span class="im">get</span>(<span class="ia">i</span>)</a></li>
+                        				<li><a href="#method-indexOf"><span class="im">indexOf</span>()</a></li>
                         				<li><a href="#method-maxDepth"><span class="im">maxDepth</span>()</a></li>
                         				<li><a href="#method-minDepth"><span class="im">minDepth</span>()</a></li>
                         				<li><a href="#method-overlap"><span class="im">overlap</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
                         				<li><a href="#method-overlap"><span class="im">overlap</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
-                        				<li><a href="#method-remove"><span class="im">remove</span>(<span class="ia">sprite</span>)</a></li>
+                        				<li><a href="#method-remove"><span class="im">remove</span>(<span class="ia">item</span>)</a></li>
+                        				<li><a href="#method-size"><span class="im">size</span>()</a></li>
+                        				<li><a href="#method-toArray"><span class="im">toArray</span>()</a></li>
                         			</ul>
                         		</li>
                         
@@ -151,7 +155,7 @@
                                 	<div class="meta">
                                 				<p>
                                 				Defined in
-                                		<a href="../files/lib_p5.play.js.html#l2302"><code>lib&#x2F;p5.play.js:2302</code></a>
+                                		<a href="../files/lib_p5.play.js.html#l2429"><code>lib&#x2F;p5.play.js:2429</code></a>
                                 		</p>
                                 
                                 
@@ -168,6 +172,95 @@
                             <div id="methods" class="page-section">
                                 <h2 class="off-left">Methods</h2>
                                 <div class="item-list">
+                                    <div id="method-_groupCollide" class="method item private">
+                                    	<div class="method-signature">
+                                    	<span class="name"><code>_groupCollide</code></span>
+                                    
+                                    		<div class="args">
+                                    			<span class="paren">(</span><ul class="args-list inline commas">
+                                    				<li class="arg">
+                                    						<code>type</code>
+                                    				</li>
+                                    				<li class="arg">
+                                    						<code>target</code>
+                                    				</li>
+                                    				<li class="arg">
+                                    						<code class="optional">callback</code>
+                                    				</li>
+                                    			</ul><span class="paren">)</span>
+                                    		</div>
+                                    		<span class="returns-inline">
+                                    			<span class="type">Boolean</span>
+                                    		</span>
+                                    	</div>
+                                    
+                                    
+                                    		<span class="flag private">private</span>
+                                    
+                                    
+                                    
+                                    
+                                    	<div class="meta">
+                                    				<p>
+                                    				Defined in
+                                    		<a href="../files/lib_p5.play.js.html#l2641"><code>lib&#x2F;p5.play.js:2641</code></a>
+                                    		</p>
+                                    
+                                    
+                                    
+                                    	</div>
+                                    
+                                    	<div class="description"><p>Collide each member of group against the target using the given collision
+                                    type.  Return true if any collision occurred.
+                                    Internal use</p>
+                                    </div>
+                                    
+                                    		<div class="params">
+                                    			<h4>Parameters:</h4>
+                                    
+                                    			<ul class="params-list">
+                                    				<li class="param">
+                                    						<code class="param-name">type</code>
+                                    						<span class="type">!string</span>
+                                    
+                                    
+                                    					<div class="param-description"><p>one of 'overlap', 'collide', 'displace', 'bounce'</p>
+                                    </div>
+                                    
+                                    				</li>
+                                    				<li class="param">
+                                    						<code class="param-name">target</code>
+                                    						<span class="type">Object</span>
+                                    
+                                    
+                                    					<div class="param-description"><p>Group or Sprite</p>
+                                    </div>
+                                    
+                                    				</li>
+                                    				<li class="param">
+                                    						<code class="param-name optional">[callback]</code>
+                                    						<span class="type">Function</span>
+                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
+                                    
+                                    
+                                    					<div class="param-description"><p>on collision.</p>
+                                    </div>
+                                    
+                                    				</li>
+                                    			</ul>
+                                    		</div>
+                                    
+                                    		<div class="returns">
+                                    			<h4>Returns:</h4>
+                                    
+                                    			<div class="returns-description">
+                                    						<span class="type">Boolean</span>:
+                                    					<p>True if any collision/overlap occurred</p>
+                                    
+                                    			</div>
+                                    		</div>
+                                    
+                                    </div>
                                     <div id="method-add" class="method item">
                                     	<div class="method-signature">
                                     	<span class="name"><code>add</code></span>
@@ -175,7 +268,7 @@
                                     		<div class="args">
                                     			<span class="paren">(</span><ul class="args-list inline commas">
                                     				<li class="arg">
-                                    						<code>sprite</code>
+                                    						<code>s</code>
                                     				</li>
                                     			</ul><span class="paren">)</span>
                                     		</div>
@@ -189,7 +282,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2357"><code>lib&#x2F;p5.play.js:2357</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2485"><code>lib&#x2F;p5.play.js:2485</code></a>
                                     		</p>
                                     
                                     
@@ -204,7 +297,7 @@
                                     
                                     			<ul class="params-list">
                                     				<li class="param">
-                                    						<code class="param-name">sprite</code>
+                                    						<code class="param-name">s</code>
                                     						<span class="type"><a href="../classes/Sprite.html" class="crosslink">Sprite</a></span>
                                     
                                     
@@ -244,7 +337,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2613"><code>lib&#x2F;p5.play.js:2613</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2751"><code>lib&#x2F;p5.play.js:2751</code></a>
                                     		</p>
                                     
                                     
@@ -329,7 +422,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2383"><code>lib&#x2F;p5.play.js:2383</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2512"><code>lib&#x2F;p5.play.js:2512</code></a>
                                     		</p>
                                     
                                     
@@ -358,7 +451,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2397"><code>lib&#x2F;p5.play.js:2397</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2525"><code>lib&#x2F;p5.play.js:2525</code></a>
                                     		</p>
                                     
                                     
@@ -396,7 +489,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2334"><code>lib&#x2F;p5.play.js:2334</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2461"><code>lib&#x2F;p5.play.js:2461</code></a>
                                     		</p>
                                     
                                     
@@ -460,7 +553,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2579"><code>lib&#x2F;p5.play.js:2579</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2720"><code>lib&#x2F;p5.play.js:2720</code></a>
                                     		</p>
                                     
                                     
@@ -545,7 +638,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2477"><code>lib&#x2F;p5.play.js:2477</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2606"><code>lib&#x2F;p5.play.js:2606</code></a>
                                     		</p>
                                     
                                     
@@ -579,7 +672,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2324"><code>lib&#x2F;p5.play.js:2324</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2451"><code>lib&#x2F;p5.play.js:2451</code></a>
                                     		</p>
                                     
                                     
@@ -607,6 +700,34 @@
                                     
                                     
                                     </div>
+                                    <div id="method-indexOf" class="method item">
+                                    	<div class="method-signature">
+                                    	<span class="name"><code>indexOf</code></span>
+                                    
+                                    		<span class="paren">()</span>
+                                    	</div>
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    	<div class="meta">
+                                    				<p>
+                                    				Defined in
+                                    		<a href="../files/lib_p5.play.js.html#l2472"><code>lib&#x2F;p5.play.js:2472</code></a>
+                                    		</p>
+                                    
+                                    
+                                    
+                                    	</div>
+                                    
+                                    	<div class="description"><p>Same as Group.contains</p>
+                                    </div>
+                                    
+                                    
+                                    
+                                    </div>
                                     <div id="method-maxDepth" class="method item">
                                     	<div class="method-signature">
                                     	<span class="name"><code>maxDepth</code></span>
@@ -625,7 +746,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2435"><code>lib&#x2F;p5.play.js:2435</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2564"><code>lib&#x2F;p5.play.js:2564</code></a>
                                     		</p>
                                     
                                     
@@ -665,7 +786,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2456"><code>lib&#x2F;p5.play.js:2456</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2585"><code>lib&#x2F;p5.play.js:2585</code></a>
                                     		</p>
                                     
                                     
@@ -714,7 +835,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2513"><code>lib&#x2F;p5.play.js:2513</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2660"><code>lib&#x2F;p5.play.js:2660</code></a>
                                     		</p>
                                     
                                     
@@ -809,7 +930,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2545"><code>lib&#x2F;p5.play.js:2545</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2689"><code>lib&#x2F;p5.play.js:2689</code></a>
                                     		</p>
                                     
                                     
@@ -886,7 +1007,7 @@
                                     		<div class="args">
                                     			<span class="paren">(</span><ul class="args-list inline commas">
                                     				<li class="arg">
-                                    						<code>sprite</code>
+                                    						<code>item</code>
                                     				</li>
                                     			</ul><span class="paren">)</span>
                                     		</div>
@@ -903,7 +1024,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2407"><code>lib&#x2F;p5.play.js:2407</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2535"><code>lib&#x2F;p5.play.js:2535</code></a>
                                     		</p>
                                     
                                     
@@ -919,7 +1040,7 @@
                                     
                                     			<ul class="params-list">
                                     				<li class="param">
-                                    						<code class="param-name">sprite</code>
+                                    						<code class="param-name">item</code>
                                     						<span class="type"><a href="../classes/Sprite.html" class="crosslink">Sprite</a></span>
                                     
                                     
@@ -939,6 +1060,62 @@
                                     
                                     			</div>
                                     		</div>
+                                    
+                                    </div>
+                                    <div id="method-size" class="method item">
+                                    	<div class="method-signature">
+                                    	<span class="name"><code>size</code></span>
+                                    
+                                    		<span class="paren">()</span>
+                                    	</div>
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    	<div class="meta">
+                                    				<p>
+                                    				Defined in
+                                    		<a href="../files/lib_p5.play.js.html#l2504"><code>lib&#x2F;p5.play.js:2504</code></a>
+                                    		</p>
+                                    
+                                    
+                                    
+                                    	</div>
+                                    
+                                    	<div class="description"><p>Same as group.length</p>
+                                    </div>
+                                    
+                                    
+                                    
+                                    </div>
+                                    <div id="method-toArray" class="method item">
+                                    	<div class="method-signature">
+                                    	<span class="name"><code>toArray</code></span>
+                                    
+                                    		<span class="paren">()</span>
+                                    	</div>
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    	<div class="meta">
+                                    				<p>
+                                    				Defined in
+                                    		<a href="../files/lib_p5.play.js.html#l2556"><code>lib&#x2F;p5.play.js:2556</code></a>
+                                    		</p>
+                                    
+                                    
+                                    
+                                    	</div>
+                                    
+                                    	<div class="description"><p>Returns a copy of the group as standard array.</p>
+                                    </div>
+                                    
+                                    
                                     
                                     </div>
                                 </div>
