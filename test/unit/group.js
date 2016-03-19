@@ -23,6 +23,12 @@ describe('Group', function() {
       expect(group.contains(sprite)).to.be.true;
     });
 
+    it("gives the sprite a reference to itself", function () {
+      var sprite = pInst.createSprite();
+      group.add(sprite);
+      expect(sprite.groups).to.include(group);
+    });
+
     it("lets you add different sprites to the group", function () {
       var sprite1 = pInst.createSprite();
       var sprite2 = pInst.createSprite();
@@ -70,6 +76,14 @@ describe('Group', function() {
       expect(group.length).to.equal(1);
       expect(group.contains(sprite1)).to.be.false;
       expect(group.contains(sprite2)).to.be.true;
+    });
+
+    it("removes the sprite's reference to itself", function () {
+      var sprite = pInst.createSprite();
+      group.add(sprite);
+      expect(sprite.groups).to.include(group);
+      group.remove(sprite);
+      expect(sprite.groups).to.not.include(group);
     });
 
     it("returns false if the sprite is not a member of the group", function () {
