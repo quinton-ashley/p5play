@@ -67,6 +67,20 @@ describe('Group', function() {
       expect(group.length).to.equal(1);
     });
 
+    it("removes all copies of a sprite if more than one happen to be present", function () {
+      // This shouldn't happen when using a group properly, but just in case let's
+      // make sure we clean up properly.
+      var sprite = pInst.createSprite();
+      group.add(sprite);
+      group.push(sprite);
+      expect(group.length).to.equal(2);
+      expect(group[0]).to.equal(sprite);
+      expect(group[1]).to.equal(sprite);
+
+      group.remove(sprite);
+      expect(group.length).to.equal(0);
+    });
+
     it("throws if passed something besides a sprite", function () {
       [
         null,
