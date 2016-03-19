@@ -11,7 +11,7 @@ describe('Group', function() {
   });
 
   it("is an array", function () {
-    expect(Array.isArray(group));
+    expect(Array.isArray(group)).to.be.true;
   });
 
   describe("add()", function () {
@@ -20,7 +20,7 @@ describe('Group', function() {
       group.add(sprite);
       expect(group).to.include(sprite);
       expect(group[0]).to.equal(sprite);
-      expect(group.contains(sprite)).to.be.at.least(0);
+      expect(group.contains(sprite)).to.be.true;
     });
 
     it("lets you add different sprites to the group", function () {
@@ -38,6 +38,21 @@ describe('Group', function() {
       expect(group.length).to.equal(1);
       expect(group[0]).to.equal(sprite);
       expect(group[1]).to.be.undefined;
+    });
+  });
+
+  describe("remove()", function () {
+    it("removes a sprite from the group", function () {
+      var sprite1 = pInst.createSprite();
+      var sprite2 = pInst.createSprite();
+      group.add(sprite1);
+      group.add(sprite2);
+      expect(group.length).to.equal(2);
+
+      group.remove(sprite1);
+      expect(group.length).to.equal(1);
+      expect(group.contains(sprite1)).to.be.false;
+      expect(group.contains(sprite2)).to.be.true;
     });
   });
 
