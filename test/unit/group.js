@@ -54,6 +54,22 @@ describe('Group', function() {
       expect(group.contains(sprite1)).to.be.false;
       expect(group.contains(sprite2)).to.be.true;
     });
+
+    it("throws if passed something besides a sprite", function () {
+      [
+        null,
+        undefined,
+        3.14,
+        'string',
+        [],
+        {},
+        new Error('error')
+      ].forEach(function (item) {
+        expect(function () {
+          group.remove(item)
+        }).throws('Error: you can only remove sprites from a group');
+      });
+    });
   });
 
   describe("removeSprites()", function() {
