@@ -49,10 +49,22 @@ describe('Group', function() {
       group.add(sprite2);
       expect(group.length).to.equal(2);
 
-      group.remove(sprite1);
+      var result = group.remove(sprite1);
+      expect(result).to.be.true;
       expect(group.length).to.equal(1);
       expect(group.contains(sprite1)).to.be.false;
       expect(group.contains(sprite2)).to.be.true;
+    });
+
+    it("returns false if the sprite is not a member of the group", function () {
+      var sprite1 = pInst.createSprite();
+      var sprite2 = pInst.createSprite();
+      group.add(sprite1);
+      expect(group.length).to.equal(1);
+
+      var result = group.remove(sprite2);
+      expect(result).to.be.false;
+      expect(group.length).to.equal(1);
     });
 
     it("throws if passed something besides a sprite", function () {
