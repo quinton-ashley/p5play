@@ -39,6 +39,22 @@ describe('Group', function() {
       expect(group[0]).to.equal(sprite);
       expect(group[1]).to.be.undefined;
     });
+
+    it("throws if passed something besides a sprite", function () {
+      [
+        null,
+        undefined,
+        3.14,
+        'string',
+        [],
+        {},
+        new Error('error')
+      ].forEach(function (item) {
+        expect(function () {
+          group.add(item)
+        }).throws('Error: you can only add sprites to a group');
+      });
+    });
   });
 
   describe("remove()", function () {
