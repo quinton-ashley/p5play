@@ -68,7 +68,7 @@ module.exports = {
     // not a great setting for keywords like 'return' and 'throw' so we'll
     // want overrides.
     "keyword-spacing": "off",
-    
+
     "linebreak-style": [
       "error",
       "unix"
@@ -147,7 +147,7 @@ module.exports = {
     "no-sequences": "error",
     "no-shadow": "off",
     "no-shadow-restricted-names": "error",
-    "no-spaced-func": "off",
+    "no-spaced-func": "error",
     "no-sync": "error",
     "no-ternary": "off",
     "no-throw-literal": "off",
