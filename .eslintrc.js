@@ -18,7 +18,7 @@ module.exports = {
     "arrow-parens": "error",
     "arrow-spacing": "error",
     "block-scoped-var": "error",
-    "block-spacing": "off",
+    "block-spacing": ["error", "always"],
     "brace-style": "off",
     "callback-return": "error",
     "camelcase": "off",
