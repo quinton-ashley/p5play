@@ -28,7 +28,7 @@ module.exports = {
       "last"
     ],
     "complexity": "off",
-    "computed-property-spacing": "off",
+    "computed-property-spacing": "error",
     "consistent-return": "off",
     "consistent-this": "off",
 
