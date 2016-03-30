@@ -79,7 +79,7 @@ module.exports = {
     "no-caller": "error",
     "no-catch-shadow": "error",
     "no-confusing-arrow": "error",
-    "no-console": "off",
+    "no-console": "off", // Customized: We log certain warnings
     "no-continue": "error",
     "no-div-regex": "error",
     "no-duplicate-imports": "error",
@@ -178,7 +178,7 @@ module.exports = {
     ],
     "require-jsdoc": "off",
     "require-yield": "error",
-    "semi": "off",
+    "semi": ["error", "always"],
     "semi-spacing": "off",
     "sort-imports": "error",
     "sort-vars": "off",
