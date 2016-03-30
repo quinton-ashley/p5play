@@ -13,6 +13,7 @@
     "docs": "yuidoc .",
     "lint": "jshint lib/",
     "start": "http-server -o",
+    "pretest": "npm run lint",
     "test": "mocha-phantomjs test/index.html"
   },
   "repository": {
