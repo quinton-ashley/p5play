@@ -62,7 +62,13 @@ module.exports = {
     "init-declarations": "off",
     "jsx-quotes": "error",
     "key-spacing": "off",
+
+    // The majority of the library follows (before:true, after:false) for this
+    // setting, but there are nearly 100 cases where that fails too, and it's
+    // not a great setting for keywords like 'return' and 'throw' so we'll
+    // want overrides.
     "keyword-spacing": "off",
+    
     "linebreak-style": [
       "error",
       "unix"
