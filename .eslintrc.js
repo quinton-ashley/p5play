@@ -22,7 +22,7 @@ module.exports = {
     "brace-style": "off",
     "callback-return": "error",
     "camelcase": "off",
-    "comma-spacing": "off",
+    "comma-spacing": "error",
     "comma-style": [
       "error",
       "last"
