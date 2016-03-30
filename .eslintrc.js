@@ -190,7 +190,7 @@ module.exports = {
     "require-jsdoc": "off",
     "require-yield": "error",
     "semi": ["error", "always"],
-    "semi-spacing": "off",
+    "semi-spacing": "error",
     "sort-imports": "error",
     "sort-vars": "off",
     "space-before-blocks": "off",
