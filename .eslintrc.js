@@ -31,7 +31,11 @@ module.exports = {
     "computed-property-spacing": "off",
     "consistent-return": "off",
     "consistent-this": "off",
+
+    // Use of braces is very inconsistent in the library so far.  It will
+    // be a significant change to enable this check.
     "curly": "off",
+
     "default-case": "error",
     "dot-location": "error",
     "dot-notation": "error",
@@ -54,6 +58,7 @@ module.exports = {
     // the main library currently ignores its module wrapper for
     // indentation purposes.
     "indent": "off",
+
     "init-declarations": "off",
     "jsx-quotes": "error",
     "key-spacing": "off",
@@ -108,7 +113,7 @@ module.exports = {
     "no-loop-func": "error",
     "no-magic-numbers": "off",
     "no-mixed-requires": "error",
-    "no-multi-spaces": "off",
+    "no-multi-spaces": "error",
     "no-multi-str": "error",
     "no-multiple-empty-lines": "off",
     "no-native-reassign": "error",
