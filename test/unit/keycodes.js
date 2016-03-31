@@ -32,13 +32,16 @@ describe('_keyCodeFromAlias', function() {
         if (KEY.hasOwnProperty(alias)) {
           upperCaseAlias = alias.toUpperCase();
           lowerCaseAlias = alias.toLowerCase();
-          randomCaseAlias = alias.split('').map(function (char) {
-            if (Math.random() < 0.5) {
-              return char.toUpperCase();
-            } else {
-              return char.toLowerCase();
-            }
-          }).join('');
+          randomCaseAlias = alias
+            .split('')
+            .map(function (char) {
+              if (Math.random() < 0.5) {
+                return char.toUpperCase();
+              } else {
+                return char.toLowerCase();
+              }
+            })
+            .join('');
 
           expect(_keyCodeFromAlias(upperCaseAlias))
             .to.equal(_keyCodeFromAlias(lowerCaseAlias))
