@@ -13,17 +13,17 @@ var tile_frames;
 // Normally you would put this in a .json file, but I'm putting it here
 // for example purposes
 var player_frames = [
-  {"name":"player_walk01", "frame":{"x":0, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk02", "frame":{"x":71, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk03", "frame":{"x":142, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk04", "frame":{"x":0, "y": 95, "width": 70, "height": 94}},
-  {"name":"player_walk05", "frame":{"x":71, "y": 95, "width": 70, "height": 94}},
-  {"name":"player_walk06", "frame":{"x":142, "y": 95, "width": 70, "height": 94}},
-  {"name":"player_walk07", "frame":{"x":213, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk08", "frame":{"x":284, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk09", "frame":{"x":213, "y": 95, "width": 70, "height": 94}},
-  {"name":"player_walk10", "frame":{"x":355, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk11", "frame":{"x":284, "y": 95, "width": 70, "height": 94}}
+  {'name':'player_walk01', 'frame':{'x':0, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk02', 'frame':{'x':71, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk03', 'frame':{'x':142, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk04', 'frame':{'x':0, 'y': 95, 'width': 70, 'height': 94}},
+  {'name':'player_walk05', 'frame':{'x':71, 'y': 95, 'width': 70, 'height': 94}},
+  {'name':'player_walk06', 'frame':{'x':142, 'y': 95, 'width': 70, 'height': 94}},
+  {'name':'player_walk07', 'frame':{'x':213, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk08', 'frame':{'x':284, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk09', 'frame':{'x':213, 'y': 95, 'width': 70, 'height': 94}},
+  {'name':'player_walk10', 'frame':{'x':355, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk11', 'frame':{'x':284, 'y': 95, 'width': 70, 'height': 94}}
 ];
 
 function preload() {
@@ -58,7 +58,7 @@ function preload() {
 
   // An animation with a single frame for standing
   player_stand = loadAnimation(new SpriteSheet('assets/player_spritesheet.png',
-    [{"name":"player_stand", "frame":{"x":284, "y": 95, "width": 70, "height": 94}}]));
+    [{'name':'player_stand', 'frame':{'x':284, 'y': 95, 'width': 70, 'height': 94}}]));
 }
 
 function setup() {
@@ -101,7 +101,7 @@ function draw() {
     // flip horizontally
     player_sprite.mirrorX(-1);
     // move left
-    player_sprite.velocity.x = - 2;
+    player_sprite.velocity.x = -2;
   }
   else if(eventX > player_sprite.position.x + 10) {
     player_sprite.changeAnimation('walk');
