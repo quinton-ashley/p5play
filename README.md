@@ -19,6 +19,7 @@ First install [node.js][]. Then run:
 
 ```
 npm install
+npm run docs
 npm start
 ```
 
