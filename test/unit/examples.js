@@ -15,7 +15,7 @@ describe('Example sketches', function() {
     });
 
     return examples;
-  })();
+  }());
 
   // The following function's source code is converted to a string
   // and evaluated in an iframe; it is NOT executed directly!
