@@ -4,14 +4,14 @@
   "description": "A p5.js library for the creation of games and playthings.",
   "dependencies": {},
   "devDependencies": {
+    "eslint": "^2.5.3",
     "http-server": "^0.9.0",
-    "jshint": "^2.9.1",
     "mocha-phantomjs": "^4.0.1",
     "yuidocjs": "^0.10.0"
   },
   "scripts": {
     "docs": "yuidoc .",
-    "lint": "jshint lib/",
+    "lint": "eslint lib/**",
     "start": "http-server -o",
     "pretest": "npm run lint",
     "test": "mocha-phantomjs test/index.html"
