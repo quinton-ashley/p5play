@@ -2,10 +2,6 @@
 
 var circles;
 var boxes;
-var MARGIN = 40;
-
-function preload() {
-}
 
 function setup() {
   createCanvas(800, 400);
@@ -33,7 +29,7 @@ function setup() {
 
   boxes = new Group();
 
-  for(var i=0; i<4; i++)
+  for(var j=0; j<4; j++)
   {
   var box = createSprite(random(0, width), random(0, height));
   box.addAnimation('normal', 'assets/box0001.png', 'assets/box0003.png');
@@ -43,7 +39,7 @@ function setup() {
 
   //rotation rotates the collider too but it will always be an axis oriented
   //bounding box, that is an ortogonal rectangle
-  if(i%2==0)
+  if(j%2==0)
     box.rotation = 90;
 
   boxes.add(box);
