@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>lib/p5.play.js - p5.play</title>
+    <title>lib\p5.play.js - p5.play</title>
     <link rel="stylesheet" href="">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -15,7 +15,7 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
-	    <img alt="p5.play" src="../../asterisk.png" style="max-height: 65%;" title="p5.play">
+	    <img alt="p5.play" src="..\..\asterisk.png" style="max-height: 65%;" title="p5.play">
             p5.play
         </h1>
 	<div class="nav">
@@ -77,7 +77,7 @@
                 <div id="docs-main">
                     <div class="content">
                         <div class="page-header">
-                            <h1>lib/p5.play.js <small>File</small></h1>
+                            <h1>lib\p5.play.js <small>File</small></h1>
                         </div>
                         
                         <div class="file">
@@ -90,13 +90,12 @@
                         
                         (function (root, factory) {
                         if (typeof define === &#x27;function&#x27; &amp;&amp; define.amd)
-                        define(&#x27;p5.play&#x27;, [&#x27;p5&#x27;], function (p5) { (factory(p5));});
+                        define(&#x27;p5.play&#x27;, [&#x27;p5&#x27;], function (p5) { (factory(p5)); });
                         else if (typeof exports === &#x27;object&#x27;)
                         factory(require(&#x27;../p5&#x27;));
                         else
-                        factory(root[&#x27;p5&#x27;]);
-                        }
-                        (this, function (p5) {
+                        factory(root.p5);
+                        }(this, function (p5) {
                         /**
                          * p5.play is a library for p5.js to facilitate the creation of games and gamelike
                          * projects.
@@ -191,13 +190,6 @@
                           };
                         }
                         
-                        // These are p5 constants that we&#x27;d like easy access to.
-                        var RGB = p5.prototype.RGB;
-                        var CENTER = p5.prototype.CENTER;
-                        var LEFT = p5.prototype.LEFT;
-                        var BOTTOM = p5.prototype.BOTTOM;
-                        var PI = p5.prototype.PI;
-                        
                         // These are utility p5 functions that don&#x27;t depend on p5 instance state in
                         // order to work properly, so we&#x27;ll go ahead and make them easy to
                         // access without needing to bind them to a p5 instance.
@@ -246,7 +238,7 @@
                           s.depth = this.allSprites.maxDepth()+1;
                           this.allSprites.add(s);
                           return s;
-                        }
+                        };
                         
                         
                         /**
@@ -259,7 +251,7 @@
                         */
                         p5.prototype.removeSprite = function(sprite) {
                           sprite.remove();
-                        }
+                        };
                         
                         /**
                         * Updates all the sprites in the sketch (position, animation...)
@@ -272,9 +264,9 @@
                         */
                         p5.prototype.updateSprites = function(upd) {
                         
-                          if(upd==false)
+                          if(upd === false)
                             this.spriteUpdate = false;
-                          if(upd==true)
+                          if(upd === true)
                             this.spriteUpdate = true;
                         
                           if(this.spriteUpdate)
@@ -282,7 +274,7 @@
                           {
                             this.allSprites.get(i).update();
                           }
-                        }
+                        };
                         
                         /**
                         * Returns all the sprites in the sketch as an array
@@ -313,7 +305,7 @@
                             return arr;
                           }
                         
-                        }
+                        };
                         
                         /**
                         * Displays a Group of sprites.
@@ -325,31 +317,16 @@
                         * @param {Group} [group] Group of Sprites to be displayed
                         */
                         p5.prototype.drawSprites = function(group) {
+                          // If no group is provided, draw the allSprites group.
+                          group = group || this.allSprites;
                         
-                          //draw everything
-                          if(arguments.length===0)
+                          if (typeof group.draw !== &#x27;function&#x27;)
                           {
-                            //sort by depth
-                            this.allSprites.sort(function(a,b) {
-                              return a.depth - b.depth;
-                            });
-                        
-                            for(var i = 0; i&lt;this.allSprites.size(); i++)
-                            {
-                              this.allSprites.get(i).display();
-                            }
+                            throw(&#x27;Error: with drawSprites you can only draw all sprites or a group&#x27;);
                           }
-                          else if(arguments.length===1)
-                          {
-                            if(arguments[0] instanceof Array == false)
-                              throw(&quot;Error: with drawSprites you can only draw all sprites or a group&quot;);
-                            else
-                            {
-                              arguments[0].draw();
-                            }
                         
-                          }
-                        }
+                          group.draw();
+                        };
                         
                         /**
                         * Displays a Sprite.
@@ -359,9 +336,9 @@
                         * @param {Sprite} sprite Sprite to be displayed
                         */
                         p5.prototype.drawSprite = function(sprite) {
-                          if(sprite!=null)
+                          if(sprite)
                           sprite.display();
-                        }
+                        };
                         
                         /**
                         * Loads an animation.
@@ -372,7 +349,7 @@
                         */
                         p5.prototype.loadAnimation = function() {
                           return construct(this.Animation, arguments);
-                        }
+                        };
                         
                         /**
                          * Loads a Sprite Sheet.
@@ -395,7 +372,7 @@
                         */
                         p5.prototype.animation = function(anim, x, y) {
                           anim.draw(x, y);
-                        }
+                        };
                         
                         //variable to detect instant presses
                         defineLazyP5Property(&#x27;_p5play&#x27;, function() {
@@ -421,7 +398,7 @@
                         */
                         p5.prototype.keyWentDown = function(key) {
                           return this._isKeyInState(key, KEY_WENT_DOWN);
-                        }
+                        };
                         
                         
                         /**
@@ -435,7 +412,7 @@
                         */
                         p5.prototype.keyWentUp = function(key) {
                           return this._isKeyInState(key, KEY_WENT_UP);
-                        }
+                        };
                         
                         /**
                         * Detects if a key is currently pressed
@@ -447,7 +424,7 @@
                         */
                         p5.prototype.keyDown = function(key) {
                           return this._isKeyInState(key, KEY_IS_DOWN);
-                        }
+                        };
                         
                         /**
                          * Detects if a key is in the given state during the last cycle.
@@ -464,7 +441,7 @@
                           var keyCode;
                           var keyStates = this._p5play.keyStates;
                         
-                          if(typeof key == &quot;string&quot;)
+                          if(typeof key === &#x27;string&#x27;)
                           {
                             keyCode = this._keyCodeFromAlias(key);
                           }
@@ -482,8 +459,8 @@
                               keyStates[keyCode] = KEY_IS_UP;
                           }
                         
-                          return (keyStates[keyCode] == state);
-                        }
+                          return (keyStates[keyCode] === state);
+                        };
                         
                         /**
                         * Detects if a mouse button is currently down
@@ -495,7 +472,7 @@
                         */
                         p5.prototype.mouseDown = function(buttonCode) {
                           return this._isMouseButtonInState(buttonCode, KEY_IS_DOWN);
-                        }
+                        };
                         
                         /**
                         * Detects if a mouse button is currently up
@@ -507,7 +484,7 @@
                         */
                         p5.prototype.mouseUp = function(buttonCode) {
                           return this._isMouseButtonInState(buttonCode, KEY_IS_UP);
-                        }
+                        };
                         
                         /**
                          * Detects if a mouse button was released during the last cycle.
@@ -519,7 +496,7 @@
                          */
                         p5.prototype.mouseWentUp = function(buttonCode) {
                           return this._isMouseButtonInState(buttonCode, KEY_WENT_UP);
-                        }
+                        };
                         
                         
                         /**
@@ -532,7 +509,7 @@
                          */
                         p5.prototype.mouseWentDown = function(buttonCode) {
                           return this._isMouseButtonInState(buttonCode, KEY_WENT_DOWN);
-                        }
+                        };
                         
                         /**
                          * Detects if a mouse button is in the given state during the last cycle.
@@ -548,22 +525,20 @@
                         p5.prototype._isMouseButtonInState = function(buttonCode, state) {
                           var mouseStates = this._p5play.mouseStates;
                         
-                          if(buttonCode == undefined)
+                          if(buttonCode === undefined)
                             buttonCode = this.LEFT;
-                          else
-                            buttonCode = buttonCode;
                         
                           //undefined = not tracked yet, start tracking
                           if(mouseStates[buttonCode]===undefined)
                           {
-                          if(this.mouseIsPressed &amp;&amp; this.mouseButton == buttonCode)
+                          if(this.mouseIsPressed &amp;&amp; this.mouseButton === buttonCode)
                             mouseStates[buttonCode] = KEY_IS_DOWN;
                           else
                             mouseStates[buttonCode] = KEY_IS_UP;
                           }
                         
-                          return (mouseStates[buttonCode] == state);
-                        }
+                          return (mouseStates[buttonCode] === state);
+                        };
                         
                         
                         /**
@@ -574,7 +549,7 @@
                          * @property KEY
                          * @type {Object}
                          */
-                        var KEY = p5.prototype.KEY = {
+                        p5.prototype.KEY = {
                             &#x27;BACKSPACE&#x27;: 8,
                             &#x27;TAB&#x27;: 9,
                             &#x27;ENTER&#x27;: 13,
@@ -667,7 +642,7 @@
                             &#x27;COMMA&#x27;: 188,
                             &#x27;SLASH&#x27;: 191,
                             &#x27;BACKSLASH&#x27;: 220
-                        }
+                        };
                         
                         /**
                          * An object storing deprecated key aliases, which we still support but
@@ -680,7 +655,7 @@
                         p5.prototype.KEY_DEPRECATIONS = {
                           &#x27;MINUT&#x27;: &#x27;MINUS&#x27;,
                           &#x27;COMA&#x27;: &#x27;COMMA&#x27;
-                        }
+                        };
                         
                         /**
                          * Given a string key alias (as defined in the KEY property above), look up
@@ -704,7 +679,7 @@
                             alias = this.KEY_DEPRECATIONS[alias];
                           }
                           return this.KEY[alias];
-                        }
+                        };
                         
                         //pre draw: detect keyStates
                         p5.prototype.readPresses = function() {
@@ -714,14 +689,14 @@
                           for (var key in keyStates) {
                             if(this.keyIsDown(key)) //if is down
                             {
-                              if(keyStates[key] == KEY_IS_UP)//and was up
+                              if(keyStates[key] === KEY_IS_UP)//and was up
                                 keyStates[key] = KEY_WENT_DOWN;
                               else
                                 keyStates[key] = KEY_IS_DOWN; //now is simply down
                             }
                             else //if it&#x27;s up
                             {
-                              if(keyStates[key] == KEY_IS_DOWN)//and was up
+                              if(keyStates[key] === KEY_IS_DOWN)//and was up
                                 keyStates[key] = KEY_WENT_UP;
                               else
                                 keyStates[key] = KEY_IS_UP; //now is simply down
@@ -731,23 +706,23 @@
                           //mouse
                           for (var btn in mouseStates) {
                         
-                            if(this.mouseIsPressed &amp;&amp; this.mouseButton == btn) //if is down
+                            if(this.mouseIsPressed &amp;&amp; this.mouseButton === btn) //if is down
                             {
-                              if(mouseStates[btn] == KEY_IS_UP)//and was up
+                              if(mouseStates[btn] === KEY_IS_UP)//and was up
                                 mouseStates[btn] = KEY_WENT_DOWN;
                               else
                                 mouseStates[btn] = KEY_IS_DOWN; //now is simply down
                             }
                             else //if it&#x27;s up
                             {
-                              if(mouseStates[btn] == KEY_IS_DOWN)//and was up
+                              if(mouseStates[btn] === KEY_IS_DOWN)//and was up
                                 mouseStates[btn] = KEY_WENT_UP;
                               else
                                 mouseStates[btn] = KEY_IS_UP; //now is simply down
                             }
                           }
                         
-                        }
+                        };
                         
                         /**
                         * Turns the quadTree on or off.
@@ -762,9 +737,9 @@
                         */
                         p5.prototype.useQuadTree = function(use) {
                         
-                          if(this.quadTree!=undefined)
+                          if(this.quadTree !== undefined)
                           {
-                            if(use==undefined)
+                            if(use === undefined)
                               return this.quadTree.active;
                             else if(use)
                               this.quadTree.active = true;
@@ -773,7 +748,7 @@
                           }
                           else
                             return false;
-                        }
+                        };
                         
                         //the actual quadTree
                         defineLazyP5Property(&#x27;quadTree&#x27;, function() {
@@ -807,16 +782,22 @@
                            * A Sprite can have a collider that defines the active area to detect
                            * collisions or overlappings with other sprites and mouse interactions.
                            *
+                           * To create a Sprite, use
+                           * {{#crossLink &quot;p5.play/createSprite:method&quot;}}{{/crossLink}}.
+                           *
                            * @class Sprite
-                           * @constructor
-                           * @param {Number} x Initial x coordinate
-                           * @param {Number} y Initial y coordinate
-                           * @param {Number} width Width of the placeholder rectangle and of the
-                           *                       collider until an image or new collider are set
-                           * @param {Number} height Height of the placeholder rectangle and of the
-                           *                       collider until an image or new collider are set
                            */
                         
+                        // For details on why these docs aren&#x27;t in a YUIDoc comment block, see:
+                        //
+                        // https://github.com/molleindustria/p5.play/pull/67
+                        //
+                        // @param {Number} x Initial x coordinate
+                        // @param {Number} y Initial y coordinate
+                        // @param {Number} width Width of the placeholder rectangle and of the
+                        //                       collider until an image or new collider are set
+                        // @param {Number} height Height of the placeholder rectangle and of the
+                        //                        collider until an image or new collider are set
                         function Sprite(pInst, _x, _y, _w, _h) {
                           var pInstBind = createPInstBinder(pInst);
                         
@@ -835,6 +816,7 @@
                           var scale = pInstBind(&#x27;scale&#x27;);
                           var rotate = pInstBind(&#x27;rotate&#x27;);
                           var stroke = pInstBind(&#x27;stroke&#x27;);
+                          var strokeWeight = pInstBind(&#x27;strokeWeight&#x27;);
                           var line = pInstBind(&#x27;line&#x27;);
                           var noFill = pInstBind(&#x27;noFill&#x27;);
                           var fill = pInstBind(&#x27;fill&#x27;);
@@ -848,6 +830,13 @@
                         
                           var quadTree = pInst.quadTree;
                           var camera = pInst.camera;
+                        
+                        
+                          // These are p5 constants that we&#x27;d like easy access to.
+                          var RGB = p5.prototype.RGB;
+                          var CENTER = p5.prototype.CENTER;
+                          var LEFT = p5.prototype.LEFT;
+                          var BOTTOM = p5.prototype.BOTTOM;
                         
                           /**
                           * The sprite&#x27;s position of the sprite as a vector (x,y).
@@ -917,13 +906,13 @@
                           * @property collider
                           * @type {Object}
                           */
-                          this.collider;
+                          this.collider = undefined;
                         
                           //internal use
                           //&quot;default&quot; - no image or custom collider is specified, use the shape width / height
                           //&quot;custom&quot; - specified with setCollider
                           //&quot;image&quot; - no collider is set with setCollider and an image is added
-                          this.colliderType = &quot;none&quot;;
+                          this.colliderType = &#x27;none&#x27;;
                         
                           /**
                           * Object containing information about the most recent collision/overlapping
@@ -1087,7 +1076,7 @@
                           * @type {Number}
                           * @default 100
                           */
-                          if(_w == undefined)
+                          if(_w === undefined)
                             this.width = 100;
                           else
                             this.width = _w;
@@ -1101,7 +1090,7 @@
                           * @type {Number}
                           * @default 100
                           */
-                          if(_h == undefined)
+                          if(_h === undefined)
                             this.height = 100;
                           else
                             this.height = _h;
@@ -1142,7 +1131,7 @@
                           * reduced by 1 unit. At 0 it will call a sprite.remove()
                           * Disabled if set to -1.
                           *
-                          * @property removed
+                          * @property life
                           * @type {Number}
                           * @default -1
                           */
@@ -1172,12 +1161,12 @@
                           * @property groups
                           * @type {Array}
                           */
-                          this.groups = new Array();
+                          this.groups = [];
                         
                           var animations = {};
                         
                           //The current animation&#x27;s label.
-                          var currentAnimation = &quot;&quot;;
+                          var currentAnimation = &#x27;&#x27;;
                         
                           /**
                           * Reference to the current animation.
@@ -1185,7 +1174,7 @@
                           * @property animation
                           * @type {Animation}
                           */
-                          this.animation;
+                          this.animation = undefined;
                         
                           /**
                           * Updates the sprite.
@@ -1199,7 +1188,7 @@
                             {
                               //if there has been a change somewhere after the last update
                               //the old position is the last position registered in the update
-                              if(this.newPosition != this.position)
+                              if(this.newPosition !== this.position)
                                 this.previousPosition = createVector(this.newPosition.x, this.newPosition.y);
                               else
                                 this.previousPosition = createVector(this.position.x, this.position.y);
@@ -1207,7 +1196,7 @@
                               this.velocity.x *= this.friction;
                               this.velocity.y *= this.friction;
                         
-                              if(this.maxSpeed != -1)
+                              if(this.maxSpeed !== -1)
                                 this.limitSpeed(this.maxSpeed);
                         
                               if(this.rotateToDirection)
@@ -1224,7 +1213,7 @@
                               this.deltaY = this.position.y - this.previousPosition.y;
                         
                               //if there is an animation
-                              if(animations[currentAnimation] != null)
+                              if(animations[currentAnimation])
                               {
                                 //update it
                                 animations[currentAnimation].update();
@@ -1232,20 +1221,20 @@
                                 //has an animation but the collider is still default
                                 //the animation wasn&#x27;t loaded. if the animation is not a 1x1 image
                                 //it means it just finished loading
-                                if(this.colliderType==&quot;default&quot; &amp;&amp;
-                                  animations[currentAnimation].getWidth()!=1 &amp;&amp;
-                                   animations[currentAnimation].getHeight()!=1
+                                if(this.colliderType === &#x27;default&#x27; &amp;&amp;
+                                  animations[currentAnimation].getWidth() !== 1 &amp;&amp;
+                                   animations[currentAnimation].getHeight() !== 1
                                   )
                                 {
                                 this.collider = this.getBoundingBox();
-                                this.colliderType = &quot;image&quot;;
+                                this.colliderType = &#x27;image&#x27;;
                                 this.width = animations[currentAnimation].getWidth()*abs(this.scale);
                                 this.height = animations[currentAnimation].getHeight()*abs(this.scale);
                                 //quadTree.insert(this);
                                 }
                         
                                 //update size and collider
-                                if(animations[currentAnimation].frameChanged || this.width == undefined || this.height == undefined)
+                                if(animations[currentAnimation].frameChanged || this.width === undefined || this.height === undefined)
                                 {
                                 //this.collider = this.getBoundingBox();
                                 this.width = animations[currentAnimation].getWidth()*abs(this.scale);
@@ -1255,35 +1244,35 @@
                         
                               //a collider is created either manually with setCollider or
                               //when I check this sprite for collisions or overlaps
-                              if(this.collider != null)
+                              if(this.collider)
                               {
                                 if(this.collider instanceof AABB)
                                 {
                                 //scale / rotate collider
                                 var t = radians(this.rotation);
                         
-                                if(this.colliderType == &quot;custom&quot;)
+                                if(this.colliderType === &#x27;custom&#x27;)
                                   {
                                   this.collider.extents.x = this.collider.originalExtents.x * abs(this.scale) * abs(cos(t)) +
-                                  this.collider.originalExtents.y * abs(this.scale) * abs(sin(t))
+                                  this.collider.originalExtents.y * abs(this.scale) * abs(sin(t));
                         
                                   this.collider.extents.y = this.collider.originalExtents.x * abs(this.scale) * abs(sin(t)) +
                                   this.collider.originalExtents.y * abs(this.scale) * abs(cos(t));
                                   }
-                                else if(this.colliderType == &quot;default&quot;)
+                                else if(this.colliderType === &#x27;default&#x27;)
                                   {
                                   this.collider.extents.x = this.originalWidth * abs(this.scale) * abs(cos(t)) +
-                                  this.originalHeight * abs(this.scale) * abs(sin(t))
+                                  this.originalHeight * abs(this.scale) * abs(sin(t));
                                   this.collider.extents.y = this.originalWidth * abs(this.scale) * abs(sin(t)) +
                                   this.originalHeight * abs(this.scale) * abs(cos(t));
                                   }
-                                else if(this.colliderType == &quot;image&quot;)
+                                else if(this.colliderType === &#x27;image&#x27;)
                                   {
                                   this.collider.extents.x = this.width * abs(cos(t)) +
-                                  this.height * abs(sin(t))
+                                  this.height * abs(sin(t));
                         
                                   this.collider.extents.y = this.width * abs(sin(t)) +
-                                  this.height  * abs(cos(t));
+                                  this.height * abs(cos(t));
                                   }
                                 }
                         
@@ -1299,17 +1288,17 @@
                               if (this.mouseActive)
                               {
                                 //if no collider set it
-                                  if(this.collider==null)
+                                  if(!this.collider)
                                     this.setDefaultCollider();
                         
                                 this.mouseUpdate();
                               }
                               else
                               {
-                                if(typeof(this.onMouseOver) === &quot;function&quot;
-                                   || typeof(this.onMouseOut) === &quot;function&quot;
-                                   || typeof(this.onMousePressed) === &quot;function&quot;
-                                   || typeof(this.onMouseReleased) === &quot;function&quot; )
+                                if (typeof(this.onMouseOver) === &#x27;function&#x27; ||
+                                    typeof(this.onMouseOut) === &#x27;function&#x27; ||
+                                    typeof(this.onMousePressed) === &#x27;function&#x27; ||
+                                    typeof(this.onMouseReleased) === &#x27;function&#x27;)
                                 {
                                   //if a mouse function is set
                                   //it&#x27;s implied we want to have it mouse active so
@@ -1317,7 +1306,7 @@
                                   this.mouseActive = true;
                         
                                   //if no collider set it
-                                  if(this.collider==null)
+                                  if(!this.collider)
                                     this.setDefaultCollider();
                         
                                   this.mouseUpdate();
@@ -1342,16 +1331,16 @@
                         
                             //if has animation get the animation bounding box
                             //working only for preloaded images
-                            if(animations[currentAnimation] != null &amp;&amp; (animations[currentAnimation].getWidth() != 1 &amp;&amp; animations[currentAnimation].getHeight()!=1))
+                            if(animations[currentAnimation] &amp;&amp; (animations[currentAnimation].getWidth() !== 1 &amp;&amp; animations[currentAnimation].getHeight() !== 1))
                             {
                               this.collider = this.getBoundingBox();
                               this.width = animations[currentAnimation].getWidth()*abs(this.scale);
                               this.height = animations[currentAnimation].getHeight()*abs(this.scale);
                               //quadTree.insert(this);
-                              this.colliderType = &quot;image&quot;;
+                              this.colliderType = &#x27;image&#x27;;
                               //print(&quot;IMAGE COLLIDER ADDED&quot;);
                             }
-                            else if(animations[currentAnimation] != null &amp;&amp; animations[currentAnimation].getWidth() == 1 &amp;&amp; animations[currentAnimation].getHeight()==1)
+                            else if(animations[currentAnimation] &amp;&amp; animations[currentAnimation].getWidth() === 1 &amp;&amp; animations[currentAnimation].getHeight() === 1)
                             {
                             //animation is still loading
                             //print(&quot;wait&quot;);
@@ -1360,7 +1349,7 @@
                             {
                               this.collider = new AABB(pInst, this.position, createVector(this.width, this.height));
                               //quadTree.insert(this);
-                              this.colliderType = &quot;default&quot;;
+                              this.colliderType = &#x27;default&#x27;;
                             }
                         
                             pInst.quadTree.insert(this);
@@ -1385,10 +1374,10 @@
                             if(camera.active)
                               mousePosition = createVector(camera.mouseX, camera.mouseY);
                             else
-                              mousePosition = createVector(pInst.mouseX, pInst.mouseY)
+                              mousePosition = createVector(pInst.mouseX, pInst.mouseY);
                         
                               //rollover
-                              if(this.collider != null)
+                              if(this.collider)
                               {
                         
                                 if (this.collider instanceof CircleCollider)
@@ -1397,10 +1386,10 @@
                                     this.mouseIsOver = true;
                                 } else if (this.collider instanceof AABB)
                                 {
-                                  if (  mousePosition.x &gt; this.collider.left()
-                                      &amp;&amp; mousePosition.y &gt; this.collider.top()
-                                      &amp;&amp; mousePosition.x &lt; this.collider.right()
-                                      &amp;&amp; mousePosition.y &lt; this.collider.bottom() )
+                                  if (mousePosition.x &gt; this.collider.left() &amp;&amp;
+                                      mousePosition.y &gt; this.collider.top() &amp;&amp;
+                                      mousePosition.x &lt; this.collider.right() &amp;&amp;
+                                      mousePosition.y &lt; this.collider.bottom())
                                   {
                                     this.mouseIsOver = true;
                                   }
@@ -1411,29 +1400,29 @@
                                   this.mouseIsPressed = true;
                         
                                 //event change - call functions
-                                if(!mouseWasOver &amp;&amp; this.mouseIsOver &amp;&amp; this.onMouseOver != undefined)
-                                  if(typeof(this.onMouseOver) === &quot;function&quot;)
-                                    this.onMouseOver.call(this,this);
+                                if(!mouseWasOver &amp;&amp; this.mouseIsOver &amp;&amp; this.onMouseOver !== undefined)
+                                  if(typeof(this.onMouseOver) === &#x27;function&#x27;)
+                                    this.onMouseOver.call(this, this);
                                   else
-                                    print(&quot;Warning: onMouseOver should be a function&quot;);
+                                    print(&#x27;Warning: onMouseOver should be a function&#x27;);
                         
-                                if(mouseWasOver &amp;&amp; !this.mouseIsOver &amp;&amp; this.onMouseOut != undefined)
-                                  if(typeof(this.onMouseOut) === &quot;function&quot;)
-                                    this.onMouseOut.call(this,this);
+                                if(mouseWasOver &amp;&amp; !this.mouseIsOver &amp;&amp; this.onMouseOut !== undefined)
+                                  if(typeof(this.onMouseOut) === &#x27;function&#x27;)
+                                    this.onMouseOut.call(this, this);
                                   else
-                                    print(&quot;Warning: onMouseOut should be a function&quot;);
+                                    print(&#x27;Warning: onMouseOut should be a function&#x27;);
                         
-                                if(!mouseWasPressed &amp;&amp; this.mouseIsPressed &amp;&amp; this.onMousePressed != undefined)
-                                  if(typeof(this.onMousePressed) === &quot;function&quot;)
-                                    this.onMousePressed.call(this,this);
+                                if(!mouseWasPressed &amp;&amp; this.mouseIsPressed &amp;&amp; this.onMousePressed !== undefined)
+                                  if(typeof(this.onMousePressed) === &#x27;function&#x27;)
+                                    this.onMousePressed.call(this, this);
                                   else
-                                    print(&quot;Warning: onMousePressed should be a function&quot;);
+                                    print(&#x27;Warning: onMousePressed should be a function&#x27;);
                         
-                                if(mouseWasPressed &amp;&amp; !this.mouseIsPressed &amp;&amp; this.onMouseReleased != undefined)
-                                  if(typeof(this.onMouseReleased) === &quot;function&quot;)
-                                    this.onMouseReleased.call(this,this);
+                                if(mouseWasPressed &amp;&amp; !this.mouseIsPressed &amp;&amp; this.onMouseReleased !== undefined)
+                                  if(typeof(this.onMouseReleased) === &#x27;function&#x27;)
+                                    this.onMouseReleased.call(this, this);
                                   else
-                                    print(&quot;Warning: onMouseReleased should be a function&quot;);
+                                    print(&#x27;Warning: onMouseReleased should be a function&#x27;);
                         
                               }
                         
@@ -1466,23 +1455,21 @@
                           */
                           this.setCollider = function(type, offsetX, offsetY, width, height) {
                         
-                            this.colliderType = &quot;custom&quot;;
+                            this.colliderType = &#x27;custom&#x27;;
                         
-                            if(type==&quot;rectangle&quot; &amp;&amp; arguments.length==5)
-                              this.collider = new AABB(pInst, this.position, createVector(arguments[3], arguments[4]), createVector(arguments[1],arguments[2]) );
-                            else if(type==&quot;circle&quot;)
-                            {
-                              var v = createVector(arguments[1], arguments[2])
+                            var v = createVector(offsetX, offsetY);
+                            if(type === &#x27;rectangle&#x27; &amp;&amp; arguments.length === 5) {
+                              this.collider = new AABB(pInst, this.position, createVector(width, height), v);
+                            } else if(type === &#x27;circle&#x27;) {
+                              if(arguments.length !== 4) {
+                                print(&#x27;Warning: usage setCollider(&quot;circle&quot;, offsetX, offsetY, radius)&#x27;);
+                              }
                         
-                              if(arguments.length!=4)
-                                print(&quot;Warning: usage setCollider(\&quot;circle\&quot;, offsetX, offsetY, radius)&quot;);
-                        
-                                this.collider = new CircleCollider(pInst, this.position,  arguments[3], createVector(arguments[1], arguments[2]));
-                        
+                              this.collider = new CircleCollider(pInst, this.position, width, v);
                             }
                         
                             quadTree.insert(this);
-                          }
+                          };
                         
                           /**
                            * Returns a the bounding box of the current image
@@ -1502,7 +1489,7 @@
                             else {
                               return new AABB(pInst, this.position, createVector(w, h));
                             }
-                          }
+                          };
                         
                           /**
                           * Sets the sprite&#x27;s horizontal mirroring.
@@ -1515,11 +1502,11 @@
                           * @return {Number} Current mirroring if no parameter is specified
                           */
                           this.mirrorX = function(dir) {
-                            if(dir == 1 || dir == -1)
+                            if(dir === 1 || dir === -1)
                               dirX = dir;
                             else
                               return dirX;
-                          }
+                          };
                         
                           /**
                           * Sets the sprite&#x27;s vertical mirroring.
@@ -1532,11 +1519,11 @@
                           * @return {Number} Current mirroring if no parameter is specified
                           */
                           this.mirrorY = function(dir) {
-                            if(dir == 1 || dir == -1)
+                            if(dir === 1 || dir === -1)
                               dirY = dir;
                             else
                               return dirY;
-                          }
+                          };
                         
                         
                           /**
@@ -1568,31 +1555,34 @@
                         
                               if(this.debug)
                               {
+                                push();
                                 //draw the anchor point
-                                stroke(0,255,0);
+                                stroke(0, 255, 0);
+                                strokeWeight(1);
                                 line(this.position.x-10, this.position.y, this.position.x+10, this.position.y);
                                 line(this.position.x, this.position.y-10, this.position.x, this.position.y+10);
                                 noFill();
                         
                                 //depth number
                                 noStroke();
-                                fill(0,255,0);
+                                fill(0, 255, 0);
                                 textAlign(LEFT, BOTTOM);
                                 textSize(16);
-                                text(this.depth+&quot;&quot;, this.position.x+4, this.position.y-2);
+                                text(this.depth+&#x27;&#x27;, this.position.x+4, this.position.y-2);
                         
                                 noFill();
-                                stroke(0,255,0);
+                                stroke(0, 255, 0);
                         
                                 //bounding box
-                                if(this.collider!=undefined)
+                                if(this.collider !== undefined)
                                 {
                                   this.collider.draw();
                                 }
+                                pop();
                               }
                         
                             }
-                          }
+                          };
                         
                         
                           /**
@@ -1607,10 +1597,10 @@
                           */
                           this.draw = function()
                           {
-                            if(currentAnimation != &quot;&quot; &amp;&amp; animations != null)
+                            if(currentAnimation !== &#x27;&#x27; &amp;&amp; animations)
                             {
-                              if(animations[currentAnimation] != null)
-                                animations[currentAnimation].draw(0,0,0);
+                              if(animations[currentAnimation])
+                                animations[currentAnimation].draw(0, 0, 0);
                             }
                             else
                             {
@@ -1618,7 +1608,7 @@
                               fill(this.shapeColor);
                               rect(0, 0, this.width, this.height);
                             }
-                          }
+                          };
                         
                           /**
                            * Removes the Sprite from the sketch.
@@ -1632,33 +1622,32 @@
                             quadTree.removeObject(this);
                         
                             //when removed from the &quot;scene&quot; also remove all the references in all the groups
-                            for(var i=0; i&lt;this.groups.length; i++)
-                            {
-                              this.groups[i].remove(this);
+                            while (this.groups.length &gt; 0) {
+                              this.groups[0].remove(this);
                             }
-                          }
+                          };
                         
                           /**
                           * Sets the velocity vector.
                           *
                           * @method setVelocity
                           * @param {Number} x X component
-                          * @param {Number} x Y component
+                          * @param {Number} y Y component
                           */
-                          this.setVelocity = function(x,y) {
+                          this.setVelocity = function(x, y) {
                             this.velocity.x = x;
                             this.velocity.y = y;
-                          }
+                          };
                         
                           /**
                           * Calculates the scalar speed.
                           *
-                          * @method setVelocity
+                          * @method getSpeed
                           * @return {Number} Scalar speed
                           */
                           this.getSpeed = function() {
                             return this.velocity.mag();
-                          }
+                          };
                         
                           /**
                           * Calculates the movement&#x27;s direction in degrees.
@@ -1673,7 +1662,7 @@
                             if(isNaN(direction))
                               direction = 0;
                             return degrees(direction);
-                          }
+                          };
                         
                           /**
                           * Adds the sprite to an existing group
@@ -1685,8 +1674,8 @@
                             if(group instanceof Array)
                               group.add(this);
                             else
-                              print(&quot;addToGroup error: &quot;+group+&quot; is not a group&quot;);
-                          }
+                              print(&#x27;addToGroup error: &#x27;+group+&#x27; is not a group&#x27;);
+                          };
                         
                           /**
                           * Limits the scalar speed.
@@ -1706,7 +1695,7 @@
                               this.velocity.x *= k;
                               this.velocity.y *= k;
                             }
-                          }
+                          };
                         
                           /**
                           * Set the speed and direction of the sprite.
@@ -1720,7 +1709,7 @@
                             var a = radians(angle);
                             this.velocity.x = cos(a)*speed;
                             this.velocity.y = sin(a)*speed;
-                          }
+                          };
                         
                           /**
                           * Pushes the sprite in a direction defined by an angle.
@@ -1734,7 +1723,7 @@
                             var a = radians(angle);
                             this.velocity.x += cos(a) * speed;
                             this.velocity.y += sin(a) * speed;
-                          }
+                          };
                         
                           /**
                           * Pushes the sprite toward a point.
@@ -1749,7 +1738,7 @@
                             var angle = atan2(pointY-this.position.y, pointX-this.position.x);
                             this.velocity.x += cos(angle) * magnitude;
                             this.velocity.y += sin(angle) * magnitude;
-                          }
+                          };
                         
                         
                           /**
@@ -1772,13 +1761,13 @@
                           */
                           this.addImage = function()
                           {
-                            if(typeof arguments[0] == &quot;string&quot; &amp;&amp; arguments[1] instanceof p5.Image)
+                            if(typeof arguments[0] === &#x27;string&#x27; &amp;&amp; arguments[1] instanceof p5.Image)
                               this.addAnimation(arguments[0], arguments[1]);
                             else if(arguments[0] instanceof p5.Image)
-                              this.addAnimation(&quot;normal&quot;, arguments[0]);
+                              this.addAnimation(&#x27;normal&#x27;, arguments[0]);
                             else
-                              throw(&quot;addImage error: allowed usages are &lt;image&gt; or &lt;label&gt;, &lt;image&gt;&quot;);
-                          }
+                              throw(&#x27;addImage error: allowed usages are &lt;image&gt; or &lt;label&gt;, &lt;image&gt;&#x27;);
+                          };
                         
                           /**
                           * Adds an animation to the sprite.
@@ -1799,18 +1788,18 @@
                           * @param {String} label Animation identifier
                           * @param {Animation} animation The preloaded animation
                           */
-                          this.addAnimation = function(label, animation)
+                          this.addAnimation = function(label)
                           {
                             var anim;
                         
-                            if(typeof label != &quot;string&quot;)
+                            if(typeof label !== &#x27;string&#x27;)
                             {
-                              print(&quot;Sprite.addAnimation error: the first argument must be a label (String)&quot;);
+                              print(&#x27;Sprite.addAnimation error: the first argument must be a label (String)&#x27;);
                               return -1;
                             }
                             else if(arguments.length &lt; 2)
                             {
-                              print(&quot;addAnimation error: you must specify a label and n frame images&quot;);
+                              print(&#x27;addAnimation error: you must specify a label and n frame images&#x27;);
                               return -1;
                             }
                             else if(arguments[1] instanceof Animation)
@@ -1822,7 +1811,7 @@
                         
                               animations[label] = newAnimation;
                         
-                              if(currentAnimation == &quot;&quot;)
+                              if(currentAnimation === &#x27;&#x27;)
                               {
                                 currentAnimation = label;
                                 this.animation = newAnimation;
@@ -1841,7 +1830,7 @@
                               anim = construct(pInst.Animation, animFrames);
                               animations[label] = anim;
                         
-                              if(currentAnimation == &quot;&quot;)
+                              if(currentAnimation === &#x27;&#x27;)
                               {
                                 currentAnimation = label;
                                 this.animation = anim;
@@ -1850,7 +1839,7 @@
                               return anim;
                             }
                         
-                          }
+                          };
                         
                           /**
                           * Changes the displayed image/animation.
@@ -1861,7 +1850,7 @@
                           */
                           this.changeImage = function(label) {
                             this.changeAnimation(label);
-                          }
+                          };
                         
                            /**
                           * Returns the label of the current animation
@@ -1871,7 +1860,7 @@
                           */
                           this.getAnimationLabel = function() {
                             return currentAnimation;
-                          }
+                          };
                         
                           /**
                           * Changes the displayed animation.
@@ -1881,14 +1870,14 @@
                           * @param {String} label Animation identifier
                           */
                           this.changeAnimation = function(label) {
-                            if(animations[label]==null)
-                              print(&quot;changeAnimation error: no animation labeled &quot;+label);
+                            if(!animations[label])
+                              print(&#x27;changeAnimation error: no animation labeled &#x27;+label);
                             else
                             {
                               currentAnimation = label;
                               this.animation = animations[label];
                             }
-                          }
+                          };
                         
                           /**
                           * Checks if the given point corresponds to a transparent pixel
@@ -1901,8 +1890,7 @@
                           * @return {Boolean} result True if non-transparent
                           */
                           this.overlapPixel = function(pointX, pointY) {
-                        
-                            var point = createVector(arguments[0], arguments[1]);
+                            var point = createVector(pointX, pointY);
                         
                             var img = this.animation.getFrameImage();
                         
@@ -1913,19 +1901,19 @@
                             //out of the image entirely
                             if(point.x&lt;0 || point.x&gt;img.width || point.y&lt;0 || point.y&gt;img.height)
                               return false;
-                            else if(this.rotation == 0 &amp;&amp; this.scale == 1)
+                            else if(this.rotation === 0 &amp;&amp; this.scale === 1)
                             {
                               //true if full opacity
                               var values = img.get(point.x, point.y);
-                              return values[3] == 255;
+                              return values[3] === 255;
                             }
                             else
                             {
-                              print(&quot;Error: overlapPixel doesn&#x27;t work with scaled or rotated sprites yet&quot;);
+                              print(&#x27;Error: overlapPixel doesn\&#x27;t work with scaled or rotated sprites yet&#x27;);
                               //offscreen printing to be implemented bleurch
                               return false;
                             }
-                          }
+                          };
                         
                           /**
                           * Checks if the given point is inside the sprite&#x27;s collider.
@@ -1936,12 +1924,12 @@
                           * @return {Boolean} result True if inside
                           */
                           this.overlapPoint = function(pointX, pointY) {
-                            var point = createVector(arguments[0], arguments[1]);
+                            var point = createVector(pointX, pointY);
                         
-                            if(this.collider == null)
+                            if(!this.collider)
                               this.setDefaultCollider();
                         
-                            if(this.collider != undefined)
+                            if(this.collider !== undefined)
                             {
                               if(this.collider instanceof AABB)
                                 return (point.x &gt; this.collider.left() &amp;&amp; point.x &lt; this.collider.right() &amp;&amp; point.y &gt; this.collider.top() &amp;&amp; point.y &lt; this.collider.bottom());
@@ -1949,7 +1937,7 @@
                               {
                                 var sqRadius = this.collider.radius * this.collider.radius;
                                 var sqDist = pow(this.collider.center.x - point.x, 2) + pow(this.collider.center.y - point.y, 2);
-                                return sqDist&lt;sqRadius
+                                return sqDist&lt;sqRadius;
                               }
                               else
                                 return false;
@@ -1957,7 +1945,7 @@
                             else
                               return false;
                         
-                          }
+                          };
                         
                         
                           /**
@@ -1988,8 +1976,8 @@
                           */
                           this.overlap = function(target, callback) {
                             //if(this.collider instanceof AABB &amp;&amp; target.collider instanceof AABB)
-                            return this.AABBops(&quot;overlap&quot;, target, callback);
-                          }
+                            return this.AABBops(&#x27;overlap&#x27;, target, callback);
+                          };
                         
                           /**
                           * Checks if the the sprite is overlapping another sprite or a group.
@@ -2022,8 +2010,8 @@
                           */
                           this.collide = function(target, callback) {
                             //if(this.collider instanceof AABB &amp;&amp; target.collider instanceof AABB)
-                            return this.AABBops(&quot;collide&quot;, target, callback);
-                          }
+                            return this.AABBops(&#x27;collide&#x27;, target, callback);
+                          };
                         
                           /**
                           * Checks if the the sprite is overlapping another sprite or a group.
@@ -2055,8 +2043,8 @@
                           * @return {Boolean} True if overlapping
                           */
                           this.displace = function(target, callback) {
-                            return this.AABBops(&quot;displace&quot;, target, callback);
-                          }
+                            return this.AABBops(&#x27;displace&#x27;, target, callback);
+                          };
                         
                           /**
                           * Checks if the the sprite is overlapping another sprite or a group.
@@ -2088,14 +2076,10 @@
                           * @return {Boolean} True if overlapping
                           */
                           this.bounce = function(target, callback) {
-                            return this.AABBops(&quot;bounce&quot;, target, callback);
-                          }
+                            return this.AABBops(&#x27;bounce&#x27;, target, callback);
+                          };
                         
-                          /**
-                           * Internal collision detection function. Do not use directly.
-                           * @private
-                           * @method
-                           */
+                          // Internal collision detection function. Do not use directly.
                           this.AABBops = function(type, target, callback) {
                         
                             this.touching.left = false;
@@ -2112,25 +2096,26 @@
                               others.push(target);
                             else if(target instanceof Array)
                             {
-                              if(quadTree != undefined &amp;&amp; quadTree.active)
+                              if(quadTree !== undefined &amp;&amp; quadTree.active)
                                 others = quadTree.retrieveFromGroup( this, target);
                         
-                              if(others.length == 0)
+                              if(others.length === 0)
                                 others = target;
                         
                             }
                             else
-                              throw(&quot;Error: overlap can only be checked between sprites or groups&quot;);
+                              throw(&#x27;Error: overlap can only be checked between sprites or groups&#x27;);
                         
                             for(var i=0; i&lt;others.length; i++)
-                              if(this != others[i] &amp;&amp; !this.removed) //you can check collisions within the same group but not on itself
+                              if(this !== others[i] &amp;&amp; !this.removed) //you can check collisions within the same group but not on itself
                               {
+                                var displacement;
                                 var other = others[i];
                         
-                                if(this.collider == undefined)
+                                if(this.collider === undefined)
                                   this.setDefaultCollider();
                         
-                                if(other.collider == undefined)
+                                if(other.collider === undefined)
                                   other.setDefaultCollider();
                         
                                 /*
@@ -2139,9 +2124,9 @@
                                   print(&quot;busted&quot;);
                                   return false;
                                 }*/
-                                if(this.collider != undefined &amp;&amp; other.collider != undefined)
+                                if(this.collider !== undefined &amp;&amp; other.collider !== undefined)
                                 {
-                                if(type==&quot;overlap&quot;)  {
+                                if(type === &#x27;overlap&#x27;) {
                                     var over;
                         
                                     //if the other is a circle I calculate the displacement from here
@@ -2155,19 +2140,19 @@
                         
                                       result = true;
                         
-                                      if(callback != undefined &amp;&amp; typeof callback == &quot;function&quot;)
+                                      if(callback !== undefined &amp;&amp; typeof callback === &#x27;function&#x27;)
                                         callback.call(this, this, other);
                                     }
                                   }
-                                else if(type==&quot;collide&quot; || type == &quot;bounce&quot;)
+                                else if(type === &#x27;collide&#x27; || type === &#x27;bounce&#x27;)
                                   {
-                                    var displacement = createVector(0,0);
+                                    displacement = createVector(0, 0);
                         
                                     //if the sum of the speed is more than the collider i may
                                     //have a tunnelling problem
-                                    var tunnelX = abs(this.velocity.x-other.velocity.x) &gt;= other.collider.extents.x/2 &amp;&amp; round(this.deltaX - this.velocity.x) == 0;
+                                    var tunnelX = abs(this.velocity.x-other.velocity.x) &gt;= other.collider.extents.x/2 &amp;&amp; round(this.deltaX - this.velocity.x) === 0;
                         
-                                    var tunnelY = abs(this.velocity.y-other.velocity.y) &gt;=  other.collider.size().y/2  &amp;&amp; round(this.deltaY - this.velocity.y) == 0;
+                                    var tunnelY = abs(this.velocity.y-other.velocity.y) &gt;= other.collider.size().y/2 &amp;&amp; round(this.deltaY - this.velocity.y) === 0;
                         
                         
                                     if(tunnelX || tunnelY)
@@ -2230,6 +2215,7 @@
                         
                                     if(displacement.x !== 0 || displacement.y !== 0)
                                     {
+                                      var newVelX1, newVelY1, newVelX2, newVelY2;
                         
                                       if(!this.immovable)
                                       {
@@ -2247,23 +2233,40 @@
                                       if(displacement.y &gt; 0)
                                         this.touching.top = true;
                         
-                                      if(type == &quot;bounce&quot;)
+                                      if(type === &#x27;bounce&#x27;)
                                       {
+                                        if (this.collider instanceof CircleCollider &amp;&amp; other.collider instanceof CircleCollider) {
+                                          var dx1 = p5.Vector.sub(this.position, other.position);
+                                          var dx2 = p5.Vector.sub(other.position, this.position);
+                                          var magnitude = dx1.magSq();
+                                          var totalMass = this.mass + other.mass;
+                                          var m1 = 0, m2 = 0;
+                                          if (this.immovable) {
+                                            m2 = 2;
+                                          } else if (other.immovable) {
+                                            m1 = 2;
+                                          } else {
+                                            m1 = 2 * other.mass / totalMass;
+                                            m2 = 2 * this.mass / totalMass;
+                                          }
+                                          var newVel1 = dx1.mult(m1 * p5.Vector.sub(this.velocity, other.velocity).dot(dx1) / magnitude);
+                                          var newVel2 = dx2.mult(m2 * p5.Vector.sub(other.velocity, this.velocity).dot(dx2) / magnitude);
+                        
+                                          this.velocity.sub(newVel1.mult(this.restitution));
+                                          other.velocity.sub(newVel2.mult(other.restitution));
+                                        }
+                                        else {
                                         if(other.immovable)
                                         {
-                                          var newVelX1 = -this.velocity.x+other.velocity.x;
-                                          var newVelY1 = -this.velocity.y+other.velocity.y;
+                                          newVelX1 = -this.velocity.x+other.velocity.x;
+                                          newVelY1 = -this.velocity.y+other.velocity.y;
                                         }
                                         else
                                         {
-                                          //
-                                          var newVelX1 = (this.velocity.x * (this.mass - other.mass) + (2 * other.mass * other.velocity.x)) / (this.mass + other.mass);
-                        
-                                          var newVelY1 = (this.velocity.y * (this.mass - other.mass) + (2 * other.mass * other.velocity.y)) / (this.mass + other.mass);
-                        
-                                          var newVelX2 = (other.velocity.x * (other.mass - this.mass) + (2 * this.mass * this.velocity.x)) / (this.mass + other.mass);
-                        
-                                          var newVelY2 = (other.velocity.y * (other.mass - this.mass) + (2 * this.mass * this.velocity.y)) / (this.mass + other.mass);
+                                          newVelX1 = (this.velocity.x * (this.mass - other.mass) + (2 * other.mass * other.velocity.x)) / (this.mass + other.mass);
+                                          newVelY1 = (this.velocity.y * (this.mass - other.mass) + (2 * other.mass * other.velocity.y)) / (this.mass + other.mass);
+                                          newVelX2 = (other.velocity.x * (other.mass - this.mass) + (2 * this.mass * this.velocity.x)) / (this.mass + other.mass);
+                                          newVelY2 = (other.velocity.y * (other.mass - this.mass) + (2 * this.mass * this.velocity.y)) / (this.mass + other.mass);
                                         }
                         
                                         //var bothCircles = (this.collider instanceof CircleCollider &amp;&amp;
@@ -2297,11 +2300,12 @@
                                           if(!other.immovable)
                                             other.velocity.y = newVelY2*other.restitution;
                                         }
+                                        }
                                       }
                                       //else if(type == &quot;collide&quot;)
                                         //this.velocity = createVector(0,0);
                         
-                                      if(callback != undefined &amp;&amp; typeof callback == &quot;function&quot;)
+                                      if(callback !== undefined &amp;&amp; typeof callback === &#x27;function&#x27;)
                                         callback.call(this, this, other);
                         
                                       result = true;
@@ -2310,7 +2314,7 @@
                         
                         
                                   }
-                                  else if(type==&quot;displace&quot;)  {
+                                  else if(type === &#x27;displace&#x27;) {
                         
                                     //if the other is a circle I calculate the displacement from here
                                     //and reverse it
@@ -2333,7 +2337,7 @@
                                       if(displacement.y &gt; 0)
                                         this.touching.top = true;
                         
-                                      if(callback != undefined &amp;&amp; typeof callback == &quot;function&quot;)
+                                      if(callback !== undefined &amp;&amp; typeof callback === &#x27;function&#x27;)
                                         callback.call(this, this, other);
                         
                                       result = true;
@@ -2343,8 +2347,8 @@
                               }
                         
                             return result;
-                          }
-                        };//end Sprite class
+                          };
+                        } //end Sprite class
                         
                         defineLazyP5Property(&#x27;Sprite&#x27;, boundConstructorFactory(Sprite));
                         
@@ -2393,7 +2397,7 @@
                           * @property position
                           * @type {p5.Vector}
                           */
-                          this.position = pInst.createVector(x,y);
+                          this.position = pInst.createVector(x, y);
                         
                           /**
                           * Camera zoom. Defines the global scale of the sketch.
@@ -2450,7 +2454,7 @@
                               cameraPush.call(pInst);
                               this.active = true;
                             }
-                          }
+                          };
                         
                           /**
                           * Deactivates the camera.
@@ -2465,8 +2469,8 @@
                               cameraPop.call(pInst);
                               this.active = false;
                             }
-                          }
-                        };//end camera class
+                          };
+                        } //end camera class
                         
                         defineLazyP5Property(&#x27;Camera&#x27;, boundConstructorFactory(Camera));
                         
@@ -2477,7 +2481,7 @@
                         
                           //awkward but necessary in order to have the camera at the center
                           //of the canvas by default
-                          if(!camera.init &amp;&amp; camera.position.x==0 &amp;&amp; camera.position.y ==0)
+                          if(!camera.init &amp;&amp; camera.position.x === 0 &amp;&amp; camera.position.y === 0)
                             {
                             camera.position.x=pInst.width/2;
                             camera.position.y=pInst.height/2;
@@ -2573,15 +2577,13 @@
                           * @param {Sprite} s The sprite to be added
                           */
                           array.add = function(s) {
+                            if(!(s instanceof Sprite)) {
+                              throw(&#x27;Error: you can only add sprites to a group&#x27;);
+                            }
                         
-                            if(s instanceof Sprite == false)
-                              throw(&quot;Error: you can only add sprites to a group&quot;);
-                            else
-                            {
-                              array.push(s); // for add(Object)
+                            if (-1 === this.indexOf(s)) {
+                              array.push(s);
                               s.groups.push(this);
-                              //next to do add a reference to the group in the sprite
-                              //so when I remove it I can remove it from all groups
                             }
                           };
                         
@@ -2597,14 +2599,13 @@
                           * Removes all the sprites in the group
                           * from the scene.
                           *
-                          * @method clear
+                          * @method removeSprites
                           */
                           array.removeSprites = function() {
-                            var arrayLength = array.length;
-                        
-                            for(var i = 0; i&lt;arrayLength; i++)
+                            while (array.length &gt; 0) {
                               array[0].remove();
-                          }
+                            }
+                          };
                         
                           /**
                           * Removes all references to the group.
@@ -2625,16 +2626,27 @@
                           * @return {Boolean} True if sprite was found and removed
                           */
                           array.remove = function(item) {
-                        
-                            if(item instanceof Sprite == false)
-                              throw(&quot;Error: you can only remove sprites from a group&quot;);
-                        
-                            item = this.indexOf(item);
-                            if (item &gt; -1) {
-                              array.splice(item, 1);
-                              return true;
+                            if(!(item instanceof Sprite)) {
+                              throw(&#x27;Error: you can only remove sprites from a group&#x27;);
                             }
-                            return false;
+                        
+                            var i, removed = false;
+                            for (i = array.length - 1; i &gt;= 0; i--) {
+                              if (array[i] === item) {
+                                array.splice(i, 1);
+                                removed = true;
+                              }
+                            }
+                        
+                            if (removed) {
+                              for (i = item.groups.length - 1; i &gt;= 0; i--) {
+                                if (item.groups[i] === this) {
+                                  item.groups.splice(i, 1);
+                                }
+                              }
+                            }
+                        
+                            return removed;
                           };
                         
                           /**
@@ -2654,7 +2666,7 @@
                           array.maxDepth = function() {
                             var max;
                         
-                            if(array.length==0)
+                            if(array.length === 0)
                               max = 0;
                             else
                               max = array[0].depth;
@@ -2675,7 +2687,7 @@
                           array.minDepth = function() {
                             var min;
                         
-                            if(array.length==0)
+                            if(array.length === 0)
                               min = 99999;
                             else
                               min = array[0].depth;
@@ -2695,7 +2707,7 @@
                           array.draw = function() {
                         
                             //sort by depth
-                            this.sort(function(a,b) {
+                            this.sort(function(a, b) {
                               return a.depth - b.depth;
                             });
                         
@@ -2703,17 +2715,17 @@
                             {
                               this.get(i).display();
                             }
-                          }
+                          };
                         
                           //internal use
                           function virtEquals(obj, other) {
                             if (obj === null || other === null) {
                               return (obj === null) &amp;&amp; (other === null);
                             }
-                            if (typeof (obj) === &quot;string&quot;) {
+                            if (typeof (obj) === &#x27;string&#x27;) {
                               return obj === other;
                             }
-                            if (typeof(obj) !== &quot;object&quot;) {
+                            if (typeof(obj) !== &#x27;object&#x27;) {
                               return obj === other;
                             }
                             if (obj.equals instanceof Function) {
@@ -2742,19 +2754,19 @@
                           }
                         
                           /**
-                          * Checks if the the group is overlapping another group.
+                          * Checks if the the group is overlapping another group or sprite.
                           * The check is performed using the colliders. If colliders are not set
                           * they will be created automatically from the image/animation bounding box.
                           *
                           * A callback function can be specified to perform additional operations
-                          * when the overlap occours.
+                          * when the overlap occurs.
                           * The function will be called for each single sprite overlapping.
                           * The parameter of the function are respectively the
-                          * member of the current group and the member of the group passed as parameter.
+                          * member of the current group and the other sprite passed as parameter.
                           *
                           * @example
                           * &lt;code&gt;
-                          * sprite.overlap(otherSprite, explosion);
+                          * group.overlap(otherSprite, explosion);
                           *
                           * function explosion(spriteA, spriteB) {
                           * spriteA.remove();
@@ -2763,7 +2775,7 @@
                           * &lt;/code&gt;
                           *
                           * @method overlap
-                          * @param {Object} target Group to check against the current one
+                          * @param {Object} target Group or Sprite to check against the current one
                           * @param {Function} [callback] The function to be called if overlap is positive
                           * @return {Boolean} True if overlapping
                           */
@@ -2771,7 +2783,7 @@
                         
                         
                           /**
-                          * Checks if the the group is overlapping another group.
+                          * Checks if the the group is overlapping another group or sprite.
                           * If the overlap is positive the sprites in the group will be displaced
                           * by the colliding one to the closest non-overlapping positions.
                           *
@@ -2782,11 +2794,11 @@
                           * when the overlap occours.
                           * The function will be called for each single sprite overlapping.
                           * The parameter of the function are respectively the
-                          * member of the current group and the member of the group passed as parameter.
+                          * member of the current group and the other sprite passed as parameter.
                           *
                           * @example
                           * &lt;code&gt;
-                          * sprite.overlap(otherSprite, explosion);
+                          * group.collide(otherSprite, explosion);
                           *
                           * function explosion(spriteA, spriteB) {
                           * spriteA.remove();
@@ -2794,15 +2806,15 @@
                           * }
                           * &lt;/code&gt;
                           *
-                          * @method overlap
-                          * @param {Object} target Group to check against the current one
+                          * @method collide
+                          * @param {Object} target Group or Sprite to check against the current one
                           * @param {Function} [callback] The function to be called if overlap is positive
                           * @return {Boolean} True if overlapping
                           */
                           array.collide = _groupCollide.bind(array, &#x27;collide&#x27;);
                         
                           /**
-                          * Checks if the the group is overlapping another group.
+                          * Checks if the the group is overlapping another group or sprite.
                           * If the overlap is positive the sprites in the group will displace
                           * the colliding ones to the closest non-overlapping positions.
                           *
@@ -2810,14 +2822,14 @@
                           * they will be created automatically from the image/animation bounding box.
                           *
                           * A callback function can be specified to perform additional operations
-                          * when the overlap occours.
+                          * when the overlap occurs.
                           * The function will be called for each single sprite overlapping.
                           * The parameter of the function are respectively the
-                          * member of the current group and the member of the group passed as parameter.
+                          * member of the current group and the other sprite passed as parameter.
                           *
                           * @example
                           * &lt;code&gt;
-                          * sprite.displace(otherSprite, explosion);
+                          * group.displace(otherSprite, explosion);
                           *
                           * function explosion(spriteA, spriteB) {
                           * spriteA.remove();
@@ -2826,16 +2838,16 @@
                           * &lt;/code&gt;
                           *
                           * @method displace
-                          * @param {Object} target Group to check against the current one
+                          * @param {Object} target Group or Sprite to check against the current one
                           * @param {Function} [callback] The function to be called if overlap is positive
                           * @return {Boolean} True if overlapping
                           */
                           array.displace = _groupCollide.bind(array, &#x27;displace&#x27;);
                         
                           /**
-                          * Checks if the the group is overlapping another group.
+                          * Checks if the the group is overlapping another group or sprite.
                           * If the overlap is positive the sprites will bounce affecting each
-                          * other&#x27;s trajectories depending on their .velocity, .mass and .restitution
+                          * other&#x27;s trajectories depending on their .velocity, .mass and .restitution.
                           *
                           * The check is performed using the colliders. If colliders are not set
                           * they will be created automatically from the image/animation bounding box.
@@ -2844,11 +2856,11 @@
                           * when the overlap occours.
                           * The function will be called for each single sprite overlapping.
                           * The parameter of the function are respectively the
-                          * member of the current group and the member of the group passed as parameter.
+                          * member of the current group and the other sprite passed as parameter.
                           *
                           * @example
                           * &lt;code&gt;
-                          * sprite.bounce(otherSprite, explosion);
+                          * group.bounce(otherSprite, explosion);
                           *
                           * function explosion(spriteA, spriteB) {
                           * spriteA.remove();
@@ -2857,7 +2869,7 @@
                           * &lt;/code&gt;
                           *
                           * @method bounce
-                          * @param {Object} target Group to check against the current one
+                          * @param {Object} target Group or Sprite to check against the current one
                           * @param {Function} [callback] The function to be called if overlap is positive
                           * @return {Boolean} True if overlapping
                           */
@@ -2874,23 +2886,25 @@
                         
                           var createVector = pInstBind(&#x27;createVector&#x27;);
                         
+                          var CENTER = p5.prototype.CENTER;
+                        
                           this.center = _center;
                           this.radius = _radius;
                           this.originalRadius = _radius;
                         
-                          if(_offset == undefined)
-                            this.offset = createVector(0,0);
+                          if(_offset === undefined)
+                            this.offset = createVector(0, 0);
                           else
                             this.offset = _offset;
                           this.extents = createVector(_radius*2, _radius*2);
                         
-                          this.draw = function(col)
+                          this.draw = function()
                           {
                             pInst.noFill();
-                            pInst.stroke(0,255,0);
+                            pInst.stroke(0, 255, 0);
                             pInst.rectMode(CENTER);
                             pInst.ellipse(this.center.x+this.offset.x, this.center.y+this.offset.y, this.radius*2, this.radius*2);
-                          }
+                          };
                         
                           //should be called only for circle vs circle
                           this.overlap = function(other)
@@ -2900,7 +2914,7 @@
                             r *= r;
                             var sqDist = pow(this.center.x - other.center.x, 2) + pow(this.center.y - other.center.y, 2);
                             return r &gt; sqDist;
-                          }
+                          };
                         
                           //should be called only for circle vs circle
                           this.collide = function(other)
@@ -2908,7 +2922,7 @@
                         
                             if(this.overlap(other))
                             {
-                              var a = pInst.atan2(this.center.y-other.center.y,this.center.x-other.center.x);
+                              var a = pInst.atan2(this.center.y-other.center.y, this.center.x-other.center.x);
                               var radii = this.radius+other.radius;
                               var intersection = abs(radii - dist(this.center.x, this.center.y, other.center.x, other.center.y));
                         
@@ -2917,37 +2931,38 @@
                               return displacement;
                             }
                             else
-                              return createVector(0,0);
-                          }
+                              return createVector(0, 0);
+                          };
                         
                           this.size = function()
                           {
                             return createVector(this.radius*2, this.radius*2);
-                          }
+                          };
                         
                           this.left = function()
                           {
                             return this.center.x+this.offset.x - this.radius;
-                          }
+                          };
                         
                           this.right = function()
                           {
                             return this.center.x+this.offset.x + this.radius;
-                          }
+                          };
                         
                           this.top = function()
                           {
                             return this.center.y+this.offset.y - this.radius;
-                          }
+                          };
                         
                           this.bottom = function()
                           {
                             return this.center.y+this.offset.y + this.radius;
-                          }
+                          };
                         
                         
                         
                         }
+                        defineLazyP5Property(&#x27;CircleCollider&#x27;, boundConstructorFactory(CircleCollider));
                         
                         //axis aligned bounding box - extents are the half sizes - used internally
                         function AABB(pInst, _center, _extents, _offset) {
@@ -2955,71 +2970,74 @@
                         
                           var createVector = pInstBind(&#x27;createVector&#x27;);
                         
+                          var CENTER = p5.prototype.CENTER;
+                          var PI = p5.prototype.PI;
+                        
                           this.center = _center;
                           this.extents = _extents;
                           this.originalExtents = _extents.copy();
                         
-                          if(_offset == undefined)
-                            this.offset = createVector(0,0);
+                          if(_offset === undefined)
+                            this.offset = createVector(0, 0);
                           else
                             this.offset = _offset;
                         
                           this.min = function()
                           {
                             return createVector(this.center.x+this.offset.x - this.extents.x, this.center.y+this.offset.y - this.extents.y);
-                          }
+                          };
                         
                           this.max = function()
                           {
                             return createVector(this.center.x+this.offset.x + this.extents.x, this.center.y+this.offset.y + this.extents.y);
-                          }
+                          };
                         
                           this.right = function()
                           {
                             return this.center.x+this.offset.x + this.extents.x/2;
-                          }
+                          };
                         
                           this.left = function()
                           {
                             return this.center.x+this.offset.x - this.extents.x/2;
-                          }
+                          };
                         
                           this.top = function()
                           {
                             return this.center.y+this.offset.y - this.extents.y/2;
-                          }
+                          };
                         
                           this.bottom = function()
                           {
                             return this.center.y+this.offset.y + this.extents.y/2;
-                          }
+                          };
                         
                           this.size = function()
                           {
                             return createVector(this.extents.x * 2, this.extents.y * 2);
-                          }
+                          };
                         
                           this.rotate = function(r)
                           {
                             //rotate the bbox
                             var t = radians(r);
                         
-                            var w2 = this.extents.x * abs(pInst.cos(t)) + this.extents.y * abs(pInst.sin(t))
+                            var w2 = this.extents.x * abs(pInst.cos(t)) + this.extents.y * abs(pInst.sin(t));
                             var h2 = this.extents.x * abs(pInst.sin(t)) + this.extents.y * abs(pInst.cos(t));
                         
                             this.extents.x = w2;
                             this.extents.y = h2;
                         
-                          }
+                          };
                         
-                          this.draw = function(col)
+                          this.draw = function()
                           {
                             //fill(col);
                             pInst.noFill();
-                            pInst.stroke(0,255,0);
+                            pInst.stroke(0, 255, 0);
                             pInst.rectMode(CENTER);
                             pInst.rect(this.center.x+this.offset.x, this.center.y+this.offset.y, this.size().x/2, this.size().y/2);
-                          }
+                          };
                         
                           this.overlap = function(other)
                           {
@@ -3060,7 +3078,7 @@
                         
                               return distance&lt;other.radius;
                             }
-                          }
+                          };
                         
                           this.collide = function(other)
                           {
@@ -3074,12 +3092,12 @@
                                   md.min().y &lt;= 0 &amp;&amp;
                                   md.max().y &gt;= 0)
                               {
-                                var boundsPoint = md.closestPointOnBoundsToPoint(createVector(0,0));
+                                var boundsPoint = md.closestPointOnBoundsToPoint(createVector(0, 0));
                         
                                 return boundsPoint;
                               }
                               else
-                                return createVector(0,0);
+                                return createVector(0, 0);
                             }
                             //box vs circle
                             else if(other instanceof CircleCollider)
@@ -3130,11 +3148,11 @@
                                   a = pInst.atan2(other.center.y-pt.y, other.center.x-pt.x);
                         
                                   //fix exceptions
-                                  if(a==0)
+                                  if(a === 0)
                                   {
-                                    if(pt.x == this.right()) a = PI;
-                                    if(pt.y == this.top()) a = PI/2;
-                                    if(pt.y == this.bottom()) a = -PI/2;
+                                    if(pt.x === this.right()) a = PI;
+                                    if(pt.y === this.top()) a = PI/2;
+                                    if(pt.y === this.bottom()) a = -PI/2;
                                   }
                                 }
                                 else
@@ -3154,16 +3172,16 @@
                                 //return createVector(0,0);
                               }
                               else
-                                return createVector(0,0);
+                                return createVector(0, 0);
                             }
-                          }
+                          };
                         
                           this.minkowskiDifference = function(other)
                           {
                             var topLeft = this.min().sub(other.max());
                             var fullSize = this.size().add(other.size());
                             return new AABB(pInst, topLeft.add(fullSize.div(2)), fullSize.div(2));
-                          }
+                          };
                         
                         
                           this.closestPointOnBoundsToPoint = function(point)
@@ -3191,10 +3209,11 @@
                             }
                         
                             return boundsPoint;
-                          }
+                          };
                         
                         
                         }//end AABB
+                        defineLazyP5Property(&#x27;AABB&#x27;, boundConstructorFactory(AABB));
                         
                         
                         
@@ -3243,7 +3262,10 @@
                            */
                         
                         function Animation(pInst) {
-                          arguments = Array.prototype.slice.call(arguments, 1);
+                          var frameArguments = Array.prototype.slice.call(arguments, 1);
+                          var i;
+                        
+                          var CENTER = p5.prototype.CENTER;
                         
                           /**
                           * Array of frames (p5.Image)
@@ -3312,41 +3334,41 @@
                         
                         
                           //sequence mode
-                          if(arguments.length == 2 &amp;&amp; typeof arguments[0] == &quot;string&quot; &amp;&amp; typeof arguments[1] == &quot;string&quot;)
+                          if(frameArguments.length === 2 &amp;&amp; typeof frameArguments[0] === &#x27;string&#x27; &amp;&amp; typeof frameArguments[1] === &#x27;string&#x27;)
                           {
-                            var from = arguments[0];
-                            var to = arguments[1];
+                            var from = frameArguments[0];
+                            var to = frameArguments[1];
                         
                             //print(&quot;sequence mode &quot;+from+&quot; -&gt; &quot;+to);
                         
                             //make sure the extensions are fine
                             var ext1 = from.substring(from.length-4, from.length);
-                            if(ext1 != &quot;.png&quot;)
+                            if(ext1 !== &#x27;.png&#x27;)
                             {
-                              pInst.println(&quot;Animation error: you need to use .png files (filename &quot;+from+&quot;)&quot;);
+                              pInst.println(&#x27;Animation error: you need to use .png files (filename &#x27;+from+&#x27;)&#x27;);
                               from = -1;
                             }
                         
                             var ext2 = to.substring(to.length-4, to.length);
-                            if(ext2 != &quot;.png&quot;)
+                            if(ext2 !== &#x27;.png&#x27;)
                             {
-                              pInst.println(&quot;Animation error: you need to use .png files (filename &quot;+to+&quot;)&quot;);
+                              pInst.println(&#x27;Animation error: you need to use .png files (filename &#x27;+to+&#x27;)&#x27;);
                               to = -1;
                             }
                         
                             //extensions are fine
-                            if(from!= -1 &amp;&amp; to!= -1)
+                            if(from !== -1 &amp;&amp; to !== -1)
                             {
                               var digits1 = 0;
                               var digits2 = 0;
                         
                               //skip extension work backwards to find the numbers
-                              for (var i = from.length-5; i &gt;= 0; i--) {
+                              for (i = from.length-5; i &gt;= 0; i--) {
                                 if(from.charAt(i) &gt;= &#x27;0&#x27; &amp;&amp; from.charAt(i) &lt;= &#x27;9&#x27;)
                                   digits1++;
                               }
                         
-                              for (var i = to.length-5; i &gt;= 0; i--) {
+                              for (i = to.length-5; i &gt;= 0; i--) {
                                 if(to.charAt(i) &gt;= &#x27;0&#x27; &amp;&amp; to.charAt(i) &lt;= &#x27;9&#x27;)
                                   digits2++;
                               }
@@ -3371,7 +3393,7 @@
                               }
                         
                               //two different frames
-                              if(prefix1 != prefix2 )
+                              if(prefix1 !== prefix2 )
                               {
                                 //print(&quot;2 separate images&quot;);
                                 this.images.push(pInst.loadImage(from));
@@ -3380,13 +3402,14 @@
                               //same digits: case img0001, img0002
                               else
                               {
-                                if(digits1 == digits2)
+                                var fileName;
+                                if(digits1 === digits2)
                                 {
                         
                                   //load all images
-                                  for (var i = number1; i &lt;= number2; i++) {
+                                  for (i = number1; i &lt;= number2; i++) {
                                     // Use nf() to number format &#x27;i&#x27; into four digits
-                                    var fileName = prefix1 + pInst.nf(i, digits1) + &quot;.png&quot;;
+                                    fileName = prefix1 + pInst.nf(i, digits1) + &#x27;.png&#x27;;
                                     this.images.push(pInst.loadImage(fileName));
                         
                                   }
@@ -3395,9 +3418,9 @@
                                 else //case: case img1, img2
                                 {
                                   //print(&quot;from &quot;+prefix1+&quot; &quot;+number1 +&quot; to &quot;+number2);
-                                  for (var i = number1; i &lt;= number2; i++) {
+                                  for (i = number1; i &lt;= number2; i++) {
                                     // Use nf() to number format &#x27;i&#x27; into four digits
-                                    var fileName = prefix1 + i + &quot;.png&quot;;
+                                    fileName = prefix1 + i + &#x27;.png&#x27;;
                                     this.images.push(pInst.loadImage(fileName));
                         
                                   }
@@ -3409,20 +3432,20 @@
                         
                           }//end sequence mode
                           // Sprite sheet mode
-                          else if (arguments.length === 1 &amp;&amp; (arguments[0] instanceof SpriteSheet))
+                          else if (frameArguments.length === 1 &amp;&amp; (frameArguments[0] instanceof SpriteSheet))
                           {
-                            this.spriteSheet = arguments[0];
+                            this.spriteSheet = frameArguments[0];
                             this.images = this.spriteSheet.frames;
                           }
-                          else if(arguments.length != 0)//arbitrary list of images
+                          else if(frameArguments.length !== 0)//arbitrary list of images
                           {
                             //print(&quot;Animation arbitrary mode&quot;);
-                            for (var i = 0; i &lt; arguments.length; i++) {
-                              //print(&quot;loading &quot;+arguments[i]);
-                              if(arguments[i] instanceof p5.Image)
-                                this.images.push(arguments[i]);
+                            for (i = 0; i &lt; frameArguments.length; i++) {
+                              //print(&quot;loading &quot;+fileNames[i]);
+                              if(frameArguments[i] instanceof p5.Image)
+                                this.images.push(frameArguments[i]);
                               else
-                                this.images.push(pInst.loadImage(arguments[i]));
+                                this.images.push(pInst.loadImage(frameArguments[i]));
                             }
                           }
                         
@@ -3452,31 +3475,28 @@
                             myClone.looping = this.looping;
                         
                             return myClone;
-                          }
+                          };
                         
                           /**
-                          * Draws the animation at coordinate x and y.
-                          * Updates the frames automatically.
-                          *
-                          * @method draw
-                          * @param {Number} x x coordinate
-                          * @param {Number} y y coordinate
-                          */
-                          this.draw = function (x, y) {
-                            this.xpos = arguments[0];
-                            this.ypos = arguments[1];
-                        
-                            if(arguments[2] != undefined)
-                              this.rotation = arguments[2];
-                            else
-                              this.rotation = 0;
+                           * Draws the animation at coordinate x and y.
+                           * Updates the frames automatically.
+                           *
+                           * @method draw
+                           * @param {Number} x x coordinate
+                           * @param {Number} y y coordinate
+                           * @param {Number} [r=0] rotation
+                           */
+                          this.draw = function (x, y, r) {
+                            this.xpos = x;
+                            this.ypos = y;
+                            this.rotation = r || 0;
                         
                             if (this.visible)
                             {
                         
                               //only connection with the sprite class
                               //if animation is used independently draw and update are the sam
-                              if(this.isSpriteAnimation == null)
+                              if(!this.isSpriteAnimation)
                                 this.update();
                         
                               //this.currentImageMode = g.imageMode;
@@ -3486,7 +3506,7 @@
                               pInst.translate(this.xpos, this.ypos);
                               pInst.rotate(radians(this.rotation));
                         
-                              if(this.images[frame]!==undefined)
+                              if(this.images[frame] !== undefined)
                               {
                                 if (this.spriteSheet) {
                                   var frame_info = this.images[frame].frame;
@@ -3498,13 +3518,13 @@
                               }
                               else
                               {
-                                pInst.print(&quot;Warning undefined frame &quot;+frame);
+                                pInst.print(&#x27;Warning undefined frame &#x27;+frame);
                                 //this.isActive = false;
                               }
                         
                               pInst.pop();
                             }
-                          }
+                          };
                         
                           //called by draw
                           this.update = function() {
@@ -3514,7 +3534,7 @@
                         
                         
                             //go to frame
-                            if(this.images.length==1)
+                            if(this.images.length === 1)
                             {
                               this.playing = false;
                               frame = 0;
@@ -3523,7 +3543,7 @@
                             if ( this.playing &amp;&amp; cycles%this.frameDelay === 0)
                             {
                               //going to target frame up
-                              if(targetFrame&gt;frame &amp;&amp; targetFrame!==-1)
+                              if(targetFrame&gt;frame &amp;&amp; targetFrame !== -1)
                               {
                                 frame++;
                               }
@@ -3532,7 +3552,7 @@
                               {
                                 frame--;
                               }
-                              else if(targetFrame==frame &amp;&amp; targetFrame !== -1)
+                              else if(targetFrame === frame &amp;&amp; targetFrame !== -1)
                               {
                                 this.playing=false;
                               }
@@ -3551,10 +3571,10 @@
                               }
                             }
                         
-                            if(previousFrame != frame)
+                            if(previousFrame !== frame)
                               this.frameChanged = true;
                         
-                          }//end update
+                          };//end update
                         
                           /**
                           * Plays the animation.
@@ -3564,7 +3584,7 @@
                           this.play = function() {
                             this.playing = true;
                             targetFrame = -1;
-                          }
+                          };
                         
                           /**
                           * Stops the animation.
@@ -3573,7 +3593,7 @@
                           */
                           this.stop = function(){
                             this.playing = false;
-                          }
+                          };
                         
                           /**
                           * Rewinds the animation to the first frame.
@@ -3582,7 +3602,7 @@
                           */
                           this.rewind = function() {
                             frame = 0;
-                          }
+                          };
                         
                           /**
                           * Changes the current frame.
@@ -3598,7 +3618,7 @@
                         
                             targetFrame = -1;
                             //this.playing = false;
-                          }
+                          };
                         
                            /**
                           * Goes to the next frame and stops.
@@ -3614,7 +3634,7 @@
                         
                             targetFrame = -1;
                             this.playing = false;
-                          }
+                          };
                         
                            /**
                           * Goes to the next frame and stops.
@@ -3630,7 +3650,7 @@
                         
                             targetFrame = -1;
                             this.playing = false;
-                          }
+                          };
                         
                           /**
                           * Plays the animation forward or backward toward a target frame.
@@ -3644,9 +3664,9 @@
                             if(this.f&gt;=0 &amp;&amp; this.f&lt;this.images.length)
                               targetFrame = this.f;
                         
-                            if(targetFrame != frame)
+                            if(targetFrame !== frame)
                               this.playing = true;
-                          }
+                          };
                         
                           /**
                           * Returns the current frame number.
@@ -3656,7 +3676,7 @@
                           */
                           this.getFrame = function() {
                             return frame;
-                          }
+                          };
                         
                           /**
                           * Returns the last frame number.
@@ -3666,7 +3686,7 @@
                           */
                           this.getLastFrame = function() {
                             return this.images.length-1;
-                          }
+                          };
                         
                           /**
                           * Returns the current frame image as p5.Image.
@@ -3676,7 +3696,7 @@
                           */
                           this.getFrameImage = function() {
                             return this.images[frame];
-                          }
+                          };
                         
                           /**
                           * Returns the frame image at the specified frame number.
@@ -3687,7 +3707,7 @@
                           */
                           this.getImageAt = function(f) {
                             return this.images[f];
-                          }
+                          };
                         
                           /**
                           * Returns the current frame width in pixels.
@@ -3697,7 +3717,7 @@
                           */
                           this.getWidth = function() {
                             return this.images[frame].width;
-                          }
+                          };
                         
                           /**
                           * Returns the current frame height in pixels.
@@ -3707,7 +3727,7 @@
                           */
                           this.getHeight = function() {
                             return this.images[frame].height;
-                          }
+                          };
                         
                         }
                         
@@ -3742,7 +3762,7 @@
                          * @param image String image path or p5.Image object
                          */
                         function SpriteSheet(pInst) {
-                          arguments = Array.prototype.slice.call(arguments, 1);
+                          var spriteSheetArgs = Array.prototype.slice.call(arguments, 1);
                         
                           this.image = null;
                           this.frames = [];
@@ -3760,8 +3780,8 @@
                             for (var i = 0; i &lt; this.num_frames; i++) {
                               this.frames.push(
                                 {
-                                  &quot;name&quot;: i,
-                                  &quot;frame&quot;: {
+                                  &#x27;name&#x27;: i,
+                                  &#x27;frame&#x27;: {
                                     &#x27;x&#x27;: sX,
                                     &#x27;y&#x27;: sY,
                                     &#x27;width&#x27;: this.frame_width,
@@ -3779,28 +3799,28 @@
                             }
                           };
                         
-                          if (arguments.length === 2 &amp;&amp; Array.isArray(arguments[1])) {
-                            this.frames = arguments[1];
+                          if (spriteSheetArgs.length === 2 &amp;&amp; Array.isArray(spriteSheetArgs[1])) {
+                            this.frames = spriteSheetArgs[1];
                             this.num_frames = this.frames.length;
-                          } else if (arguments.length === 4 &amp;&amp;
-                            (typeof arguments[1] == &#x27;number&#x27;) &amp;&amp;
-                            (typeof arguments[2] == &#x27;number&#x27;) &amp;&amp;
-                            (typeof arguments[3] == &#x27;number&#x27;)) {
-                            this.frame_width = arguments[1];
-                            this.frame_height = arguments[2];
-                            this.num_frames = arguments[3];
+                          } else if (spriteSheetArgs.length === 4 &amp;&amp;
+                            (typeof spriteSheetArgs[1] === &#x27;number&#x27;) &amp;&amp;
+                            (typeof spriteSheetArgs[2] === &#x27;number&#x27;) &amp;&amp;
+                            (typeof spriteSheetArgs[3] === &#x27;number&#x27;)) {
+                            this.frame_width = spriteSheetArgs[1];
+                            this.frame_height = spriteSheetArgs[2];
+                            this.num_frames = spriteSheetArgs[3];
                           }
                         
-                          if(arguments[0] instanceof p5.Image) {
-                            this.image = arguments[0];
-                            if (arguments.length === 4) {
+                          if(spriteSheetArgs[0] instanceof p5.Image) {
+                            this.image = spriteSheetArgs[0];
+                            if (spriteSheetArgs.length === 4) {
                               this._generateSheetFrames();
                             }
                           } else {
-                            if (arguments.length === 2) {
-                              this.image = pInst.loadImage(arguments[0]);
-                            } else if (arguments.length === 4) {
-                              this.image = pInst.loadImage(arguments[0], this._generateSheetFrames.bind(this));
+                            if (spriteSheetArgs.length === 2) {
+                              this.image = pInst.loadImage(spriteSheetArgs[0]);
+                            } else if (spriteSheetArgs.length === 4) {
+                              this.image = pInst.loadImage(spriteSheetArgs[0], this._generateSheetFrames.bind(this));
                             }
                           }
                         
@@ -3845,12 +3865,12 @@
                             for(var i = 0; i &lt; this.frames.length; i++) {
                               var frame = this.frames[i].frame;
                               var cloneFrame = {
-                                &quot;name&quot;:frame.name,
-                                &quot;frame&quot;: {
-                                  &quot;x&quot;:frame.x,
-                                  &quot;y&quot;:frame.y,
-                                  &quot;width&quot;:frame.width,
-                                  &quot;height&quot;:frame.height
+                                &#x27;name&#x27;:frame.name,
+                                &#x27;frame&#x27;: {
+                                  &#x27;x&#x27;:frame.x,
+                                  &#x27;y&#x27;:frame.y,
+                                  &#x27;width&#x27;:frame.width,
+                                  &#x27;height&#x27;:frame.height
                                 }
                               };
                               myClone.frames.push(cloneFrame);
@@ -3900,7 +3920,7 @@
                           this.objects 		= [];
                           this.object_refs	= [];
                           this.nodes 			= [];
-                        };
+                        }
                         
                         Quadtree.prototype.updateBounds = function() {
                         
@@ -3929,9 +3949,9 @@
                             y:y,
                             width:w,
                             height:h
-                          }
+                          };
                           //print(this.bounds);
-                        }
+                        };
                         
                         /*
                         	 * Split the node into 4 subnodes
@@ -3982,7 +4002,7 @@
                         	 * Determine the quadtrant for an area in this node
                         	 */
                         Quadtree.prototype.getIndex = function( pRect ) {
-                          if(pRect.collider == null)
+                          if(!pRect.collider)
                             return -1;
                           else
                           {
@@ -4025,7 +4045,7 @@
                         	 */
                         Quadtree.prototype.insert = function( obj ) {
                           //avoid double insertion
-                          if(this.objects.indexOf(obj) == -1)
+                          if(this.objects.indexOf(obj) === -1)
                           {
                         
                             var i = 0,
@@ -4053,7 +4073,7 @@
                               //add all objects to there corresponding subnodes
                               while( i &lt; this.objects.length ) {
                         
-                                index = this.getIndex( this.objects[ i ] );
+                                index = this.getIndex( this.objects[i] );
                         
                                 if( index !== -1 ) {
                                   this.nodes[index].insert( this.objects.splice(i, 1)[0] );
@@ -4098,7 +4118,7 @@
                           var results = [];
                           var candidates = this.retrieve(pRect);
                         
-                          for(var i=0; i&lt;candidates.length;i++)
+                          for(var i=0; i&lt;candidates.length; i++)
                             if(group.contains(candidates[i]))
                             results.push(candidates[i]);
                         

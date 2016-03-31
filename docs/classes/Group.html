@@ -15,7 +15,7 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
-	    <img alt="p5.play" src="../../asterisk.png" style="max-height: 65%;" title="p5.play">
+	    <img alt="p5.play" src="..\..\asterisk.png" style="max-height: 65%;" title="p5.play">
             p5.play
         </h1>
 	<div class="nav">
@@ -114,7 +114,7 @@
                         				<li><a href="#method-add"><span class="im">add</span>(<span class="ia">s</span>)</a></li>
                         				<li><a href="#method-bounce"><span class="im">bounce</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
                         				<li><a href="#method-clear"><span class="im">clear</span>()</a></li>
-                        				<li><a href="#method-clear"><span class="im">clear</span>()</a></li>
+                        				<li><a href="#method-collide"><span class="im">collide</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
                         				<li><a href="#method-contains"><span class="im">contains</span>(<span class="ia">sprite</span>)</a></li>
                         				<li><a href="#method-displace"><span class="im">displace</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
                         				<li><a href="#method-draw"><span class="im">draw</span>()</a></li>
@@ -123,8 +123,8 @@
                         				<li><a href="#method-maxDepth"><span class="im">maxDepth</span>()</a></li>
                         				<li><a href="#method-minDepth"><span class="im">minDepth</span>()</a></li>
                         				<li><a href="#method-overlap"><span class="im">overlap</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
-                        				<li><a href="#method-overlap"><span class="im">overlap</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
                         				<li><a href="#method-remove"><span class="im">remove</span>(<span class="ia">item</span>)</a></li>
+                        				<li><a href="#method-removeSprites"><span class="im">removeSprites</span>()</a></li>
                         				<li><a href="#method-size"><span class="im">size</span>()</a></li>
                         				<li><a href="#method-toArray"><span class="im">toArray</span>()</a></li>
                         			</ul>
@@ -155,7 +155,7 @@
                                 	<div class="meta">
                                 				<p>
                                 				Defined in
-                                		<a href="../files/lib_p5.play.js.html#l2429"><code>lib&#x2F;p5.play.js:2429</code></a>
+                                		<a href="../files/lib_p5.play.js.html#l2433"><code>lib\p5.play.js:2433</code></a>
                                 		</p>
                                 
                                 
@@ -203,7 +203,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2641"><code>lib&#x2F;p5.play.js:2641</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2653"><code>lib\p5.play.js:2653</code></a>
                                     		</p>
                                     
                                     
@@ -282,7 +282,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2485"><code>lib&#x2F;p5.play.js:2485</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2489"><code>lib\p5.play.js:2489</code></a>
                                     		</p>
                                     
                                     
@@ -337,23 +337,23 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2751"><code>lib&#x2F;p5.play.js:2751</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2763"><code>lib\p5.play.js:2763</code></a>
                                     		</p>
                                     
                                     
                                     
                                     	</div>
                                     
-                                    	<div class="description"><p>Checks if the the group is overlapping another group.
+                                    	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
                                     If the overlap is positive the sprites will bounce affecting each
-                                    other's trajectories depending on their .velocity, .mass and .restitution</p>
+                                    other's trajectories depending on their .velocity, .mass and .restitution.</p>
                                     <p>The check is performed using the colliders. If colliders are not set
                                     they will be created automatically from the image/animation bounding box.</p>
                                     <p>A callback function can be specified to perform additional operations
                                     when the overlap occours.
                                     The function will be called for each single sprite overlapping.
                                     The parameter of the function are respectively the
-                                    member of the current group and the member of the group passed as parameter.</p>
+                                    member of the current group and the other sprite passed as parameter.</p>
                                     </div>
                                     
                                     		<div class="params">
@@ -365,7 +365,7 @@
                                     						<span class="type">Object</span>
                                     
                                     
-                                    					<div class="param-description"><p>Group to check against the current one</p>
+                                    					<div class="param-description"><p>Group or Sprite to check against the current one</p>
                                     </div>
                                     
                                     				</li>
@@ -397,7 +397,7 @@
                                     
                                     			<div class="example-content">
                                     				<code>
-                                    sprite.bounce(otherSprite, explosion);
+                                    group.bounce(otherSprite, explosion);
                                     <p>function explosion(spriteA, spriteB) {
                                     spriteA.remove();
                                     spriteB.score++;
@@ -422,36 +422,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2512"><code>lib&#x2F;p5.play.js:2512</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Removes all the sprites in the group
-                                    from the scene.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-clear" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>clear</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2525"><code>lib&#x2F;p5.play.js:2525</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2526"><code>lib\p5.play.js:2526</code></a>
                                     		</p>
                                     
                                     
@@ -464,6 +435,103 @@
                                     
                                     
                                     
+                                    </div>
+                                    <div id="method-collide" class="method item">
+                                    	<div class="method-signature">
+                                    	<span class="name"><code>collide</code></span>
+                                    
+                                    		<div class="args">
+                                    			<span class="paren">(</span><ul class="args-list inline commas">
+                                    				<li class="arg">
+                                    						<code>target</code>
+                                    				</li>
+                                    				<li class="arg">
+                                    						<code class="optional">callback</code>
+                                    				</li>
+                                    			</ul><span class="paren">)</span>
+                                    		</div>
+                                    		<span class="returns-inline">
+                                    			<span class="type">Boolean</span>
+                                    		</span>
+                                    	</div>
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    	<div class="meta">
+                                    				<p>
+                                    				Defined in
+                                    		<a href="../files/lib_p5.play.js.html#l2701"><code>lib\p5.play.js:2701</code></a>
+                                    		</p>
+                                    
+                                    
+                                    
+                                    	</div>
+                                    
+                                    	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
+                                    If the overlap is positive the sprites in the group will be displaced
+                                    by the colliding one to the closest non-overlapping positions.</p>
+                                    <p>The check is performed using the colliders. If colliders are not set
+                                    they will be created automatically from the image/animation bounding box.</p>
+                                    <p>A callback function can be specified to perform additional operations
+                                    when the overlap occours.
+                                    The function will be called for each single sprite overlapping.
+                                    The parameter of the function are respectively the
+                                    member of the current group and the other sprite passed as parameter.</p>
+                                    </div>
+                                    
+                                    		<div class="params">
+                                    			<h4>Parameters:</h4>
+                                    
+                                    			<ul class="params-list">
+                                    				<li class="param">
+                                    						<code class="param-name">target</code>
+                                    						<span class="type">Object</span>
+                                    
+                                    
+                                    					<div class="param-description"><p>Group or Sprite to check against the current one</p>
+                                    </div>
+                                    
+                                    				</li>
+                                    				<li class="param">
+                                    						<code class="param-name optional">[callback]</code>
+                                    						<span class="type">Function</span>
+                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
+                                    
+                                    
+                                    					<div class="param-description"><p>The function to be called if overlap is positive</p>
+                                    </div>
+                                    
+                                    				</li>
+                                    			</ul>
+                                    		</div>
+                                    
+                                    		<div class="returns">
+                                    			<h4>Returns:</h4>
+                                    
+                                    			<div class="returns-description">
+                                    						<span class="type">Boolean</span>:
+                                    					<p>True if overlapping</p>
+                                    
+                                    			</div>
+                                    		</div>
+                                    
+                                    		<div class="example">
+                                    			<h4>Example:</h4>
+                                    
+                                    			<div class="example-content">
+                                    				<code>
+                                    group.collide(otherSprite, explosion);
+                                    <p>function explosion(spriteA, spriteB) {
+                                    spriteA.remove();
+                                    spriteB.score++;
+                                    }
+                                    </code></p>
+                                    
+                                    			</div>
+                                    		</div>
                                     </div>
                                     <div id="method-contains" class="method item">
                                     	<div class="method-signature">
@@ -489,7 +557,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2461"><code>lib&#x2F;p5.play.js:2461</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2465"><code>lib\p5.play.js:2465</code></a>
                                     		</p>
                                     
                                     
@@ -553,23 +621,23 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2720"><code>lib&#x2F;p5.play.js:2720</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2732"><code>lib\p5.play.js:2732</code></a>
                                     		</p>
                                     
                                     
                                     
                                     	</div>
                                     
-                                    	<div class="description"><p>Checks if the the group is overlapping another group.
+                                    	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
                                     If the overlap is positive the sprites in the group will displace
                                     the colliding ones to the closest non-overlapping positions.</p>
                                     <p>The check is performed using the colliders. If colliders are not set
                                     they will be created automatically from the image/animation bounding box.</p>
                                     <p>A callback function can be specified to perform additional operations
-                                    when the overlap occours.
+                                    when the overlap occurs.
                                     The function will be called for each single sprite overlapping.
                                     The parameter of the function are respectively the
-                                    member of the current group and the member of the group passed as parameter.</p>
+                                    member of the current group and the other sprite passed as parameter.</p>
                                     </div>
                                     
                                     		<div class="params">
@@ -581,7 +649,7 @@
                                     						<span class="type">Object</span>
                                     
                                     
-                                    					<div class="param-description"><p>Group to check against the current one</p>
+                                    					<div class="param-description"><p>Group or Sprite to check against the current one</p>
                                     </div>
                                     
                                     				</li>
@@ -613,7 +681,7 @@
                                     
                                     			<div class="example-content">
                                     				<code>
-                                    sprite.displace(otherSprite, explosion);
+                                    group.displace(otherSprite, explosion);
                                     <p>function explosion(spriteA, spriteB) {
                                     spriteA.remove();
                                     spriteB.score++;
@@ -638,7 +706,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2606"><code>lib&#x2F;p5.play.js:2606</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2618"><code>lib\p5.play.js:2618</code></a>
                                     		</p>
                                     
                                     
@@ -672,7 +740,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2451"><code>lib&#x2F;p5.play.js:2451</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2455"><code>lib\p5.play.js:2455</code></a>
                                     		</p>
                                     
                                     
@@ -715,7 +783,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2472"><code>lib&#x2F;p5.play.js:2472</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2476"><code>lib\p5.play.js:2476</code></a>
                                     		</p>
                                     
                                     
@@ -746,7 +814,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2564"><code>lib&#x2F;p5.play.js:2564</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2576"><code>lib\p5.play.js:2576</code></a>
                                     		</p>
                                     
                                     
@@ -786,7 +854,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2585"><code>lib&#x2F;p5.play.js:2585</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2597"><code>lib\p5.play.js:2597</code></a>
                                     		</p>
                                     
                                     
@@ -835,21 +903,21 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2660"><code>lib&#x2F;p5.play.js:2660</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2672"><code>lib\p5.play.js:2672</code></a>
                                     		</p>
                                     
                                     
                                     
                                     	</div>
                                     
-                                    	<div class="description"><p>Checks if the the group is overlapping another group.
+                                    	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
                                     The check is performed using the colliders. If colliders are not set
                                     they will be created automatically from the image/animation bounding box.</p>
                                     <p>A callback function can be specified to perform additional operations
-                                    when the overlap occours.
+                                    when the overlap occurs.
                                     The function will be called for each single sprite overlapping.
                                     The parameter of the function are respectively the
-                                    member of the current group and the member of the group passed as parameter.</p>
+                                    member of the current group and the other sprite passed as parameter.</p>
                                     </div>
                                     
                                     		<div class="params">
@@ -861,7 +929,7 @@
                                     						<span class="type">Object</span>
                                     
                                     
-                                    					<div class="param-description"><p>Group to check against the current one</p>
+                                    					<div class="param-description"><p>Group or Sprite to check against the current one</p>
                                     </div>
                                     
                                     				</li>
@@ -893,104 +961,7 @@
                                     
                                     			<div class="example-content">
                                     				<code>
-                                    sprite.overlap(otherSprite, explosion);
-                                    <p>function explosion(spriteA, spriteB) {
-                                    spriteA.remove();
-                                    spriteB.score++;
-                                    }
-                                    </code></p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    </div>
-                                    <div id="method-overlap" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>overlap</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>target</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code class="optional">callback</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Boolean</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2689"><code>lib&#x2F;p5.play.js:2689</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Checks if the the group is overlapping another group.
-                                    If the overlap is positive the sprites in the group will be displaced
-                                    by the colliding one to the closest non-overlapping positions.</p>
-                                    <p>The check is performed using the colliders. If colliders are not set
-                                    they will be created automatically from the image/animation bounding box.</p>
-                                    <p>A callback function can be specified to perform additional operations
-                                    when the overlap occours.
-                                    The function will be called for each single sprite overlapping.
-                                    The parameter of the function are respectively the
-                                    member of the current group and the member of the group passed as parameter.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">target</code>
-                                    						<span class="type">Object</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Group to check against the current one</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name optional">[callback]</code>
-                                    						<span class="type">Function</span>
-                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The function to be called if overlap is positive</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Boolean</span>:
-                                    					<p>True if overlapping</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    		<div class="example">
-                                    			<h4>Example:</h4>
-                                    
-                                    			<div class="example-content">
-                                    				<code>
-                                    sprite.overlap(otherSprite, explosion);
+                                    group.overlap(otherSprite, explosion);
                                     <p>function explosion(spriteA, spriteB) {
                                     spriteA.remove();
                                     spriteB.score++;
@@ -1024,7 +995,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2535"><code>lib&#x2F;p5.play.js:2535</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2536"><code>lib\p5.play.js:2536</code></a>
                                     		</p>
                                     
                                     
@@ -1062,6 +1033,35 @@
                                     		</div>
                                     
                                     </div>
+                                    <div id="method-removeSprites" class="method item">
+                                    	<div class="method-signature">
+                                    	<span class="name"><code>removeSprites</code></span>
+                                    
+                                    		<span class="paren">()</span>
+                                    	</div>
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    	<div class="meta">
+                                    				<p>
+                                    				Defined in
+                                    		<a href="../files/lib_p5.play.js.html#l2514"><code>lib\p5.play.js:2514</code></a>
+                                    		</p>
+                                    
+                                    
+                                    
+                                    	</div>
+                                    
+                                    	<div class="description"><p>Removes all the sprites in the group
+                                    from the scene.</p>
+                                    </div>
+                                    
+                                    
+                                    
+                                    </div>
                                     <div id="method-size" class="method item">
                                     	<div class="method-signature">
                                     	<span class="name"><code>size</code></span>
@@ -1077,7 +1077,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2504"><code>lib&#x2F;p5.play.js:2504</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2506"><code>lib\p5.play.js:2506</code></a>
                                     		</p>
                                     
                                     
@@ -1105,7 +1105,7 @@
                                     	<div class="meta">
                                     				<p>
                                     				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2556"><code>lib&#x2F;p5.play.js:2556</code></a>
+                                    		<a href="../files/lib_p5.play.js.html#l2568"><code>lib\p5.play.js:2568</code></a>
                                     		</p>
                                     
                                     
