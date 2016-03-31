@@ -1,15 +1,15 @@
-describe('Sprite', function () {
+describe('Sprite', function() {
   var pInst;
 
-  beforeEach(function () {
-    pInst = new p5(function () {});
+  beforeEach(function() {
+    pInst = new p5(function() {});
   });
 
-  afterEach(function () {
+  afterEach(function() {
     pInst.remove();
   });
 
-  it('sets correct coordinate mode for rendering', function () {
+  it('sets correct coordinate mode for rendering', function() {
     // Note: This test reaches into p5's internals somewhat more than usual.
     // It's designed to catch a particular rendering regression reported in
     // issue #48, where certain local constants are initialized incorrectly.
@@ -19,7 +19,7 @@ describe('Sprite', function () {
 
     // Monkeypatch sprite's draw method to inspect coordinate mode at draw-time.
     var sprite = pInst.createSprite();
-    sprite.draw = function () {
+    sprite.draw = function() {
       rectMode = pInst._renderer._rectMode;
       ellipseMode = pInst._renderer._ellipseMode;
       imageMode = pInst._renderer._imageMode;

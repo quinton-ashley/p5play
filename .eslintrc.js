@@ -197,11 +197,19 @@ module.exports = {
     "sort-imports": "error",
     "sort-vars": "off",
 
-    // I'd like to enable these four rules, but should discuss target style
-    // with the community before we do because we don't follow these at all
+    // I'd like to enable this rule, but should discuss target style
+    // with the community before we do because we don't follow it at all
     // right now.
     "space-before-blocks": "off",
-    "space-before-function-paren": "off",
+
+    "space-before-function-paren": [
+      "error",
+      "never"
+    ],
+
+    // I'd like to enable these two rules, but should discuss target style
+    // with the community before we do because we don't follow these at all
+    // right now.
     "space-in-parens": "off",
     "space-infix-ops": "off",
 

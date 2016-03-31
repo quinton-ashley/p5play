@@ -1,40 +1,40 @@
-describe('Input', function () {
+describe('Input', function() {
   var myp5;
   var LEFT_ARROW, LEFT;
 
-  beforeEach(function () {
-    myp5 = new p5(function () {});
+  beforeEach(function() {
+    myp5 = new p5(function() {});
     LEFT_ARROW = myp5.LEFT_ARROW;
     LEFT = myp5.LEFT;
   });
 
-  afterEach(function () {
+  afterEach(function() {
     myp5.remove();
   });
 
-  function mouseup (which) {
+  function mouseup(which) {
     myp5._setProperty('mouseButton', which);
     myp5._setProperty('mouseIsPressed', false);
   }
 
-  function mousedown (which) {
+  function mousedown(which) {
     myp5._setProperty('mouseButton', which);
     myp5._setProperty('mouseIsPressed', true);
   }
 
-  function keydown (which) {
+  function keydown(which) {
     myp5._onkeydown({which: which});
   }
 
-  function keyup (which) {
+  function keyup(which) {
     myp5._onkeyup({which: which});
   }
 
-  function nextFrame () {
+  function nextFrame() {
     myp5.readPresses();
   }
 
-  it('reports mouseUp() properly', function () {
+  it('reports mouseUp() properly', function() {
     mousedown(LEFT);
     nextFrame();
 
@@ -52,7 +52,7 @@ describe('Input', function () {
     expect(myp5.mouseUp(LEFT)).to.be.true;
   });
 
-  it('reports mouseDown() properly', function () {
+  it('reports mouseDown() properly', function() {
     mouseup(LEFT);
     nextFrame();
 
@@ -70,7 +70,7 @@ describe('Input', function () {
     expect(myp5.mouseDown(LEFT)).to.be.true;
   });
 
-  it('reports mouseWentDown() properly', function () {
+  it('reports mouseWentDown() properly', function() {
     mouseup(LEFT);
     nextFrame();
 
@@ -86,7 +86,7 @@ describe('Input', function () {
     expect(myp5.mouseWentDown(LEFT)).to.be.false;
   });
 
-  it('reports mouseWentUp() properly', function () {
+  it('reports mouseWentUp() properly', function() {
     mousedown(LEFT);
     nextFrame();
 
@@ -98,7 +98,7 @@ describe('Input', function () {
     expect(myp5.mouseWentUp(LEFT)).to.be.true;
   });
 
-  it('reports keyDown() properly', function () {
+  it('reports keyDown() properly', function() {
     keyup(LEFT_ARROW);
     nextFrame();
 
@@ -116,7 +116,7 @@ describe('Input', function () {
     expect(myp5.keyDown(LEFT_ARROW)).to.be.true;
   });
 
-  it('reports keyWentDown() properly', function () {
+  it('reports keyWentDown() properly', function() {
     keyup(LEFT_ARROW);
     nextFrame();
 
@@ -132,7 +132,7 @@ describe('Input', function () {
     expect(myp5.keyWentDown(LEFT_ARROW)).to.be.false;
   });
 
-  it('reports keyWentUp() properly', function () {
+  it('reports keyWentUp() properly', function() {
     keydown(LEFT_ARROW);
     nextFrame();
 
