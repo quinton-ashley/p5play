@@ -35,7 +35,7 @@ function setup() {
     //this.deltaX and this.deltaY are the position increment
     //since the last frame, move the face image toward the direction
     image(face, this.deltaX*2, this.deltaY*2);
-    };
+  };
 
   stretchy.maxSpeed = 10;
 }

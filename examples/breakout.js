@@ -61,10 +61,10 @@ function draw() {
   ball.bounce(wallRight);
 
   if(ball.bounce(paddle))
-    {
+  {
     var swing = (ball.position.x-paddle.position.x)/3;
     ball.setSpeed(MAX_SPEED, ball.getDirection()+swing);
-    }
+  }
 
   ball.bounce(bricks, brickHit);
 
@@ -77,5 +77,5 @@ function mousePressed() {
 }
 
 function brickHit(ball, brick) {
-brick.remove();
+  brick.remove();
 }

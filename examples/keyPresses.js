@@ -38,18 +38,18 @@ function draw() {
   if(asterisk.collide(platform)) {
     asterisk.velocity.y = 0;
     asterisk.changeAnimation('normal');
-    }
+  }
 
   //keyDown returns true for a cycle if the key was just pressed
   //during this cycle. Useful to capture instant events in the draw cycle
   //without moving game logic to the mousePressed() function
   //mouseWentDown works the same way with mouse input
   if(keyWentDown('x') || mouseWentDown(LEFT))
-    {
+  {
     asterisk.changeAnimation('stretch');
     asterisk.animation.rewind();
     asterisk.velocity.y = -JUMP;
-    }
+  }
 
   //same as keyWentDown
   //RIGHT = right mouse button

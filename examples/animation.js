@@ -8,12 +8,12 @@ var ghost, asterisk;
 //of your sketch otherwise they may appear with a little delay
 function preload() {
 
-//create an animation from a sequence of numbered images
-//pass the first and the last file name and it will try to find the ones in between
-ghost = loadAnimation('assets/ghost_standing0001.png', 'assets/ghost_standing0007.png');
+  //create an animation from a sequence of numbered images
+  //pass the first and the last file name and it will try to find the ones in between
+  ghost = loadAnimation('assets/ghost_standing0001.png', 'assets/ghost_standing0007.png');
 
-//create an animation listing all the images files
-asterisk = loadAnimation('assets/asterisk.png', 'assets/triangle.png', 'assets/square.png', 'assets/cloud.png', 'assets/star.png', 'assets/mess.png', 'assets/monster.png');
+  //create an animation listing all the images files
+  asterisk = loadAnimation('assets/asterisk.png', 'assets/triangle.png', 'assets/square.png', 'assets/cloud.png', 'assets/star.png', 'assets/mess.png', 'assets/monster.png');
 }
 
 function setup() {

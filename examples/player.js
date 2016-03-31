@@ -38,7 +38,7 @@ function playCode (code) {
       if (typeof p.setup === 'undefined') {
         console.log('no setup');
         p.setup = function() {
-        p.createCanvas(window.innerWidth, window.innerHeight);
+          p.createCanvas(window.innerWidth, window.innerHeight);
         };
       }
     }

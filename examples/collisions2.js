@@ -20,18 +20,18 @@ function setup() {
   collectibles = new Group();
 
   for(var i=0; i<4; i++)
-    {
+  {
     var box = createSprite(random(0, width), random(0, height));
     box.addAnimation('normal', 'assets/box0001.png', 'assets/box0003.png');
     obstacles.add(box);
-    }
+  }
 
   for(var j=0; j<10; j++)
-    {
+  {
     var dot = createSprite(random(0, width), random(0, height));
     dot.addAnimation('normal', 'assets/small_circle0001.png', 'assets/small_circle0001.png');
     collectibles.add(dot);
-    }
+  }
 
 }
 

@@ -12,22 +12,22 @@ function draw() {
   //every 10 frames
   if(frameCount%10 == 0) {
 
-  //create a sprite in a random position
-  var newSprite = createSprite(random(0, width), random(0, height));
-  //assign a random appearance
-  var rnd = floor(random(0, 4));
+    //create a sprite in a random position
+    var newSprite = createSprite(random(0, width), random(0, height));
+    //assign a random appearance
+    var rnd = floor(random(0, 4));
 
-  if(rnd == 0)
-    newSprite.addAnimation('img', 'assets/box0001.png');
-  if(rnd == 1)
-    newSprite.addAnimation('img', 'assets/ghost_standing0004.png');
-  if(rnd == 2)
-    newSprite.addAnimation('img', 'assets/cloud_breathing0001.png');
-  if(rnd == 3)
-    newSprite.addAnimation('img', 'assets/square.png');
+    if(rnd == 0)
+      newSprite.addAnimation('img', 'assets/box0001.png');
+    if(rnd == 1)
+      newSprite.addAnimation('img', 'assets/ghost_standing0004.png');
+    if(rnd == 2)
+      newSprite.addAnimation('img', 'assets/cloud_breathing0001.png');
+    if(rnd == 3)
+      newSprite.addAnimation('img', 'assets/square.png');
 
-  //set a lifespan to avoid consuming all the memory
-  newSprite.life = 1000;
+    //set a lifespan to avoid consuming all the memory
+    newSprite.life = 1000;
   }
 
   //the newest sprites are drawn on the top
@@ -37,14 +37,14 @@ function draw() {
 //unless the depths are directly set
 function mousePressed() {
 
-//set the existing sprites' depths in relation to their position
-for(var i=0; i<allSprites.length; i++) {
+  //set the existing sprites' depths in relation to their position
+  for(var i=0; i<allSprites.length; i++) {
 
-  //sprites on the bottom will be drawn first
-  allSprites[i].depth = allSprites[i].position.y;
+    //sprites on the bottom will be drawn first
+    allSprites[i].depth = allSprites[i].position.y;
 
-  //you can link the scale to the y position to simulate perspective
-  //allSprites[i].scale = map(allSprites[i].position.y, 0, height, 0.2, 1);
-}
+    //you can link the scale to the y position to simulate perspective
+    //allSprites[i].scale = map(allSprites[i].position.y, 0, height, 0.2, 1);
+  }
 
 }

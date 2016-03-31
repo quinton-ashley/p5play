@@ -27,11 +27,11 @@ function setup() {
   //create some background for visual reference
   for(var i=0; i<80; i++)
   {
-  //create a sprite and add the 3 animations
-  var rock = createSprite(random(-width, SCENE_W+width), random(-height, SCENE_H+height));
-  //cycles through rocks 0 1 2
-  rock.addAnimation('normal', 'assets/rocks'+i%3+'.png');
-  bg.add(rock);
+    //create a sprite and add the 3 animations
+    var rock = createSprite(random(-width, SCENE_W+width), random(-height, SCENE_H+height));
+    //cycles through rocks 0 1 2
+    rock.addAnimation('normal', 'assets/rocks'+i%3+'.png');
+    bg.add(rock);
   }
 
   frame = loadImage('assets/frame.png');

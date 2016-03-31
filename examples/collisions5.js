@@ -43,7 +43,7 @@ function draw() {
   //instead of checking the colliders or bounding box overlaps
   //I can just check a point against a collider
   if(cloud.overlapPoint(triangle.position.x, triangle.position.y))
-      cloud.changeAnimation('transformed');
+    cloud.changeAnimation('transformed');
 
   //Or check a point against the pixels of a sprite animation or image
   //if the bottom of the triangle is not overlapping with the non transparent pixels
@@ -54,10 +54,10 @@ function draw() {
   //if the bottom of the triangle is overlapping the non transparent pixels
   //of the platform move it up one pixel until it doesn't overlap anymore
   while(platform.overlapPixel(triangle.position.x, triangle.position.y+30))
-    {
+  {
     triangle.position.y--;
     triangle.velocity.y = 0;
-    }
+  }
 
   drawSprites();
 }

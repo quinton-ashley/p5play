@@ -22,18 +22,18 @@ function setup() {
 
   //assign new sprites to the respective groups
   for(var i = 0; i<6; i++) {
-  var newGhost = createSprite(random(0, width), random(0, height));
-  newGhost.addAnimation('floating', 'assets/ghost_standing0001.png', 'assets/ghost_standing0007.png');
-  ghosts.add(newGhost);
+    var newGhost = createSprite(random(0, width), random(0, height));
+    newGhost.addAnimation('floating', 'assets/ghost_standing0001.png', 'assets/ghost_standing0007.png');
+    ghosts.add(newGhost);
   }
 
   for(var j = 0; j<6; j++) {
-  var newCloud = createSprite(random(0, width), random(0, height));
-  newCloud.addAnimation('floating', 'assets/cloud_pulsing0001.png', 'assets/cloud_pulsing0007.png');
-  //set a rotation speed
-  newCloud.rotationSpeed = -2;
-  //another way to add a sprite to a group
-  newCloud.addToGroup(clouds);
+    var newCloud = createSprite(random(0, width), random(0, height));
+    newCloud.addAnimation('floating', 'assets/cloud_pulsing0001.png', 'assets/cloud_pulsing0007.png');
+    //set a rotation speed
+    newCloud.rotationSpeed = -2;
+    //another way to add a sprite to a group
+    newCloud.addToGroup(clouds);
   }
 }
 
@@ -43,9 +43,9 @@ function draw() {
   //a group can be accessed like an array
   //the removed objects will be automatically removed from the groups as well
   for(var i = 0; i<ghosts.length; i++) {
-  var g = ghosts[i];
-  //moving all the ghosts y following a sin function (sinusoid)
-  g.position.y += sin(frameCount/10);
+    var g = ghosts[i];
+    //moving all the ghosts y following a sin function (sinusoid)
+    g.position.y += sin(frameCount/10);
   }
 
   asterisk.position.x = mouseX;

@@ -24,21 +24,21 @@ function setup() {
   //I can assign functions to be called upon specific mouse events
   //within the function "this" will reference the sprite that triggered the event
   asterisk.onMouseOver = function() {
-  this.changeAnimation('stretch');
+    this.changeAnimation('stretch');
   };
 
   asterisk.onMouseOut = function() {
-  this.changeAnimation('normal');
+    this.changeAnimation('normal');
   };
 
   asterisk.onMousePressed = function() {
-  this.changeAnimation('transform');
-  this.animation.goToFrame(this.animation.getLastFrame());
+    this.changeAnimation('transform');
+    this.animation.goToFrame(this.animation.getLastFrame());
   };
 
   asterisk.onMouseReleased = function() {
-  this.changeAnimation('transform');
-  this.animation.goToFrame(0);
+    this.changeAnimation('transform');
+    this.animation.goToFrame(0);
   };
 
 }
@@ -49,7 +49,7 @@ function draw() {
   //if a sprite is mouseActive true I can check if the mouse is over its collider
   //and if the button is pressed
   if(ghost.mouseIsOver)
-      ghost.rotation-= 10;
+    ghost.rotation-= 10;
 
   ghost.visible = !ghost.mouseIsPressed;
 

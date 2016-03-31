@@ -4,17 +4,17 @@ var circle, explode, sleep, glitch;
 
 function preload() {
 
-sleep = loadAnimation('assets/asterisk_stretching0001.png', 'assets/asterisk_stretching0008.png');
+  sleep = loadAnimation('assets/asterisk_stretching0001.png', 'assets/asterisk_stretching0008.png');
 
-circle = loadAnimation('assets/asterisk_circle0000.png', 'assets/asterisk_circle0008.png');
-//by default animations loop but it can be changed
-circle.looping = false;
+  circle = loadAnimation('assets/asterisk_circle0000.png', 'assets/asterisk_circle0008.png');
+  //by default animations loop but it can be changed
+  circle.looping = false;
 
-explode = loadAnimation('assets/asterisk_explode0001.png', 'assets/asterisk_explode0011.png');
+  explode = loadAnimation('assets/asterisk_explode0001.png', 'assets/asterisk_explode0011.png');
 
-glitch = loadAnimation('assets/asterisk.png', 'assets/triangle.png', 'assets/square.png', 'assets/cloud.png', 'assets/star.png', 'assets/mess.png', 'assets/monster.png');
-//by default an animation plays but you may not want that
-glitch.playing = false;
+  glitch = loadAnimation('assets/asterisk.png', 'assets/triangle.png', 'assets/square.png', 'assets/cloud.png', 'assets/star.png', 'assets/mess.png', 'assets/monster.png');
+  //by default an animation plays but you may not want that
+  glitch.playing = false;
 }
 
 function setup() {

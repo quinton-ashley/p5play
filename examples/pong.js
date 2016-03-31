@@ -49,15 +49,15 @@ function draw() {
   }
 
   if(ball.position.x<0) {
-  ball.position.x = width/2;
-  ball.position.y = height/2;
-  ball.setSpeed(MAX_SPEED, 0);
+    ball.position.x = width/2;
+    ball.position.y = height/2;
+    ball.setSpeed(MAX_SPEED, 0);
   }
 
   if(ball.position.x>width) {
-  ball.position.x = width/2;
-  ball.position.y = height/2;
-  ball.setSpeed(MAX_SPEED, 180);
+    ball.position.x = width/2;
+    ball.position.y = height/2;
+    ball.setSpeed(MAX_SPEED, 180);
   }
 
   drawSprites();
