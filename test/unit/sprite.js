@@ -15,9 +15,7 @@ describe('Sprite', function() {
     // issue #48, where certain local constants are initialized incorrectly.
     // See https://github.com/molleindustria/p5.play/issues/48
     expect(p5.prototype.CENTER).to.not.be.undefined;
-    var rectMode = undefined,
-        ellipseMode = undefined,
-        imageMode = undefined;
+    var rectMode, ellipseMode, imageMode;
 
     // Monkeypatch sprite's draw method to inspect coordinate mode at draw-time.
     var sprite = pInst.createSprite();
