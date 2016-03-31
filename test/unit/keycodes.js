@@ -17,8 +17,8 @@ describe('_keyCodeFromAlias', function() {
     pInst.remove();
   });
 
-  describe("key aliases", function () {
-    it("maps every alias to a numeric keycode", function () {
+  describe('key aliases', function () {
+    it('maps every alias to a numeric keycode', function () {
       for (var alias in KEY) {
         expect(typeof _keyCodeFromAlias(alias)).to.equal('number');
       }
@@ -43,55 +43,55 @@ describe('_keyCodeFromAlias', function() {
       }
     });
 
-    it("does not warn when looking up a regular alias", function () {
+    it('does not warn when looking up a regular alias', function () {
       for (var alias in KEY) {
         _keyCodeFromAlias(alias);
         expect(_warn.callCount).to.equal(0);
       }
     });
 
-    it("maps MINUS to 109", function () {
+    it('maps MINUS to 109', function () {
       expect(_keyCodeFromAlias('MINUS')).to.equal(109);
     });
 
-    it("maps COMMA to 188", function () {
+    it('maps COMMA to 188', function () {
       expect(_keyCodeFromAlias('COMMA')).to.equal(188);
     });
   });
 
-  describe("deprecated aliases", function() {
+  describe('deprecated aliases', function() {
     var KEY_DEPRECATIONS = p5.prototype.KEY_DEPRECATIONS;
 
-    it("maps every deprecated alias to a valid key alias", function () {
+    it('maps every deprecated alias to a valid key alias', function () {
       for (var alias in KEY_DEPRECATIONS) {
         expect(KEY).to.include.keys(KEY_DEPRECATIONS[alias]);
       }
     });
 
-    it("does not include any deprecated aliases in key aliases", function () {
+    it('does not include any deprecated aliases in key aliases', function () {
       for (var alias in KEY_DEPRECATIONS) {
         expect(KEY).to.not.include.keys(alias);
       }
     });
 
-    it("aliases 'MINUT' to 'MINUS'", function() {
+    it('aliases \'MINUT\' to \'MINUS\'', function() {
       expect(_keyCodeFromAlias('MINUT'))
         .to.equal(_keyCodeFromAlias('MINUS'));
     });
 
-    it("warns when using MINUT", function () {
+    it('warns when using MINUT', function () {
       _keyCodeFromAlias('MINUT');
       expect(_warn.firstCall.args[0])
         .to.equal('Key literal "MINUT" is deprecated and may be removed in a ' +
                   'future version of p5.play. Please use "MINUS" instead.');
     });
 
-    it("aliases 'COMA' to 'COMMA'", function() {
+    it('aliases \'COMA\' to \'COMMA\'', function() {
       expect(_keyCodeFromAlias('COMA'))
         .to.equal(_keyCodeFromAlias('COMMA'));
     });
 
-    it("warns when using COMA", function () {
+    it('warns when using COMA', function () {
       _keyCodeFromAlias('COMA');
       expect(_warn.firstCall.args[0])
         .to.equal('Key literal "COMA" is deprecated and may be removed in a ' +

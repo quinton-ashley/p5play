@@ -10,12 +10,12 @@ describe('Group', function() {
     pInst.remove();
   });
 
-  it("is an array", function () {
+  it('is an array', function () {
     expect(Array.isArray(group)).to.be.true;
   });
 
-  describe("add()", function () {
-    it("adds a sprite to the group", function () {
+  describe('add()', function () {
+    it('adds a sprite to the group', function () {
       var sprite = pInst.createSprite();
       group.add(sprite);
       expect(group).to.include(sprite);
@@ -23,13 +23,13 @@ describe('Group', function() {
       expect(group.contains(sprite)).to.be.true;
     });
 
-    it("gives the sprite a reference to itself", function () {
+    it('gives the sprite a reference to itself', function () {
       var sprite = pInst.createSprite();
       group.add(sprite);
       expect(sprite.groups).to.include(group);
     });
 
-    it("lets you add different sprites to the group", function () {
+    it('lets you add different sprites to the group', function () {
       var sprite1 = pInst.createSprite();
       var sprite2 = pInst.createSprite();
       group.add(sprite1);
@@ -37,7 +37,7 @@ describe('Group', function() {
       expect(group.length).to.equal(2);
     });
 
-    it("ignores double addition of a unique sprite", function () {
+    it('ignores double addition of a unique sprite', function () {
       var sprite = pInst.createSprite();
       group.add(sprite);
       group.add(sprite);
@@ -46,7 +46,7 @@ describe('Group', function() {
       expect(group[1]).to.be.undefined;
     });
 
-    it("throws if passed something besides a sprite", function () {
+    it('throws if passed something besides a sprite', function () {
       [
         null,
         undefined,
@@ -57,14 +57,14 @@ describe('Group', function() {
         new Error('error')
       ].forEach(function (item) {
         expect(function () {
-          group.add(item)
+          group.add(item);
         }).throws('Error: you can only add sprites to a group');
       });
     });
   });
 
-  describe("remove()", function () {
-    it("removes a sprite from the group", function () {
+  describe('remove()', function () {
+    it('removes a sprite from the group', function () {
       var sprite1 = pInst.createSprite();
       var sprite2 = pInst.createSprite();
       group.add(sprite1);
@@ -78,7 +78,7 @@ describe('Group', function() {
       expect(group.contains(sprite2)).to.be.true;
     });
 
-    it("removes the sprite's reference to itself", function () {
+    it('removes the sprite\'s reference to itself', function () {
       var sprite = pInst.createSprite();
       group.add(sprite);
       expect(sprite.groups).to.include(group);
@@ -86,7 +86,7 @@ describe('Group', function() {
       expect(sprite.groups).to.not.include(group);
     });
 
-    it("returns false if the sprite is not a member of the group", function () {
+    it('returns false if the sprite is not a member of the group', function () {
       var sprite1 = pInst.createSprite();
       var sprite2 = pInst.createSprite();
       group.add(sprite1);
@@ -97,7 +97,7 @@ describe('Group', function() {
       expect(group.length).to.equal(1);
     });
 
-    it("removes all copies of a sprite if more than one happen to be present", function () {
+    it('removes all copies of a sprite if more than one happen to be present', function () {
       // This shouldn't happen when using a group properly, but just in case let's
       // make sure we clean up properly.
       var sprite = pInst.createSprite();
@@ -111,7 +111,7 @@ describe('Group', function() {
       expect(group.length).to.equal(0);
     });
 
-    it("throws if passed something besides a sprite", function () {
+    it('throws if passed something besides a sprite', function () {
       [
         null,
         undefined,
@@ -122,14 +122,14 @@ describe('Group', function() {
         new Error('error')
       ].forEach(function (item) {
         expect(function () {
-          group.remove(item)
+          group.remove(item);
         }).throws('Error: you can only remove sprites from a group');
       });
     });
   });
 
-  describe("removeSprites()", function() {
-    it("should remove all sprites", function() {
+  describe('removeSprites()', function() {
+    it('should remove all sprites', function() {
       expect(group.size()).to.equal(0);
       expect(pInst.allSprites.size()).to.equal(0);
 

@@ -26,7 +26,7 @@ describe('Example sketches', function() {
     window.onerror = function(msg, source, lineno, colno, error) {
       if (!error) {
         // Some browsers, like PhantomJS, don't pass an error argument.
-        return done(new Error(msg + " @ " + source + ":" + lineno));
+        return done(new Error(msg + ' @ ' + source + ':' + lineno));
       }
       done(error);
     };
@@ -59,7 +59,7 @@ describe('Example sketches', function() {
         FRAMES_TO_DRAW
       ];
       var iframeScriptCode = (
-        '(' +  iframeScript + ').apply(window, ' +
+        '(' + iframeScript + ').apply(window, ' +
         JSON.stringify(iframeScriptArgs) + ');'
       );
       window[windowCbName] = done;

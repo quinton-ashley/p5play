@@ -7,7 +7,6 @@ module.exports = {
     "p5": true
   },
   "rules": {
-
     // Allow empty functions in tests, because we often want to pass a no-op
     // placeholder when testing.
     // Very frequent: new p5(function () {})

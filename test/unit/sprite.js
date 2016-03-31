@@ -9,7 +9,7 @@ describe('Sprite', function() {
     pInst.remove();
   });
 
-  it("sets correct coordinate mode for rendering", function () {
+  it('sets correct coordinate mode for rendering', function () {
     // Note: This test reaches into p5's internals somewhat more than usual.
     // It's designed to catch a particular rendering regression reported in
     // issue #48, where certain local constants are initialized incorrectly.
