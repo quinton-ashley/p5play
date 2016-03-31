@@ -89,6 +89,10 @@ module.exports = {
     "no-bitwise": "error",
     "no-caller": "error",
     "no-catch-shadow": "error",
+    "no-cond-assign": [
+      "error",
+      "except-parens"
+    ],
     "no-confusing-arrow": "error",
     "no-console": "off", // Customized: We log certain warnings
     "no-continue": "error",
