@@ -37,13 +37,14 @@ function draw() {
   ball.bounce(wallTop);
   ball.bounce(wallBottom);
 
+  var swing;
   if(ball.bounce(paddleA)) {
-    var swing = (ball.position.y-paddleA.position.y)/3;
+    swing = (ball.position.y-paddleA.position.y)/3;
     ball.setSpeed(MAX_SPEED, ball.getDirection()+swing);
   }
 
   if(ball.bounce(paddleB)) {
-    var swing = (ball.position.y-paddleB.position.y)/3;
+    swing = (ball.position.y-paddleB.position.y)/3;
     ball.setSpeed(MAX_SPEED, ball.getDirection()-swing);
   }
 
