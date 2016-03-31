@@ -96,7 +96,6 @@ module.exports = {
     "no-duplicate-imports": "error",
     "no-else-return": "off",
     "no-empty-function": "error",
-    "no-eq-null": "error",
     "no-eval": "error",
     "no-extend-native": "error",
     "no-extra-bind": "error",
