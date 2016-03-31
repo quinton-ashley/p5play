@@ -76,7 +76,7 @@ describe('Example sketches', function() {
         '<script src="lib/p5.js"></script>',
         '<script>' + iframeScriptCode + '</script>',
         '<script src="../lib/p5.play.js"></script>',
-        '<script src="' + fileName + '"></script>',
+        '<script src="' + fileName + '"></script>'
       ].join('\n'));
       iframe.contentDocument.close();
     });
