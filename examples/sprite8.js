@@ -27,7 +27,7 @@ function setup() {
   ghosts.add(newGhost);
   }
 
-  for(var i = 0; i<6; i++) {
+  for(var j = 0; j<6; j++) {
   var newCloud = createSprite(random(0, width), random(0, height));
   newCloud.addAnimation('floating', 'assets/cloud_pulsing0001.png', 'assets/cloud_pulsing0007.png');
   //set a rotation speed
