@@ -5,11 +5,12 @@ var activeSketch;
 
 // adapted from p5js.org, originally by Lauren McCarthy
 // https://github.com/processing/p5.js-website/blob/master/js/render.js
-var playCode = function(code) {
+function playCode (code) {
+  /*eslint no-with: "off", no-eval: "off"*/
   var runnable = code;
   var _p5 = p5;
 
-  var s = function( p ) {
+  function s( p ) {
 
     if (runnable.indexOf('setup()') === -1 && runnable.indexOf('draw()') === -1){
       p.setup = function() {
@@ -42,14 +43,18 @@ var playCode = function(code) {
       }
     }
 
-  };
+  }
 
 
   //avoid duplicate canvases
   $( '#myP5' ).empty();
 
   //clear registered methods
-  for (var member in activeSketch._registeredMethods) delete activeSketch._registeredMethods[member];
+  for (var member in activeSketch._registeredMethods) {
+    if (activeSketch._registeredMethods.hasOwnProperty(member)) {
+      delete activeSketch._registeredMethods[member];
+    }
+  }
 
   activeSketch._registeredMethods = {pre: [], post: [], remove: []};
 
@@ -59,7 +64,7 @@ var playCode = function(code) {
 
   activeSketch = myp5;
 
-};
+}
 
 function playEditor() {
   playCode(editor.getValue());
