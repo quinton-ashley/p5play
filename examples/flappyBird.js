@@ -1,7 +1,7 @@
 //flappy bird-like
 //mouse click or x to flap
 
-var GRAVITY = .3;
+var GRAVITY = 0.3;
 var FLAP = -7;
 var GROUND_Y = 450;
 var MIN_OPENING = 300;
