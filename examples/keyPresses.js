@@ -13,7 +13,7 @@ function setup() {
   createCanvas(800, 400);
 
   ghost = createSprite(600, 200);
-  ghost.addAnimation('normal', 'assets/ghost_spin0001.png',  'assets/ghost_spin0003.png');
+  ghost.addAnimation('normal', 'assets/ghost_spin0001.png', 'assets/ghost_spin0003.png');
 
   asterisk = createSprite(200, 200);
   asterisk.addAnimation('normal', 'assets/asterisk_normal0001.png', 'assets/asterisk_normal0003.png');
@@ -23,7 +23,7 @@ function setup() {
   asterisk.setCollider('circle', 0, 0, 64);
 
   platform = createSprite(200, 300);
-  platform.addAnimation('normal', 'assets/small_platform0001.png',  'assets/small_platform0003.png');
+  platform.addAnimation('normal', 'assets/small_platform0001.png', 'assets/small_platform0003.png');
 }
 
 function draw() {

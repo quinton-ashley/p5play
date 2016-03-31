@@ -15,7 +15,7 @@ function setup() {
   for(var i=0; i<20; i++)
   {
   var circle = createSprite(random(0, width), random(0, height));
-  circle.addAnimation('normal', 'assets/asterisk_circle0006.png',  'assets/asterisk_circle0008.png');
+  circle.addAnimation('normal', 'assets/asterisk_circle0006.png', 'assets/asterisk_circle0008.png');
   circle.setCollider('circle', -2, 2, 55);
   circle.setSpeed(random(2, 3), random(0, 360));
 
@@ -36,7 +36,7 @@ function setup() {
   for(var i=0; i<4; i++)
   {
   var box = createSprite(random(0, width), random(0, height));
-  box.addAnimation('normal', 'assets/box0001.png',  'assets/box0003.png');
+  box.addAnimation('normal', 'assets/box0001.png', 'assets/box0003.png');
   //setting immovable to true makes the sprite immune to bouncing and displacements
   //as if with infinite mass
   box.immovable = true;

@@ -18,8 +18,8 @@ function setup() {
   triangle.debug = true;
 
   cloud = createSprite(500, 150);
-  cloud.addAnimation('normal', 'assets/cloud_breathing0001.png',  'assets/cloud_breathing0009.png');
-  cloud.addAnimation('transformed', 'assets/asterisk_normal0001.png',  'assets/asterisk_normal0003.png');
+  cloud.addAnimation('normal', 'assets/cloud_breathing0001.png', 'assets/cloud_breathing0009.png');
+  cloud.addAnimation('transformed', 'assets/asterisk_normal0001.png', 'assets/asterisk_normal0003.png');
   cloud.setCollider('circle', 0, 0, 50);
   cloud.debug = true;
 

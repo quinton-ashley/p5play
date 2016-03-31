@@ -18,20 +18,20 @@ function setup() {
   anim.frameDelay = 8;
 
   sun = createSprite(400, 200);
-  sun.addAnimation('normal', 'assets/sun1.png',  'assets/sun3.png');
+  sun.addAnimation('normal', 'assets/sun1.png', 'assets/sun3.png');
   //the animation has semi transparent parts I only want the core to be tested for collision
   //so I set a circular collider to it
   //collider type "circle", offset x, offset y, radius
   sun.setCollider('circle', 0, 0, 60);
 
   bubbly = createSprite(650, 180);
-  bubbly.addAnimation('normal', 'assets/bubbly0001.png',  'assets/bubbly0004.png');
+  bubbly.addAnimation('normal', 'assets/bubbly0001.png', 'assets/bubbly0004.png');
   //the animation active area should be a smaller and shifted area
   //collider type "rectangle", offset x, offset y, width, height
   bubbly.setCollider('rectangle', 0, 26, 75, 75);
 
   circle = createSprite(0, 0);
-  circle.addAnimation('normal', 'assets/asterisk_circle0006.png',  'assets/asterisk_circle0008.png');
+  circle.addAnimation('normal', 'assets/asterisk_circle0006.png', 'assets/asterisk_circle0008.png');
   circle.setCollider('circle', -2, 2, 55);
 }
 

@@ -8,7 +8,7 @@ function setup() {
   createCanvas(800, 400);
 
   ghost = createSprite(200, 200);
-  ghost.addAnimation('normal', 'assets/ghost_spin0001.png',  'assets/ghost_spin0003.png');
+  ghost.addAnimation('normal', 'assets/ghost_spin0001.png', 'assets/ghost_spin0003.png');
   //detect the mouse position and click on this sprite
   //if no collider is defined, the image bounding box will be checked
   ghost.mouseActive = true;
