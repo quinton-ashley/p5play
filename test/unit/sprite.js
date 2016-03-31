@@ -1,4 +1,4 @@
-describe('Sprite', function() {
+describe('Sprite', function () {
   var pInst;
 
   beforeEach(function () {

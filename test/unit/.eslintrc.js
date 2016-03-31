@@ -8,6 +8,9 @@ module.exports = {
     "sinon": true
   },
   "rules": {
+    // Eventually we want to propagate this setting up to the main config.
+    "keyword-spacing": "error",
+
     // Allow empty functions in tests, because we often want to pass a no-op
     // placeholder when testing.
     // Very frequent: new p5(function () {})
@@ -15,6 +18,12 @@ module.exports = {
 
     // Chai BDD assertions violate this style rule, so disable it in tests
     // e.g. expect(value).to.equal('something')
-    "no-unused-expressions": "off"
+    "no-unused-expressions": "off",
+
+    // Eventually we want to propagate these four settings up to the main config.
+    "space-before-blocks": "error",
+    "space-before-function-paren": "error",
+    "space-in-parens": "error",
+    "space-infix-ops": "error"
   }
 };

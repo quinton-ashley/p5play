@@ -1,12 +1,12 @@
-describe('Group', function() {
+describe('Group', function () {
   var pInst, group;
 
-  beforeEach(function() {
-    pInst = new p5(function() {});
+  beforeEach(function () {
+    pInst = new p5(function () {});
     group = new pInst.Group();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     pInst.remove();
   });
 
@@ -128,8 +128,8 @@ describe('Group', function() {
     });
   });
 
-  describe('removeSprites()', function() {
-    it('should remove all sprites', function() {
+  describe('removeSprites()', function () {
+    it('should remove all sprites', function () {
       expect(group.size()).to.equal(0);
       expect(pInst.allSprites.size()).to.equal(0);
 

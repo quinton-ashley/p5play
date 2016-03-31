@@ -11,28 +11,28 @@
 /* jshint expr:true */
 /* global afterEach, beforeEach, describe, expect, it*/
 
-describe('collisions', function() {
+describe('collisions', function () {
   var SIZE = 10;
   var pInst;
   var spriteA, spriteB, spriteC, spriteD;
   var groupAB, groupCD;
   var callCount, pairs;
 
-  function testCallback(a, b) {
+  function testCallback (a, b) {
     callCount++;
     pairs.push([a.name, b.name]);
   }
 
-  function moveAToB(a, b) {
+  function moveAToB (a, b) {
     a.position.x = b.position.x;
   }
 
   beforeEach(function () {
-    pInst = new p5(function() {});
+    pInst = new p5(function () {});
     callCount = 0;
     pairs = [];
 
-    function createTestSprite(letter, position) {
+    function createTestSprite (letter, position) {
       var sprite = pInst.createSprite(position, 0, SIZE, SIZE);
       sprite.name = 'sprite' + letter;
       return sprite;
@@ -649,7 +649,7 @@ describe('collisions', function() {
   });
 
   describe('group.overlap(group)', function () {
-    function expectGroupsOverlap(outcome) {
+    function expectGroupsOverlap (outcome) {
       expect(groupAB.overlap(groupCD)).to.equal(outcome);
       expect(groupCD.overlap(groupAB)).to.equal(outcome);
     }

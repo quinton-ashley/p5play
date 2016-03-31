@@ -1,9 +1,9 @@
-describe('_keyCodeFromAlias', function() {
+describe('_keyCodeFromAlias', function () {
   var pInst, _warn, _keyCodeFromAlias;
   var KEY = p5.prototype.KEY;
 
   beforeEach(function () {
-    pInst = new p5(function() {});
+    pInst = new p5(function () {});
     _keyCodeFromAlias = pInst._keyCodeFromAlias.bind(pInst);
 
     // Stub p5.prototype._warn to hide console output during tests
@@ -68,7 +68,7 @@ describe('_keyCodeFromAlias', function() {
     });
   });
 
-  describe('deprecated aliases', function() {
+  describe('deprecated aliases', function () {
     var KEY_DEPRECATIONS = p5.prototype.KEY_DEPRECATIONS;
 
     it('maps every deprecated alias to a valid key alias', function () {
@@ -87,7 +87,7 @@ describe('_keyCodeFromAlias', function() {
       }
     });
 
-    it('aliases \'MINUT\' to \'MINUS\'', function() {
+    it('aliases \'MINUT\' to \'MINUS\'', function () {
       expect(_keyCodeFromAlias('MINUT'))
         .to.equal(_keyCodeFromAlias('MINUS'));
     });
@@ -99,7 +99,7 @@ describe('_keyCodeFromAlias', function() {
                   'future version of p5.play. Please use "MINUS" instead.');
     });
 
-    it('aliases \'COMA\' to \'COMMA\'', function() {
+    it('aliases \'COMA\' to \'COMMA\'', function () {
       expect(_keyCodeFromAlias('COMA'))
         .to.equal(_keyCodeFromAlias('COMMA'));
     });
