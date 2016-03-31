@@ -9,6 +9,10 @@ module.exports = {
   },
   "rules": {
     // Eventually move up to root config.
+    "brace-style": "error",
+    "curly": "error",
+
+    // Eventually move up to root config.
     "indent": ["error", 2],
 
     // Eventually we want to propagate this setting up to the main config.
