@@ -26,7 +26,7 @@ function setup() {
     obstacles.add(box);
     }
 
-  for(var i=0; i<10; i++)
+  for(var j=0; j<10; j++)
     {
     var dot = createSprite(random(0, width), random(0, height));
     dot.addAnimation('normal', 'assets/small_circle0001.png', 'assets/small_circle0001.png');
