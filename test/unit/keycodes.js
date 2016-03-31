@@ -20,33 +20,39 @@ describe('_keyCodeFromAlias', function() {
   describe('key aliases', function () {
     it('maps every alias to a numeric keycode', function () {
       for (var alias in KEY) {
-        expect(typeof _keyCodeFromAlias(alias)).to.equal('number');
+        if (KEY.hasOwnProperty(alias)) {
+          expect(typeof _keyCodeFromAlias(alias)).to.equal('number');
+        }
       }
     });
 
     it('is case-insensitive', function () {
       var upperCaseAlias, lowerCaseAlias, randomCaseAlias;
       for (var alias in KEY) {
-        upperCaseAlias = alias.toUpperCase();
-        lowerCaseAlias = alias.toLowerCase();
-        randomCaseAlias = alias.split('').map(function (char) {
-          if (Math.random() < 0.5) {
-            return char.toUpperCase();
-          } else {
-            return char.toLowerCase();
-          }
-        }).join('');
+        if (KEY.hasOwnProperty(alias)) {
+          upperCaseAlias = alias.toUpperCase();
+          lowerCaseAlias = alias.toLowerCase();
+          randomCaseAlias = alias.split('').map(function (char) {
+            if (Math.random() < 0.5) {
+              return char.toUpperCase();
+            } else {
+              return char.toLowerCase();
+            }
+          }).join('');
 
-        expect(_keyCodeFromAlias(upperCaseAlias))
-          .to.equal(_keyCodeFromAlias(lowerCaseAlias))
-          .to.equal(_keyCodeFromAlias(randomCaseAlias));
+          expect(_keyCodeFromAlias(upperCaseAlias))
+            .to.equal(_keyCodeFromAlias(lowerCaseAlias))
+            .to.equal(_keyCodeFromAlias(randomCaseAlias));
+        }
       }
     });
 
     it('does not warn when looking up a regular alias', function () {
       for (var alias in KEY) {
-        _keyCodeFromAlias(alias);
-        expect(_warn.callCount).to.equal(0);
+        if (KEY.hasOwnProperty(alias)) {
+          _keyCodeFromAlias(alias);
+          expect(_warn.callCount).to.equal(0);
+        }
       }
     });
 
@@ -64,13 +70,17 @@ describe('_keyCodeFromAlias', function() {
 
     it('maps every deprecated alias to a valid key alias', function () {
       for (var alias in KEY_DEPRECATIONS) {
-        expect(KEY).to.include.keys(KEY_DEPRECATIONS[alias]);
+        if (KEY_DEPRECATIONS.hasOwnProperty(alias)) {
+          expect(KEY).to.include.keys(KEY_DEPRECATIONS[alias]);
+        }
       }
     });
 
     it('does not include any deprecated aliases in key aliases', function () {
       for (var alias in KEY_DEPRECATIONS) {
-        expect(KEY).to.not.include.keys(alias);
+        if (KEY_DEPRECATIONS.hasOwnProperty(alias)) {
+          expect(KEY).to.not.include.keys(alias);
+        }
       }
     });
 
