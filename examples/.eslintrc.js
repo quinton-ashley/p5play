@@ -1,5 +1,8 @@
 module.exports = {
   "rules": {
+    // As beginner-friendly example code, don't worry about strict equality.
+    "eqeqeq": "off",
+
     // Let examples declare variables in the global scope - they aren't actually
     // run in global scope, so it's okay.
     "no-implicit-globals": "off",
