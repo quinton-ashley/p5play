@@ -16,7 +16,7 @@ particleImage = loadImage('assets/asteroids_particle.png');
 
 ship = createSprite(width/2, height/2);
 ship.maxSpeed = 6;
-ship.friction = .98;
+ship.friction = 0.98;
 ship.setCollider('circle', 0, 0, 20);
 
 ship.addImage('normal', shipImage);
@@ -58,7 +58,7 @@ function draw() {
     ship.rotation += 4;
   if(keyDown(UP_ARROW))
     {
-    ship.addSpeed(.2, ship.rotation);
+    ship.addSpeed(0.2, ship.rotation);
     ship.changeAnimation('thrust');
     }
   else
@@ -82,14 +82,14 @@ function createAsteroid(type, x, y) {
   var img = loadImage('assets/asteroid'+floor(random(0, 3))+'.png');
   a.addImage(img);
   a.setSpeed(2.5-(type/2), random(360));
-  a.rotationSpeed = .5;
+  a.rotationSpeed = 0.5;
   //a.debug = true;
   a.type = type;
 
   if(type == 2)
-    a.scale = .6;
+    a.scale = 0.6;
   if(type == 1)
-    a.scale = .3;
+    a.scale = 0.3;
 
   a.mass = 2+a.scale;
   a.setCollider('circle', 0, 0, 50);
