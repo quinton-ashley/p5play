@@ -48,7 +48,7 @@ function draw() {
 
   //.5 zoom is zooming out (50% of the normal size)
   if(mouseIsPressed)
-    camera.zoom = .5;
+    camera.zoom = 0.5;
   else
     camera.zoom = 1;
 
