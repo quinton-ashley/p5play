@@ -37,7 +37,7 @@ module.exports = {
     "curly": "off",
 
     "default-case": "error",
-    "dot-location": "error",
+    "dot-location": ["error", "property"],
     "dot-notation": "error",
     "eol-last": "error",
     "eqeqeq": "error",
@@ -168,7 +168,7 @@ module.exports = {
     "no-useless-escape": "error",
     "no-var": "off",
     "no-void": "error",
-    "no-warning-comments": "error",
+    "no-warning-comments": "warn",
     "no-whitespace-before-property": "error",
     "no-with": "error",
     "object-curly-spacing": "error",
