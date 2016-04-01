@@ -5,7 +5,7 @@ var activeSketch;
 
 // adapted from p5js.org, originally by Lauren McCarthy
 // https://github.com/processing/p5.js-website/blob/master/js/render.js
-function playCode (code) {
+function playCode(code) {
   /*eslint no-with: "off", no-eval: "off"*/
   var runnable = code;
   var _p5 = p5;
