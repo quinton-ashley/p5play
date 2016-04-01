@@ -16,6 +16,7 @@
     "lint:lib": "eslint lib/**",
     "lint:test": "eslint test/unit/**",
     "start": "http-server -o",
+    "postinstall": "npm run docs",
     "pretest": "npm run lint",
     "test": "mocha-phantomjs test/index.html"
   },
