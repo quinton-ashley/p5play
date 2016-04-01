@@ -1,17 +1,17 @@
-describe('p5 sketch instances', function () {
+describe('p5 sketch instances', function() {
   var pInstA, pInstB;
 
-  beforeEach(function () {
-    pInstA = new p5(function () {});
-    pInstB = new p5(function () {});
+  beforeEach(function() {
+    pInstA = new p5(function() {});
+    pInstB = new p5(function() {});
   });
 
-  afterEach(function () {
+  afterEach(function() {
     pInstA.remove();
     pInstB.remove();
   });
 
-  it('have their own allSprites property', function () {
+  it('have their own allSprites property', function() {
     expect(pInstA.allSprites.length).to.equal(0);
     expect(pInstB.allSprites.length).to.equal(0);
 
@@ -23,7 +23,7 @@ describe('p5 sketch instances', function () {
     expect(pInstB.allSprites.length).to.equal(0);
   });
 
-  it('have their own spriteUpdate property', function () {
+  it('have their own spriteUpdate property', function() {
     expect(pInstA.spriteUpdate).to.be.true;
     expect(pInstB.spriteUpdate).to.be.true;
 

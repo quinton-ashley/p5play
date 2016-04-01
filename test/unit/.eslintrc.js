@@ -29,7 +29,6 @@ module.exports = {
 
     // Eventually we want to propagate these four settings up to the main config.
     "space-before-blocks": "error",
-    "space-before-function-paren": "error",
     "space-in-parens": "error",
     "space-infix-ops": "error"
   }

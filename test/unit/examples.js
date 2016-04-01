@@ -1,8 +1,8 @@
-describe('Example sketches', function () {
+describe('Example sketches', function() {
   var FRAMES_TO_DRAW = 3;
 
   var iframe;
-  var examples = (function findExamples () {
+  var examples = (function findExamples() {
     var FILENAME_RE = /index\.html\?fileName=([A-Za-z0-9_.]+)/g;
     var examples = [];
     var req = new XMLHttpRequest();
@@ -10,7 +10,7 @@ describe('Example sketches', function () {
     req.open('GET', '../examples/index.html', false);
     req.send(null);
 
-    req.responseText.replace(FILENAME_RE, function (_, fileName) {
+    req.responseText.replace(FILENAME_RE, function(_, fileName) {
       examples.push(fileName);
     });
 
@@ -19,11 +19,11 @@ describe('Example sketches', function () {
 
   // The following function's source code is converted to a string
   // and evaluated in an iframe; it is NOT executed directly!
-  var iframeScript = function (parentWindowCbName, framesToDraw) {
+  var iframeScript = function(parentWindowCbName, framesToDraw) {
     var framesDrawn = 0;
     var done = window.parent[parentWindowCbName];
 
-    window.onerror = function (msg, source, lineno, colno, error) {
+    window.onerror = function(msg, source, lineno, colno, error) {
       if (!error) {
         // Some browsers, like PhantomJS, don't pass an error argument.
         return done(new Error(msg + ' @ ' + source + ':' + lineno));
@@ -31,14 +31,14 @@ describe('Example sketches', function () {
       done(error);
     };
 
-    p5.prototype.registerMethod('post', function () {
+    p5.prototype.registerMethod('post', function() {
       if (++framesDrawn === framesToDraw) {
         done();
       }
     });
   }.toString();
 
-  beforeEach(function () {
+  beforeEach(function() {
     iframe = document.createElement('iframe');
     document.body.appendChild(iframe);
     iframe.style.visibility = 'hidden';
@@ -46,13 +46,13 @@ describe('Example sketches', function () {
     iframe.style.height = '480px';
   });
 
-  afterEach(function () {
+  afterEach(function() {
     iframe.parentNode.removeChild(iframe);
   });
 
-  examples.forEach(function (fileName) {
+  examples.forEach(function(fileName) {
     var testName = fileName + ' runs for ' + FRAMES_TO_DRAW + ' frames';
-    it(testName, function (done) {
+    it(testName, function(done) {
       var windowCbName = 'example_' + fileName.slice(0, -3) + '_done';
       var iframeScriptArgs = [
         windowCbName,
