@@ -13,6 +13,7 @@
     "docs": "yuidoc .",
     "lint": "eslint lib/**",
     "start": "http-server -o",
+    "postinstall": "npm run docs",
     "pretest": "npm run lint",
     "test": "mocha-phantomjs test/index.html"
   },
