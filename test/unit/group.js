@@ -211,4 +211,71 @@ describe('Group', function() {
       expect(group.maxDepth()).to.equal(topSprite.depth);
     });
   });
+
+  describe('minDepth()', function() {
+    it('should be 99999 for an empty group', function() {
+      expect(group.minDepth()).to.equal(99999);
+    });
+
+    it('should be the depth of the sprite in a single-sprite group', function() {
+      var sprite = pInst.createSprite(1, 1);
+      sprite.depth = 99;
+      group.add(sprite);
+      expect(group.minDepth()).to.equal(sprite.depth);
+    });
+
+    it('even when the max sprite depth is greater than 99999', function() {
+      var sprite = pInst.createSprite(1, 1);
+      sprite.depth = Number.MAX_VALUE;
+      expect(sprite.depth).to.be.greaterThan(99999);
+      group.add(sprite);
+      expect(group.minDepth()).to.equal(sprite.depth);
+    });
+
+    it('should be the greatest depth of sprites in the group', function() {
+      var bottomSprite = pInst.createSprite(1, 1);
+      var sprite2 = pInst.createSprite(1, 2);
+      var sprite3 = pInst.createSprite(1, 3);
+
+      bottomSprite.depth = 1;
+      sprite2.depth = 15;
+      sprite3.depth = 101;
+      expect(pInst.allSprites.minDepth()).to.equal(bottomSprite.depth);
+
+      // Regardless of order they are added
+      group.add(sprite3);
+      group.add(bottomSprite);
+      group.add(sprite2);
+      expect(group.minDepth()).to.equal(bottomSprite.depth);
+    });
+
+    it('only considers sprites in the given group', function() {
+      var bottomSprite = pInst.createSprite(1, 1);
+      var sprite2 = pInst.createSprite(1, 2);
+      var sprite3 = pInst.createSprite(1, 3);
+
+      bottomSprite.depth = 1;
+      sprite2.depth = 15;
+      sprite3.depth = 101;
+
+      group.add(sprite3);
+      group.add(sprite2);
+      expect(group.minDepth()).to.equal(sprite2.depth);
+    });
+
+    it('works given negative depths too', function() {
+      var bottomSprite = pInst.createSprite(1, 1);
+      var sprite2 = pInst.createSprite(1, 2);
+      var sprite3 = pInst.createSprite(1, 3);
+
+      bottomSprite.depth = -100;
+      sprite2.depth = -15;
+      sprite3.depth = -50;
+
+      group.add(bottomSprite);
+      group.add(sprite2);
+      group.add(sprite3);
+      expect(group.minDepth()).to.equal(bottomSprite.depth);
+    });
+  });
 });
