@@ -31,4 +31,50 @@ describe('Sprite', function() {
     expect(ellipseMode).to.equal(p5.prototype.CENTER);
     expect(imageMode).to.equal(p5.prototype.CENTER);
   });
+
+  describe('getDirection', function() {
+    var sprite;
+
+    beforeEach(function() {
+      sprite = pInst.createSprite();
+    });
+
+    function checkDirectionForVelocity(v, d) {
+      sprite.velocity.x = v[0];
+      sprite.velocity.y = v[1];
+      expect(sprite.getDirection()).to.equal(d);
+    }
+
+    it('returns zero when there is no velocity', function() {
+      checkDirectionForVelocity([0, 0], 0);
+    });
+
+    it('positive or zero y velocity gives a positive direction', function() {
+      checkDirectionForVelocity([-1, 0], 180);
+      checkDirectionForVelocity([0, 0], 0);
+      checkDirectionForVelocity([1, 0], 0);
+
+      checkDirectionForVelocity([-1, 1], 135);
+      checkDirectionForVelocity([0, 1], 90);
+      checkDirectionForVelocity([1, 1], 45);
+    });
+
+    it('negative y velocity gives a negative direction', function() {
+      checkDirectionForVelocity([-1, -1], -135);
+      checkDirectionForVelocity([0, -1], -90);
+      checkDirectionForVelocity([1, -1], -45);
+    });
+
+    it('returns degrees when p5 angleMode is RADIANS', function() {
+      pInst.angleMode(p5.prototype.RADIANS);
+      checkDirectionForVelocity([1, 1], 45);
+      checkDirectionForVelocity([0, 1], 90);
+    });
+
+    it('returns degrees when p5 angleMode is DEGREES', function() {
+      pInst.angleMode(p5.prototype.DEGREES);
+      checkDirectionForVelocity([1, 1], 45);
+      checkDirectionForVelocity([0, 1], 90);
+    });
+  });
 });
