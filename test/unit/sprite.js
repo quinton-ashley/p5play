@@ -76,5 +76,55 @@ describe('Sprite', function() {
       checkDirectionForVelocity([1, 1], 45);
       checkDirectionForVelocity([0, 1], 90);
     });
+
+  });
+
+  describe('demension updating when animation changes', function() {
+    it('animation width and height get inherited from frame', function() {
+      var image = new p5.Image(100, 100, pInst);
+      var frames = [
+        {name: 0, frame: {x: 0, y: 0, width: 30, height: 30}}
+      ];
+      var sheet = new pInst.SpriteSheet(image, frames);
+      var animation = new pInst.Animation(sheet);
+
+      var sprite = pInst.createSprite(0, 0);
+      sprite.addAnimation('label', animation);
+
+      expect(sprite.width).to.equal(30);
+      expect(sprite.height).to.equal(30);
+    });
+
+    it('updates the width and height property when frames are different sizes', function() {
+      var image = new p5.Image(100, 100, pInst);
+      var frames = [
+        {name: 0, frame: {x: 0, y: 0, width: 50, height: 50}},
+        {name: 1, frame: {x: 100, y: 0, width: 40, height: 60}},
+        {name: 2, frame: {x: 0, y: 80, width: 70, height: 30}}
+      ];
+      var sheet = new pInst.SpriteSheet(image, frames);
+      var animation = new pInst.Animation(sheet);
+
+      var sprite = pInst.createSprite(0, 0);
+      sprite.addAnimation('label', animation);
+
+      expect(sprite.width).to.equal(50);
+      expect(sprite.height).to.equal(50);
+
+      // Frame changes after every 4th update because of frame delay.
+      sprite.update();
+      sprite.update();
+      sprite.update();
+      sprite.update();
+      expect(sprite.width).to.equal(40);
+      expect(sprite.height).to.equal(60);
+
+      sprite.update();
+      sprite.update();
+      sprite.update();
+      sprite.update();
+      expect(sprite.width).to.equal(70);
+      expect(sprite.height).to.equal(30);
+    });
   });
 });
