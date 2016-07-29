@@ -77,4 +77,31 @@ describe('Sprite', function() {
       checkDirectionForVelocity([0, 1], 90);
     });
   });
+
+  describe('mouse events', function() {
+    it('does not call onMouseReleased on mouse-out if mouse is still down', function() {
+      var sprite = pInst.createSprite(0, 0, 100, 100);
+      sprite.onMouseOver = sinon.spy();
+      sprite.onMouseOut = sinon.spy();
+      sprite.onMousePressed = sinon.spy();
+      sprite.onMouseReleased = sinon.spy();
+      sprite.update();
+      expect(sprite.onMousePressed.called).to.be.false;
+      expect(sprite.onMouseReleased.called).to.be.false;
+
+      pInst.mouseX = 0;
+      pInst.mouseY = 0;
+      pInst.mouseIsPressed = true;
+      sprite.update();
+      expect(sprite.onMousePressed.called).to.be.true;
+      expect(sprite.onMouseReleased.called).to.be.false;
+
+      pInst.mouseX = 200;
+      pInst.mouseY = 0;
+      pInst.mouseIsPressed = true;
+      sprite.update();
+      expect(sprite.onMousePressed.called).to.be.true;
+      expect(sprite.onMouseReleased.called).to.be.false;
+    });
+  });
 });
