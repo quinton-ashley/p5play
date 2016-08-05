@@ -79,7 +79,7 @@ describe('Sprite', function() {
 
   });
 
-  describe('demension updating when animation changes', function() {
+  describe('dimension updating when animation changes', function() {
     it('animation width and height get inherited from frame', function() {
       var image = new p5.Image(100, 100, pInst);
       var frames = [
