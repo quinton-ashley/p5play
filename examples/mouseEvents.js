@@ -3,6 +3,7 @@
 
 var asterisk;
 var ghost;
+var draggedSprite;
 
 function setup() {
   createCanvas(800, 400);
@@ -34,17 +35,28 @@ function setup() {
   asterisk.onMousePressed = function() {
     this.changeAnimation('transform');
     this.animation.goToFrame(this.animation.getLastFrame());
+    if (draggedSprite == null) {
+      draggedSprite = this;
+    }
   };
 
   asterisk.onMouseReleased = function() {
     this.changeAnimation('transform');
     this.animation.goToFrame(0);
+    if (draggedSprite == this) {
+      draggedSprite = null;
+    }
   };
 
 }
 
 function draw() {
   background(255, 255, 255);
+
+  if (draggedSprite != null) {
+    draggedSprite.position.x = mouseX;
+    draggedSprite.position.y = mouseY;
+  }
 
   //if a sprite is mouseActive true I can check if the mouse is over its collider
   //and if the button is pressed
