@@ -165,6 +165,47 @@ describe('Animation', function() {
       animation.update();
       expect(animation.playing).to.be.false;
     });
+
+    describe('when target frame is out of bounds', function() {
+      it('does not affect play behavior', function() {
+        // Play forwards
+        animation.changeFrame(5);
+        animation.play();
+        expect(animation.getFrame()).to.equal(5);
+
+        // Verify playing forwards
+        animation.update();
+        expect(animation.getFrame()).to.equal(6);
+
+        // Try to go to a negative frame.
+        // Unless ignored, we'd expect the animation to start going backwards
+        animation.goToFrame(-1);
+        animation.update();
+        expect(animation.getFrame()).to.equal(7);
+
+        // Play backwards (correctly this time)
+        animation.goToFrame(0);
+        animation.update();
+        expect(animation.getFrame()).to.equal(6);
+
+        // Try going to a positive frame out of bounds
+        // Unless ignored, we'd expect the animation to run forward again
+        animation.goToFrame(animation.images.length);
+        animation.update();
+        expect(animation.getFrame()).to.equal(5);
+      });
+
+      it('does not affect play state', function() {
+        animation.stop();
+        expect(animation.playing).to.be.false;
+
+        animation.goToFrame(-1);
+        expect(animation.playing).to.be.false;
+
+        animation.goToFrame(animation.images.length);
+        expect(animation.playing).to.be.false;
+      });
+    });
   });
 
   /**
