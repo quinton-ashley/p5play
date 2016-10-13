@@ -370,6 +370,118 @@ describe('collisions', function() {
         expect(pairs).to.deep.equal([[spriteB.name, spriteA.name]]);
       });
     });
+
+    it('does not reposition either sprite when sprites do not overlap', function() {
+      var initialPositionA = spriteA.position.copy();
+      var initialPositionB = spriteB.position.copy();
+
+      spriteA.collide(spriteB);
+
+      expect(spriteA.position).to.deep.equal(initialPositionA);
+      expect(spriteB.position).to.deep.equal(initialPositionB);
+
+      spriteB.collide(spriteA);
+
+      expect(spriteA.position).to.deep.equal(initialPositionA);
+      expect(spriteB.position).to.deep.equal(initialPositionB);
+    });
+
+    describe('displaces the caller out of collision when sprites do overlap', function() {
+      it('to the left', function() {
+        spriteA.position.x = spriteB.position.x - 1;
+
+        var expectedPositionA = spriteB.position.copy().add(-SIZE, 0);
+        var expectedPositionB = spriteB.position.copy();
+
+        spriteA.collide(spriteB);
+
+        expect(spriteA.position).to.deep.equal(expectedPositionA);
+        expect(spriteB.position).to.deep.equal(expectedPositionB);
+      });
+
+      it('to the right', function() {
+        spriteA.position.x = spriteB.position.x + 1;
+
+        var expectedPositionA = spriteB.position.copy().add(SIZE, 0);
+        var expectedPositionB = spriteB.position.copy();
+
+        spriteA.collide(spriteB);
+
+        expect(spriteA.position).to.deep.equal(expectedPositionA);
+        expect(spriteB.position).to.deep.equal(expectedPositionB);
+      });
+
+      it('caller and callee reversed', function() {
+        spriteA.position.x = spriteB.position.x + 1;
+
+        var expectedPositionA = spriteA.position.copy();
+        var expectedPositionB = spriteA.position.copy().add(-SIZE, 0);
+
+        spriteB.collide(spriteA);
+
+        expect(spriteA.position).to.deep.equal(expectedPositionA);
+        expect(spriteB.position).to.deep.equal(expectedPositionB);
+      });
+    });
+
+    it('does not change velocity of either sprite when sprites do not overlap', function() {
+      var initialVelocityA = spriteA.velocity.copy();
+      var initialVelocityB = spriteB.velocity.copy();
+
+      spriteA.collide(spriteB);
+
+      expect(spriteA.velocity).to.deep.equal(initialVelocityA);
+      expect(spriteB.velocity).to.deep.equal(initialVelocityB);
+
+      spriteB.collide(spriteA);
+
+      expect(spriteA.velocity).to.deep.equal(initialVelocityA);
+      expect(spriteB.velocity).to.deep.equal(initialVelocityB);
+    });
+
+    describe('matches caller velocity to callee velocity when sprites do overlap', function() {
+      it('when callee velocity is zero', function() {
+        spriteA.position.x = spriteB.position.x - 1;
+        spriteA.velocity.x = 2;
+        spriteB.velocity.x = 0;
+
+        var expectedVelocityA = spriteB.velocity.copy();
+        var expectedVelocityB = spriteB.velocity.copy();
+
+        spriteA.collide(spriteB);
+
+        expect(spriteA.velocity).to.deep.equal(expectedVelocityA);
+        expect(spriteB.velocity).to.deep.equal(expectedVelocityB);
+      });
+
+      it('when callee velocity is nonzero', function() {
+        spriteA.position.x = spriteB.position.x - 1;
+        spriteA.velocity.x = 2;
+        spriteB.velocity.x = -1;
+
+        var expectedVelocityA = spriteB.velocity.copy();
+        var expectedVelocityB = spriteB.velocity.copy();
+
+        spriteA.collide(spriteB);
+
+        expect(spriteA.velocity).to.deep.equal(expectedVelocityA);
+        expect(spriteB.velocity).to.deep.equal(expectedVelocityB);
+      });
+
+      it('caller and callee reversed', function() {
+        spriteA.position.x = spriteB.position.x - 1;
+        spriteA.velocity.x = 2;
+        spriteB.velocity.x = -1;
+
+        var expectedVelocityA = spriteA.velocity.copy();
+        var expectedVelocityB = spriteA.velocity.copy();
+
+        spriteB.collide(spriteA);
+
+        expect(spriteA.velocity).to.deep.equal(expectedVelocityA);
+        expect(spriteB.velocity).to.deep.equal(expectedVelocityB);
+      });
+    });
   });
 
   describe('sprite.collide(group)', function() {
