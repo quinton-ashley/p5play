@@ -228,6 +228,85 @@ describe('CircleCollider', function() {
         expect(displacementD2.x).to.equal(0);
         expect(displacementD2.y).to.equal(0);
       });
+
+      it('projects horizontally when exactly overlapped by offset', function() {
+        var a = makeAt(2, 2);
+        var b = makeWithOffset(2, 2);
+        var displacementB1 = a.collide(b);
+        var displacementB2 = b.collide(a);
+        expect(displacementB1.x).to.equal(2);
+        expect(displacementB1.y).to.equal(0);
+        expect(displacementB2.x).to.equal(2);
+        expect(displacementB2.y).to.equal(0);
+      });
+
+      it('projects out when partially overlapped along axes by offset', function() {
+        var a = makeAt(2, 2);
+        var b = makeWithOffset(2, 3);
+        var verticalDisplacement1 = a.collide(b);
+        var verticalDisplacement2 = b.collide(a);
+        expect(verticalDisplacement1.x).to.closeTo(0, 0.001);
+        expect(verticalDisplacement1.y).to.equal(-1);
+        expect(verticalDisplacement2.x).to.closeTo(0, 0.001);
+        expect(verticalDisplacement2.y).to.equal(1);
+
+        var c = makeWithOffset(3, 2);
+        var horizontalDisplacement1 = a.collide(c);
+        var horizontalDisplacement2 = c.collide(a);
+        expect(horizontalDisplacement1.x).to.equal(-1);
+        expect(horizontalDisplacement1.y).to.closeTo(0, 0.001);
+        expect(horizontalDisplacement2.x).to.equal(1);
+        expect(horizontalDisplacement2.y).to.closeTo(0, 0.001);
+      });
+
+      it('projects at an angle when overlapped at an angle by offset', function() {
+        var a = makeAt(2, 2);
+
+        // At 45deg
+        var b = makeWithOffset(3, 3);
+        var displacementB1 = a.collide(b);
+        var displacementB2 = b.collide(a);
+        expect(displacementB1.x).to.be.closeTo(-0.414, 0.001);
+        expect(displacementB1.y).to.be.closeTo(-0.414, 0.001);
+        expect(displacementB2.x).to.be.closeTo(0.414, 0.001);
+        expect(displacementB2.y).to.be.closeTo(0.414, 0.001);
+
+        var c = makeWithOffset(1.5, 3);
+        var displacementC1 = a.collide(c);
+        var displacementC2 = c.collide(a);
+        expect(displacementC1.x).to.be.closeTo(0.394, 0.001);
+        expect(displacementC1.y).to.be.closeTo(-0.788, 0.001);
+        expect(displacementC2.x).to.be.closeTo(-0.394, 0.001);
+        expect(displacementC2.y).to.be.closeTo(0.788, 0.001);
+      });
+
+      it('returns zero vector when not overlapping by offset', function() {
+        var a = makeAt(2, 2);
+
+        var b = makeWithOffset(5, 2); // Separated by 3 on the x-axis
+        var displacementB1 = a.collide(b);
+        var displacementB2 = b.collide(a);
+        expect(displacementB1.x).to.equal(0);
+        expect(displacementB1.y).to.equal(0);
+        expect(displacementB2.x).to.equal(0);
+        expect(displacementB2.y).to.equal(0);
+
+        var c = makeWithOffset(2, 5); // Separated by 3 on the y-axis
+        var displacementC1 = a.collide(c);
+        var displacementC2 = c.collide(a);
+        expect(displacementC1.x).to.equal(0);
+        expect(displacementC1.y).to.equal(0);
+        expect(displacementC2.x).to.equal(0);
+        expect(displacementC2.y).to.equal(0);
+
+        var d = makeWithOffset(4, 4); // Separated by 2 on both x and y axes
+        var displacementD1 = a.collide(d);
+        var displacementD2 = d.collide(a);
+        expect(displacementD1.x).to.equal(0);
+        expect(displacementD1.y).to.equal(0);
+        expect(displacementD2.x).to.equal(0);
+        expect(displacementD2.y).to.equal(0);
+      });
     });
   });
 
