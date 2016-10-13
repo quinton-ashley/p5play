@@ -1,17 +1,10 @@
-/** @file Tests for collision methods and how they report out.
- *
- * There are four 'collision' methods in p5.play:
- * - overlap (a check with no automatic response)
- * - displace (the caller pushes the callee out of the way)
- * - collide (the callee resists the caller, opposite of displace)
- * - bounce (motion of both callee and caller are affected)
+/** @file Tests for Sprite.bounce(Group), Group.bounce(Sprite), and
+ *  Group.bounce(group) behaviors.
+ *  See sprite-bounce.js for Sprite.bounce(Sprite) tests and coverage of
+ *  changes to position/velocity.
  */
-// The following jshint options stop it from complaining about chai expectations
-/* jshint -W024 */
-/* jshint expr:true */
-/* global afterEach, beforeEach, describe, expect, it*/
 
-describe('collisions', function() {
+describe('Groups and bounce()', function() {
   var SIZE = 10;
   var pInst;
   var spriteA, spriteB, spriteC, spriteD;
@@ -28,7 +21,8 @@ describe('collisions', function() {
   }
 
   beforeEach(function() {
-    pInst = new p5(function() {});
+    pInst = new p5(function() {
+    });
     callCount = 0;
     pairs = [];
 
