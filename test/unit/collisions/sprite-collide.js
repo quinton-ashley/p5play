@@ -106,13 +106,13 @@ describe('sprite.collide(sprite)', function() {
 
     spriteA.collide(spriteB);
 
-    expect(spriteA.position).to.deep.equal(initialPositionA);
-    expect(spriteB.position).to.deep.equal(initialPositionB);
+    expectVectorsAreClose(spriteA.position, initialPositionA);
+    expectVectorsAreClose(spriteB.position, initialPositionB);
 
     spriteB.collide(spriteA);
 
-    expect(spriteA.position).to.deep.equal(initialPositionA);
-    expect(spriteB.position).to.deep.equal(initialPositionB);
+    expectVectorsAreClose(spriteA.position, initialPositionA);
+    expectVectorsAreClose(spriteB.position, initialPositionB);
   });
 
   describe('displaces the caller out of collision when sprites do overlap', function() {
@@ -124,8 +124,8 @@ describe('sprite.collide(sprite)', function() {
 
       spriteA.collide(spriteB);
 
-      expect(spriteA.position).to.deep.equal(expectedPositionA);
-      expect(spriteB.position).to.deep.equal(expectedPositionB);
+      expectVectorsAreClose(spriteA.position, expectedPositionA);
+      expectVectorsAreClose(spriteB.position, expectedPositionB);
     });
 
     it('to the right', function() {
@@ -136,8 +136,8 @@ describe('sprite.collide(sprite)', function() {
 
       spriteA.collide(spriteB);
 
-      expect(spriteA.position).to.deep.equal(expectedPositionA);
-      expect(spriteB.position).to.deep.equal(expectedPositionB);
+      expectVectorsAreClose(spriteA.position, expectedPositionA);
+      expectVectorsAreClose(spriteB.position, expectedPositionB);
     });
 
     it('caller and callee reversed', function() {
@@ -148,8 +148,8 @@ describe('sprite.collide(sprite)', function() {
 
       spriteB.collide(spriteA);
 
-      expect(spriteA.position).to.deep.equal(expectedPositionA);
-      expect(spriteB.position).to.deep.equal(expectedPositionB);
+      expectVectorsAreClose(spriteA.position, expectedPositionA);
+      expectVectorsAreClose(spriteB.position, expectedPositionB);
     });
   });
 
@@ -159,13 +159,13 @@ describe('sprite.collide(sprite)', function() {
 
     spriteA.collide(spriteB);
 
-    expect(spriteA.velocity).to.deep.equal(initialVelocityA);
-    expect(spriteB.velocity).to.deep.equal(initialVelocityB);
+    expectVectorsAreClose(spriteA.velocity, initialVelocityA);
+    expectVectorsAreClose(spriteB.velocity, initialVelocityB);
 
     spriteB.collide(spriteA);
 
-    expect(spriteA.velocity).to.deep.equal(initialVelocityA);
-    expect(spriteB.velocity).to.deep.equal(initialVelocityB);
+    expectVectorsAreClose(spriteA.velocity, initialVelocityA);
+    expectVectorsAreClose(spriteB.velocity, initialVelocityB);
   });
 
   describe('matches caller velocity to callee velocity when sprites do overlap', function() {
@@ -179,8 +179,8 @@ describe('sprite.collide(sprite)', function() {
 
       spriteA.collide(spriteB);
 
-      expect(spriteA.velocity).to.deep.equal(expectedVelocityA);
-      expect(spriteB.velocity).to.deep.equal(expectedVelocityB);
+      expectVectorsAreClose(spriteA.velocity, expectedVelocityA);
+      expectVectorsAreClose(spriteB.velocity, expectedVelocityB);
     });
 
     it('when callee velocity is nonzero', function() {
@@ -193,8 +193,44 @@ describe('sprite.collide(sprite)', function() {
 
       spriteA.collide(spriteB);
 
-      expect(spriteA.velocity).to.deep.equal(expectedVelocityA);
-      expect(spriteB.velocity).to.deep.equal(expectedVelocityB);
+      expectVectorsAreClose(spriteA.velocity, expectedVelocityA);
+      expectVectorsAreClose(spriteB.velocity, expectedVelocityB);
+    });
+
+    it('only along x axis when only displaced along x axis', function() {
+      spriteA.position.x = spriteB.position.x - 1;
+      spriteA.velocity.x = 2;
+      spriteA.velocity.y = 3;
+      spriteB.velocity.x = -1;
+
+      // Expect to change velocity only along X
+      var expectedVelocityA = spriteA.velocity.copy();
+      expectedVelocityA.x = spriteB.velocity.x;
+      var expectedVelocityB = spriteB.velocity.copy();
+
+      spriteA.collide(spriteB);
+
+      expectVectorsAreClose(spriteA.velocity, expectedVelocityA);
+      expectVectorsAreClose(spriteB.velocity, expectedVelocityB);
+    });
+
+    it('only along y axis when only displaced along y axis', function() {
+      spriteA.position.x = spriteB.position.x;
+      spriteA.position.y = spriteB.position.y + 1;
+      spriteA.velocity.x = 2;
+      spriteA.velocity.y = 3;
+      spriteB.velocity.x = -1;
+      spriteB.velocity.y = 1.5;
+
+      // Expect to change velocity only along Y
+      var expectedVelocityA = spriteA.velocity.copy();
+      expectedVelocityA.y = spriteB.velocity.y;
+      var expectedVelocityB = spriteB.velocity.copy();
+
+      spriteA.collide(spriteB);
+
+      expectVectorsAreClose(spriteA.velocity, expectedVelocityA);
+      expectVectorsAreClose(spriteB.velocity, expectedVelocityB);
     });
 
     it('caller and callee reversed', function() {
@@ -207,8 +243,16 @@ describe('sprite.collide(sprite)', function() {
 
       spriteB.collide(spriteA);
 
-      expect(spriteA.velocity).to.deep.equal(expectedVelocityA);
-      expect(spriteB.velocity).to.deep.equal(expectedVelocityB);
+      expectVectorsAreClose(spriteA.velocity, expectedVelocityA);
+      expectVectorsAreClose(spriteB.velocity, expectedVelocityB);
     });
   });
+
+  function expectVectorsAreClose(vA, vB) {
+    var failMsg = 'Expected <' + vA.x + ', ' + vA.y + '> to equal <' +
+      vB.x + ', ' + vB.y + '>';
+    expect(vA.x).to.be.closeTo(vB.x, 0.00001, failMsg);
+    expect(vA.y).to.be.closeTo(vB.y, 0.00001, failMsg);
+  }
 });
+
