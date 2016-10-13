@@ -18,6 +18,15 @@ describe('CircleCollider', function() {
     );
   }
 
+  // Create at a (0,0) with radius=1 to test use of offsets
+  function makeWithOffset(x, y) {
+    return new pInst.CircleCollider(
+      new p5.Vector(0, 0),
+      1,
+      new p5.Vector(x, y)
+    );
+  }
+
   it('conforms to the collider interface', function() {
     // Still figuring out what this is though;
     var collider = new pInst.CircleCollider();
@@ -61,8 +70,8 @@ describe('CircleCollider', function() {
 
       it('true when tangent along 45deg line', function() {
         var a = makeAt(2, 2);
-        var b = makeAt(2 + 2*Math.cos(Math.PI / 4),
-                       2 + 2*Math.sin(Math.PI / 4));
+        var b = makeAt(2 + 2 * Math.cos(Math.PI / 4),
+                       2 + 2 * Math.sin(Math.PI / 4));
         expect(a.overlap(b)).to.be.true;
         expect(b.overlap(a)).to.be.true;
       });
@@ -81,6 +90,57 @@ describe('CircleCollider', function() {
       it('false when distant along 45deg line', function() {
         var a = makeAt(2, 2);
         var b = makeAt(4, 4); // Separated by 2 on both x and y axes
+        expect(a.overlap(b)).to.be.false;
+        expect(b.overlap(a)).to.be.false;
+      });
+
+      it('true when exactly overlapped by offset', function() {
+        var a = makeAt(2, 2);
+        var b = makeWithOffset(2, 2);
+        expect(a.overlap(b)).to.be.true;
+        expect(b.overlap(a)).to.be.true;
+      });
+
+      it('true when partially overlapped by offset', function() {
+        var a = makeAt(2, 2);
+        var b = makeWithOffset(2, 3);
+        expect(a.overlap(b)).to.be.true;
+        expect(b.overlap(a)).to.be.true;
+      });
+
+      it('false when tangent along axes by offset', function() {
+        var a = makeAt(2, 2);
+        var b = makeWithOffset(4, 2); // Separated by 2 on the x-axis
+        expect(a.overlap(b)).to.be.false;
+        expect(b.overlap(a)).to.be.false;
+
+        var c = makeWithOffset(2, 4); // Separated by 2 on the y-axis
+        expect(a.overlap(c)).to.be.false;
+        expect(c.overlap(a)).to.be.false;
+      });
+
+      it('true when tangent along 45deg line by offset', function() {
+        var a = makeAt(2, 2);
+        var b = makeWithOffset(2 + 2 * Math.cos(Math.PI / 4),
+          2 + 2 * Math.sin(Math.PI / 4));
+        expect(a.overlap(b)).to.be.true;
+        expect(b.overlap(a)).to.be.true;
+      });
+
+      it('false when distant along axes by offset', function() {
+        var a = makeAt(2, 2);
+        var b = makeWithOffset(5, 2); // Separated by 3 on the x-axis
+        expect(a.overlap(b)).to.be.false;
+        expect(b.overlap(a)).to.be.false;
+
+        var c = makeWithOffset(2, 5); // Separated by 3 on the y-axis
+        expect(a.overlap(c)).to.be.false;
+        expect(c.overlap(a)).to.be.false;
+      });
+
+      it('false when distant along 45deg line by offset', function() {
+        var a = makeAt(2, 2);
+        var b = makeWithOffset(4, 4); // Separated by 2 on both x and y axes
         expect(a.overlap(b)).to.be.false;
         expect(b.overlap(a)).to.be.false;
       });
@@ -120,7 +180,7 @@ describe('CircleCollider', function() {
         expect(horizontalDisplacementB.y).to.closeTo(0, 0.001);
       });
 
-      it('projects at an angle when overlapped at an angle', function () {
+      it('projects at an angle when overlapped at an angle', function() {
         var a = makeAt(2, 2);
 
         // At 45deg
@@ -174,7 +234,7 @@ describe('CircleCollider', function() {
   describe('size()', function() {
     var collider, radius;
 
-    beforeEach(function (){
+    beforeEach(function() {
       radius = Math.floor(100 * Math.random());
       collider = new pInst.CircleCollider(
         new p5.Vector(0, 0),
@@ -184,13 +244,13 @@ describe('CircleCollider', function() {
     });
 
     it('returns a p5.Vector', function() {
-       expect(collider.size()).to.be.an.instanceOf(p5.Vector);
+      expect(collider.size()).to.be.an.instanceOf(p5.Vector);
     });
 
-    it('is twice the circle radius in each direction', function () {
+    it('is twice the circle radius in each direction', function() {
       var size = collider.size();
-      expect(size.x).to.equal(2*radius);
-      expect(size.y).to.equal(2*radius);
-    })
+      expect(size.x).to.equal(2 * radius);
+      expect(size.y).to.equal(2 * radius);
+    });
   });
 });
