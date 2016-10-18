@@ -320,11 +320,17 @@ describe('Sprite', function() {
       expect(sprite.collider).to.be.an.instanceOf(pInst.CircleCollider);
       expect(sprite.collider.center).to.eq(sprite.position);
       // Radius should be half of sprite's larger dimension.
-      expect(sprite.collider.radius).to.eq(20);
+      expect(sprite.collider.radius).to.eq(sprite.height / 2);
       // Offset should be zero
       expect(sprite.collider.offset).to.be.an.instanceOf(p5.Vector);
       expect(sprite.collider.offset.x).to.eq(0);
       expect(sprite.collider.offset.y).to.eq(0);
+    });
+
+    it('scaling sprite without animation does not affect default circle collider size', function() {
+      sprite.scale = 0.25;
+      sprite.setCollider('circle');
+      expect(sprite.collider.radius).to.eq(sprite.height / 2);
     });
 
     it('can construct a circle collider with explicit radius and offset', function() {
@@ -367,7 +373,12 @@ describe('Sprite', function() {
       expect(sprite.collider.offset.y).to.eq(0);
     });
 
-    // TODO: Test with scaled sprite, make sure scale works as expected
+    it('scaling sprite without animation does not affect default rectangle collider size', function() {
+      sprite.scale = 0.25;
+      sprite.setCollider('rectangle');
+      expect(sprite.collider.extents.x).to.eq(sprite.width);
+      expect(sprite.collider.extents.y).to.eq(sprite.height);
+    });
 
     it('can construct a rectangle collider with explicit dimensions and offset', function() {
       sprite.setCollider('rectangle', 1, 2, 3, 4);
