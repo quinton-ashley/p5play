@@ -90,4 +90,79 @@ describe('sprite.displace(sprite)', function() {
       expect(pairs).to.deep.equal([[spriteB.name, spriteA.name]]);
     });
   });
+
+  it('does not reposition either sprite when sprites do not overlap', function() {
+    var initialPositionA = spriteA.position.copy();
+    var initialPositionB = spriteB.position.copy();
+
+    spriteA.displace(spriteB);
+
+    expectVectorsAreClose(spriteA.position, initialPositionA);
+    expectVectorsAreClose(spriteB.position, initialPositionB);
+
+    spriteB.displace(spriteA);
+
+    expectVectorsAreClose(spriteA.position, initialPositionA);
+    expectVectorsAreClose(spriteB.position, initialPositionB);
+  });
+
+  describe('displaces the callee out of collision when sprites do overlap', function() {
+    it('to the left', function() {
+      spriteA.position.x = spriteB.position.x - 1;
+
+      var expectedPositionA = spriteA.position.copy();
+      var expectedPositionB = spriteA.position.copy().add(SIZE, 0);
+
+      spriteA.displace(spriteB);
+
+      expectVectorsAreClose(spriteA.position, expectedPositionA);
+      expectVectorsAreClose(spriteB.position, expectedPositionB);
+    });
+
+    it('to the right', function() {
+      spriteA.position.x = spriteB.position.x + 1;
+
+      var expectedPositionA = spriteA.position.copy();
+      var expectedPositionB = spriteA.position.copy().add(-SIZE, 0);
+
+      spriteA.displace(spriteB);
+
+      expectVectorsAreClose(spriteA.position, expectedPositionA);
+      expectVectorsAreClose(spriteB.position, expectedPositionB);
+    });
+
+    it('caller and callee reversed', function() {
+      spriteA.position.x = spriteB.position.x + 1;
+
+      var expectedPositionA = spriteB.position.copy().add(SIZE, 0);
+      var expectedPositionB = spriteB.position.copy();
+
+      spriteB.displace(spriteA);
+
+      expectVectorsAreClose(spriteA.position, expectedPositionA);
+      expectVectorsAreClose(spriteB.position, expectedPositionB);
+    });
+  });
+
+  it('does not change velocity of either sprite when sprites do not overlap', function() {
+    var initialVelocityA = spriteA.velocity.copy();
+    var initialVelocityB = spriteB.velocity.copy();
+
+    spriteA.displace(spriteB);
+
+    expectVectorsAreClose(spriteA.velocity, initialVelocityA);
+    expectVectorsAreClose(spriteB.velocity, initialVelocityB);
+
+    spriteB.displace(spriteA);
+
+    expectVectorsAreClose(spriteA.velocity, initialVelocityA);
+    expectVectorsAreClose(spriteB.velocity, initialVelocityB);
+  });
+
+  function expectVectorsAreClose(vA, vB) {
+    var failMsg = 'Expected <' + vA.x + ', ' + vA.y + '> to equal <' +
+      vB.x + ', ' + vB.y + '>';
+    expect(vA.x).to.be.closeTo(vB.x, 0.00001, failMsg);
+    expect(vA.y).to.be.closeTo(vB.y, 0.00001, failMsg);
+  }
 });
