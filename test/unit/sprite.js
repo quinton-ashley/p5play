@@ -384,20 +384,20 @@ describe('Sprite', function() {
     it('throws if creating a rectangle collider with 1, 2, 3, or 5+ params', function() {
       expect(function() {
         sprite.setCollider('rectangle', 1);
-      }).to.throw(TypeError, 'Usage: setCollider("rectangle", offsetX, offsetY, width, height)');
+      }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
       expect(function() {
         sprite.setCollider('rectangle', 1, 2);
-      }).to.throw(TypeError, 'Usage: setCollider("rectangle", offsetX, offsetY, width, height)');
+      }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
       expect(function() {
         sprite.setCollider('rectangle', 1, 2, 3);
-      }).to.throw(TypeError, 'Usage: setCollider("rectangle", offsetX, offsetY, width, height)');
+      }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
       // setCollider('rectangle', 1, 2, 3, 4) is fine.
       expect(function() {
         sprite.setCollider('rectangle', 1, 2, 3, 4, 5);
-      }).to.throw(TypeError, 'Usage: setCollider("rectangle", offsetX, offsetY, width, height)');
+      }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
       expect(function() {
         sprite.setCollider('rectangle', 1, 2, 3, 4, 5, 6);
-      }).to.throw(TypeError, 'Usage: setCollider("rectangle", offsetX, offsetY, width, height)');
+      }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
     });
   });
 });
