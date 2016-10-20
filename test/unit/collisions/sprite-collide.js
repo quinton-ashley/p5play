@@ -115,6 +115,19 @@ describe('sprite.collide(sprite)', function() {
     expect(spriteB.position).to.deep.equal(initialPositionB);
   });
 
+  it('does not reposition either sprite when caller is immovable', function() {
+    spriteA.position.x = spriteB.position.x - 1;
+    spriteA.immovable = true;
+
+    var initialPositionA = spriteA.position.copy();
+    var initialPositionB = spriteB.position.copy();
+
+    spriteA.collide(spriteB);
+
+    expectVectorsAreClose(spriteA.position, initialPositionA);
+    expectVectorsAreClose(spriteB.position, initialPositionB);
+  });
+
   describe('displaces the caller out of collision when sprites do overlap', function() {
     it('to the left', function() {
       spriteA.position.x = spriteB.position.x - 1;
@@ -168,4 +181,11 @@ describe('sprite.collide(sprite)', function() {
     expect(spriteA.velocity).to.deep.equal(initialVelocityA);
     expect(spriteB.velocity).to.deep.equal(initialVelocityB);
   });
+
+  function expectVectorsAreClose(vA, vB) {
+    var failMsg = 'Expected <' + vA.x + ', ' + vA.y + '> to equal <' +
+      vB.x + ', ' + vB.y + '>';
+    expect(vA.x).to.be.closeTo(vB.x, 0.00001, failMsg);
+    expect(vA.y).to.be.closeTo(vB.y, 0.00001, failMsg);
+  }
 });

@@ -107,6 +107,19 @@ describe('sprite.displace(sprite)', function() {
     expectVectorsAreClose(spriteB.position, initialPositionB);
   });
 
+  it('does not reposition either sprite when callee is immovable', function() {
+    spriteA.position.x = spriteB.position.x - 1;
+    spriteB.immovable = true;
+
+    var initialPositionA = spriteA.position.copy();
+    var initialPositionB = spriteB.position.copy();
+
+    spriteA.displace(spriteB);
+
+    expectVectorsAreClose(spriteA.position, initialPositionA);
+    expectVectorsAreClose(spriteB.position, initialPositionB);
+  });
+
   describe('displaces the callee out of collision when sprites do overlap', function() {
     it('to the left', function() {
       spriteA.position.x = spriteB.position.x - 1;
@@ -145,10 +158,11 @@ describe('sprite.displace(sprite)', function() {
     });
   });
 
-  it('does not change velocity of either sprite when sprites do not overlap', function() {
+  it('does not change velocity of either sprite', function() {
     var initialVelocityA = spriteA.velocity.copy();
     var initialVelocityB = spriteB.velocity.copy();
 
+    spriteA.position.x = spriteB.position.x + 1;
     spriteA.displace(spriteB);
 
     expectVectorsAreClose(spriteA.velocity, initialVelocityA);
