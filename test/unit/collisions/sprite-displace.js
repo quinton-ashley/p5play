@@ -1,5 +1,6 @@
 /** @file Tests for Sprite.displace(sprite) behavior. */
 describe('sprite.displace(sprite)', function() {
+  var expectVectorsAreClose = p5PlayTestUtils.expectVectorsAreClose;
   var SIZE = 10;
   var pInst;
   var spriteA, spriteB;
@@ -158,11 +159,4 @@ describe('sprite.displace(sprite)', function() {
     expectVectorsAreClose(spriteA.velocity, initialVelocityA);
     expectVectorsAreClose(spriteB.velocity, initialVelocityB);
   });
-
-  function expectVectorsAreClose(vA, vB) {
-    var failMsg = 'Expected <' + vA.x + ', ' + vA.y + '> to equal <' +
-      vB.x + ', ' + vB.y + '>';
-    expect(vA.x).to.be.closeTo(vB.x, 0.00001, failMsg);
-    expect(vA.y).to.be.closeTo(vB.y, 0.00001, failMsg);
-  }
 });

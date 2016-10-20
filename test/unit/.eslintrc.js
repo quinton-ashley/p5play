@@ -5,7 +5,8 @@ module.exports = {
   "globals": {
     "expect": true,
     "p5": true,
-    "sinon": true
+    "sinon": true,
+    "p5PlayTestUtils": true
   },
   "rules": {
     // Eventually move up to root config.
