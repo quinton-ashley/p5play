@@ -10,6 +10,7 @@
  * tests the behavior of the collide() method between two sprites.
  */
 describe('sprite.collide(sprite)', function() {
+  var expectVectorsAreClose = p5PlayAssertions.expectVectorsAreClose;
   var SIZE = 10;
   var pInst;
   var spriteA, spriteB;
@@ -181,11 +182,4 @@ describe('sprite.collide(sprite)', function() {
     expect(spriteA.velocity).to.deep.equal(initialVelocityA);
     expect(spriteB.velocity).to.deep.equal(initialVelocityB);
   });
-
-  function expectVectorsAreClose(vA, vB) {
-    var failMsg = 'Expected <' + vA.x + ', ' + vA.y + '> to equal <' +
-      vB.x + ', ' + vB.y + '>';
-    expect(vA.x).to.be.closeTo(vB.x, 0.00001, failMsg);
-    expect(vA.y).to.be.closeTo(vB.y, 0.00001, failMsg);
-  }
 });
