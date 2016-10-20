@@ -419,19 +419,19 @@ describe('Sprite', function() {
       sprite = pInst.createSprite();
     });
 
-    it('has no effect on update() when set to 1', function() {
+    it('has no effect on update() when set to 0', function() {
       sprite.velocity.x = 1;
       sprite.velocity.y = 1;
-      sprite.friction = 1;
+      sprite.friction = 0;
       sprite.update();
       expect(sprite.velocity.x).to.equal(1);
       expect(sprite.velocity.y).to.equal(1);
     });
 
-    it('reduces velocity to zero on update() when set to 0', function() {
+    it('reduces velocity to zero on update() when set to 1', function() {
       sprite.velocity.x = 1;
       sprite.velocity.y = 1;
-      sprite.friction = 0;
+      sprite.friction = 1;
       sprite.update();
       expect(sprite.velocity.x).to.equal(0);
       expect(sprite.velocity.y).to.equal(0);
@@ -453,8 +453,8 @@ describe('Sprite', function() {
         expect(sprite.velocity.x).to.equal(2);
       });
 
-      it('cuts velocity to one-quarter each update when set to 0.25', function() {
-        sprite.friction = 0.25;
+      it('cuts velocity to one-quarter each update when set to 0.75', function() {
+        sprite.friction = 0.75;
         expect(sprite.velocity.x).to.equal(16);
         sprite.update();
         expect(sprite.velocity.x).to.equal(4);
@@ -490,8 +490,8 @@ describe('Sprite', function() {
         expect(sprite.velocity.mag()).to.equal(5 * 2);
       });
 
-      it('cuts velocity to one-quarter each update when set to 0.25', function() {
-        sprite.friction = 0.25;
+      it('cuts velocity to one-quarter each update when set to 0.75', function() {
+        sprite.friction = 0.75;
         expect(sprite.velocity.x).to.equal(3 * 16);
         expect(sprite.velocity.y).to.equal(4 * 16);
         expect(sprite.velocity.mag()).to.equal(5 * 16);
