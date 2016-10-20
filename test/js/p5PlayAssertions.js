@@ -1,6 +1,6 @@
 // Test utilities available in all test files.  Expects chai, p5, and p5.play
 // to be in scope.
-var p5PlayTestUtils = {
+var p5PlayAssertions = {
   /**
    * Assert two 2D p5.Vector objects are (nearly) the same - have the same X and
    * Y components to a certain level of precision.  Generate a useful failure

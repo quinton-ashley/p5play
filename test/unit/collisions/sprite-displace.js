@@ -1,6 +1,6 @@
 /** @file Tests for Sprite.displace(sprite) behavior. */
 describe('sprite.displace(sprite)', function() {
-  var expectVectorsAreClose = p5PlayTestUtils.expectVectorsAreClose;
+  var expectVectorsAreClose = p5PlayAssertions.expectVectorsAreClose;
   var SIZE = 10;
   var pInst;
   var spriteA, spriteB;

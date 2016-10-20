@@ -6,7 +6,7 @@ module.exports = {
     "expect": true,
     "p5": true,
     "sinon": true,
-    "p5PlayTestUtils": true
+    "p5PlayAssertions": true
   },
   "rules": {
     // Eventually move up to root config.
