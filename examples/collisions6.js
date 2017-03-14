@@ -35,30 +35,28 @@ function setup() {
 }
 
 function draw() {
-  
+
   background(255, 255, 255);
 
   bottomTriangle.position.x = mouseX;
   bottomTriangle.position.y = mouseY;
-  
+
   drawSprites();
 
-  if(box.collide(bottomTriangle)) {
-  }
+  box.collide(bottomTriangle);
 
-  if(circle.collide(bottomTriangle)) {
-  }
+  circle.collide(bottomTriangle);
 
-  if(topTriangle.collide(bottomTriangle)) {
-  }
+  topTriangle.collide(bottomTriangle);
+
   if(fps === null) {
     fps = round(frameRate());
   }
-  if(frameCount % 40 === 0) { 
-    fps = round(frameRate())
+  if(frameCount % 40 === 0) {
+    fps = round(frameRate());
   }
   noStroke();
   fill(154, 10, 20);
   textSize(20);
-  text(fps + " FPS", 10, 60);
+  text(fps + ' FPS', 10, 60);
 }
