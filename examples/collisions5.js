@@ -31,6 +31,7 @@ function setup() {
 
 function draw() {
   background(255, 255, 255);
+  console.log(triangle.width);
 
   //if no arrow input set velocity to 0
   triangle.velocity.x = 0;

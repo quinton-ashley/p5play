@@ -23,7 +23,6 @@ function setup() {
 
   asterisk.addAnimation('round', 'assets/asterisk_circle0006.png', 'assets/asterisk_circle0008.png');
 
-
 }
 
 function draw() {
