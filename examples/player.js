@@ -16,13 +16,13 @@ function playCode(code) {
       p.setup = function() {
         p.createCanvas(window.innerWidth, window.innerHeight);
         with (p) {
-          eval(runnable+myLibraries);
+          eval(runnable);
         }
       };
     }
     else {
       with (p) {
-        eval(runnable+myLibraries);
+        eval(runnable);
       }
 
       var fxns = p5functions;
@@ -48,15 +48,6 @@ function playCode(code) {
 
   //avoid duplicate canvases
   $( '#myP5' ).empty();
-
-  //clear registered methods
-  for (var member in activeSketch._registeredMethods) {
-    if (activeSketch._registeredMethods.hasOwnProperty(member)) {
-      delete activeSketch._registeredMethods[member];
-    }
-  }
-
-  activeSketch._registeredMethods = {pre: [], post: [], remove: []};
 
   var myp5 = new _p5(s, myP5);
 
@@ -84,20 +75,5 @@ function startMain() {
   editor.setOption('maxLines', 150);
 
   activeSketch = new p5('', myP5);
-
-  //new p5(myP5);
-
-  /*
-  //"live coding"
-  $( "#editor" ).keyup(function(e) {
-
-    var code = e.keyCode || e.which;
-    if( (code < 16 || code > 20 ) && code != 9 && code != 13 && code != 37 && code != 38 && code != 39 && code != 40 ) { //Enter keycode
-    playEditor();
-    }
-
-
-  });*/
-
 }
 

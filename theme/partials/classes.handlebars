@@ -68,7 +68,7 @@
 				{{#methods}}
 				{{#if static}}
 				{{else}}
-				<li><a href="#method-{{name}}"><span class="im">{{name}}</span>({{#params}}<span class="ia">{{name}}</span>{{/params}})</a></li>
+				<li class="{{filteringClassnames}}"><a href="#method-{{name}}"><span class="im">{{name}}</span>({{#params}}<span class="ia">{{name}}</span>{{/params}})</a></li>
 				{{/if}}
 				{{/methods}}
 			</ul>
@@ -80,7 +80,7 @@
 			<strong>Properties</strong>
 			<ul>
 				{{#properties}}
-				<li><a href="#prop-{{name}}"><span class="ip">{{name}}</span></a></li>
+				<li class="{{filteringClassnames}}"><a href="#prop-{{name}}"><span class="ip">{{name}}</span></a></li>
 				{{/properties}}
 			</ul>
 		</li>
@@ -91,7 +91,7 @@
 			<strong>Attributes</strong>
 			<ul>
 				{{#attrs}}
-				<li><a href="#attr-{{name}}"><span class="iattr">{{name}}</span></a></li>
+				<li class="{{filteringClassnames}}"><a href="#attr-{{name}}"><span class="iattr">{{name}}</span></a></li>
 				{{/attrs}}
 			</ul>
 		</li>
@@ -103,7 +103,7 @@
 			<ul>
 				{{#methods}}
 				{{#if static}}
-				<li><a href="#method-{{name}}"><span class="im">{{class}}.{{name}}</span>({{#params}}<span class="ia">{{name}}</span>{{/params}})</a></li>
+				<li class="{{filteringClassnames}}"><a href="#method-{{name}}"><span class="im">{{class}}.{{name}}</span>({{#params}}<span class="ia">{{name}}</span>{{/params}})</a></li>
 				{{/if}}
 				{{/methods}}
 			</ul>
@@ -118,7 +118,7 @@
     <div class="constructor yuidoc-class-constructor page-section">
         <h2>Constructor</h2>
         <div class="item-list">
-        {{>method}}
+{{>method}}
         </div>
     </div>
 {{/is_constructor}}
@@ -130,7 +130,7 @@
        		{{#methods}}
         	{{#if static}}
             {{else}}
-            {{>method}}
+{{>method}}
             {{/if}}
         {{/methods}}
         </div>
@@ -143,7 +143,7 @@
 
         <div class="item-list">
         {{#properties}}
-            {{>props}}
+{{>props}}
         {{/properties}}
         </div>
     </div>
@@ -154,7 +154,7 @@
         <h2 class="off-left">Attributes</h2>
 
         {{#attrs}}
-            {{>attrs}}
+{{>attrs}}
         {{/attrs}}
     </div>
 {{/if}}
@@ -165,7 +165,7 @@
 
         <div class="item-list">
         {{#events}}
-            {{>events}}
+{{>events}}
         {{/events}}
         </div>
     </div>
@@ -177,7 +177,7 @@
         <div class="item-list">
         {{#methods}}
 			{{#if static}}
-    	        {{>method}}
+{{>method}}
             {{/if}}
         {{/methods}}
         </div>

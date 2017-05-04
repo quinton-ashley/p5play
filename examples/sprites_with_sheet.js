@@ -8,7 +8,6 @@ var explode_sprite;
 var player_walk;
 var player_stand;
 var player_sprite;
-var tile_frames;
 
 // Normally you would put this in a .json file, but I'm putting it here
 // for example purposes
@@ -38,8 +37,6 @@ function preload() {
   //
   //    Below demonstrates both methods:
 
-  // Load the json for the tiles sprite sheet
-  tile_frames = loadJSON('assets/tiles.json');
 
   // Load the explode sprite sheet using frame width, height and number of frames
   explode_sprite_sheet = loadSpriteSheet('assets/explode_sprite_sheet.png', 171, 158, 11);
@@ -47,8 +44,11 @@ function preload() {
   // Load player sprite sheet from frames array
   player_sprite_sheet = loadSpriteSheet('assets/player_spritesheet.png', player_frames);
 
-  // Load tiles sprite sheet from frames array
-  tile_sprite_sheet = loadSpriteSheet('assets/tiles_spritesheet.png', tile_frames);
+  // Load the json for the tiles sprite sheet
+  loadJSON('assets/tiles.json', function(tile_frames) {
+    // Load tiles sprite sheet from frames array once frames array is ready
+    tile_sprite_sheet = loadSpriteSheet('assets/tiles_spritesheet.png', tile_frames);
+  });
 
   // Exploding star animation
   explode_animation = loadAnimation(explode_sprite_sheet);
