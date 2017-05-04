@@ -10,6 +10,7 @@
  * tests the behavior of the collide() method between two sprites.
  */
 describe('sprite.collide(sprite)', function() {
+  var expectVectorsAreClose = p5PlayAssertions.expectVectorsAreClose;
   var SIZE = 10;
   var pInst;
   var spriteA, spriteB;
@@ -113,6 +114,19 @@ describe('sprite.collide(sprite)', function() {
 
     expect(spriteA.position).to.deep.equal(initialPositionA);
     expect(spriteB.position).to.deep.equal(initialPositionB);
+  });
+
+  it('does not reposition either sprite when caller is immovable', function() {
+    spriteA.position.x = spriteB.position.x - 1;
+    spriteA.immovable = true;
+
+    var initialPositionA = spriteA.position.copy();
+    var initialPositionB = spriteB.position.copy();
+
+    spriteA.collide(spriteB);
+
+    expectVectorsAreClose(spriteA.position, initialPositionA);
+    expectVectorsAreClose(spriteB.position, initialPositionB);
   });
 
   describe('displaces the caller out of collision when sprites do overlap', function() {
