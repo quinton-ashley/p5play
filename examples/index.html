@@ -4,11 +4,12 @@
     <title>p5.play Example</title>
     <script src="lib/jquery.min.js" type="text/javascript"></script>
     <script src="lib/p5.js" type="text/javascript"></script>
+    <script src="../lib/p5.play.js" type="text/javascript"></script>
     <script src="js/ace/ace.js"></script>
     <script src="player.js"></script>
     <link rel="stylesheet" href="js/bootstrap/bootstrap.min.css">
     <script src="js/bootstrap/bootstrap.min.js"></script>
-    
+
     <link rel="stylesheet" type="text/css" href="style.css">
 
     <style>
@@ -21,81 +22,80 @@
     <div id = "container">
     <div id="myP5">
     </div>
-    
+
       <div class="dropdown">
     <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Examples
     <span class="caret"></span></button>
     <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=animation.js">Animations - creation</a></li>
 
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=animation_sprite_sheet.js">Animations - sprite sheet</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=animation2.js">Animations - control</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite.js">Sprites - creation</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite2.js">Sprites - appearance</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite3.js">Sprites - animation</a></li>
 
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprites_with_sheet.js">Sprites - Sprite Sheets</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite4.js">Sprites - movements</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite5.js">Sprites - access and deletion</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite6.js">Sprites - lifespan and visibility</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite7.js">Sprites - depth and drawing order</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite8.js">Sprites - groups</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=sprite9.js">Sprites - custom draw function</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=collisions.js">Collisions - overlap, collide, displace</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=collisions2.js">Collisions - between group, events functions</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=collisions3.js">Collisions - custom colliders</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=collisions4.js">Collisions - bouncing</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=collisions5.js">Collisions - point and pixel overlap</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=mouseEvents.js">Mouse events on sprites</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=keyPresses.js">Keyboard and mouse input</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=camera.js">Using the virtual camera</a></li>
-      
+
       <li role="presentation" class="divider"></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=pong.js">Game - Pong</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=asteroids.js">Game - Asteroids</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=breakout.js">Game - Breakout</a></li>
-      
+
       <li role="presentation"><a role="menuitem" tabindex="-1" href="index.html?fileName=flappyBird.js">Game - Flappy Bird</a></li>
-      
+
     </ul>
   </div>
-      
+
     <a class="btn" href="#" onclick='run()'>&#9658; Run</a>
     <a class="btn" href="#" onclick='reset()'>&#8634; Reset</a>
-    
+
     <pre id="editor">
       //file not found
     </pre>
     </div>
-      
+
     <script>
 
-      var myLibraries = "";
       var fileName;
       var originalCode;
-      
+
       //load a script
       $(document).ready( function () {
 
@@ -111,7 +111,6 @@
           url: fileName,
           dataType: "text",
           async: true,
-          //success: handleData
           success: loadLibraries,
           error: loadLibrariesDefault
         });
@@ -121,7 +120,7 @@
       function getUrlValue(varSearch) {
         var searchString = window.location.search.substring(1);
         var variableArray = searchString.split('&');
-        
+
         for(var i = 0; i < variableArray.length; i++){
           var keyValuePair = variableArray[i].split('=');
           console.log(keyValuePair);
@@ -130,12 +129,12 @@
           }
         }
       }
-      
-      
+
+
       function loadLibrariesDefault() {
       editor.setValue("//file not found");
       }
-      
+
       function loadLibraries(data) {
         originalCode = data;
         startMain();
@@ -147,23 +146,16 @@
           url: "../lib/p5.play.js",
           dataType: "text",
           async: true,
-          success: handleData
-          //success: loadLibraries,
+          success: playEditor
         });
 
       }
 
-      function handleData(data) {
-        myLibraries = data;
-        playEditor();
-      }
-      
       function reset() {
         editor.setValue(originalCode, -1);
         playEditor();
       }
-      
-      
+
       function run() {
         playEditor();
       }
