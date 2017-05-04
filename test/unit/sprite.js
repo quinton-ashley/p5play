@@ -411,4 +411,103 @@ describe('Sprite', function() {
       }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
     });
   });
+
+  describe('friction', function() {
+    var sprite;
+
+    beforeEach(function() {
+      sprite = pInst.createSprite();
+    });
+
+    it('has no effect on update() when set to 0', function() {
+      sprite.velocity.x = 1;
+      sprite.velocity.y = 1;
+      sprite.friction = 0;
+      sprite.update();
+      expect(sprite.velocity.x).to.equal(1);
+      expect(sprite.velocity.y).to.equal(1);
+    });
+
+    it('reduces velocity to zero on update() when set to 1', function() {
+      sprite.velocity.x = 1;
+      sprite.velocity.y = 1;
+      sprite.friction = 1;
+      sprite.update();
+      expect(sprite.velocity.x).to.equal(0);
+      expect(sprite.velocity.y).to.equal(0);
+    });
+
+    describe('axis-aligned', function() {
+      beforeEach(function() {
+        sprite.velocity.x = 16;
+      });
+
+      it('cuts velocity in half each update when set to 0.5', function() {
+        sprite.friction = 0.5;
+        expect(sprite.velocity.x).to.equal(16);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(8);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(4);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(2);
+      });
+
+      it('cuts velocity to one-quarter each update when set to 0.75', function() {
+        sprite.friction = 0.75;
+        expect(sprite.velocity.x).to.equal(16);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(4);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(1);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(0.25);
+      });
+    });
+
+    describe('not axis-aligned', function() {
+      beforeEach(function() {
+        sprite.velocity.x = 3 * 16;
+        sprite.velocity.y = 4 * 16;
+      });
+
+      it('cuts velocity in half each update when set to 0.5', function() {
+        sprite.friction = 0.5;
+        expect(sprite.velocity.x).to.equal(3 * 16);
+        expect(sprite.velocity.y).to.equal(4 * 16);
+        expect(sprite.velocity.mag()).to.equal(5 * 16);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(3 * 8);
+        expect(sprite.velocity.y).to.equal(4 * 8);
+        expect(sprite.velocity.mag()).to.equal(5 * 8);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(3 * 4);
+        expect(sprite.velocity.y).to.equal(4 * 4);
+        expect(sprite.velocity.mag()).to.equal(5 * 4);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(3 * 2);
+        expect(sprite.velocity.y).to.equal(4 * 2);
+        expect(sprite.velocity.mag()).to.equal(5 * 2);
+      });
+
+      it('cuts velocity to one-quarter each update when set to 0.75', function() {
+        sprite.friction = 0.75;
+        expect(sprite.velocity.x).to.equal(3 * 16);
+        expect(sprite.velocity.y).to.equal(4 * 16);
+        expect(sprite.velocity.mag()).to.equal(5 * 16);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(3 * 4);
+        expect(sprite.velocity.y).to.equal(4 * 4);
+        expect(sprite.velocity.mag()).to.equal(5 * 4);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(3 * 1);
+        expect(sprite.velocity.y).to.equal(4 * 1);
+        expect(sprite.velocity.mag()).to.equal(5 * 1);
+        sprite.update();
+        expect(sprite.velocity.x).to.equal(3 * 0.25);
+        expect(sprite.velocity.y).to.equal(4 * 0.25);
+        expect(sprite.velocity.mag()).to.equal(5 * 0.25);
+      });
+    });
+  });
 });
