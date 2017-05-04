@@ -13,6 +13,15 @@ module.exports = {
 
 		return ret;
 	},
+	filteringClassnames: function() {
+		return [
+			this.access,
+			this.deprecated && 'deprectated',
+			this.extended_from && 'inherited'
+		].filter(function (x) {
+			return !!x;
+		}).join(' ');
+	},
 	/**
 	 * Hack for:
 	 * https://github.com/yui/yuidoc/issues/198

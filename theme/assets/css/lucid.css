@@ -20,11 +20,7 @@ h3 {
 	color: #4A4A4A !important;
 }
 body a {
-	color: #ED225D;
-}
-
-body a:hover {
-	color: #f08baa;
+	color: #4CA0E7;
 }
 
 #sidebar .tab-pane li a:hover, #sidebar .tab-pane li a:focus {

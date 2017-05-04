@@ -62,7 +62,7 @@ $(function() {
         var cssName = $.trim(box.parent('label').text()).toLowerCase();
         if(box.is(':checked')){
             $('div.'+cssName).css('display', 'block');
-            $('li.'+cssName).css('display', 'block');
+            $('li.'+cssName).css('display', 'list-item');
             $('span.'+cssName).css('display', 'inline');
         }else{
             $('.'+cssName).css('display', 'none');
