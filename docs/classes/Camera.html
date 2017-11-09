@@ -15,7 +15,7 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
-	    <img alt="p5.play" src="..\..\asterisk.png" style="max-height: 65%;" title="p5.play">
+	    <img alt="p5.play" src="../../asterisk.png" style="max-height: 65%;" title="p5.play">
             p5.play
         </h1>
 	<div class="nav">
@@ -34,389 +34,389 @@
 <div class="container">
     <div class="row">
         <div class="span3">
-	    <div>
-	        <div id="sidebar">
-	        <div id="classes">
-	            <ul id="api-classes" class="nav nav-list">
-	                    <li><a href="../classes/Animation.html">Animation</a></li>
-	                    <li><a href="../classes/Camera.html">Camera</a></li>
-	                    <li><a href="../classes/Group.html">Group</a></li>
-	                    <li><a href="../classes/p5.play.html">p5.play</a></li>
-	                    <li><a href="../classes/Sprite.html">Sprite</a></li>
-	                    <li><a href="../classes/SpriteSheet.html">SpriteSheet</a></li>
-	            </ul>
-	        </div>
-	        </div>
-	    </div>
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Animation.html">Animation</a></li>
+                <li><a href="../classes/Camera.html">Camera</a></li>
+                <li><a href="../classes/Group.html">Group</a></li>
+                <li><a href="../classes/p5.play.html">p5.play</a></li>
+                <li><a href="../classes/Sprite.html">Sprite</a></li>
+                <li><a href="../classes/SpriteSheet.html">SpriteSheet</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
         </div>
         <div class="span9">
-                <form id="options-form" class="form-inline pull-right">
-                    Show:
-                    <label for="api-show-inherited" class="checkbox">
-                        <input type="checkbox" id="api-show-inherited" checked>
-                        Inherited
-                    </label>
-            
-                    <label for="api-show-protected" class="checkbox">
-                        <input type="checkbox" id="api-show-protected">
-                        Protected
-                    </label>
-            
-                    <label for="api-show-private" class="checkbox">
-                        <input type="checkbox" id="api-show-private" checked>
-                        Private
-                    </label>
-                    <label for="api-show-deprecated" class="checkbox">
-                        <input type="checkbox" id="api-show-deprecated">
-                        Deprecated
-                    </label>
-            
-                </form>
-            
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <div class="page-header">
-                            <h1>Camera</h1>
-                        </div>
-                        
-                        
-                        
-                        	<div class="well well-small">
-                                    Module: <a href="../modules/p5.play.html">p5.play</a><br>
-                                    Parent Module: <a href="../modules/p5.play.html">p5.play</a>
-                            </div>
-                        
-                        
-                        
-                        <div class="yuidoc-class-description">
-                        <p>A camera facilitates scrolling and zooming for scenes extending beyond
-                        the canvas. A camera has a position, a zoom factor, and the mouse
-                        coordinates relative to the view.
-                        The camera is automatically created on the first draw cycle.</p>
-                        <p>In p5.js terms the camera wraps the whole drawing cycle in a
-                        transformation matrix but it can be disable anytime during the draw
-                        cycle for example to draw interface elements in an absolute position.</p>
-                        
-                        </div>
-                        
-                        <!-- table of contents -->
-                        
-                        <div id="class-toc" class="page-section">
-                        	<h2>Table of Contents</h2>
-                            <ul>
-                        		<li>
-                        			<strong>Methods</strong>
-                        			<ul>
-                        				<li><a href="#method-off"><span class="im">off</span>()</a></li>
-                        				<li><a href="#method-on"><span class="im">on</span>()</a></li>
-                        			</ul>
-                        		</li>
-                        
-                        		<li>
-                        			<strong>Properties</strong>
-                        			<ul>
-                        				<li><a href="#prop-active"><span class="ip">active</span></a></li>
-                        				<li><a href="#prop-mouseX"><span class="ip">mouseX</span></a></li>
-                        				<li><a href="#prop-mouseY"><span class="ip">mouseY</span></a></li>
-                        				<li><a href="#prop-position"><span class="ip">position</span></a></li>
-                        				<li><a href="#prop-zoom"><span class="ip">zoom</span></a></li>
-                        			</ul>
-                        		</li>
-                        
-                        
-                        	</ul>
-                        </div>
-                        
-                        <!-- details -->
-                        
-                            <div class="constructor yuidoc-class-constructor page-section">
-                                <h2>Constructor</h2>
-                                <div class="item-list">
-                                <div id="method-Camera" class="method item">
-                                	<div class="method-signature">
-                                	<span class="name"><code>Camera</code></span>
-                                
-                                		<div class="args">
-                                			<span class="paren">(</span><ul class="args-list inline commas">
-                                				<li class="arg">
-                                						<code>x</code>
-                                				</li>
-                                				<li class="arg">
-                                						<code>y</code>
-                                				</li>
-                                				<li class="arg">
-                                						<code>zoom</code>
-                                				</li>
-                                			</ul><span class="paren">)</span>
-                                		</div>
-                                	</div>
-                                
-                                
-                                
-                                
-                                
-                                
-                                	<div class="meta">
-                                				<p>
-                                				Defined in
-                                		<a href="../files/lib_p5.play.js.html#l2293"><code>lib\p5.play.js:2293</code></a>
-                                		</p>
-                                
-                                
-                                
-                                	</div>
-                                
-                                
-                                		<div class="params">
-                                			<h4>Parameters:</h4>
-                                
-                                			<ul class="params-list">
-                                				<li class="param">
-                                						<code class="param-name">x</code>
-                                						<span class="type">Number</span>
-                                
-                                
-                                					<div class="param-description"><p>Initial x coordinate</p>
-                                </div>
-                                
-                                				</li>
-                                				<li class="param">
-                                						<code class="param-name">y</code>
-                                						<span class="type">Number</span>
-                                
-                                
-                                					<div class="param-description"><p>Initial y coordinate</p>
-                                </div>
-                                
-                                				</li>
-                                				<li class="param">
-                                						<code class="param-name">zoom</code>
-                                						<span class="type">Number</span>
-                                
-                                
-                                					<div class="param-description"><p>magnification</p>
-                                </div>
-                                
-                                				</li>
-                                			</ul>
-                                		</div>
-                                
-                                
-                                </div>
-                                </div>
-                            </div>
-                        
-                            <div id="methods" class="page-section">
-                                <h2 class="off-left">Methods</h2>
-                                <div class="item-list">
-                                    <div id="method-off" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>off</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2375"><code>lib\p5.play.js:2375</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Deactivates the camera.
-                                    The canvas will be drawn normally, ignoring the camera's position
-                                    and scale until Camera.on() is called</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-on" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>on</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2360"><code>lib\p5.play.js:2360</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Activates the camera.
-                                    The canvas will be drawn according to the camera position and scale until
-                                    Camera.off() is called</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                </div>
-                            </div>
-                        
-                            <div id="properties" class="page-section">
-                                <h2 class="off-left">Properties</h2>
-                        
-                                <div class="item-list">
-                                    <div id="prop-active" class="property item">
-                                        <h3 class="name"><code>active</code></h3>
-                                        <span class="type">Boolean</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l2350"><code>lib\p5.play.js:2350</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>True if the camera is active.
-                                    Read only property. Use the methods Camera.on() and Camera.off()
-                                    to enable or disable the camera.</p>
-                                    
-                                        </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-mouseX" class="property item">
-                                        <h3 class="name"><code>mouseX</code></h3>
-                                        <span class="type">Number</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l2328"><code>lib\p5.play.js:2328</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>MouseX translated to the camera view.
-                                    Offsetting and scaling the canvas will not change the sprites' position
-                                    nor the mouseX and mouseY variables. Use this property to read the mouse
-                                    position if the camera moved or zoomed.</p>
-                                    
-                                        </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-mouseY" class="property item">
-                                        <h3 class="name"><code>mouseY</code></h3>
-                                        <span class="type">Number</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l2339"><code>lib\p5.play.js:2339</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>MouseY translated to the camera view.
-                                    Offsetting and scaling the canvas will not change the sprites' position
-                                    nor the mouseX and mouseY variables. Use this property to read the mouse
-                                    position if the camera moved or zoomed.</p>
-                                    
-                                        </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-position" class="property item">
-                                        <h3 class="name"><code>position</code></h3>
-                                        <span class="type">p5.Vector</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l2310"><code>lib\p5.play.js:2310</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>Camera position. Defines the global offset of the sketch.</p>
-                                    
-                                        </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-zoom" class="property item">
-                                        <h3 class="name"><code>zoom</code></h3>
-                                        <span class="type">Number</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l2318"><code>lib\p5.play.js:2318</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>Camera zoom. Defines the global scale of the sketch.
-                                    A scale of 1 will be the normal size. Setting it to 2 will make everything
-                                    twice the size. .5 will make everything half size.</p>
-                                    
-                                        </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                </div>
-                            </div>
-                        
-                        
-                        
+<div class="page-header">
+    <h1>Camera</h1>
+</div>
+
+
+
+	<div class="well well-small">
+            Module: <a href="../modules/p5.play.html">p5.play</a><br>
+            Parent Module: <a href="../modules/p5.play.html">p5.play</a>
+    </div>
+
+
+
+<div class="yuidoc-class-description">
+<p>A camera facilitates scrolling and zooming for scenes extending beyond
+the canvas. A camera has a position, a zoom factor, and the mouse
+coordinates relative to the view.
+The camera is automatically created on the first draw cycle.</p>
+<p>In p5.js terms the camera wraps the whole drawing cycle in a
+transformation matrix but it can be disable anytime during the draw
+cycle for example to draw interface elements in an absolute position.</p>
+
+</div>
+
+<!-- table of contents -->
+
+<div id="class-toc" class="page-section">
+	<h2>Table of Contents</h2>
+    <ul>
+		<li>
+			<strong>Methods</strong>
+			<ul>
+				<li class=""><a href="#method-off"><span class="im">off</span>()</a></li>
+				<li class=""><a href="#method-on"><span class="im">on</span>()</a></li>
+			</ul>
+		</li>
+
+		<li>
+			<strong>Properties</strong>
+			<ul>
+				<li class=""><a href="#prop-active"><span class="ip">active</span></a></li>
+				<li class=""><a href="#prop-mouseX"><span class="ip">mouseX</span></a></li>
+				<li class=""><a href="#prop-mouseY"><span class="ip">mouseY</span></a></li>
+				<li class=""><a href="#prop-position"><span class="ip">position</span></a></li>
+				<li class=""><a href="#prop-zoom"><span class="ip">zoom</span></a></li>
+			</ul>
+		</li>
+
+
+	</ul>
+</div>
+
+<!-- details -->
+
+    <div class="constructor yuidoc-class-constructor page-section">
+        <h2>Constructor</h2>
+        <div class="item-list">
+<div id="method-Camera" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>Camera</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>x</code>
+				</li>
+				<li class="arg">
+						<code>y</code>
+				</li>
+				<li class="arg">
+						<code>zoom</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2437"><code>lib&#x2F;p5.play.js:2437</code></a>
+		</p>
+
+
+
+	</div>
+
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">x</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>Initial x coordinate</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name">y</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>Initial y coordinate</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name">zoom</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>magnification</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+
+</div>
+        </div>
+    </div>
+
+    <div id="methods" class="page-section">
+        <h2 class="off-left">Methods</h2>
+        <div class="item-list">
+<div id="method-off" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>off</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2519"><code>lib&#x2F;p5.play.js:2519</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Deactivates the camera.
+The canvas will be drawn normally, ignoring the camera's position
+and scale until Camera.on() is called</p>
+</div>
+
+
+
+</div>
+<div id="method-on" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>on</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2504"><code>lib&#x2F;p5.play.js:2504</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Activates the camera.
+The canvas will be drawn according to the camera position and scale until
+Camera.off() is called</p>
+</div>
+
+
+
+</div>
+        </div>
+    </div>
+
+    <div id="properties" class="page-section">
+        <h2 class="off-left">Properties</h2>
+
+        <div class="item-list">
+<div id="prop-active" class="property item ">
+    <h3 class="name"><code>active</code></h3>
+    <span class="type">Boolean</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l2494"><code>lib&#x2F;p5.play.js:2494</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>True if the camera is active.
+Read only property. Use the methods Camera.on() and Camera.off()
+to enable or disable the camera.</p>
+
+    </div>
+
+
+
+</div>
+<div id="prop-mouseX" class="property item ">
+    <h3 class="name"><code>mouseX</code></h3>
+    <span class="type">Number</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l2472"><code>lib&#x2F;p5.play.js:2472</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>MouseX translated to the camera view.
+Offsetting and scaling the canvas will not change the sprites' position
+nor the mouseX and mouseY variables. Use this property to read the mouse
+position if the camera moved or zoomed.</p>
+
+    </div>
+
+
+
+</div>
+<div id="prop-mouseY" class="property item ">
+    <h3 class="name"><code>mouseY</code></h3>
+    <span class="type">Number</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l2483"><code>lib&#x2F;p5.play.js:2483</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>MouseY translated to the camera view.
+Offsetting and scaling the canvas will not change the sprites' position
+nor the mouseX and mouseY variables. Use this property to read the mouse
+position if the camera moved or zoomed.</p>
+
+    </div>
+
+
+
+</div>
+<div id="prop-position" class="property item ">
+    <h3 class="name"><code>position</code></h3>
+    <span class="type">p5.Vector</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l2454"><code>lib&#x2F;p5.play.js:2454</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Camera position. Defines the global offset of the sketch.</p>
+
+    </div>
+
+
+
+</div>
+<div id="prop-zoom" class="property item ">
+    <h3 class="name"><code>zoom</code></h3>
+    <span class="type">Number</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l2462"><code>lib&#x2F;p5.play.js:2462</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Camera zoom. Defines the global scale of the sketch.
+A scale of 1 will be the normal size. Setting it to 2 will make everything
+twice the size. .5 will make everything half size.</p>
+
+    </div>
+
+
+
+</div>
+        </div>
+    </div>
+
+
+
                     </div>
                 </div>
             </div>
