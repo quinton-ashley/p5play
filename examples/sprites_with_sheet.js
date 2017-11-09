@@ -8,22 +8,21 @@ var explode_sprite;
 var player_walk;
 var player_stand;
 var player_sprite;
-var tile_frames;
 
 // Normally you would put this in a .json file, but I'm putting it here
 // for example purposes
 var player_frames = [
-  {"name":"player_walk01", "frame":{"x":0, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk02", "frame":{"x":71, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk03", "frame":{"x":142, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk04", "frame":{"x":0, "y": 95, "width": 70, "height": 94}},
-  {"name":"player_walk05", "frame":{"x":71, "y": 95, "width": 70, "height": 94}},
-  {"name":"player_walk06", "frame":{"x":142, "y": 95, "width": 70, "height": 94}},
-  {"name":"player_walk07", "frame":{"x":213, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk08", "frame":{"x":284, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk09", "frame":{"x":213, "y": 95, "width": 70, "height": 94}},
-  {"name":"player_walk10", "frame":{"x":355, "y": 0, "width": 70, "height": 94}},
-  {"name":"player_walk11", "frame":{"x":284, "y": 95, "width": 70, "height": 94}}
+  {'name':'player_walk01', 'frame':{'x':0, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk02', 'frame':{'x':71, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk03', 'frame':{'x':142, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk04', 'frame':{'x':0, 'y': 95, 'width': 70, 'height': 94}},
+  {'name':'player_walk05', 'frame':{'x':71, 'y': 95, 'width': 70, 'height': 94}},
+  {'name':'player_walk06', 'frame':{'x':142, 'y': 95, 'width': 70, 'height': 94}},
+  {'name':'player_walk07', 'frame':{'x':213, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk08', 'frame':{'x':284, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk09', 'frame':{'x':213, 'y': 95, 'width': 70, 'height': 94}},
+  {'name':'player_walk10', 'frame':{'x':355, 'y': 0, 'width': 70, 'height': 94}},
+  {'name':'player_walk11', 'frame':{'x':284, 'y': 95, 'width': 70, 'height': 94}}
 ];
 
 function preload() {
@@ -38,8 +37,6 @@ function preload() {
   //
   //    Below demonstrates both methods:
 
-  // Load the json for the tiles sprite sheet
-  tile_frames = loadJSON('assets/tiles.json');
 
   // Load the explode sprite sheet using frame width, height and number of frames
   explode_sprite_sheet = loadSpriteSheet('assets/explode_sprite_sheet.png', 171, 158, 11);
@@ -47,8 +44,11 @@ function preload() {
   // Load player sprite sheet from frames array
   player_sprite_sheet = loadSpriteSheet('assets/player_spritesheet.png', player_frames);
 
-  // Load tiles sprite sheet from frames array
-  tile_sprite_sheet = loadSpriteSheet('assets/tiles_spritesheet.png', tile_frames);
+  // Load the json for the tiles sprite sheet
+  loadJSON('assets/tiles.json', function(tile_frames) {
+    // Load tiles sprite sheet from frames array once frames array is ready
+    tile_sprite_sheet = loadSpriteSheet('assets/tiles_spritesheet.png', tile_frames);
+  });
 
   // Exploding star animation
   explode_animation = loadAnimation(explode_sprite_sheet);
@@ -58,7 +58,7 @@ function preload() {
 
   // An animation with a single frame for standing
   player_stand = loadAnimation(new SpriteSheet('assets/player_spritesheet.png',
-    [{"name":"player_stand", "frame":{"x":284, "y": 95, "width": 70, "height": 94}}]));
+    [{'name':'player_stand', 'frame':{'x':284, 'y': 95, 'width': 70, 'height': 94}}]));
 }
 
 function setup() {
@@ -101,7 +101,7 @@ function draw() {
     // flip horizontally
     player_sprite.mirrorX(-1);
     // move left
-    player_sprite.velocity.x = - 2;
+    player_sprite.velocity.x = -2;
   }
   else if(eventX > player_sprite.position.x + 10) {
     player_sprite.changeAnimation('walk');

@@ -1,7 +1,7 @@
 //flappy bird-like
 //mouse click or x to flap
 
-var GRAVITY = .3;
+var GRAVITY = 0.3;
 var FLAP = -7;
 var GROUND_Y = 450;
 var MIN_OPENING = 300;
@@ -12,17 +12,17 @@ var birdImg, pipeImg, groundImg, bgImg;
 
 
 function setup() {
-  createCanvas(400,600);
+  createCanvas(400, 600);
 
-  birdImg = loadImage("assets/flappy_bird.png");
-  pipeImg = loadImage("assets/flappy_pipe.png");
-  groundImg = loadImage("assets/flappy_ground.png");
-  bgImg = loadImage("assets/flappy_bg.png");
-  
-  bird = createSprite(width/2, height/2, 40,40);
+  birdImg = loadImage('assets/flappy_bird.png');
+  pipeImg = loadImage('assets/flappy_pipe.png');
+  groundImg = loadImage('assets/flappy_ground.png');
+  bgImg = loadImage('assets/flappy_bg.png');
+
+  bird = createSprite(width/2, height/2, 40, 40);
   bird.rotateToDirection = true;
   bird.velocity.x = 4;
-  bird.setCollider("circle", 0,0,20);
+  bird.setCollider('circle', 0, 0, 20);
   bird.addImage(birdImg);
 
   ground = createSprite(800/2, GROUND_Y+100); //image 800x200
@@ -31,25 +31,25 @@ function setup() {
   pipes = new Group();
   gameOver = true;
   updateSprites(false);
-  
+
   camera.position.y = height/2;
 }
 
 function draw() {
 
-  if(gameOver && keyWentDown("x"))
+  if(gameOver && keyWentDown('x'))
     newGame();
 
   if(!gameOver) {
 
-    if(keyWentDown("x"))
+    if(keyWentDown('x'))
       bird.velocity.y = FLAP;
-    
+
     bird.velocity.y += GRAVITY;
-    
+
     if(bird.position.y<0)
       bird.position.y = 0;
-    
+
     if(bird.position.y+bird.height/2 > GROUND_Y)
       die();
 
@@ -85,7 +85,7 @@ function draw() {
   if(camera.position.x > ground.position.x-ground.width+width/2)
     ground.position.x+=ground.width;
 
-  background(247, 134, 131); 
+  background(247, 134, 131);
   camera.off();
   image(bgImg, 0, GROUND_Y-190);
   camera.on();
@@ -97,7 +97,7 @@ function draw() {
 
 function die() {
   updateSprites(false);
-  gameOver = true;   
+  gameOver = true;
 }
 
 function newGame() {
