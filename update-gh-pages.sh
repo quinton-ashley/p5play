@@ -9,6 +9,7 @@ npm run docs
 
 echo "Copying/moving files in working dir."
 
+npm run copy:p5
 rm -rf __temp_examples __temp_docs __temp_p5.play.js
 cp -r examples/ __temp_examples/
 mv docs __temp_docs

@@ -5,7 +5,7 @@ node_js:
   - "4"
 
 before_script:
-  - 'if [ "$P5_VERSION" ]; then npm install p5@$P5_VERSION && npm run link:p5; fi'
+  - 'if [ "$P5_VERSION" ]; then npm install p5@$P5_VERSION && npm run copy:p5; fi'
 
 env:
   - P5_VERSION=0.5.0
