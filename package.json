@@ -19,9 +19,9 @@
     "lint:examples": "eslint examples/*.js",
     "lint:lib": "eslint lib/**",
     "lint:test": "eslint test/unit/**",
-    "link:p5": "ln -fs `npm root`/p5/lib/p5.js examples/lib/p5.js",
+    "copy:p5": "cp -f `npm root`/p5/lib/p5.js examples/lib/p5.js",
     "start": "http-server -o",
-    "postinstall": "npm run link:p5 && npm run docs",
+    "postinstall": "npm run copy:p5 && npm run docs",
     "pretest": "npm run lint",
     "test": "mocha-phantomjs test/index.html"
   },
