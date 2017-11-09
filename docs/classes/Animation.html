@@ -15,7 +15,7 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
-	    <img alt="p5.play" src="..\..\asterisk.png" style="max-height: 65%;" title="p5.play">
+	    <img alt="p5.play" src="../../asterisk.png" style="max-height: 65%;" title="p5.play">
             p5.play
         </h1>
 	<div class="nav">
@@ -34,1009 +34,1013 @@
 <div class="container">
     <div class="row">
         <div class="span3">
-	    <div>
-	        <div id="sidebar">
-	        <div id="classes">
-	            <ul id="api-classes" class="nav nav-list">
-	                    <li><a href="../classes/Animation.html">Animation</a></li>
-	                    <li><a href="../classes/Camera.html">Camera</a></li>
-	                    <li><a href="../classes/Group.html">Group</a></li>
-	                    <li><a href="../classes/p5.play.html">p5.play</a></li>
-	                    <li><a href="../classes/Sprite.html">Sprite</a></li>
-	                    <li><a href="../classes/SpriteSheet.html">SpriteSheet</a></li>
-	            </ul>
-	        </div>
-	        </div>
-	    </div>
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Animation.html">Animation</a></li>
+                <li><a href="../classes/Camera.html">Camera</a></li>
+                <li><a href="../classes/Group.html">Group</a></li>
+                <li><a href="../classes/p5.play.html">p5.play</a></li>
+                <li><a href="../classes/Sprite.html">Sprite</a></li>
+                <li><a href="../classes/SpriteSheet.html">SpriteSheet</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
         </div>
         <div class="span9">
-                <form id="options-form" class="form-inline pull-right">
-                    Show:
-                    <label for="api-show-inherited" class="checkbox">
-                        <input type="checkbox" id="api-show-inherited" checked>
-                        Inherited
-                    </label>
-            
-                    <label for="api-show-protected" class="checkbox">
-                        <input type="checkbox" id="api-show-protected">
-                        Protected
-                    </label>
-            
-                    <label for="api-show-private" class="checkbox">
-                        <input type="checkbox" id="api-show-private" checked>
-                        Private
-                    </label>
-                    <label for="api-show-deprecated" class="checkbox">
-                        <input type="checkbox" id="api-show-deprecated">
-                        Deprecated
-                    </label>
-            
-                </form>
-            
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <div class="page-header">
-                            <h1>Animation</h1>
-                        </div>
-                        
-                        
-                        
-                        	<div class="well well-small">
-                                    Module: <a href="../modules/p5.play.html">p5.play</a><br>
-                                    Parent Module: <a href="../modules/p5.play.html">p5.play</a>
-                            </div>
-                        
-                        
-                        
-                        <div class="yuidoc-class-description">
-                        <p>An Animation object contains a series of images (p5.Image) that
-                        can be displayed sequentially.</p>
-                        <p>All files must be png images. You must include the directory from the sketch root,
-                        and the extension .png</p>
-                        <p>A sprite can have multiple labeled animations, see Sprite.addAnimation
-                        and Sprite.changeAnimation, however an animation can be used independently.</p>
-                        <p>An animation can be created either by passing a series of file names,
-                        no matter how many or by passing the first and the last file name
-                        of a numbered sequence.
-                        p5.play will try to detect the sequence pattern.</p>
-                        <p>For example if the given filenames are
-                        "data/file0001.png" and "data/file0005.png" the images
-                        "data/file0003.png" and "data/file0004.png" will be loaded as well.</p>
-                        
-                        </div>
-                        
-                        <!-- table of contents -->
-                        
-                        <div id="class-toc" class="page-section">
-                        	<h2>Table of Contents</h2>
-                            <ul>
-                        		<li>
-                        			<strong>Methods</strong>
-                        			<ul>
-                        				<li><a href="#method-changeFrame"><span class="im">changeFrame</span>()</a></li>
-                        				<li><a href="#method-changeFrame"><span class="im">changeFrame</span>()</a></li>
-                        				<li><a href="#method-changeFrame"><span class="im">changeFrame</span>(<span class="ia">frame</span>)</a></li>
-                        				<li><a href="#method-clone"><span class="im">clone</span>()</a></li>
-                        				<li><a href="#method-draw"><span class="im">draw</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">r</span>)</a></li>
-                        				<li><a href="#method-getFrame"><span class="im">getFrame</span>()</a></li>
-                        				<li><a href="#method-getFrameImage"><span class="im">getFrameImage</span>()</a></li>
-                        				<li><a href="#method-getHeight"><span class="im">getHeight</span>()</a></li>
-                        				<li><a href="#method-getImageAt"><span class="im">getImageAt</span>(<span class="ia">frame</span>)</a></li>
-                        				<li><a href="#method-getLastFrame"><span class="im">getLastFrame</span>()</a></li>
-                        				<li><a href="#method-getWidth"><span class="im">getWidth</span>()</a></li>
-                        				<li><a href="#method-goToFrame"><span class="im">goToFrame</span>(<span class="ia">targetFrame</span>)</a></li>
-                        				<li><a href="#method-play"><span class="im">play</span>()</a></li>
-                        				<li><a href="#method-rewind"><span class="im">rewind</span>()</a></li>
-                        				<li><a href="#method-stop"><span class="im">stop</span>()</a></li>
-                        			</ul>
-                        		</li>
-                        
-                        		<li>
-                        			<strong>Properties</strong>
-                        			<ul>
-                        				<li><a href="#prop-frameChanged"><span class="ip">frameChanged</span></a></li>
-                        				<li><a href="#prop-frameDelay"><span class="ip">frameDelay</span></a></li>
-                        				<li><a href="#prop-images"><span class="ip">images</span></a></li>
-                        				<li><a href="#prop-looping"><span class="ip">looping</span></a></li>
-                        				<li><a href="#prop-playing"><span class="ip">playing</span></a></li>
-                        				<li><a href="#prop-visible"><span class="ip">visible</span></a></li>
-                        			</ul>
-                        		</li>
-                        
-                        
-                        	</ul>
-                        </div>
-                        
-                        <!-- details -->
-                        
-                            <div class="constructor yuidoc-class-constructor page-section">
-                                <h2>Constructor</h2>
-                                <div class="item-list">
-                                <div id="method-Animation" class="method item">
-                                	<div class="method-signature">
-                                	<span class="name"><code>Animation</code></span>
-                                
-                                		<div class="args">
-                                			<span class="paren">(</span><ul class="args-list inline commas">
-                                				<li class="arg">
-                                						<code>fileName1</code>
-                                				</li>
-                                				<li class="arg">
-                                						<code>fileName2</code>
-                                				</li>
-                                				<li class="arg">
-                                						<code class="optional">fileNameN</code>
-                                				</li>
-                                			</ul><span class="paren">)</span>
-                                		</div>
-                                	</div>
-                                
-                                
-                                
-                                
-                                
-                                
-                                	<div class="meta">
-                                				<p>
-                                				Defined in
-                                		<a href="../files/lib_p5.play.js.html#l3136"><code>lib\p5.play.js:3136</code></a>
-                                		</p>
-                                
-                                
-                                
-                                	</div>
-                                
-                                
-                                		<div class="params">
-                                			<h4>Parameters:</h4>
-                                
-                                			<ul class="params-list">
-                                				<li class="param">
-                                						<code class="param-name">fileName1</code>
-                                						<span class="type">String</span>
-                                
-                                
-                                					<div class="param-description"><p>First file in a sequence OR first image file</p>
-                                </div>
-                                
-                                				</li>
-                                				<li class="param">
-                                						<code class="param-name">fileName2</code>
-                                						<span class="type">String</span>
-                                
-                                
-                                					<div class="param-description"><p>Last file in a sequence OR second image file</p>
-                                </div>
-                                
-                                				</li>
-                                				<li class="param">
-                                						<code class="param-name optional">[fileNameN]</code>
-                                						<span class="type">String</span>
-                                						<span class="flag optional" title="This parameter is optional.">optional</span>
-                                
-                                						<span class="flag multiple" title="This argument may occur one or more times.">multiple</span>
-                                
-                                					<div class="param-description"><p>Any number of image files after the first two</p>
-                                </div>
-                                
-                                				</li>
-                                			</ul>
-                                		</div>
-                                
-                                
-                                		<div class="example">
-                                			<h4>Example:</h4>
-                                
-                                			<div class="example-content">
-                                				<code>
-                                var sequenceAnimation;<br>
-                                var glitch;<br><br>
-                                function preload() {<br>
-                                  sequenceAnimation = loadAnimation("data/walking0001.png", "data/walking0005.png");<br>
-                                  glitch = loadAnimation("data/dog.png", "data/horse.png", "data/cat.png", "data/snake.png");<br>
-                                }<br><br>
-                                function setup() {<br>
-                                  createCanvas(800, 600);<br>
-                                }<br><br>
-                                function draw() {<br>
-                                  background(0);<br>
-                                  animation(sequenceAnimation, 100, 100);<br>
-                                  animation(glitch, 200, 100);<br>
-                                }
-                                </code>
-                                			</div>
-                                		</div>
-                                </div>
-                                </div>
-                            </div>
-                        
-                            <div id="methods" class="page-section">
-                                <h2 class="off-left">Methods</h2>
-                                <div class="item-list">
-                                    <div id="method-changeFrame" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>changeFrame</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3555"><code>lib\p5.play.js:3555</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Goes to the next frame and stops.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-changeFrame" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>changeFrame</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3539"><code>lib\p5.play.js:3539</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Goes to the next frame and stops.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-changeFrame" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>changeFrame</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>frame</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3523"><code>lib\p5.play.js:3523</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Changes the current frame.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">frame</code>
-                                    						<span class="type">Number</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Frame number (starts from 0).</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    
-                                    </div>
-                                    <div id="method-clone" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>clone</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    		<span class="returns-inline">
-                                    			<span class="type"><a href="../classes/Animation.html" class="crosslink">Animation</a></span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3368"><code>lib\p5.play.js:3368</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Objects are passed by reference so to have different sprites
-                                    using the same animation you need to clone it.</p>
-                                    </div>
-                                    
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type"><a href="../classes/Animation.html" class="crosslink">Animation</a></span>:
-                                    					<p>A clone of the current animation</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-draw" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>draw</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>x</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code>y</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code class="optional">r=0</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3396"><code>lib\p5.play.js:3396</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Draws the animation at coordinate x and y.
-                                    Updates the frames automatically.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">x</code>
-                                    						<span class="type">Number</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>x coordinate</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name">y</code>
-                                    						<span class="type">Number</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>y coordinate</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name optional">[r=0]</code>
-                                    						<span class="type">Number</span>
-                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>rotation</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    
-                                    </div>
-                                    <div id="method-getFrame" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>getFrame</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Number</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3587"><code>lib\p5.play.js:3587</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns the current frame number.</p>
-                                    </div>
-                                    
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Number</span>:
-                                    					<p>Current frame (starts from 0)</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-getFrameImage" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>getFrameImage</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    		<span class="returns-inline">
-                                    			<span class="type">p5.Image</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3607"><code>lib\p5.play.js:3607</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns the current frame image as p5.Image.</p>
-                                    </div>
-                                    
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">p5.Image</span>:
-                                    					<p>Current frame image</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-getHeight" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>getHeight</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Number</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3638"><code>lib\p5.play.js:3638</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns the current frame height in pixels.</p>
-                                    </div>
-                                    
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Number</span>:
-                                    					<p>Frame height</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-getImageAt" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>getImageAt</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>frame</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">p5.Image</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3617"><code>lib\p5.play.js:3617</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns the frame image at the specified frame number.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">frame</code>
-                                    						<span class="type">Number</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Frame number</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">p5.Image</span>:
-                                    					<p>Frame image</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-getLastFrame" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>getLastFrame</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Number</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3597"><code>lib\p5.play.js:3597</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns the last frame number.</p>
-                                    </div>
-                                    
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Number</span>:
-                                    					<p>Last frame number (starts from 0)</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-getWidth" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>getWidth</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Number</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3628"><code>lib\p5.play.js:3628</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns the current frame width in pixels.</p>
-                                    </div>
-                                    
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Number</span>:
-                                    					<p>Frame width</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-goToFrame" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>goToFrame</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>targetFrame</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3571"><code>lib\p5.play.js:3571</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Plays the animation forward or backward toward a target frame.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">targetFrame</code>
-                                    						<span class="type">Number</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Frame number destination (starts from 0)</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    
-                                    </div>
-                                    <div id="method-play" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>play</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3495"><code>lib\p5.play.js:3495</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Plays the animation.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-rewind" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>rewind</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3514"><code>lib\p5.play.js:3514</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Rewinds the animation to the first frame.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-stop" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>stop</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l3505"><code>lib\p5.play.js:3505</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Stops the animation.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                </div>
-                            </div>
-                        
-                            <div id="properties" class="page-section">
-                                <h2 class="off-left">Properties</h2>
-                        
-                                <div class="item-list">
-                                    <div id="prop-frameChanged" class="property item">
-                                        <h3 class="name"><code>frameChanged</code></h3>
-                                        <span class="type">Boolean</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3239"><code>lib\p5.play.js:3239</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>True if frame changed during the last draw cycle</p>
-                                    
-                                        </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-frameDelay" class="property item">
-                                        <h3 class="name"><code>frameDelay</code></h3>
-                                        <span class="type">Number</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3201"><code>lib\p5.play.js:3201</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>Delay between frames in number of draw cycles.
-                                    If set to 4 the framerate of the anymation would be the
-                                    sketch framerate divided by 4 (60fps = 15fps)</p>
-                                    
-                                        </div>
-                                    
-                                            <p><strong>Default:</strong> 2</p>
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-images" class="property item">
-                                        <h3 class="name"><code>images</code></h3>
-                                        <span class="type">Array</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3186"><code>lib\p5.play.js:3186</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>Array of frames (p5.Image)</p>
-                                    
-                                        </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-looping" class="property item">
-                                        <h3 class="name"><code>looping</code></h3>
-                                        <span class="type">Boolean</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3230"><code>lib\p5.play.js:3230</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>If set to false the animation will stop after reaching the last frame</p>
-                                    
-                                        </div>
-                                    
-                                            <p><strong>Default:</strong> true</p>
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-playing" class="property item">
-                                        <h3 class="name"><code>playing</code></h3>
-                                        <span class="type">Boolean</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3212"><code>lib\p5.play.js:3212</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>True if the animation is currently playing.</p>
-                                    
-                                        </div>
-                                    
-                                            <p><strong>Default:</strong> true</p>
-                                    
-                                    
-                                    </div>
-                                    <div id="prop-visible" class="property item">
-                                        <h3 class="name"><code>visible</code></h3>
-                                        <span class="type">Boolean</span>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                        <div class="meta">
-                                                    <p>
-                                                    Defined in
-                                            <a href="../files/lib_p5.play.js.html#l3221"><code>lib\p5.play.js:3221</code></a>
-                                            </p>
-                                    
-                                    
-                                        </div>
-                                    
-                                        <div class="description">
-                                            <p>Animation visibility.</p>
-                                    
-                                        </div>
-                                    
-                                            <p><strong>Default:</strong> true</p>
-                                    
-                                    
-                                    </div>
-                                </div>
-                            </div>
-                        
-                        
-                        
+<div class="page-header">
+    <h1>Animation</h1>
+</div>
+
+
+
+	<div class="well well-small">
+            Module: <a href="../modules/p5.play.html">p5.play</a><br>
+            Parent Module: <a href="../modules/p5.play.html">p5.play</a>
+    </div>
+
+
+
+<div class="yuidoc-class-description">
+<p>An Animation object contains a series of images (p5.Image) that
+can be displayed sequentially.</p>
+<p>All files must be png images. You must include the directory from the sketch root,
+and the extension .png</p>
+<p>A sprite can have multiple labeled animations, see Sprite.addAnimation
+and Sprite.changeAnimation, however an animation can be used independently.</p>
+<p>An animation can be created either by passing a series of file names,
+no matter how many or by passing the first and the last file name
+of a numbered sequence.
+p5.play will try to detect the sequence pattern.</p>
+<p>For example if the given filenames are
+"data/file0001.png" and "data/file0005.png" the images
+"data/file0003.png" and "data/file0004.png" will be loaded as well.</p>
+
+</div>
+
+<!-- table of contents -->
+
+<div id="class-toc" class="page-section">
+	<h2>Table of Contents</h2>
+    <ul>
+		<li>
+			<strong>Methods</strong>
+			<ul>
+				<li class=""><a href="#method-changeFrame"><span class="im">changeFrame</span>(<span class="ia">frame</span>)</a></li>
+				<li class=""><a href="#method-clone"><span class="im">clone</span>()</a></li>
+				<li class=""><a href="#method-draw"><span class="im">draw</span>(<span class="ia">x</span><span class="ia">y</span><span class="ia">r</span>)</a></li>
+				<li class=""><a href="#method-getFrame"><span class="im">getFrame</span>()</a></li>
+				<li class=""><a href="#method-getFrameImage"><span class="im">getFrameImage</span>()</a></li>
+				<li class=""><a href="#method-getHeight"><span class="im">getHeight</span>()</a></li>
+				<li class=""><a href="#method-getImageAt"><span class="im">getImageAt</span>(<span class="ia">frame</span>)</a></li>
+				<li class=""><a href="#method-getLastFrame"><span class="im">getLastFrame</span>()</a></li>
+				<li class=""><a href="#method-getWidth"><span class="im">getWidth</span>()</a></li>
+				<li class=""><a href="#method-goToFrame"><span class="im">goToFrame</span>(<span class="ia">toFrame</span>)</a></li>
+				<li class=""><a href="#method-nextFrame"><span class="im">nextFrame</span>()</a></li>
+				<li class=""><a href="#method-play"><span class="im">play</span>()</a></li>
+				<li class=""><a href="#method-previousFrame"><span class="im">previousFrame</span>()</a></li>
+				<li class=""><a href="#method-rewind"><span class="im">rewind</span>()</a></li>
+				<li class=""><a href="#method-stop"><span class="im">stop</span>()</a></li>
+			</ul>
+		</li>
+
+		<li>
+			<strong>Properties</strong>
+			<ul>
+				<li class=""><a href="#prop-frameChanged"><span class="ip">frameChanged</span></a></li>
+				<li class=""><a href="#prop-frameDelay"><span class="ip">frameDelay</span></a></li>
+				<li class=""><a href="#prop-images"><span class="ip">images</span></a></li>
+				<li class=""><a href="#prop-looping"><span class="ip">looping</span></a></li>
+				<li class=""><a href="#prop-playing"><span class="ip">playing</span></a></li>
+				<li class=""><a href="#prop-visible"><span class="ip">visible</span></a></li>
+			</ul>
+		</li>
+
+
+	</ul>
+</div>
+
+<!-- details -->
+
+    <div class="constructor yuidoc-class-constructor page-section">
+        <h2>Constructor</h2>
+        <div class="item-list">
+<div id="method-Animation" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>Animation</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>fileName1</code>
+				</li>
+				<li class="arg">
+						<code>fileName2</code>
+				</li>
+				<li class="arg">
+						<code class="optional">fileNameN</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3273"><code>lib&#x2F;p5.play.js:3273</code></a>
+		</p>
+
+
+
+	</div>
+
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">fileName1</code>
+						<span class="type">String</span>
+
+
+					<div class="param-description"><p>First file in a sequence OR first image file</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name">fileName2</code>
+						<span class="type">String</span>
+
+
+					<div class="param-description"><p>Last file in a sequence OR second image file</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[fileNameN]</code>
+						<span class="type">String</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+						<span class="flag multiple" title="This argument may occur one or more times.">multiple</span>
+
+					<div class="param-description"><p>Any number of image files after the first two</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+
+		<div class="example">
+			<h4>Example:</h4>
+
+			<div class="example-content">
+				<pre class="code prettyprint"><code>var sequenceAnimation;
+var glitch;
+
+function preload() {
+  sequenceAnimation = loadAnimation("data/walking0001.png", "data/walking0005.png");
+  glitch = loadAnimation("data/dog.png", "data/horse.png", "data/cat.png", "data/snake.png");
+}
+
+function setup() {
+  createCanvas(800, 600);
+}
+
+function draw() {
+  background(0);
+  animation(sequenceAnimation, 100, 100);
+  animation(glitch, 200, 100);
+}</code></pre>
+
+			</div>
+		</div>
+</div>
+        </div>
+    </div>
+
+    <div id="methods" class="page-section">
+        <h2 class="off-left">Methods</h2>
+        <div class="item-list">
+<div id="method-changeFrame" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>changeFrame</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>frame</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3661"><code>lib&#x2F;p5.play.js:3661</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Changes the current frame.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">frame</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>Frame number (starts from 0).</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+
+</div>
+<div id="method-clone" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>clone</code></span>
+
+		<span class="paren">()</span>
+		<span class="returns-inline">
+			<span class="type"><a href="../classes/Animation.html" class="crosslink">Animation</a></span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3505"><code>lib&#x2F;p5.play.js:3505</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Objects are passed by reference so to have different sprites
+using the same animation you need to clone it.</p>
+</div>
+
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type"><a href="../classes/Animation.html" class="crosslink">Animation</a></span>:
+					<p>A clone of the current animation</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-draw" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>draw</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>x</code>
+				</li>
+				<li class="arg">
+						<code>y</code>
+				</li>
+				<li class="arg">
+						<code class="optional">r=0</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3530"><code>lib&#x2F;p5.play.js:3530</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Draws the animation at coordinate x and y.
+Updates the frames automatically.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">x</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>x coordinate</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name">y</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>y coordinate</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[r=0]</code>
+						<span class="type">Number</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>rotation</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+
+</div>
+<div id="method-getFrame" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>getFrame</code></span>
+
+		<span class="paren">()</span>
+		<span class="returns-inline">
+			<span class="type">Number</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3729"><code>lib&#x2F;p5.play.js:3729</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns the current frame number.</p>
+</div>
+
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Number</span>:
+					<p>Current frame (starts from 0)</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-getFrameImage" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>getFrameImage</code></span>
+
+		<span class="paren">()</span>
+		<span class="returns-inline">
+			<span class="type">p5.Image</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3749"><code>lib&#x2F;p5.play.js:3749</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns the current frame image as p5.Image.</p>
+</div>
+
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">p5.Image</span>:
+					<p>Current frame image</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-getHeight" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>getHeight</code></span>
+
+		<span class="paren">()</span>
+		<span class="returns-inline">
+			<span class="type">Number</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3788"><code>lib&#x2F;p5.play.js:3788</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns the current frame height in pixels.
+If there is no image loaded, returns 1.</p>
+</div>
+
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Number</span>:
+					<p>Frame height</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-getImageAt" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>getImageAt</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>frame</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">p5.Image</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3759"><code>lib&#x2F;p5.play.js:3759</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns the frame image at the specified frame number.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">frame</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>Frame number</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">p5.Image</span>:
+					<p>Frame image</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-getLastFrame" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>getLastFrame</code></span>
+
+		<span class="paren">()</span>
+		<span class="returns-inline">
+			<span class="type">Number</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3739"><code>lib&#x2F;p5.play.js:3739</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns the last frame number.</p>
+</div>
+
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Number</span>:
+					<p>Last frame number (starts from 0)</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-getWidth" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>getWidth</code></span>
+
+		<span class="paren">()</span>
+		<span class="returns-inline">
+			<span class="type">Number</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3770"><code>lib&#x2F;p5.play.js:3770</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns the current frame width in pixels.
+If there is no image loaded, returns 1.</p>
+</div>
+
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Number</span>:
+					<p>Frame width</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-goToFrame" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>goToFrame</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>toFrame</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3709"><code>lib&#x2F;p5.play.js:3709</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Plays the animation forward or backward toward a target frame.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">toFrame</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>Frame number destination (starts from 0)</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+
+</div>
+<div id="method-nextFrame" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>nextFrame</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3677"><code>lib&#x2F;p5.play.js:3677</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Goes to the next frame and stops.</p>
+</div>
+
+
+
+</div>
+<div id="method-play" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>play</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3633"><code>lib&#x2F;p5.play.js:3633</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Plays the animation.</p>
+</div>
+
+
+
+</div>
+<div id="method-previousFrame" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>previousFrame</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3693"><code>lib&#x2F;p5.play.js:3693</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Goes to the previous frame and stops.</p>
+</div>
+
+
+
+</div>
+<div id="method-rewind" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>rewind</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3652"><code>lib&#x2F;p5.play.js:3652</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Rewinds the animation to the first frame.</p>
+</div>
+
+
+
+</div>
+<div id="method-stop" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>stop</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l3643"><code>lib&#x2F;p5.play.js:3643</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Stops the animation.</p>
+</div>
+
+
+
+</div>
+        </div>
+    </div>
+
+    <div id="properties" class="page-section">
+        <h2 class="off-left">Properties</h2>
+
+        <div class="item-list">
+<div id="prop-frameChanged" class="property item ">
+    <h3 class="name"><code>frameChanged</code></h3>
+    <span class="type">Boolean</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l3376"><code>lib&#x2F;p5.play.js:3376</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>True if frame changed during the last draw cycle</p>
+
+    </div>
+
+
+
+</div>
+<div id="prop-frameDelay" class="property item ">
+    <h3 class="name"><code>frameDelay</code></h3>
+    <span class="type">Number</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l3338"><code>lib&#x2F;p5.play.js:3338</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Delay between frames in number of draw cycles.
+If set to 4 the framerate of the animation would be the
+sketch framerate divided by 4 (60fps = 15fps)</p>
+
+    </div>
+
+        <p><strong>Default:</strong> 4</p>
+
+
+</div>
+<div id="prop-images" class="property item ">
+    <h3 class="name"><code>images</code></h3>
+    <span class="type">Array</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l3323"><code>lib&#x2F;p5.play.js:3323</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Array of frames (p5.Image)</p>
+
+    </div>
+
+
+
+</div>
+<div id="prop-looping" class="property item ">
+    <h3 class="name"><code>looping</code></h3>
+    <span class="type">Boolean</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l3367"><code>lib&#x2F;p5.play.js:3367</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>If set to false the animation will stop after reaching the last frame</p>
+
+    </div>
+
+        <p><strong>Default:</strong> true</p>
+
+
+</div>
+<div id="prop-playing" class="property item ">
+    <h3 class="name"><code>playing</code></h3>
+    <span class="type">Boolean</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l3349"><code>lib&#x2F;p5.play.js:3349</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>True if the animation is currently playing.</p>
+
+    </div>
+
+        <p><strong>Default:</strong> true</p>
+
+
+</div>
+<div id="prop-visible" class="property item ">
+    <h3 class="name"><code>visible</code></h3>
+    <span class="type">Boolean</span>
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/lib_p5.play.js.html#l3358"><code>lib&#x2F;p5.play.js:3358</code></a>
+        </p>
+
+
+    </div>
+
+    <div class="description">
+        <p>Animation visibility.</p>
+
+    </div>
+
+        <p><strong>Default:</strong> true</p>
+
+
+</div>
+        </div>
+    </div>
+
+
+
                     </div>
                 </div>
             </div>

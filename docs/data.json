@@ -7,8 +7,8 @@
         "logo": "../asterisk.png"
     },
     "files": {
-        "lib\\p5.play.js": {
-            "name": "lib\\p5.play.js",
+        "lib/p5.play.js": {
+            "name": "lib/p5.play.js",
             "modules": {
                 "p5.play": 1
             },
@@ -43,8 +43,8 @@
             },
             "namespaces": {},
             "module": "p5.play",
-            "file": "lib\\p5.play.js",
-            "line": 3652,
+            "file": "lib/p5.play.js",
+            "line": 3810,
             "description": "p5.play is a library for p5.js to facilitate the creation of games and gamelike\nprojects.\n\nIt provides a flexible Sprite class to manage visual objects in 2D space\nand features such as animation support, basic collision detection\nand resolution, mouse and keyboard interactions, and a virtual camera.\n\np5.play is not a box2D-derived physics engine, it doesn't use events, and it's\ndesigned to be understood and possibly modified by intermediate programmers.\n\nSee the examples folder for more info on how to use this library.",
             "tag": "main",
             "itemtype": "main"
@@ -74,8 +74,8 @@
             "module": "p5.play",
             "submodule": "p5.play",
             "namespace": "",
-            "file": "lib\\p5.play.js",
-            "line": 694,
+            "file": "lib/p5.play.js",
+            "line": 721,
             "description": "A Sprite is the main building block of p5.play:\nan element able to store images or animations with a set of\nproperties such as position and visibility.\nA Sprite can have a collider that defines the active area to detect\ncollisions or overlappings with other sprites and mouse interactions.\n\nTo create a Sprite, use\n{{#crossLink \"p5.play/createSprite:method\"}}{{/crossLink}}."
         },
         "Camera": {
@@ -89,8 +89,8 @@
             "module": "p5.play",
             "submodule": "p5.play",
             "namespace": "",
-            "file": "lib\\p5.play.js",
-            "line": 2293,
+            "file": "lib/p5.play.js",
+            "line": 2437,
             "description": "A camera facilitates scrolling and zooming for scenes extending beyond\nthe canvas. A camera has a position, a zoom factor, and the mouse\ncoordinates relative to the view.\nThe camera is automatically created on the first draw cycle.\n\nIn p5.js terms the camera wraps the whole drawing cycle in a\ntransformation matrix but it can be disable anytime during the draw\ncycle for example to draw interface elements in an absolute position.",
             "is_constructor": 1,
             "params": [
@@ -122,8 +122,8 @@
             "module": "p5.play",
             "submodule": "p5.play",
             "namespace": "",
-            "file": "lib\\p5.play.js",
-            "line": 2433,
+            "file": "lib/p5.play.js",
+            "line": 2577,
             "description": "In p5.play groups are collections of sprites with similar behavior.\nFor example a group may contain all the sprites in the background\nor all the sprites that \"kill\" the player.\n\nGroups are \"extended\" arrays and inherit all their properties\ne.g. group.length\n\nSince groups contain only references, a sprite can be in multiple\ngroups and deleting a group doesn't affect the sprites themselves.\n\nSprite.remove() will also remove the sprite from all the groups\nit belongs to.",
             "is_constructor": 1
         },
@@ -138,11 +138,11 @@
             "module": "p5.play",
             "submodule": "p5.play",
             "namespace": "",
-            "file": "lib\\p5.play.js",
-            "line": 3136,
+            "file": "lib/p5.play.js",
+            "line": 3273,
             "description": "An Animation object contains a series of images (p5.Image) that\ncan be displayed sequentially.\n\nAll files must be png images. You must include the directory from the sketch root,\nand the extension .png\n\nA sprite can have multiple labeled animations, see Sprite.addAnimation\nand Sprite.changeAnimation, however an animation can be used independently.\n\nAn animation can be created either by passing a series of file names,\nno matter how many or by passing the first and the last file name\nof a numbered sequence.\np5.play will try to detect the sequence pattern.\n\nFor example if the given filenames are\n\"data/file0001.png\" and \"data/file0005.png\" the images\n\"data/file0003.png\" and \"data/file0004.png\" will be loaded as well.",
             "example": [
-                "\n<code>\nvar sequenceAnimation;<br>\nvar glitch;<br><br>\nfunction preload() {<br>\n  sequenceAnimation = loadAnimation(\"data/walking0001.png\", \"data/walking0005.png\");<br>\n  glitch = loadAnimation(\"data/dog.png\", \"data/horse.png\", \"data/cat.png\", \"data/snake.png\");<br>\n}<br><br>\nfunction setup() {<br>\n  createCanvas(800, 600);<br>\n}<br><br>\nfunction draw() {<br>\n  background(0);<br>\n  animation(sequenceAnimation, 100, 100);<br>\n  animation(glitch, 200, 100);<br>\n}\n</code>"
+                "\n    var sequenceAnimation;\n    var glitch;\n\n    function preload() {\n      sequenceAnimation = loadAnimation(\"data/walking0001.png\", \"data/walking0005.png\");\n      glitch = loadAnimation(\"data/dog.png\", \"data/horse.png\", \"data/cat.png\", \"data/snake.png\");\n    }\n\n    function setup() {\n      createCanvas(800, 600);\n    }\n\n    function draw() {\n      background(0);\n      animation(sequenceAnimation, 100, 100);\n      animation(glitch, 200, 100);\n    }"
             ],
             "is_constructor": 1,
             "params": [
@@ -176,11 +176,11 @@
             "module": "p5.play",
             "submodule": "p5.play",
             "namespace": "",
-            "file": "lib\\p5.play.js",
-            "line": 3652,
+            "file": "lib/p5.play.js",
+            "line": 3810,
             "description": "Represents a sprite sheet and all it's frames.  To be used with Animation,\nor static drawing single frames.\n\n There are two different ways to load a SpriteSheet\n\n1. Given width, height that will be used for every frame and the\n   number of frames to cycle through. The sprite sheet must have a\n   uniform grid with consistent rows and columns.\n\n2. Given an array of frame objects that define the position and\n   dimensions of each frame.  This is Flexible because you can use\n   sprite sheets that don't have uniform rows and columns.",
             "example": [
-                "\n<code>\n  // Method 1 - Using width, height for each frame and number of frames<br/>\n  explode_sprite_sheet = loadSpriteSheet('assets/explode_sprite_sheet.png', 171, 158, 11);\n  <br/><br/>\n  // Method 2 - Using an array of objects that define each frame\n  var player_frames = loadJSON('assets/tiles.json');<br/>\n  player_sprite_sheet = loadSpriteSheet('assets/player_spritesheet.png', player_frames);<br/>\n</code>"
+                "\n    // Method 1 - Using width, height for each frame and number of frames\n    explode_sprite_sheet = loadSpriteSheet('assets/explode_sprite_sheet.png', 171, 158, 11);\n\n    // Method 2 - Using an array of objects that define each frame\n    var player_frames = loadJSON('assets/tiles.json');\n    player_sprite_sheet = loadSpriteSheet('assets/player_spritesheet.png', player_frames);"
             ],
             "is_constructor": 1,
             "params": [
@@ -194,8 +194,19 @@
     "elements": {},
     "classitems": [
         {
-            "file": "lib\\p5.play.js",
-            "line": 124,
+            "file": "lib/p5.play.js",
+            "line": 42,
+            "description": "The sketch camera automatically created at the beginning of a sketch.\nA camera facilitates scrolling and zooming for scenes extending beyond\nthe canvas. A camera has a position, a zoom factor, and the mouse\ncoordinates relative to the view.\n\nIn p5.js terms the camera wraps the whole drawing cycle in a\ntransformation matrix but it can be disabled anytime during the draw\ncycle, for example to draw interface elements in an absolute position.",
+            "itemtype": "property",
+            "name": "camera",
+            "type": "{camera}",
+            "class": "p5.play",
+            "module": "p5.play",
+            "submodule": "p5.play"
+        },
+        {
+            "file": "lib/p5.play.js",
+            "line": 145,
             "description": "A Group containing all the sprites in the sketch.",
             "itemtype": "property",
             "name": "allSprites",
@@ -205,9 +216,9 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 135,
-            "description": "A Sprite is the main building block of p5.play:\nan element able to store images or animations with a set of\nproperties such as position and visibility.\nA Sprite can have a collider that defines the active area to detect\ncollisions or overlappings with other sprites and mouse interactions.",
+            "file": "lib/p5.play.js",
+            "line": 158,
+            "description": "A Sprite is the main building block of p5.play:\nan element able to store images or animations with a set of\nproperties such as position and visibility.\nA Sprite can have a collider that defines the active area to detect\ncollisions or overlappings with other sprites and mouse interactions.\n\nSprites created using createSprite (the preferred way) are added to the\nallSprites group and given a depth value that puts it in front of all\nother sprites.",
             "itemtype": "method",
             "name": "createSprite",
             "params": [
@@ -241,8 +252,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 160,
+            "file": "lib/p5.play.js",
+            "line": 187,
             "description": "Removes a Sprite from the sketch.\nThe removed Sprite won't be drawn or updated anymore.\nEquivalent to Sprite.remove()",
             "itemtype": "method",
             "name": "removeSprite",
@@ -258,8 +269,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 172,
+            "file": "lib/p5.play.js",
+            "line": 199,
             "description": "Updates all the sprites in the sketch (position, animation...)\nit's called automatically at every draw().\nIt can be paused by passing a parameter true or false;\nNote: it does not render the sprites.",
             "itemtype": "method",
             "name": "updateSprites",
@@ -275,8 +286,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 195,
+            "file": "lib/p5.play.js",
+            "line": 222,
             "description": "Returns all the sprites in the sketch as an array",
             "itemtype": "method",
             "name": "getSprites",
@@ -289,8 +300,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 226,
+            "file": "lib/p5.play.js",
+            "line": 253,
             "description": "Displays a Group of sprites.\nIf no parameter is specified, draws all sprites in the\nsketch.\nThe drawing order is determined by the Sprite property \"depth\"",
             "itemtype": "method",
             "name": "drawSprites",
@@ -307,8 +318,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 247,
+            "file": "lib/p5.play.js",
+            "line": 274,
             "description": "Displays a Sprite.\nTo be typically used in the main draw function.",
             "itemtype": "method",
             "name": "drawSprite",
@@ -324,8 +335,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 259,
+            "file": "lib/p5.play.js",
+            "line": 286,
             "description": "Loads an animation.\nTo be typically used in the preload() function of the sketch.",
             "itemtype": "method",
             "name": "loadAnimation",
@@ -341,8 +352,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 270,
+            "file": "lib/p5.play.js",
+            "line": 297,
             "description": "Loads a Sprite Sheet.\nTo be typically used in the preload() function of the sketch.",
             "itemtype": "method",
             "name": "loadSpriteSheet",
@@ -351,8 +362,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 280,
+            "file": "lib/p5.play.js",
+            "line": 307,
             "description": "Displays an animation.",
             "itemtype": "method",
             "name": "animation",
@@ -378,8 +389,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 306,
+            "file": "lib/p5.play.js",
+            "line": 333,
             "description": "Detects if a key was pressed during the last cycle.\nIt can be used to trigger events once, when a key is pressed or released.\nExample: Super Mario jumping.",
             "itemtype": "method",
             "name": "keyWentDown",
@@ -399,8 +410,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 320,
+            "file": "lib/p5.play.js",
+            "line": 347,
             "description": "Detects if a key was released during the last cycle.\nIt can be used to trigger events once, when a key is pressed or released.\nExample: Spaceship shooting.",
             "itemtype": "method",
             "name": "keyWentUp",
@@ -420,8 +431,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 333,
+            "file": "lib/p5.play.js",
+            "line": 360,
             "description": "Detects if a key is currently pressed\nLike p5 keyIsDown but accepts strings and codes",
             "itemtype": "method",
             "name": "keyDown",
@@ -441,8 +452,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 345,
+            "file": "lib/p5.play.js",
+            "line": 372,
             "description": "Detects if a key is in the given state during the last cycle.\nHelper method encapsulating common key state logic; it may be preferable\nto call keyDown or other methods directly.",
             "access": "private",
             "tagname": "",
@@ -469,8 +480,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 381,
+            "file": "lib/p5.play.js",
+            "line": 408,
             "description": "Detects if a mouse button is currently down\nCombines mouseIsPressed and mouseButton of p5",
             "itemtype": "method",
             "name": "mouseDown",
@@ -491,8 +502,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 393,
+            "file": "lib/p5.play.js",
+            "line": 420,
             "description": "Detects if a mouse button is currently up\nCombines mouseIsPressed and mouseButton of p5",
             "itemtype": "method",
             "name": "mouseUp",
@@ -513,8 +524,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 405,
+            "file": "lib/p5.play.js",
+            "line": 432,
             "description": "Detects if a mouse button was released during the last cycle.\nIt can be used to trigger events once, to be checked in the draw cycle",
             "itemtype": "method",
             "name": "mouseWentUp",
@@ -535,8 +546,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 418,
+            "file": "lib/p5.play.js",
+            "line": 445,
             "description": "Detects if a mouse button was pressed during the last cycle.\nIt can be used to trigger events once, to be checked in the draw cycle",
             "itemtype": "method",
             "name": "mouseWentDown",
@@ -557,8 +568,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 430,
+            "file": "lib/p5.play.js",
+            "line": 457,
             "description": "Detects if a mouse button is in the given state during the last cycle.\nHelper method encapsulating common mouse button state logic; it may be\npreferable to call mouseWentUp, etc, directly.",
             "access": "private",
             "tagname": "",
@@ -586,8 +597,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 460,
+            "file": "lib/p5.play.js",
+            "line": 487,
             "description": "An object storing all useful keys for easy access\nKey.tab = 9",
             "access": "private",
             "tagname": "",
@@ -599,8 +610,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 563,
+            "file": "lib/p5.play.js",
+            "line": 590,
             "description": "An object storing deprecated key aliases, which we still support but\nshould be mapped to valid aliases and generate warnings.",
             "access": "private",
             "tagname": "",
@@ -612,8 +623,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 576,
+            "file": "lib/p5.play.js",
+            "line": 603,
             "description": "Given a string key alias (as defined in the KEY property above), look up\nand return the numeric JavaScript key code for that key.  If a deprecated\nalias is passed (as defined in the KEY_DEPRECATIONS property) it will be\nmapped to a valid key code, but will also generate a warning about use\nof the deprecated alias.",
             "access": "private",
             "tagname": "",
@@ -635,8 +646,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 643,
+            "file": "lib/p5.play.js",
+            "line": 670,
             "description": "Turns the quadTree on or off.\nA quadtree is a data structure used to optimize collision detection.\nIt can improve performance when there is a large number of Sprites to be\nchecked continuously for overlapping.\n\np5.play will create and update a quadtree automatically.",
             "itemtype": "method",
             "name": "useQuadTree",
@@ -652,8 +663,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 757,
+            "file": "lib/p5.play.js",
+            "line": 784,
             "description": "The sprite's position of the sprite as a vector (x,y).",
             "itemtype": "property",
             "name": "position",
@@ -663,8 +674,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 764,
+            "file": "lib/p5.play.js",
+            "line": 791,
             "description": "The sprite's position at the beginning of the last update as a vector (x,y).",
             "itemtype": "property",
             "name": "previousPosition",
@@ -674,8 +685,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 782,
+            "file": "lib/p5.play.js",
+            "line": 809,
             "description": "The sprite's velocity as a vector (x,y)\nVelocity is speed broken down to its vertical and horizontal components.",
             "itemtype": "property",
             "name": "velocity",
@@ -685,8 +696,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 791,
+            "file": "lib/p5.play.js",
+            "line": 818,
             "description": "Set a limit to the sprite's scalar speed regardless of the direction.\nThe value can only be positive. If set to -1, there's no limit.",
             "itemtype": "property",
             "name": "maxSpeed",
@@ -697,21 +708,21 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 801,
-            "description": "Friction factor, reduces the sprite's velocity.\nThe friction should be close to 1 (eg. 0.99)\n1: no friction",
+            "file": "lib/p5.play.js",
+            "line": 828,
+            "description": "Friction factor, reduces the sprite's velocity.\nThe friction should be close to 0 (eg. 0.01)\n0: no friction\n1: full friction",
             "itemtype": "property",
             "name": "friction",
             "type": "{Number}",
-            "default": "1",
+            "default": "0",
             "class": "Sprite",
             "module": "p5.play",
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 812,
-            "description": "The sprite's current collider.\nIt can either be an Axis Aligned Bounding Box (a non-rotated rectangle)\nor a circular collider.\nIf the sprite is checked for collision, bounce, overlapping or mouse events the\ncollider is automatically created from the width and height parameter passed at the\ncreation of the sprite or the from the image dimension in case of animate sprites\n\nYou can set a custom collider with Sprite.setCollider",
+            "file": "lib/p5.play.js",
+            "line": 840,
+            "description": "The sprite's current collider.\nIt can either be an Axis Aligned Bounding Box (a non-rotated rectangle)\nor a circular collider.\nIf the sprite is checked for collision, bounce, overlapping or mouse events the\ncollider is automatically created from the width and height\nof the sprite or from the image dimension in case of animate sprites\n\nYou can set a custom collider with Sprite.setCollider",
             "itemtype": "property",
             "name": "collider",
             "type": "{Object}",
@@ -720,8 +731,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 833,
+            "file": "lib/p5.play.js",
+            "line": 861,
             "description": "Object containing information about the most recent collision/overlapping\nTo be typically used in combination with Sprite.overlap or Sprite.collide\nfunctions.\nThe properties are touching.left, touching.right, touching.top,\ntouching.bottom and are either true or false depending on the side of the\ncollider.",
             "itemtype": "property",
             "name": "touching",
@@ -731,8 +742,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 850,
+            "file": "lib/p5.play.js",
+            "line": 878,
             "description": "The mass determines the velocity transfer when sprites bounce\nagainst each other. See Sprite.bounce\nThe higher the mass the least the sprite will be affected by collisions.",
             "itemtype": "property",
             "name": "mass",
@@ -743,8 +754,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 861,
+            "file": "lib/p5.play.js",
+            "line": 889,
             "description": "If set to true the sprite won't bounce or be displaced by collisions\nSimulates an infinite mass or an anchored object.",
             "itemtype": "property",
             "name": "immovable",
@@ -755,8 +766,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 874,
+            "file": "lib/p5.play.js",
+            "line": 902,
             "description": "Coefficient of restitution. The velocity lost after bouncing.\n1: perfectly elastic, no energy is lost\n0: perfectly inelastic, no bouncing\nless than 1: inelastic, this is the most common in nature\ngreater than 1: hyper elastic, energy is increased like in a pinball bumper",
             "itemtype": "property",
             "name": "restitution",
@@ -767,8 +778,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 887,
+            "file": "lib/p5.play.js",
+            "line": 915,
             "description": "Rotation in degrees of the visual element (image or animation)\nNote: this is not the movement's direction, see getDirection.",
             "itemtype": "property",
             "name": "rotation",
@@ -779,8 +790,22 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 897,
+            "file": "lib/p5.play.js",
+            "line": 936,
+            "description": "Internal rotation variable (expressed in degrees).\nNote: external callers access this through the rotation property above.",
+            "access": "private",
+            "tagname": "",
+            "itemtype": "property",
+            "name": "_rotation",
+            "type": "{Number}",
+            "default": "0",
+            "class": "Sprite",
+            "module": "p5.play",
+            "submodule": "p5.play"
+        },
+        {
+            "file": "lib/p5.play.js",
+            "line": 947,
             "description": "Rotation change in degrees per frame of thevisual element (image or animation)\nNote: this is not the movement's direction, see getDirection.",
             "itemtype": "property",
             "name": "rotationSpeed",
@@ -791,9 +816,9 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 908,
-            "description": "Automatically set the rotation of the visual element\n(image or animation) to the sprite's movement direction.",
+            "file": "lib/p5.play.js",
+            "line": 958,
+            "description": "Automatically lock the rotation property of the visual element\n(image or animation) to the sprite's movement direction and vice versa.",
             "itemtype": "property",
             "name": "rotateToDirection",
             "type": "{Boolean}",
@@ -803,20 +828,20 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 919,
+            "file": "lib/p5.play.js",
+            "line": 969,
             "description": "Determines the rendering order within a group: a sprite with\nlower depth will appear below the ones with higher depth.\n\nNote: drawing a group before another with drawSprites will make\nits members appear below the second one, like in normal p5 canvas\ndrawing.",
             "itemtype": "property",
             "name": "depth",
             "type": "{Number}",
-            "default": "0",
+            "default": "One more than the greatest existing sprite depth, when calling\n         createSprite().  When calling new Sprite() directly, depth will\n         initialize to 0 (not recommended).",
             "class": "Sprite",
             "module": "p5.play",
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 933,
+            "file": "lib/p5.play.js",
+            "line": 985,
             "description": "Determines the sprite's scale.\nExample: 2 will be twice the native size of the visuals,\n0.5 will be half. Scaling up may make images blurry.",
             "itemtype": "property",
             "name": "scale",
@@ -827,8 +852,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 947,
+            "file": "lib/p5.play.js",
+            "line": 999,
             "description": "The sprite's visibility.",
             "itemtype": "property",
             "name": "visible",
@@ -839,8 +864,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 956,
+            "file": "lib/p5.play.js",
+            "line": 1008,
             "description": "If set to true sprite will track its mouse state.\nthe properties mouseIsPressed and mouseIsOver will be updated.\nNote: automatically set to true if the functions\nonMouseReleased or onMousePressed are set.",
             "itemtype": "property",
             "name": "mouseActive",
@@ -851,8 +876,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 968,
+            "file": "lib/p5.play.js",
+            "line": 1020,
             "description": "True if mouse is on the sprite's collider.\nRead only.",
             "itemtype": "property",
             "name": "mouseIsOver",
@@ -862,8 +887,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 977,
+            "file": "lib/p5.play.js",
+            "line": 1029,
             "description": "True if mouse is pressed on the sprite's collider.\nRead only.",
             "itemtype": "property",
             "name": "mouseIsPressed",
@@ -873,8 +898,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 986,
+            "file": "lib/p5.play.js",
+            "line": 1080,
             "description": "Width of the sprite's current image.\nIf no images or animations are set it's the width of the\nplaceholder rectangle.",
             "itemtype": "property",
             "name": "width",
@@ -885,8 +910,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1000,
+            "file": "lib/p5.play.js",
+            "line": 1105,
             "description": "Height of the sprite's current image.\nIf no images or animations are set it's the height of the\nplaceholder rectangle.",
             "itemtype": "property",
             "name": "height",
@@ -897,8 +922,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1014,
+            "file": "lib/p5.play.js",
+            "line": 1130,
             "description": "Unscaled width of the sprite\nIf no images or animations are set it's the width of the\nplaceholder rectangle.",
             "itemtype": "property",
             "name": "originalWidth",
@@ -909,8 +934,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1025,
+            "file": "lib/p5.play.js",
+            "line": 1141,
             "description": "Unscaled height of the sprite\nIf no images or animations are set it's the height of the\nplaceholder rectangle.",
             "itemtype": "property",
             "name": "originalHeight",
@@ -921,8 +946,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1036,
+            "file": "lib/p5.play.js",
+            "line": 1152,
             "description": "True if the sprite has been removed.",
             "itemtype": "property",
             "name": "removed",
@@ -932,8 +957,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1044,
+            "file": "lib/p5.play.js",
+            "line": 1160,
             "description": "Cycles before self removal.\nSet it to initiate a countdown, every draw cycle the property is\nreduced by 1 unit. At 0 it will call a sprite.remove()\nDisabled if set to -1.",
             "itemtype": "property",
             "name": "life",
@@ -944,8 +969,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1056,
+            "file": "lib/p5.play.js",
+            "line": 1172,
             "description": "If set to true, draws an outline of the collider, the depth, and center.",
             "itemtype": "property",
             "name": "debug",
@@ -956,8 +981,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1065,
+            "file": "lib/p5.play.js",
+            "line": 1181,
             "description": "If no image or animations are set this is color of the\nplaceholder rectangle",
             "itemtype": "property",
             "name": "shapeColor",
@@ -967,8 +992,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1074,
+            "file": "lib/p5.play.js",
+            "line": 1190,
             "description": "Groups the sprite belongs to, including allSprites",
             "itemtype": "property",
             "name": "groups",
@@ -978,8 +1003,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1087,
+            "file": "lib/p5.play.js",
+            "line": 1203,
             "description": "Reference to the current animation.",
             "itemtype": "property",
             "name": "animation",
@@ -989,8 +1014,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1095,
+            "file": "lib/p5.play.js",
+            "line": 1238,
             "description": "Updates the sprite.\nCalled automatically at the beginning of the draw cycle.",
             "itemtype": "method",
             "name": "update",
@@ -999,8 +1024,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1240,
+            "file": "lib/p5.play.js",
+            "line": 1367,
             "description": "Creates a default collider matching the size of the\nplaceholder rectangle or the bounding box of the image.",
             "itemtype": "method",
             "name": "setDefaultCollider",
@@ -1009,8 +1034,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1274,
+            "file": "lib/p5.play.js",
+            "line": 1401,
             "description": "Updates the sprite mouse states and triggers the mouse events:\nonMouseOver, onMouseOut, onMousePressed, onMouseReleased",
             "itemtype": "method",
             "name": "mouseUpdate",
@@ -1019,9 +1044,9 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1347,
-            "description": "Sets a collider for the sprite.\n\nIn p5.play a Collider is an invisible circle or rectangle\nthat can have any size or position relative to the sprite and which\nwill be used to detect collisions and overlapping with other sprites,\nor the mouse cursor.\n\nIf the sprite is checked for collision, bounce, overlapping or mouse events a\ncollider is automatically created from the width and height parameter passed at the\ncreation of the sprite or the from the image dimension in case of animate sprites.\n\nOften the image bounding box is not appropriate as active area for\na collision detection so you can set a circular or rectangular sprite with different\ndimensions and offset from the sprite's center.\n\nsetCollider",
+            "file": "lib/p5.play.js",
+            "line": 1474,
+            "description": "Sets a collider for the sprite.\n\nIn p5.play a Collider is an invisible circle or rectangle\nthat can have any size or position relative to the sprite and which\nwill be used to detect collisions and overlapping with other sprites,\nor the mouse cursor.\n\nIf the sprite is checked for collision, bounce, overlapping or mouse events\na collider is automatically created from the width and height parameter\npassed at the creation of the sprite or the from the image dimension in case\nof animated sprites.\n\nOften the image bounding box is not appropriate as the active area for\ncollision detection so you can set a circular or rectangular sprite with\ndifferent dimensions and offset from the sprite's center.\n\nThere are four ways to call this method:\n\n1. setCollider(\"rectangle\")\n2. setCollider(\"rectangle\", offsetX, offsetY, width, height)\n3. setCollider(\"circle\")\n4. setCollider(\"circle\", offsetX, offsetY, radius)",
             "itemtype": "method",
             "name": "setCollider",
             "params": [
@@ -1051,13 +1076,17 @@
                     "type": "Number"
                 }
             ],
+            "throws": {
+                "description": "if given invalid parameters.",
+                "type": "TypeError"
+            },
             "class": "Sprite",
             "module": "p5.play",
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1390,
+            "file": "lib/p5.play.js",
+            "line": 1531,
             "description": "Returns a the bounding box of the current image",
             "itemtype": "method",
             "name": "getBoundingBox",
@@ -1066,8 +1095,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1410,
+            "file": "lib/p5.play.js",
+            "line": 1551,
             "description": "Sets the sprite's horizontal mirroring.\nIf 1 the images displayed normally\nIf -1 the images are flipped horizontally\nIf no argument returns the current x mirroring",
             "itemtype": "method",
             "name": "mirrorX",
@@ -1087,8 +1116,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1427,
+            "file": "lib/p5.play.js",
+            "line": 1568,
             "description": "Sets the sprite's vertical mirroring.\nIf 1 the images displayed normally\nIf -1 the images are flipped vertically\nIf no argument returns the current y mirroring",
             "itemtype": "method",
             "name": "mirrorY",
@@ -1108,8 +1137,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1445,
+            "file": "lib/p5.play.js",
+            "line": 1605,
             "description": "Manages the positioning, scale and rotation of the sprite\nCalled automatically, it should not be overridden",
             "access": "private",
             "tagname": "",
@@ -1121,8 +1150,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1504,
+            "file": "lib/p5.play.js",
+            "line": 1668,
             "description": "Manages the visuals of the sprite.\nIt can be overridden with a custom drawing function.\nThe 0,0 point will be the center of the sprite.\nExample:\nsprite.draw = function() { ellipse(0,0,10,10) }\nWill display the sprite as circle.",
             "itemtype": "method",
             "name": "draw",
@@ -1131,8 +1160,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1529,
+            "file": "lib/p5.play.js",
+            "line": 1693,
             "description": "Removes the Sprite from the sketch.\nThe removed Sprite won't be drawn or updated anymore.",
             "itemtype": "method",
             "name": "remove",
@@ -1141,8 +1170,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1546,
+            "file": "lib/p5.play.js",
+            "line": 1710,
             "description": "Sets the velocity vector.",
             "itemtype": "method",
             "name": "setVelocity",
@@ -1163,8 +1192,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1558,
+            "file": "lib/p5.play.js",
+            "line": 1722,
             "description": "Calculates the scalar speed.",
             "itemtype": "method",
             "name": "getSpeed",
@@ -1177,8 +1206,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1568,
+            "file": "lib/p5.play.js",
+            "line": 1732,
             "description": "Calculates the movement's direction in degrees.",
             "itemtype": "method",
             "name": "getDirection",
@@ -1191,8 +1220,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1583,
+            "file": "lib/p5.play.js",
+            "line": 1756,
             "description": "Adds the sprite to an existing group",
             "itemtype": "method",
             "name": "addToGroup",
@@ -1208,8 +1237,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1596,
+            "file": "lib/p5.play.js",
+            "line": 1769,
             "description": "Limits the scalar speed.",
             "itemtype": "method",
             "name": "limitSpeed",
@@ -1225,21 +1254,22 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1616,
-            "description": "Set the speed and direction of the sprite.\nThe action overwrites the current velocity.",
+            "file": "lib/p5.play.js",
+            "line": 1789,
+            "description": "Set the speed and direction of the sprite.\nThe action overwrites the current velocity.\nIf direction is not supplied, the current direction is maintained.\nIf direction is not supplied and there is no current velocity, the current\nrotation angle used for the direction.",
             "itemtype": "method",
             "name": "setSpeed",
             "params": [
                 {
                     "name": "speed",
-                    "description": "Scalar speed to add",
+                    "description": "Scalar speed",
                     "type": "Number"
                 },
                 {
                     "name": "angle",
                     "description": "Direction in degrees",
-                    "type": "Number"
+                    "type": "Number",
+                    "optional": true
                 }
             ],
             "class": "Sprite",
@@ -1247,8 +1277,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1630,
+            "file": "lib/p5.play.js",
+            "line": 1823,
             "description": "Pushes the sprite in a direction defined by an angle.\nThe force is added to the current velocity.",
             "itemtype": "method",
             "name": "addSpeed",
@@ -1269,8 +1299,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1644,
+            "file": "lib/p5.play.js",
+            "line": 1842,
             "description": "Pushes the sprite toward a point.\nThe force is added to the current velocity.",
             "itemtype": "method",
             "name": "attractionPoint",
@@ -1296,8 +1326,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1660,
+            "file": "lib/p5.play.js",
+            "line": 1858,
             "description": "Adds an image to the sprite.\nAn image will be considered a one-frame animation.\nThe image should be preloaded in the preload() function using p5 loadImage.\nAnimations require a identifying label (string) to change them.\nThe image is stored in the sprite but not necessarily displayed\nuntil Sprite.changeAnimation(label) is called\n\nUsages:\n- sprite.addImage(label, image);\n- sprite.addImage(image);\n\nIf only an image is passed no label is specified",
             "itemtype": "method",
             "name": "addImage",
@@ -1319,8 +1349,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1688,
+            "file": "lib/p5.play.js",
+            "line": 1886,
             "description": "Adds an animation to the sprite.\nThe animation should be preloaded in the preload() function\nusing loadAnimation.\nAnimations require a identifying label (string) to change them.\nAnimations are stored in the sprite but not necessarily displayed\nuntil Sprite.changeAnimation(label) is called.\n\nUsage:\n- sprite.addAnimation(label, animation);\n\nAlternative usages. See Animation for more information on file sequences:\n- sprite.addAnimation(label, firstFrame, lastFrame);\n- sprite.addAnimation(label, frame1, frame2, frame3...);",
             "itemtype": "method",
             "name": "addAnimation",
@@ -1341,8 +1371,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1760,
+            "file": "lib/p5.play.js",
+            "line": 1965,
             "description": "Changes the displayed image/animation.\nEquivalent to changeAnimation",
             "itemtype": "method",
             "name": "changeImage",
@@ -1358,8 +1388,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1771,
+            "file": "lib/p5.play.js",
+            "line": 1976,
             "description": "Returns the label of the current animation",
             "itemtype": "method",
             "name": "getAnimationLabel",
@@ -1372,8 +1402,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1781,
+            "file": "lib/p5.play.js",
+            "line": 1986,
             "description": "Changes the displayed animation.\nSee Animation for more control over the sequence.",
             "itemtype": "method",
             "name": "changeAnimation",
@@ -1389,8 +1419,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1798,
+            "file": "lib/p5.play.js",
+            "line": 2003,
             "description": "Checks if the given point corresponds to a transparent pixel\nin the sprite's current image. It can be used to check a point collision\nagainst only the visible part of the sprite.",
             "itemtype": "method",
             "name": "overlapPixel",
@@ -1415,8 +1445,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1834,
+            "file": "lib/p5.play.js",
+            "line": 2039,
             "description": "Checks if the given point is inside the sprite's collider.",
             "itemtype": "method",
             "name": "overlapPoint",
@@ -1441,11 +1471,11 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1867,
+            "file": "lib/p5.play.js",
+            "line": 2072,
             "description": "Checks if the the sprite is overlapping another sprite or a group.\nThe check is performed using the colliders. If colliders are not set\nthey will be created automatically from the image/animation bounding box.\n\nA callback function can be specified to perform additional operations\nwhen the overlap occours.\nIf the target is a group the function will be called for each single\nsprite overlapping. The parameter of the function are respectively the\ncurrent sprite and the colliding sprite.",
             "example": [
-                "\n<code>\nsprite.overlap(otherSprite, explosion);\n\nfunction explosion(spriteA, spriteB) {\nspriteA.remove();\nspriteB.score++;\n}\n</code>"
+                "\n    sprite.overlap(otherSprite, explosion);\n\n    function explosion(spriteA, spriteB) {\n      spriteA.remove();\n      spriteB.score++;\n    }"
             ],
             "itemtype": "method",
             "name": "overlap",
@@ -1471,11 +1501,11 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1898,
+            "file": "lib/p5.play.js",
+            "line": 2101,
             "description": "Checks if the the sprite is overlapping another sprite or a group.\nIf the overlap is positive the current sprite will be displace by\nthe colliding one in the closest non-overlapping position.\n\nThe check is performed using the colliders. If colliders are not set\nthey will be created automatically from the image/animation bounding box.\n\nA callback function can be specified to perform additional operations\nwhen the collision occours.\nIf the target is a group the function will be called for each single\nsprite colliding. The parameter of the function are respectively the\ncurrent sprite and the colliding sprite.",
             "example": [
-                "\n<code>\nsprite.collide(otherSprite, explosion);\n\nfunction explosion(spriteA, spriteB) {\nspriteA.remove();\nspriteB.score++;\n}\n</code>"
+                "\n    sprite.collide(otherSprite, explosion);\n\n    function explosion(spriteA, spriteB) {\n      spriteA.remove();\n      spriteB.score++;\n    }"
             ],
             "itemtype": "method",
             "name": "collide",
@@ -1501,11 +1531,11 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1932,
+            "file": "lib/p5.play.js",
+            "line": 2133,
             "description": "Checks if the the sprite is overlapping another sprite or a group.\nIf the overlap is positive the current sprite will displace\nthe colliding one to the closest non-overlapping position.\n\nThe check is performed using the colliders. If colliders are not set\nthey will be created automatically from the image/animation bounding box.\n\nA callback function can be specified to perform additional operations\nwhen the collision occours.\nIf the target is a group the function will be called for each single\nsprite colliding. The parameter of the function are respectively the\ncurrent sprite and the colliding sprite.",
             "example": [
-                "\n<code>\nsprite.displace(otherSprite, explosion);\n\nfunction explosion(spriteA, spriteB) {\nspriteA.remove();\nspriteB.score++;\n}\n</code>"
+                "\n    sprite.displace(otherSprite, explosion);\n\n    function explosion(spriteA, spriteB) {\n      spriteA.remove();\n      spriteB.score++;\n    }"
             ],
             "itemtype": "method",
             "name": "displace",
@@ -1531,11 +1561,11 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 1965,
+            "file": "lib/p5.play.js",
+            "line": 2164,
             "description": "Checks if the the sprite is overlapping another sprite or a group.\nIf the overlap is positive the sprites will bounce affecting each\nother's trajectories depending on their .velocity, .mass and .restitution\n\nThe check is performed using the colliders. If colliders are not set\nthey will be created automatically from the image/animation bounding box.\n\nA callback function can be specified to perform additional operations\nwhen the collision occours.\nIf the target is a group the function will be called for each single\nsprite colliding. The parameter of the function are respectively the\ncurrent sprite and the colliding sprite.",
             "example": [
-                "\n<code>\nsprite.bounce(otherSprite, explosion);\n\nfunction explosion(spriteA, spriteB) {\nspriteA.remove();\nspriteB.score++;\n}\n</code>"
+                "\n    sprite.bounce(otherSprite, explosion);\n\n    function explosion(spriteA, spriteB) {\n      spriteA.remove();\n      spriteB.score++;\n    }"
             ],
             "itemtype": "method",
             "name": "bounce",
@@ -1561,19 +1591,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2273,
-            "description": "The sketch camera automatically created at the beginning of a sketch.\nA camera facilitates scrolling and zooming for scenes extending beyond\nthe canvas. A camera has a position, a zoom factor, and the mouse\ncoordinates relative to the view.\n\nIn p5.js terms the camera wraps the whole drawing cycle in a\ntransformation matrix but it can be disable anytime during the draw\ncycle for example to draw interface elements in an absolute position.",
-            "itemtype": "property",
-            "name": "camera",
-            "type": "{camera}",
-            "class": "Sprite",
-            "module": "p5.play",
-            "submodule": "p5.play"
-        },
-        {
-            "file": "lib\\p5.play.js",
-            "line": 2310,
+            "file": "lib/p5.play.js",
+            "line": 2454,
             "description": "Camera position. Defines the global offset of the sketch.",
             "itemtype": "property",
             "name": "position",
@@ -1583,8 +1602,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2318,
+            "file": "lib/p5.play.js",
+            "line": 2462,
             "description": "Camera zoom. Defines the global scale of the sketch.\nA scale of 1 will be the normal size. Setting it to 2 will make everything\ntwice the size. .5 will make everything half size.",
             "itemtype": "property",
             "name": "zoom",
@@ -1594,8 +1613,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2328,
+            "file": "lib/p5.play.js",
+            "line": 2472,
             "description": "MouseX translated to the camera view.\nOffsetting and scaling the canvas will not change the sprites' position\nnor the mouseX and mouseY variables. Use this property to read the mouse\nposition if the camera moved or zoomed.",
             "itemtype": "property",
             "name": "mouseX",
@@ -1605,8 +1624,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2339,
+            "file": "lib/p5.play.js",
+            "line": 2483,
             "description": "MouseY translated to the camera view.\nOffsetting and scaling the canvas will not change the sprites' position\nnor the mouseX and mouseY variables. Use this property to read the mouse\nposition if the camera moved or zoomed.",
             "itemtype": "property",
             "name": "mouseY",
@@ -1616,8 +1635,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2350,
+            "file": "lib/p5.play.js",
+            "line": 2494,
             "description": "True if the camera is active.\nRead only property. Use the methods Camera.on() and Camera.off()\nto enable or disable the camera.",
             "itemtype": "property",
             "name": "active",
@@ -1627,8 +1646,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2360,
+            "file": "lib/p5.play.js",
+            "line": 2504,
             "description": "Activates the camera.\nThe canvas will be drawn according to the camera position and scale until\nCamera.off() is called",
             "itemtype": "method",
             "name": "on",
@@ -1637,8 +1656,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2375,
+            "file": "lib/p5.play.js",
+            "line": 2519,
             "description": "Deactivates the camera.\nThe canvas will be drawn normally, ignoring the camera's position\nand scale until Camera.on() is called",
             "itemtype": "method",
             "name": "off",
@@ -1647,8 +1666,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2455,
+            "file": "lib/p5.play.js",
+            "line": 2599,
             "description": "Gets the member at index i.",
             "itemtype": "method",
             "name": "get",
@@ -1664,8 +1683,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2465,
+            "file": "lib/p5.play.js",
+            "line": 2609,
             "description": "Checks if the group contains a sprite.",
             "itemtype": "method",
             "name": "contains",
@@ -1685,8 +1704,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2476,
+            "file": "lib/p5.play.js",
+            "line": 2620,
             "description": "Same as Group.contains",
             "itemtype": "method",
             "name": "indexOf",
@@ -1695,8 +1714,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2489,
+            "file": "lib/p5.play.js",
+            "line": 2633,
             "description": "Adds a sprite to the group.",
             "itemtype": "method",
             "name": "add",
@@ -1712,8 +1731,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2506,
+            "file": "lib/p5.play.js",
+            "line": 2650,
             "description": "Same as group.length",
             "itemtype": "method",
             "name": "size",
@@ -1722,8 +1741,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2514,
+            "file": "lib/p5.play.js",
+            "line": 2658,
             "description": "Removes all the sprites in the group\nfrom the scene.",
             "itemtype": "method",
             "name": "removeSprites",
@@ -1732,8 +1751,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2526,
+            "file": "lib/p5.play.js",
+            "line": 2670,
             "description": "Removes all references to the group.\nDoes not remove the actual sprites.",
             "itemtype": "method",
             "name": "clear",
@@ -1742,8 +1761,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2536,
+            "file": "lib/p5.play.js",
+            "line": 2680,
             "description": "Removes a sprite from the group.\nDoes not remove the actual sprite, only the affiliation (reference).",
             "itemtype": "method",
             "name": "remove",
@@ -1763,8 +1782,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2568,
+            "file": "lib/p5.play.js",
+            "line": 2712,
             "description": "Returns a copy of the group as standard array.",
             "itemtype": "method",
             "name": "toArray",
@@ -1773,8 +1792,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2576,
+            "file": "lib/p5.play.js",
+            "line": 2720,
             "description": "Returns the highest depth in a group",
             "itemtype": "method",
             "name": "maxDepth",
@@ -1787,8 +1806,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2597,
+            "file": "lib/p5.play.js",
+            "line": 2736,
             "description": "Returns the lowest depth in a group",
             "itemtype": "method",
             "name": "minDepth",
@@ -1801,8 +1820,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2618,
+            "file": "lib/p5.play.js",
+            "line": 2752,
             "description": "Draws all the sprites in the group.",
             "itemtype": "method",
             "name": "draw",
@@ -1811,8 +1830,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2653,
+            "file": "lib/p5.play.js",
+            "line": 2787,
             "description": "Collide each member of group against the target using the given collision\ntype.  Return true if any collision occurred.\nInternal use",
             "access": "private",
             "tagname": "",
@@ -1845,11 +1864,11 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2672,
+            "file": "lib/p5.play.js",
+            "line": 2806,
             "description": "Checks if the the group is overlapping another group or sprite.\nThe check is performed using the colliders. If colliders are not set\nthey will be created automatically from the image/animation bounding box.\n\nA callback function can be specified to perform additional operations\nwhen the overlap occurs.\nThe function will be called for each single sprite overlapping.\nThe parameter of the function are respectively the\nmember of the current group and the other sprite passed as parameter.",
             "example": [
-                "\n<code>\ngroup.overlap(otherSprite, explosion);\n\nfunction explosion(spriteA, spriteB) {\nspriteA.remove();\nspriteB.score++;\n}\n</code>"
+                "\n    group.overlap(otherSprite, explosion);\n\n    function explosion(spriteA, spriteB) {\n      spriteA.remove();\n      spriteB.score++;\n    }"
             ],
             "itemtype": "method",
             "name": "overlap",
@@ -1875,11 +1894,11 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2701,
+            "file": "lib/p5.play.js",
+            "line": 2833,
             "description": "Checks if the the group is overlapping another group or sprite.\nIf the overlap is positive the sprites in the group will be displaced\nby the colliding one to the closest non-overlapping positions.\n\nThe check is performed using the colliders. If colliders are not set\nthey will be created automatically from the image/animation bounding box.\n\nA callback function can be specified to perform additional operations\nwhen the overlap occours.\nThe function will be called for each single sprite overlapping.\nThe parameter of the function are respectively the\nmember of the current group and the other sprite passed as parameter.",
             "example": [
-                "\n<code>\ngroup.collide(otherSprite, explosion);\n\nfunction explosion(spriteA, spriteB) {\nspriteA.remove();\nspriteB.score++;\n}\n</code>"
+                "\n    group.collide(otherSprite, explosion);\n\n    function explosion(spriteA, spriteB) {\n      spriteA.remove();\n      spriteB.score++;\n    }"
             ],
             "itemtype": "method",
             "name": "collide",
@@ -1905,11 +1924,11 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2732,
+            "file": "lib/p5.play.js",
+            "line": 2862,
             "description": "Checks if the the group is overlapping another group or sprite.\nIf the overlap is positive the sprites in the group will displace\nthe colliding ones to the closest non-overlapping positions.\n\nThe check is performed using the colliders. If colliders are not set\nthey will be created automatically from the image/animation bounding box.\n\nA callback function can be specified to perform additional operations\nwhen the overlap occurs.\nThe function will be called for each single sprite overlapping.\nThe parameter of the function are respectively the\nmember of the current group and the other sprite passed as parameter.",
             "example": [
-                "\n<code>\ngroup.displace(otherSprite, explosion);\n\nfunction explosion(spriteA, spriteB) {\nspriteA.remove();\nspriteB.score++;\n}\n</code>"
+                "\n    group.displace(otherSprite, explosion);\n\n    function explosion(spriteA, spriteB) {\n      spriteA.remove();\n      spriteB.score++;\n    }"
             ],
             "itemtype": "method",
             "name": "displace",
@@ -1935,11 +1954,11 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 2763,
+            "file": "lib/p5.play.js",
+            "line": 2891,
             "description": "Checks if the the group is overlapping another group or sprite.\nIf the overlap is positive the sprites will bounce affecting each\nother's trajectories depending on their .velocity, .mass and .restitution.\n\nThe check is performed using the colliders. If colliders are not set\nthey will be created automatically from the image/animation bounding box.\n\nA callback function can be specified to perform additional operations\nwhen the overlap occours.\nThe function will be called for each single sprite overlapping.\nThe parameter of the function are respectively the\nmember of the current group and the other sprite passed as parameter.",
             "example": [
-                "\n<code>\ngroup.bounce(otherSprite, explosion);\n\nfunction explosion(spriteA, spriteB) {\nspriteA.remove();\nspriteB.score++;\n}\n</code>"
+                "\n    group.bounce(otherSprite, explosion);\n\n    function explosion(spriteA, spriteB) {\n      spriteA.remove();\n      spriteB.score++;\n    }"
             ],
             "itemtype": "method",
             "name": "bounce",
@@ -1965,8 +1984,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3186,
+            "file": "lib/p5.play.js",
+            "line": 3323,
             "description": "Array of frames (p5.Image)",
             "itemtype": "property",
             "name": "images",
@@ -1976,20 +1995,20 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3201,
-            "description": "Delay between frames in number of draw cycles.\nIf set to 4 the framerate of the anymation would be the\nsketch framerate divided by 4 (60fps = 15fps)",
+            "file": "lib/p5.play.js",
+            "line": 3338,
+            "description": "Delay between frames in number of draw cycles.\nIf set to 4 the framerate of the animation would be the\nsketch framerate divided by 4 (60fps = 15fps)",
             "itemtype": "property",
             "name": "frameDelay",
             "type": "{Number}",
-            "default": "2",
+            "default": "4",
             "class": "Animation",
             "module": "p5.play",
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3212,
+            "file": "lib/p5.play.js",
+            "line": 3349,
             "description": "True if the animation is currently playing.",
             "itemtype": "property",
             "name": "playing",
@@ -2000,8 +2019,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3221,
+            "file": "lib/p5.play.js",
+            "line": 3358,
             "description": "Animation visibility.",
             "itemtype": "property",
             "name": "visible",
@@ -2012,8 +2031,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3230,
+            "file": "lib/p5.play.js",
+            "line": 3367,
             "description": "If set to false the animation will stop after reaching the last frame",
             "itemtype": "property",
             "name": "looping",
@@ -2024,8 +2043,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3239,
+            "file": "lib/p5.play.js",
+            "line": 3376,
             "description": "True if frame changed during the last draw cycle",
             "itemtype": "property",
             "name": "frameChanged",
@@ -2035,8 +2054,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3368,
+            "file": "lib/p5.play.js",
+            "line": 3505,
             "description": "Objects are passed by reference so to have different sprites\nusing the same animation you need to clone it.",
             "itemtype": "method",
             "name": "clone",
@@ -2049,8 +2068,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3396,
+            "file": "lib/p5.play.js",
+            "line": 3530,
             "description": "Draws the animation at coordinate x and y.\nUpdates the frames automatically.",
             "itemtype": "method",
             "name": "draw",
@@ -2078,8 +2097,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3495,
+            "file": "lib/p5.play.js",
+            "line": 3633,
             "description": "Plays the animation.",
             "itemtype": "method",
             "name": "play",
@@ -2088,8 +2107,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3505,
+            "file": "lib/p5.play.js",
+            "line": 3643,
             "description": "Stops the animation.",
             "itemtype": "method",
             "name": "stop",
@@ -2098,8 +2117,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3514,
+            "file": "lib/p5.play.js",
+            "line": 3652,
             "description": "Rewinds the animation to the first frame.",
             "itemtype": "method",
             "name": "rewind",
@@ -2108,8 +2127,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3523,
+            "file": "lib/p5.play.js",
+            "line": 3661,
             "description": "Changes the current frame.",
             "itemtype": "method",
             "name": "changeFrame",
@@ -2125,34 +2144,34 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3539,
+            "file": "lib/p5.play.js",
+            "line": 3677,
             "description": "Goes to the next frame and stops.",
             "itemtype": "method",
-            "name": "changeFrame",
+            "name": "nextFrame",
             "class": "Animation",
             "module": "p5.play",
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3555,
-            "description": "Goes to the next frame and stops.",
+            "file": "lib/p5.play.js",
+            "line": 3693,
+            "description": "Goes to the previous frame and stops.",
             "itemtype": "method",
-            "name": "changeFrame",
+            "name": "previousFrame",
             "class": "Animation",
             "module": "p5.play",
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3571,
+            "file": "lib/p5.play.js",
+            "line": 3709,
             "description": "Plays the animation forward or backward toward a target frame.",
             "itemtype": "method",
             "name": "goToFrame",
             "params": [
                 {
-                    "name": "targetFrame",
+                    "name": "toFrame",
                     "description": "Frame number destination (starts from 0)",
                     "type": "Number"
                 }
@@ -2162,8 +2181,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3587,
+            "file": "lib/p5.play.js",
+            "line": 3729,
             "description": "Returns the current frame number.",
             "itemtype": "method",
             "name": "getFrame",
@@ -2176,8 +2195,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3597,
+            "file": "lib/p5.play.js",
+            "line": 3739,
             "description": "Returns the last frame number.",
             "itemtype": "method",
             "name": "getLastFrame",
@@ -2190,8 +2209,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3607,
+            "file": "lib/p5.play.js",
+            "line": 3749,
             "description": "Returns the current frame image as p5.Image.",
             "itemtype": "method",
             "name": "getFrameImage",
@@ -2204,8 +2223,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3617,
+            "file": "lib/p5.play.js",
+            "line": 3759,
             "description": "Returns the frame image at the specified frame number.",
             "itemtype": "method",
             "name": "getImageAt",
@@ -2225,9 +2244,9 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3628,
-            "description": "Returns the current frame width in pixels.",
+            "file": "lib/p5.play.js",
+            "line": 3770,
+            "description": "Returns the current frame width in pixels.\nIf there is no image loaded, returns 1.",
             "itemtype": "method",
             "name": "getWidth",
             "return": {
@@ -2239,9 +2258,9 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3638,
-            "description": "Returns the current frame height in pixels.",
+            "file": "lib/p5.play.js",
+            "line": 3788,
+            "description": "Returns the current frame height in pixels.\nIf there is no image loaded, returns 1.",
             "itemtype": "method",
             "name": "getHeight",
             "return": {
@@ -2253,8 +2272,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3689,
+            "file": "lib/p5.play.js",
+            "line": 3845,
             "description": "Generate the frames data for this sprite sheet baesd on user params",
             "access": "private",
             "tagname": "",
@@ -2265,8 +2284,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3743,
+            "file": "lib/p5.play.js",
+            "line": 3899,
             "description": "Draws a specific frame to the canvas.",
             "params": [
                 {
@@ -2299,8 +2318,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 3770,
+            "file": "lib/p5.play.js",
+            "line": 3926,
             "description": "Objects are passed by reference so to have different sprites\nusing the same animation you need to clone it.",
             "itemtype": "method",
             "name": "clone",
@@ -2313,8 +2332,8 @@
             "submodule": "p5.play"
         },
         {
-            "file": "lib\\p5.play.js",
-            "line": 4165,
+            "file": "lib/p5.play.js",
+            "line": 4321,
             "description": "Log a warning message to the host console, using native `console.warn`\nif it is available but falling back on `console.log` if not.  If no\nconsole is available, this method will fail silently.",
             "itemtype": "method",
             "name": "_warn",

@@ -15,7 +15,7 @@
 <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
         <h1 class="brand" style="padding: 10px 16px 10px; height: 20px; line-height: 20px; margin-left: 0;">
-	    <img alt="p5.play" src="..\..\asterisk.png" style="max-height: 65%;" title="p5.play">
+	    <img alt="p5.play" src="../../asterisk.png" style="max-height: 65%;" title="p5.play">
             p5.play
         </h1>
 	<div class="nav">
@@ -34,1096 +34,1092 @@
 <div class="container">
     <div class="row">
         <div class="span3">
-	    <div>
-	        <div id="sidebar">
-	        <div id="classes">
-	            <ul id="api-classes" class="nav nav-list">
-	                    <li><a href="../classes/Animation.html">Animation</a></li>
-	                    <li><a href="../classes/Camera.html">Camera</a></li>
-	                    <li><a href="../classes/Group.html">Group</a></li>
-	                    <li><a href="../classes/p5.play.html">p5.play</a></li>
-	                    <li><a href="../classes/Sprite.html">Sprite</a></li>
-	                    <li><a href="../classes/SpriteSheet.html">SpriteSheet</a></li>
-	            </ul>
-	        </div>
-	        </div>
-	    </div>
+<div>
+    <div id="sidebar">
+    <div id="classes">
+        <ul id="api-classes" class="nav nav-list">
+                <li><a href="../classes/Animation.html">Animation</a></li>
+                <li><a href="../classes/Camera.html">Camera</a></li>
+                <li><a href="../classes/Group.html">Group</a></li>
+                <li><a href="../classes/p5.play.html">p5.play</a></li>
+                <li><a href="../classes/Sprite.html">Sprite</a></li>
+                <li><a href="../classes/SpriteSheet.html">SpriteSheet</a></li>
+        </ul>
+    </div>
+    </div>
+</div>
         </div>
         <div class="span9">
-                <form id="options-form" class="form-inline pull-right">
-                    Show:
-                    <label for="api-show-inherited" class="checkbox">
-                        <input type="checkbox" id="api-show-inherited" checked>
-                        Inherited
-                    </label>
-            
-                    <label for="api-show-protected" class="checkbox">
-                        <input type="checkbox" id="api-show-protected">
-                        Protected
-                    </label>
-            
-                    <label for="api-show-private" class="checkbox">
-                        <input type="checkbox" id="api-show-private" checked>
-                        Private
-                    </label>
-                    <label for="api-show-deprecated" class="checkbox">
-                        <input type="checkbox" id="api-show-deprecated">
-                        Deprecated
-                    </label>
-            
-                </form>
-            
+    <form id="options-form" class="form-inline pull-right">
+        Show:
+        <label for="api-show-inherited" class="checkbox">
+            <input type="checkbox" id="api-show-inherited" checked>
+            Inherited
+        </label>
+
+        <label for="api-show-protected" class="checkbox">
+            <input type="checkbox" id="api-show-protected">
+            Protected
+        </label>
+
+        <label for="api-show-private" class="checkbox">
+            <input type="checkbox" id="api-show-private">
+            Private
+        </label>
+        <label for="api-show-deprecated" class="checkbox">
+            <input type="checkbox" id="api-show-deprecated">
+            Deprecated
+        </label>
+
+    </form>
+
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <div class="page-header">
-                            <h1>Group</h1>
-                        </div>
-                        
-                        
-                        
-                        	<div class="well well-small">
-                                    Module: <a href="../modules/p5.play.html">p5.play</a><br>
-                                    Parent Module: <a href="../modules/p5.play.html">p5.play</a>
-                            </div>
-                        
-                        
-                        
-                        <div class="yuidoc-class-description">
-                        <p>In p5.play groups are collections of sprites with similar behavior.
-                        For example a group may contain all the sprites in the background
-                        or all the sprites that "kill" the player.</p>
-                        <p>Groups are "extended" arrays and inherit all their properties
-                        e.g. group.length</p>
-                        <p>Since groups contain only references, a sprite can be in multiple
-                        groups and deleting a group doesn't affect the sprites themselves.</p>
-                        <p>Sprite.remove() will also remove the sprite from all the groups
-                        it belongs to.</p>
-                        
-                        </div>
-                        
-                        <!-- table of contents -->
-                        
-                        <div id="class-toc" class="page-section">
-                        	<h2>Table of Contents</h2>
-                            <ul>
-                        		<li>
-                        			<strong>Methods</strong>
-                        			<ul>
-                        				<li><a href="#method-_groupCollide"><span class="im">_groupCollide</span>(<span class="ia">type</span><span class="ia">target</span><span class="ia">callback</span>)</a></li>
-                        				<li><a href="#method-add"><span class="im">add</span>(<span class="ia">s</span>)</a></li>
-                        				<li><a href="#method-bounce"><span class="im">bounce</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
-                        				<li><a href="#method-clear"><span class="im">clear</span>()</a></li>
-                        				<li><a href="#method-collide"><span class="im">collide</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
-                        				<li><a href="#method-contains"><span class="im">contains</span>(<span class="ia">sprite</span>)</a></li>
-                        				<li><a href="#method-displace"><span class="im">displace</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
-                        				<li><a href="#method-draw"><span class="im">draw</span>()</a></li>
-                        				<li><a href="#method-get"><span class="im">get</span>(<span class="ia">i</span>)</a></li>
-                        				<li><a href="#method-indexOf"><span class="im">indexOf</span>()</a></li>
-                        				<li><a href="#method-maxDepth"><span class="im">maxDepth</span>()</a></li>
-                        				<li><a href="#method-minDepth"><span class="im">minDepth</span>()</a></li>
-                        				<li><a href="#method-overlap"><span class="im">overlap</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
-                        				<li><a href="#method-remove"><span class="im">remove</span>(<span class="ia">item</span>)</a></li>
-                        				<li><a href="#method-removeSprites"><span class="im">removeSprites</span>()</a></li>
-                        				<li><a href="#method-size"><span class="im">size</span>()</a></li>
-                        				<li><a href="#method-toArray"><span class="im">toArray</span>()</a></li>
-                        			</ul>
-                        		</li>
-                        
-                        
-                        
-                        	</ul>
-                        </div>
-                        
-                        <!-- details -->
-                        
-                            <div class="constructor yuidoc-class-constructor page-section">
-                                <h2>Constructor</h2>
-                                <div class="item-list">
-                                <div id="method-Group" class="method item">
-                                	<div class="method-signature">
-                                	<span class="name"><code>Group</code></span>
-                                
-                                		<span class="paren">()</span>
-                                	</div>
-                                
-                                
-                                
-                                
-                                
-                                
-                                	<div class="meta">
-                                				<p>
-                                				Defined in
-                                		<a href="../files/lib_p5.play.js.html#l2433"><code>lib\p5.play.js:2433</code></a>
-                                		</p>
-                                
-                                
-                                
-                                	</div>
-                                
-                                
-                                
-                                
-                                </div>
-                                </div>
-                            </div>
-                        
-                            <div id="methods" class="page-section">
-                                <h2 class="off-left">Methods</h2>
-                                <div class="item-list">
-                                    <div id="method-_groupCollide" class="method item private">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>_groupCollide</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>type</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code>target</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code class="optional">callback</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Boolean</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    		<span class="flag private">private</span>
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2653"><code>lib\p5.play.js:2653</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Collide each member of group against the target using the given collision
-                                    type.  Return true if any collision occurred.
-                                    Internal use</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">type</code>
-                                    						<span class="type">!string</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>one of 'overlap', 'collide', 'displace', 'bounce'</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name">target</code>
-                                    						<span class="type">Object</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Group or Sprite</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name optional">[callback]</code>
-                                    						<span class="type">Function</span>
-                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>on collision.</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Boolean</span>:
-                                    					<p>True if any collision/overlap occurred</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-add" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>add</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>s</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2489"><code>lib\p5.play.js:2489</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Adds a sprite to the group.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">s</code>
-                                    						<span class="type"><a href="../classes/Sprite.html" class="crosslink">Sprite</a></span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The sprite to be added</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    
-                                    </div>
-                                    <div id="method-bounce" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>bounce</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>target</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code class="optional">callback</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Boolean</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2763"><code>lib\p5.play.js:2763</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
-                                    If the overlap is positive the sprites will bounce affecting each
-                                    other's trajectories depending on their .velocity, .mass and .restitution.</p>
-                                    <p>The check is performed using the colliders. If colliders are not set
-                                    they will be created automatically from the image/animation bounding box.</p>
-                                    <p>A callback function can be specified to perform additional operations
-                                    when the overlap occours.
-                                    The function will be called for each single sprite overlapping.
-                                    The parameter of the function are respectively the
-                                    member of the current group and the other sprite passed as parameter.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">target</code>
-                                    						<span class="type">Object</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Group or Sprite to check against the current one</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name optional">[callback]</code>
-                                    						<span class="type">Function</span>
-                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The function to be called if overlap is positive</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Boolean</span>:
-                                    					<p>True if overlapping</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    		<div class="example">
-                                    			<h4>Example:</h4>
-                                    
-                                    			<div class="example-content">
-                                    				<code>
-                                    group.bounce(otherSprite, explosion);
-                                    <p>function explosion(spriteA, spriteB) {
-                                    spriteA.remove();
-                                    spriteB.score++;
-                                    }
-                                    </code></p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    </div>
-                                    <div id="method-clear" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>clear</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2526"><code>lib\p5.play.js:2526</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Removes all references to the group.
-                                    Does not remove the actual sprites.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-collide" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>collide</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>target</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code class="optional">callback</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Boolean</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2701"><code>lib\p5.play.js:2701</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
-                                    If the overlap is positive the sprites in the group will be displaced
-                                    by the colliding one to the closest non-overlapping positions.</p>
-                                    <p>The check is performed using the colliders. If colliders are not set
-                                    they will be created automatically from the image/animation bounding box.</p>
-                                    <p>A callback function can be specified to perform additional operations
-                                    when the overlap occours.
-                                    The function will be called for each single sprite overlapping.
-                                    The parameter of the function are respectively the
-                                    member of the current group and the other sprite passed as parameter.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">target</code>
-                                    						<span class="type">Object</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Group or Sprite to check against the current one</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name optional">[callback]</code>
-                                    						<span class="type">Function</span>
-                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The function to be called if overlap is positive</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Boolean</span>:
-                                    					<p>True if overlapping</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    		<div class="example">
-                                    			<h4>Example:</h4>
-                                    
-                                    			<div class="example-content">
-                                    				<code>
-                                    group.collide(otherSprite, explosion);
-                                    <p>function explosion(spriteA, spriteB) {
-                                    spriteA.remove();
-                                    spriteB.score++;
-                                    }
-                                    </code></p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    </div>
-                                    <div id="method-contains" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>contains</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>sprite</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Number</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2465"><code>lib\p5.play.js:2465</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Checks if the group contains a sprite.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">sprite</code>
-                                    						<span class="type"><a href="../classes/Sprite.html" class="crosslink">Sprite</a></span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The sprite to search</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Number</span>:
-                                    					<p>Index or -1 if not found</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-displace" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>displace</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>target</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code class="optional">callback</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Boolean</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2732"><code>lib\p5.play.js:2732</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
-                                    If the overlap is positive the sprites in the group will displace
-                                    the colliding ones to the closest non-overlapping positions.</p>
-                                    <p>The check is performed using the colliders. If colliders are not set
-                                    they will be created automatically from the image/animation bounding box.</p>
-                                    <p>A callback function can be specified to perform additional operations
-                                    when the overlap occurs.
-                                    The function will be called for each single sprite overlapping.
-                                    The parameter of the function are respectively the
-                                    member of the current group and the other sprite passed as parameter.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">target</code>
-                                    						<span class="type">Object</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Group or Sprite to check against the current one</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name optional">[callback]</code>
-                                    						<span class="type">Function</span>
-                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The function to be called if overlap is positive</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Boolean</span>:
-                                    					<p>True if overlapping</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    		<div class="example">
-                                    			<h4>Example:</h4>
-                                    
-                                    			<div class="example-content">
-                                    				<code>
-                                    group.displace(otherSprite, explosion);
-                                    <p>function explosion(spriteA, spriteB) {
-                                    spriteA.remove();
-                                    spriteB.score++;
-                                    }
-                                    </code></p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    </div>
-                                    <div id="method-draw" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>draw</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2618"><code>lib\p5.play.js:2618</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Draws all the sprites in the group.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-get" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>get</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>i</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2455"><code>lib\p5.play.js:2455</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Gets the member at index i.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">i</code>
-                                    						<span class="type">Number</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The index of the object to retrieve</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    
-                                    </div>
-                                    <div id="method-indexOf" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>indexOf</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2476"><code>lib\p5.play.js:2476</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Same as Group.contains</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-maxDepth" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>maxDepth</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Number</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2576"><code>lib\p5.play.js:2576</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns the highest depth in a group</p>
-                                    </div>
-                                    
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Number</span>:
-                                    					<p>The depth of the sprite drawn on the top</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-minDepth" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>minDepth</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Number</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2597"><code>lib\p5.play.js:2597</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns the lowest depth in a group</p>
-                                    </div>
-                                    
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Number</span>:
-                                    					<p>The depth of the sprite drawn on the bottom</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-overlap" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>overlap</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>target</code>
-                                    				</li>
-                                    				<li class="arg">
-                                    						<code class="optional">callback</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Boolean</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2672"><code>lib\p5.play.js:2672</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
-                                    The check is performed using the colliders. If colliders are not set
-                                    they will be created automatically from the image/animation bounding box.</p>
-                                    <p>A callback function can be specified to perform additional operations
-                                    when the overlap occurs.
-                                    The function will be called for each single sprite overlapping.
-                                    The parameter of the function are respectively the
-                                    member of the current group and the other sprite passed as parameter.</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">target</code>
-                                    						<span class="type">Object</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>Group or Sprite to check against the current one</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    				<li class="param">
-                                    						<code class="param-name optional">[callback]</code>
-                                    						<span class="type">Function</span>
-                                    						<span class="flag optional" title="This parameter is optional.">optional</span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The function to be called if overlap is positive</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Boolean</span>:
-                                    					<p>True if overlapping</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    		<div class="example">
-                                    			<h4>Example:</h4>
-                                    
-                                    			<div class="example-content">
-                                    				<code>
-                                    group.overlap(otherSprite, explosion);
-                                    <p>function explosion(spriteA, spriteB) {
-                                    spriteA.remove();
-                                    spriteB.score++;
-                                    }
-                                    </code></p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    </div>
-                                    <div id="method-remove" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>remove</code></span>
-                                    
-                                    		<div class="args">
-                                    			<span class="paren">(</span><ul class="args-list inline commas">
-                                    				<li class="arg">
-                                    						<code>item</code>
-                                    				</li>
-                                    			</ul><span class="paren">)</span>
-                                    		</div>
-                                    		<span class="returns-inline">
-                                    			<span class="type">Boolean</span>
-                                    		</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2536"><code>lib\p5.play.js:2536</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Removes a sprite from the group.
-                                    Does not remove the actual sprite, only the affiliation (reference).</p>
-                                    </div>
-                                    
-                                    		<div class="params">
-                                    			<h4>Parameters:</h4>
-                                    
-                                    			<ul class="params-list">
-                                    				<li class="param">
-                                    						<code class="param-name">item</code>
-                                    						<span class="type"><a href="../classes/Sprite.html" class="crosslink">Sprite</a></span>
-                                    
-                                    
-                                    					<div class="param-description"><p>The sprite to be removed</p>
-                                    </div>
-                                    
-                                    				</li>
-                                    			</ul>
-                                    		</div>
-                                    
-                                    		<div class="returns">
-                                    			<h4>Returns:</h4>
-                                    
-                                    			<div class="returns-description">
-                                    						<span class="type">Boolean</span>:
-                                    					<p>True if sprite was found and removed</p>
-                                    
-                                    			</div>
-                                    		</div>
-                                    
-                                    </div>
-                                    <div id="method-removeSprites" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>removeSprites</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2514"><code>lib\p5.play.js:2514</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Removes all the sprites in the group
-                                    from the scene.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-size" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>size</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2506"><code>lib\p5.play.js:2506</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Same as group.length</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                    <div id="method-toArray" class="method item">
-                                    	<div class="method-signature">
-                                    	<span class="name"><code>toArray</code></span>
-                                    
-                                    		<span class="paren">()</span>
-                                    	</div>
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    	<div class="meta">
-                                    				<p>
-                                    				Defined in
-                                    		<a href="../files/lib_p5.play.js.html#l2568"><code>lib\p5.play.js:2568</code></a>
-                                    		</p>
-                                    
-                                    
-                                    
-                                    	</div>
-                                    
-                                    	<div class="description"><p>Returns a copy of the group as standard array.</p>
-                                    </div>
-                                    
-                                    
-                                    
-                                    </div>
-                                </div>
-                            </div>
-                        
-                        
-                        
-                        
+<div class="page-header">
+    <h1>Group</h1>
+</div>
+
+
+
+	<div class="well well-small">
+            Module: <a href="../modules/p5.play.html">p5.play</a><br>
+            Parent Module: <a href="../modules/p5.play.html">p5.play</a>
+    </div>
+
+
+
+<div class="yuidoc-class-description">
+<p>In p5.play groups are collections of sprites with similar behavior.
+For example a group may contain all the sprites in the background
+or all the sprites that "kill" the player.</p>
+<p>Groups are "extended" arrays and inherit all their properties
+e.g. group.length</p>
+<p>Since groups contain only references, a sprite can be in multiple
+groups and deleting a group doesn't affect the sprites themselves.</p>
+<p>Sprite.remove() will also remove the sprite from all the groups
+it belongs to.</p>
+
+</div>
+
+<!-- table of contents -->
+
+<div id="class-toc" class="page-section">
+	<h2>Table of Contents</h2>
+    <ul>
+		<li>
+			<strong>Methods</strong>
+			<ul>
+				<li class="private"><a href="#method-_groupCollide"><span class="im">_groupCollide</span>(<span class="ia">type</span><span class="ia">target</span><span class="ia">callback</span>)</a></li>
+				<li class=""><a href="#method-add"><span class="im">add</span>(<span class="ia">s</span>)</a></li>
+				<li class=""><a href="#method-bounce"><span class="im">bounce</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
+				<li class=""><a href="#method-clear"><span class="im">clear</span>()</a></li>
+				<li class=""><a href="#method-collide"><span class="im">collide</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
+				<li class=""><a href="#method-contains"><span class="im">contains</span>(<span class="ia">sprite</span>)</a></li>
+				<li class=""><a href="#method-displace"><span class="im">displace</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
+				<li class=""><a href="#method-draw"><span class="im">draw</span>()</a></li>
+				<li class=""><a href="#method-get"><span class="im">get</span>(<span class="ia">i</span>)</a></li>
+				<li class=""><a href="#method-indexOf"><span class="im">indexOf</span>()</a></li>
+				<li class=""><a href="#method-maxDepth"><span class="im">maxDepth</span>()</a></li>
+				<li class=""><a href="#method-minDepth"><span class="im">minDepth</span>()</a></li>
+				<li class=""><a href="#method-overlap"><span class="im">overlap</span>(<span class="ia">target</span><span class="ia">callback</span>)</a></li>
+				<li class=""><a href="#method-remove"><span class="im">remove</span>(<span class="ia">item</span>)</a></li>
+				<li class=""><a href="#method-removeSprites"><span class="im">removeSprites</span>()</a></li>
+				<li class=""><a href="#method-size"><span class="im">size</span>()</a></li>
+				<li class=""><a href="#method-toArray"><span class="im">toArray</span>()</a></li>
+			</ul>
+		</li>
+
+
+
+	</ul>
+</div>
+
+<!-- details -->
+
+    <div class="constructor yuidoc-class-constructor page-section">
+        <h2>Constructor</h2>
+        <div class="item-list">
+<div id="method-Group" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>Group</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2577"><code>lib&#x2F;p5.play.js:2577</code></a>
+		</p>
+
+
+
+	</div>
+
+
+
+
+</div>
+        </div>
+    </div>
+
+    <div id="methods" class="page-section">
+        <h2 class="off-left">Methods</h2>
+        <div class="item-list">
+<div id="method-_groupCollide" class="method item private">
+	<div class="method-signature">
+	<span class="name"><code>_groupCollide</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>type</code>
+				</li>
+				<li class="arg">
+						<code>target</code>
+				</li>
+				<li class="arg">
+						<code class="optional">callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">Boolean</span>
+		</span>
+	</div>
+
+
+		<span class="flag private">private</span>
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2787"><code>lib&#x2F;p5.play.js:2787</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Collide each member of group against the target using the given collision
+type.  Return true if any collision occurred.
+Internal use</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">type</code>
+						<span class="type">!string</span>
+
+
+					<div class="param-description"><p>one of 'overlap', 'collide', 'displace', 'bounce'</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name">target</code>
+						<span class="type">Object</span>
+
+
+					<div class="param-description"><p>Group or Sprite</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[callback]</code>
+						<span class="type">Function</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>on collision.</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Boolean</span>:
+					<p>True if any collision/overlap occurred</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-add" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>add</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>s</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2633"><code>lib&#x2F;p5.play.js:2633</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Adds a sprite to the group.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">s</code>
+						<span class="type"><a href="../classes/Sprite.html" class="crosslink">Sprite</a></span>
+
+
+					<div class="param-description"><p>The sprite to be added</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+
+</div>
+<div id="method-bounce" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>bounce</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>target</code>
+				</li>
+				<li class="arg">
+						<code class="optional">callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">Boolean</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2891"><code>lib&#x2F;p5.play.js:2891</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
+If the overlap is positive the sprites will bounce affecting each
+other's trajectories depending on their .velocity, .mass and .restitution.</p>
+<p>The check is performed using the colliders. If colliders are not set
+they will be created automatically from the image/animation bounding box.</p>
+<p>A callback function can be specified to perform additional operations
+when the overlap occours.
+The function will be called for each single sprite overlapping.
+The parameter of the function are respectively the
+member of the current group and the other sprite passed as parameter.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">target</code>
+						<span class="type">Object</span>
+
+
+					<div class="param-description"><p>Group or Sprite to check against the current one</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[callback]</code>
+						<span class="type">Function</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>The function to be called if overlap is positive</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Boolean</span>:
+					<p>True if overlapping</p>
+
+			</div>
+		</div>
+
+		<div class="example">
+			<h4>Example:</h4>
+
+			<div class="example-content">
+				<pre class="code prettyprint"><code>group.bounce(otherSprite, explosion);
+
+function explosion(spriteA, spriteB) {
+  spriteA.remove();
+  spriteB.score++;
+}</code></pre>
+
+			</div>
+		</div>
+</div>
+<div id="method-clear" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>clear</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2670"><code>lib&#x2F;p5.play.js:2670</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Removes all references to the group.
+Does not remove the actual sprites.</p>
+</div>
+
+
+
+</div>
+<div id="method-collide" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>collide</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>target</code>
+				</li>
+				<li class="arg">
+						<code class="optional">callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">Boolean</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2833"><code>lib&#x2F;p5.play.js:2833</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
+If the overlap is positive the sprites in the group will be displaced
+by the colliding one to the closest non-overlapping positions.</p>
+<p>The check is performed using the colliders. If colliders are not set
+they will be created automatically from the image/animation bounding box.</p>
+<p>A callback function can be specified to perform additional operations
+when the overlap occours.
+The function will be called for each single sprite overlapping.
+The parameter of the function are respectively the
+member of the current group and the other sprite passed as parameter.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">target</code>
+						<span class="type">Object</span>
+
+
+					<div class="param-description"><p>Group or Sprite to check against the current one</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[callback]</code>
+						<span class="type">Function</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>The function to be called if overlap is positive</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Boolean</span>:
+					<p>True if overlapping</p>
+
+			</div>
+		</div>
+
+		<div class="example">
+			<h4>Example:</h4>
+
+			<div class="example-content">
+				<pre class="code prettyprint"><code>group.collide(otherSprite, explosion);
+
+function explosion(spriteA, spriteB) {
+  spriteA.remove();
+  spriteB.score++;
+}</code></pre>
+
+			</div>
+		</div>
+</div>
+<div id="method-contains" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>contains</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>sprite</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">Number</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2609"><code>lib&#x2F;p5.play.js:2609</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Checks if the group contains a sprite.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">sprite</code>
+						<span class="type"><a href="../classes/Sprite.html" class="crosslink">Sprite</a></span>
+
+
+					<div class="param-description"><p>The sprite to search</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Number</span>:
+					<p>Index or -1 if not found</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-displace" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>displace</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>target</code>
+				</li>
+				<li class="arg">
+						<code class="optional">callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">Boolean</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2862"><code>lib&#x2F;p5.play.js:2862</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
+If the overlap is positive the sprites in the group will displace
+the colliding ones to the closest non-overlapping positions.</p>
+<p>The check is performed using the colliders. If colliders are not set
+they will be created automatically from the image/animation bounding box.</p>
+<p>A callback function can be specified to perform additional operations
+when the overlap occurs.
+The function will be called for each single sprite overlapping.
+The parameter of the function are respectively the
+member of the current group and the other sprite passed as parameter.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">target</code>
+						<span class="type">Object</span>
+
+
+					<div class="param-description"><p>Group or Sprite to check against the current one</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[callback]</code>
+						<span class="type">Function</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>The function to be called if overlap is positive</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Boolean</span>:
+					<p>True if overlapping</p>
+
+			</div>
+		</div>
+
+		<div class="example">
+			<h4>Example:</h4>
+
+			<div class="example-content">
+				<pre class="code prettyprint"><code>group.displace(otherSprite, explosion);
+
+function explosion(spriteA, spriteB) {
+  spriteA.remove();
+  spriteB.score++;
+}</code></pre>
+
+			</div>
+		</div>
+</div>
+<div id="method-draw" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>draw</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2752"><code>lib&#x2F;p5.play.js:2752</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Draws all the sprites in the group.</p>
+</div>
+
+
+
+</div>
+<div id="method-get" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>get</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>i</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2599"><code>lib&#x2F;p5.play.js:2599</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Gets the member at index i.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">i</code>
+						<span class="type">Number</span>
+
+
+					<div class="param-description"><p>The index of the object to retrieve</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+
+</div>
+<div id="method-indexOf" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>indexOf</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2620"><code>lib&#x2F;p5.play.js:2620</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Same as Group.contains</p>
+</div>
+
+
+
+</div>
+<div id="method-maxDepth" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>maxDepth</code></span>
+
+		<span class="paren">()</span>
+		<span class="returns-inline">
+			<span class="type">Number</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2720"><code>lib&#x2F;p5.play.js:2720</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns the highest depth in a group</p>
+</div>
+
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Number</span>:
+					<p>The depth of the sprite drawn on the top</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-minDepth" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>minDepth</code></span>
+
+		<span class="paren">()</span>
+		<span class="returns-inline">
+			<span class="type">Number</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2736"><code>lib&#x2F;p5.play.js:2736</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns the lowest depth in a group</p>
+</div>
+
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Number</span>:
+					<p>The depth of the sprite drawn on the bottom</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-overlap" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>overlap</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>target</code>
+				</li>
+				<li class="arg">
+						<code class="optional">callback</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">Boolean</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2806"><code>lib&#x2F;p5.play.js:2806</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Checks if the the group is overlapping another group or sprite.
+The check is performed using the colliders. If colliders are not set
+they will be created automatically from the image/animation bounding box.</p>
+<p>A callback function can be specified to perform additional operations
+when the overlap occurs.
+The function will be called for each single sprite overlapping.
+The parameter of the function are respectively the
+member of the current group and the other sprite passed as parameter.</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">target</code>
+						<span class="type">Object</span>
+
+
+					<div class="param-description"><p>Group or Sprite to check against the current one</p>
+</div>
+
+				</li>
+				<li class="param">
+						<code class="param-name optional">[callback]</code>
+						<span class="type">Function</span>
+						<span class="flag optional" title="This parameter is optional.">optional</span>
+
+
+					<div class="param-description"><p>The function to be called if overlap is positive</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Boolean</span>:
+					<p>True if overlapping</p>
+
+			</div>
+		</div>
+
+		<div class="example">
+			<h4>Example:</h4>
+
+			<div class="example-content">
+				<pre class="code prettyprint"><code>group.overlap(otherSprite, explosion);
+
+function explosion(spriteA, spriteB) {
+  spriteA.remove();
+  spriteB.score++;
+}</code></pre>
+
+			</div>
+		</div>
+</div>
+<div id="method-remove" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>remove</code></span>
+
+		<div class="args">
+			<span class="paren">(</span><ul class="args-list inline commas">
+				<li class="arg">
+						<code>item</code>
+				</li>
+			</ul><span class="paren">)</span>
+		</div>
+		<span class="returns-inline">
+			<span class="type">Boolean</span>
+		</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2680"><code>lib&#x2F;p5.play.js:2680</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Removes a sprite from the group.
+Does not remove the actual sprite, only the affiliation (reference).</p>
+</div>
+
+		<div class="params">
+			<h4>Parameters:</h4>
+
+			<ul class="params-list">
+				<li class="param">
+						<code class="param-name">item</code>
+						<span class="type"><a href="../classes/Sprite.html" class="crosslink">Sprite</a></span>
+
+
+					<div class="param-description"><p>The sprite to be removed</p>
+</div>
+
+				</li>
+			</ul>
+		</div>
+
+		<div class="returns">
+			<h4>Returns:</h4>
+
+			<div class="returns-description">
+						<span class="type">Boolean</span>:
+					<p>True if sprite was found and removed</p>
+
+			</div>
+		</div>
+
+</div>
+<div id="method-removeSprites" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>removeSprites</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2658"><code>lib&#x2F;p5.play.js:2658</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Removes all the sprites in the group
+from the scene.</p>
+</div>
+
+
+
+</div>
+<div id="method-size" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>size</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2650"><code>lib&#x2F;p5.play.js:2650</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Same as group.length</p>
+</div>
+
+
+
+</div>
+<div id="method-toArray" class="method item ">
+	<div class="method-signature">
+	<span class="name"><code>toArray</code></span>
+
+		<span class="paren">()</span>
+	</div>
+
+
+
+
+
+
+	<div class="meta">
+				<p>
+				Defined in
+		<a href="../files/lib_p5.play.js.html#l2712"><code>lib&#x2F;p5.play.js:2712</code></a>
+		</p>
+
+
+
+	</div>
+
+	<div class="description"><p>Returns a copy of the group as standard array.</p>
+</div>
+
+
+
+</div>
+        </div>
+    </div>
+
+
+
+
                     </div>
                 </div>
             </div>
