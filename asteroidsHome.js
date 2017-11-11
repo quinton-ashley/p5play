@@ -17,7 +17,7 @@ particleImage = loadImage("images/asteroids_particle.png");
 
 ship = createSprite(width/2, height/2);
 ship.maxSpeed = 6;
-ship.friction = .98;
+ship.friction = 0.02;
 ship.setCollider("circle", 0,0, 20);
 
 ship.addImage("normal", shipImage);
@@ -111,7 +111,7 @@ for(var i=0; i<10; i++) {
   var p = createSprite(bullet.position.x, bullet.position.y);
   p.addImage(particleImage);
   p.setSpeed(random(3,5), random(360));
-  p.friction = 0.95;
+  p.friction = 0.05;
   p.life = 15;
   }
 
