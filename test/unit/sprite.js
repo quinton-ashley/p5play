@@ -409,7 +409,7 @@ describe('Sprite', function() {
       expect(sprite.collider.offset.y).to.eq(2);
     });
 
-    it('throws if creating a rectangle collider with 1, 2, 3, or 5+ params', function() {
+    it('throws if creating a rectangle collider with 1, 2, or 3 params', function() {
       expect(function() {
         sprite.setCollider('rectangle', 1);
       }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
@@ -419,13 +419,21 @@ describe('Sprite', function() {
       expect(function() {
         sprite.setCollider('rectangle', 1, 2, 3);
       }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
-      // setCollider('rectangle', 1, 2, 3, 4) is fine.
-      expect(function() {
-        sprite.setCollider('rectangle', 1, 2, 3, 4, 5);
-      }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
-      expect(function() {
-        sprite.setCollider('rectangle', 1, 2, 3, 4, 5, 6);
-      }).to.throw(TypeError, 'Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
+    });
+
+    it('logs a warning and ignores extra params for rectangle collider', function() {
+      sprite.setCollider('rectangle', 1, 2, 3, 4, 5);
+      expect(_warn.callCount).to.equal(1);
+      expect(_warn.firstCall.args[0]).to.equal('Extra parameters to setCollider were ignored. Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
+      expect(sprite.collider).to.be.an.instanceOf(pInst.AABB);
+      expect(sprite.collider.offset.x).to.eq(1);
+      expect(sprite.collider.offset.y).to.eq(2);
+      expect(sprite.collider.extents.x).to.eq(3);
+      expect(sprite.collider.extents.y).to.eq(4);
+
+      sprite.setCollider('rectangle', 1, 2, 3, 4, 5, 6);
+      expect(_warn.callCount).to.equal(2);
+      expect(_warn.lastCall.args[0]).to.equal('Extra parameters to setCollider were ignored. Usage: setCollider("rectangle") or setCollider("rectangle", offsetX, offsetY, width, height)');
     });
   });
 
