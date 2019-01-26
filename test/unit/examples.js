@@ -1,6 +1,24 @@
 describe('Example sketches', function() {
   var FRAMES_TO_DRAW = 3;
 
+  // Examples we are unable to test in PhantomJS
+  var PHANTOMJS_BLACKLIST = [
+    // This example can't be tested in Phantom unit tests because it calls
+    // loadJSON() which uses the `fetch` API since p5.js@0.5.8 and won't permit
+    // loading a file from localhost.
+    // Maybe someday we can serve test files from a local server.
+    // This works fine when run in the browser from the local dev server.
+    // See also:
+    // https://github.com/processing/p5.js/issues/1975
+    // https://github.com/processing/p5.js/wiki/Local-server
+    'sprites_with_sheet.js'
+  ];
+
+  var inPhantomJS = (/PhantomJS/).test(window.navigator.userAgent);
+  function isBlacklisted(filename) {
+    return inPhantomJS && PHANTOMJS_BLACKLIST.indexOf(filename) >= 0;
+  }
+
   var iframe;
   var examples = (function findExamples() {
     var FILENAME_RE = /index\.html\?fileName=([A-Za-z0-9_.]+)/g;
@@ -52,7 +70,7 @@ describe('Example sketches', function() {
 
   examples.forEach(function(fileName) {
     var testName = fileName + ' runs for ' + FRAMES_TO_DRAW + ' frames';
-    it(testName, function(done) {
+    function testFunc(done) {
       var windowCbName = 'example_' + fileName.slice(0, -3) + '_done';
       var iframeScriptArgs = [
         windowCbName,
@@ -79,6 +97,12 @@ describe('Example sketches', function() {
         '<script src="' + fileName + '"></script>'
       ].join('\n'));
       iframe.contentDocument.close();
-    });
+    }
+
+    if (isBlacklisted(fileName)) {
+      it.skip(testName);
+    } else {
+      it(testName, testFunc);
+    }
   });
 });

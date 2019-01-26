@@ -8,8 +8,11 @@ before_script:
   - 'if [ "$P5_VERSION" ]; then npm install p5@$P5_VERSION && npm run copy:p5; fi'
 
 env:
-  - P5_VERSION=0.5.0
-  - P5_VERSION=0.5.1
-  - P5_VERSION=0.5.2
-  #- P5_VERSION=0.5.3 Known issue
-  - P5_VERSION=0.5.4
+  - P5_VERSION=0.5.5
+  - P5_VERSION=0.5.6
+  - P5_VERSION=0.5.7
+  - P5_VERSION=0.5.8
+  - P5_VERSION=0.5.9
+  - P5_VERSION=0.5.10
+  - P5_VERSION=0.5.11
+  - P5_VERSION=latest

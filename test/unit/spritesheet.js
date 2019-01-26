@@ -85,16 +85,16 @@ describe('SpriteSheet', function() {
       expect(pInst.image.calledOnce).to.be.true;
       expect(pInst.image.firstCall.calledWith(
         srcImage,         // source image
-        100, 0, 100, 160, // source coordinates
-        25, 45, 50, 80    // destination coordinates
+        25, 45, 100, 160, // source coordinates
+        100, 0, 50, 80    // destination coordinates
       )).to.be.true;
 
       sheet.drawFrame(0, 25, 45, 50, 80);
       expect(pInst.image.calledTwice).to.be.true;
       expect(pInst.image.secondCall.calledWith(
         srcImage,         // source image
-        0, 0, 100, 160,   // source coordinates
-        25, 45, 50, 80    // destination coordinates
+        25, 45, 100, 160, // source coordinates
+        0, 0, 50, 80      // destination coordinates
       )).to.be.true;
     });
 
@@ -102,8 +102,8 @@ describe('SpriteSheet', function() {
       sheet.drawFrame(2, 25, 45, 50, 80);
       expect(pInst.image.firstCall.calledWith(
         srcImage,         // source image
-        200, 0, 100, 160, // source coordinates
-        25, 45, 50, 80    // destination coordinates
+        25, 45, 100, 160, // source coordinates
+        200, 0, 50, 80    // destination coordinates
       )).to.be.true;
     });
 
@@ -111,8 +111,8 @@ describe('SpriteSheet', function() {
       sheet.drawFrame('happy', 25, 45, 50, 80);
       expect(pInst.image.firstCall.calledWith(
         srcImage,         // source image
-        200, 0, 100, 160, // source coordinates
-        25, 45, 50, 80    // destination coordinates
+        25, 45, 100, 160, // source coordinates
+        200, 0, 50, 80    // destination coordinates
       )).to.be.true;
     });
 
@@ -120,8 +120,8 @@ describe('SpriteSheet', function() {
       sheet.drawFrame(0, 25, 45);
       expect(pInst.image.firstCall.calledWith(
         srcImage,         // source image
-        0, 0, 100, 160,   // source coordinates
-        25, 45, 100, 160  // destination coordinates
+        25, 45, 100, 160, // source coordinates
+        0, 0, 100, 160    // destination coordinates
       )).to.be.true;
     });
   });
