@@ -52,7 +52,7 @@ function draw() {
     animatedSprite.animation.play();
 
   //change the frame in relation to the mouse x position
-  var frame = round(map(mouseX, 0, width, 0, anotherAnimatedSprite.animation.getLastFrame()));
+  var frame = round(map(mouseX, 0, width, 0, anotherAnimatedSprite.animation.getLastFrame(), true));
   //note: frames must be integer numbers so I have to round the result of map
 
   anotherAnimatedSprite.animation.changeFrame(frame);
