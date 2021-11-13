@@ -12,7 +12,7 @@ p5.play extends [p5.js][], a javascript library (and a community) that aims to m
 
 
 ## Using p5.play
-You can link directly to the library [https://rawgit.com/molleindustria/p5.play/master/lib/p5.play.js][here]
+You can link directly to the library [here](https://rawgit.com/molleindustria/p5.play/master/lib/p5.play.js)
 
 Eg. Include this line in the head of your index.html
 ```
