@@ -8,6 +8,18 @@ p5.play provides a Sprite class to manage visual objects in 2D space and feature
 
 p5.play extends [p5.js][], a javascript library (and a community) that aims to make coding accessible for artists, designers, educators, and beginners. If you are not familiar with p5.js, you should start at [p5js.org/tutorials][].
 
+**Warning:** p5 is currently unsupported and provided "as is". Feel free to get in touch if you want to maintain it and expand it.
+
+
+## Using p5.play
+You can link directly to the library [https://rawgit.com/molleindustria/p5.play/master/lib/p5.play.js][here]
+
+Eg. Include this line in the head of your index.html
+```
+<script src="https://rawgit.com/molleindustria/p5.play/master/lib/p5.play.js"></script>
+```
+
+
 ## Development
 
 The following documentation is for *developing* p5.play itself. If you
