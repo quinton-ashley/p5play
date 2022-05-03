@@ -4,70 +4,39 @@ p5.play is a p5.js library for the creation of games and playthings.
 
 You can find examples and more information at [p5play.molleindustria.org][].
 
-p5.play provides a Sprite class to manage visual objects in 2D space and features such as animation support, basic collision detection and resolution, sprite grouping, helpers for mouse and keyboard interactions, and a virtual camera. 
+p5.play provides a Sprite class to manage visual objects in 2D space and features such as animation support, basic collision detection and resolution, sprite grouping, helpers for mouse and keyboard interactions, and a virtual camera.
 
 p5.play extends [p5.js][], a javascript library (and a community) that aims to make coding accessible for artists, designers, educators, and beginners. If you are not familiar with p5.js, you should start at [p5js.org/tutorials][].
 
-**Warning:** p5 is currently unsupported and provided "as is". Feel free to get in touch if you want to maintain it and expand it.
-
+p5.play was created by Paolo Pedercini @molleindustria and is currently maintained by Quinton Ashley @quinton-ashley. If you have any questions or problems make an issue report on this GitHub repository or email <qashto@gmail.com>
 
 ## Using p5.play
-You can link directly to the library [here](https://rawgit.com/molleindustria/p5.play/master/lib/p5.play.js)
 
-Eg. Include this line in the head of your index.html
-```
+Here is a direct link to the [p5.js library](https://rawgit.com/molleindustria/lib/p5.play/master/p5.play.js). You can easily use this library by adding the following script tag to your html file in the head or body section.
+
+```html
 <script src="https://rawgit.com/molleindustria/p5.play/master/lib/p5.play.js"></script>
 ```
 
+You can also install p5.play as a package on npm!
+
+```
+npm install p5.play
+```
+
+## More Info
+
+Check out the [p5.play website][] for more information including [documentation][] and [example projects][]!
 
 ## Development
 
-The following documentation is for *developing* p5.play itself. If you
-want to *use* p5.play, please see [p5play.molleindustria.org][].
+Switch to the gh-pages branch of this repository for information about how to contribute to the development of p5.play
 
-### Quick Start
-
-First install [node.js][]. Then run:
-
-```
-npm install
-npm start
-```
-
-Your web browser should open to a welcome page. If it doesn't, visit
-[localhost:8080][] in your browser.
-
-### Unit Tests
-
-To run the unit tests in your browser, visit [localhost:8080/test][].
-
-To run them from the command-line, use `npm test`.
-
-### Documentation
-
-The docs can be found at [localhost:8080/docs][] or via the "Reference" link on
-the quick start welcome page. 
-
-Use `npm run docs` to regenerate the local documentation using [YUIDoc][].
-
-A (mostly current) copy of the docs is also hosted at [p5play.molleindustria.org/docs][].
-
-### Examples
-
-Several example sketches are available at [p5play.molleindustria.org/examples][].
-
-You can try these examples against your local copy of p5.play at
-[localhost:8080/examples][] or via the "Examples" link on the quick start
-welcome page. 
-
-  [localhost:8080]: http://localhost:8080/
-  [localhost:8080/test]: http://localhost:8080/test/
-  [localhost:8080/docs]: http://localhost:8080/docs/
-  [localhost:8080/examples]: http://localhost:8080/examples/
-  [p5.js]: https://p5js.org
-  [p5js.org/tutorials]: http://p5js.org/tutorials/
-  [p5play.molleindustria.org]: http://p5play.molleindustria.org
-  [p5play.molleindustria.org/docs]: http://p5play.molleindustria.org/docs/
-  [p5play.molleindustria.org/examples]: http://p5play.molleindustria.org/examples/
-  [node.js]: https://nodejs.org/en/
-  [YUIDoc]: http://yui.github.io/yuidoc/
+[p5.js]: https://p5js.org
+[p5js.org/tutorials]: http://p5js.org/tutorials/
+[p5play.molleindustria.org]: http://p5play.molleindustria.org
+[p5.play website]: http://p5play.molleindustria.org
+[documentation]: http://p5play.molleindustria.org/docs/
+[example projects]: http://p5play.molleindustria.org/examples/
+[node.js]: https://nodejs.org/en/
+[yuidoc]: http://yui.github.io/yuidoc/
