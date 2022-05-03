@@ -8,17 +8,6 @@
 		"quinton-ashley <qashto@gmail.com> (https://quintos.org)"
 	],
 	"description": "A p5.js library for the creation of games and playthings.",
-	"dependencies": {},
-	"devDependencies": {
-		"eslint": "^3.1.0",
-		"http-server": "^0.9.0",
-		"mocha-phantomjs": "^4.0.1",
-		"p5": "^1.4.0",
-		"yuidocjs": "^0.10.0"
-	},
-	"engines": {
-		"node": ">=4.0.0"
-	},
 	"license": "LGPL-2.1",
 	"homepage": "https://github.com/molleindustria/p5.play#readme",
 	"repository": {
@@ -26,20 +15,10 @@
 		"url": "git+https://github.com/molleindustria/p5.play.git"
 	},
 	"scripts": {
-		"docs": "yuidoc .",
-		"lint": "eslint lib/** test/unit/** examples/*.js",
-		"lint:examples": "eslint examples/*.js",
-		"lint:lib": "eslint lib/**",
-		"lint:test": "eslint test/unit/**",
-		"copy:p5": "cp -f `npm root`/p5/lib/p5.js examples/lib/p5.js",
-		"start": "http-server -o",
-		"postinstall": "npm run copy:p5 && npm run docs",
-		"pretest": "npm run lint",
-		"test": "mocha-phantomjs test/index.html",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "2.0.2"
+	"version": "2.0.3"
 }
