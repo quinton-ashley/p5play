@@ -20,7 +20,7 @@ Here is a direct link to the [p5.js library](https://rawgit.com/molleindustria/l
 <script src="https://rawgit.com/molleindustria/p5.play/master/lib/p5.play.js"></script>
 ```
 
-You can also install p5.play as a package on npm!
+You can also install the [p5.play npm pacakge][]!
 
 ```
 npm install p5.play
@@ -29,6 +29,8 @@ npm install p5.play
 ## More Info
 
 Check out the [p5.play website][] for more information including [documentation][] and [example projects][]!
+
+[Click this link to download all the example projects.](https://github.com/molleindustria/p5.play/archive/refs/heads/gh-pages.zip)
 
 ## Development
 
@@ -41,3 +43,4 @@ Switch to the `gh-pages` branch of this repository for information about how to 
 [documentation]: http://p5play.molleindustria.org/docs/
 [example projects]: http://p5play.molleindustria.org/examples/
 [issue report]: https://github.com/molleindustria/p5.play/issues
+[p5.play npm package]: https://www.npmjs.com/package/p5.play
