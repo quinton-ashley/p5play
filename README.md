@@ -32,12 +32,12 @@ Switch to the [gh-pages branch][] of this repository for information about how t
 
 [p5.js]: https://p5js.org
 [p5js.org/tutorials]: https://p5js.org/tutorials/
-[p5play.molleindustria.org]: https://p5play.molleindustria.org
+[p5play.molleindustria.org]: https://molleindustria.github.io/p5.play/
 [p5.play library]: https://molleindustria.github.io/p5.play/lib/p5.play.js
 [p5.play npm package]: https://www.npmjs.com/package/p5.play
-[p5.play website]: https://p5play.molleindustria.org
-[documentation]: https://p5play.molleindustria.org/docs/
-[example projects]: https://p5play.molleindustria.org/examples/
+[p5.play website]: https://molleindustria.github.io/p5.play/
+[documentation]: https://p5play.molleindustria.org/p5.play/docs/
+[example projects]: https://molleindustria.github.io/p5.play/examples
 [issue report]: https://github.com/molleindustria/p5.play/issues
 [gh-pages branch]: https://github.com/molleindustria/p5.play/tree/gh-pages
 [@quinton-ashley]: https://github.com/quinton-ashley
