@@ -6,6 +6,8 @@ p5.play provides a Sprite class to manage visual objects in 2D space and feature
 
 p5.play was created by Paolo Pedercini [@molleindustria][] and is currently maintained by Quinton Ashley [@quinton-ashley][]. If you have any questions or problems make an [issue report][] on this GitHub repository or email <qashto@gmail.com>
 
+[p5.play Version 3][] is coming soon!
+
 ## Using p5.play
 
 You can find interactive examples and documentation at [p5play.molleindustria.org][].
@@ -38,6 +40,7 @@ Switch to the [gh-pages branch][] of this repository for information about how t
 [p5.play website]: https://molleindustria.github.io/p5.play/
 [documentation]: https://p5play.molleindustria.org/p5.play/docs/
 [example projects]: https://molleindustria.github.io/p5.play/examples
+[p5.play Version 3]: https://github.com/molleindustria/p5.play/wiki/p5.play-Version-3
 [issue report]: https://github.com/molleindustria/p5.play/issues
 [gh-pages branch]: https://github.com/molleindustria/p5.play/tree/gh-pages
 [@quinton-ashley]: https://github.com/quinton-ashley
