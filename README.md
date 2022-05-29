@@ -6,7 +6,7 @@ p5.play provides a Sprite class to manage visual objects in 2D space and feature
 
 p5.play was created by Paolo Pedercini [@molleindustria][] and is currently maintained by Quinton Ashley [@quinton-ashley][]. If you have any questions or problems make an [issue report][] on this GitHub repository or email <qashto@gmail.com>
 
-[p5.play Version 3][] is coming soon!
+Version 3 is in early BETA testing. Please keep using v2.3.0 for now.
 
 ## Using p5.play
 
