@@ -23,7 +23,7 @@ Here is a direct link to the [p5.play library][]. You can easily use this JavaSc
 You can also install the [p5.play npm package][].
 
 ```
-npm install p5.play
+npm install p5.play@2.3.0
 ```
 
 Need help getting started with local p5.play development? Check out this [guide](https://github.com/molleindustria/p5.play/wiki/Get-Started).
@@ -40,7 +40,7 @@ Switch to the [gh-pages branch][] of this repository for information about how t
 [p5.play website]: https://molleindustria.github.io/p5.play/
 [documentation]: https://p5play.molleindustria.org/p5.play/docs/
 [example projects]: https://molleindustria.github.io/p5.play/examples
-[p5.play Version 3]: https://github.com/molleindustria/p5.play/wiki/p5.play-Version-3
+[p5.play version 3]: https://github.com/molleindustria/p5.play/wiki/p5.play-Version-3
 [issue report]: https://github.com/molleindustria/p5.play/issues
 [gh-pages branch]: https://github.com/molleindustria/p5.play/tree/gh-pages
 [@quinton-ashley]: https://github.com/quinton-ashley
