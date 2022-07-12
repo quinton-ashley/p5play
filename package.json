@@ -20,7 +20,7 @@
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "3.0.30",
+	"version": "3.0.31",
 	"dependencies": {
 		"run": "^1.4.0",
 		"v": "^0.3.0"
