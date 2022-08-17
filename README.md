@@ -6,7 +6,7 @@ It uses [p5.js][] for graphics rendering. We share the Processing Foundation's g
 
 Ready to learn how to use p5.play to prototype, develop, and publish games? [Version 3][] is in late beta testing and will be released in August 2022. [Try it out today!][]
 
-[Join our discord server][] to ask questions and meet other people making games with p5.play!
+## [Join the p5.play community Discord server][] to ask questions and meet other people making games with p5.play!
 
 p5.play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated by Paolo Pedercini [@molleindustria][] . If you have any questions or problems make an [issue report][] on this GitHub repository or email <qashto@gmail.com>
 
