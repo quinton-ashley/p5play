@@ -5,11 +5,13 @@
  * @author quinton-ashley
  * @year 2022
  * @license gpl-v3-only
+ * @descripton p5.play is a 2D game engine that uses planck (Box2D) to simulate
+ * physics and provides sprites, a tile system, input handling, and animations!
  *
- * Upgraded and maintained by Quinton Ashley @qashto, 2022
+ * Created by Quinton Ashley @qashto, 2022
  * https://quintos.org
  *
- * p5.play was founded by Paolo Pedercini @molleindustria, 2015
+ * Initiated by Paolo Pedercini @molleindustria, 2015
  * https://molleindustria.org/
  */
 p5.prototype.registerMethod('init', function p5PlayInit() {
@@ -397,6 +399,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			w ??= group.w || group.width || group.diameter;
 			h ??= group.h || group.height;
 
+			let lastG = this.groups[this.groups.length - 1];
+
+			if (typeof x == 'function') x = x(lastG.length - 1);
+			if (typeof y == 'function') y = y(lastG.length - 1);
+
 			this.x = x;
 			this.y = y;
 
@@ -428,9 +435,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.idNum = this.p.world.spritesCreated;
 			this.p.world.spritesCreated++;
 
-			let lastG = this.groups[this.groups.length - 1];
 			for (let prop of spriteProps) {
-				if (prop == 'collider') continue;
+				if (prop == 'collider' || prop == 'x' || prop == 'y') continue;
 				let val = lastG[prop];
 				if (val === undefined) continue;
 				if (typeof val == 'function') val = val(lastG.length - 1);
@@ -1419,27 +1425,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @private
 		 */
 		update() {
-			// if (this._shift.x || this._shift.y) {
-			// 	this._shift.x ??= this.x;
-			// 	this._shift.y ??= this.y;
-			// 	let pos = new pl.Vec2((this._shift.x * this.tileSize) / plScale, (this._shift.y * this.tileSize) / plScale);
-			// 	this.body.move(pos.x, pos.y);
-			// 	this._shift = {};
-			// }
 			if (this.animation) this.animation.update();
-			// this._syncAnimationSizes();
-			//patch for un-preloaded single image sprites
-			// if (this.width == 1 && this.height == 1) {
-			// 	this.width = this.animation.getWidth();
-			// 	this.height = this.animation.getHeight();
-			// }
+
 			if (!this.body) {
 				this.rotation += this._rotationSpeed;
 				this.x += this.vel.x;
 				this.y += this.vel.y;
 			}
-			if (this.xLock) this.y = this.previousPosition.y;
+
+			if (this.xLock) this.x = this.previousPosition.x;
 			if (this.yLock) this.y = this.previousPosition.y;
+
 			for (let prop in this.mouse) {
 				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
 			}
