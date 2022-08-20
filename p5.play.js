@@ -33,6 +33,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.mouseTracking ??= true;
 	this.p5play.mouseSprite = null;
 	this.p5play.mouseSprites = [];
+	this.p5play.chainMode = 'center';
 
 	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
 	const scaleFrom = ({ x, y }, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
@@ -120,7 +121,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args = args.slice(1);
 			}
 
-			if (args[0] !== undefined && typeof args[0] != 'number') {
+			if (args[0] !== undefined && !Array.isArray(args[0]) && typeof args[0] !== 'number') {
 				// ani instanceof p5.Image
 				// shift
 				ani = args[0];
@@ -132,6 +133,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			w = args[2];
 			h = args[3];
 			collider = args[4];
+
+			if (Array.isArray(x)) {
+				x = undefined;
+				y = undefined;
+				w = args[0];
+				h = args[1];
+				collider = args[2];
+			}
 
 			if (Array.isArray(w) || (!isNaN(w) && typeof h == 'string')) {
 				collider = h;
@@ -554,6 +563,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let min = { x: 0, y: 0 };
 				let max = { x: 0, y: 0 };
 
+				// if the path is an array of position arrays
 				let usesVertices = Array.isArray(path[0]);
 
 				function checkVert() {
@@ -564,9 +574,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 
 				if (usesVertices) {
-					for (let i = 1; i < path.length; i++) {
-						vert.x = path[i][0] - this.x;
-						vert.y = path[i][1] - this.y;
+					for (let i = 0; i < path.length; i++) {
+						// vert.x = path[i][0] - this.x;
+						// vert.y = path[i][1] - this.y;
+						vert.x = path[i][0];
+						vert.y = path[i][1];
 						vecs.push({ x: vert.x, y: vert.y });
 						checkVert();
 					}
@@ -602,7 +614,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._hw = w * 0.5;
 				h = max.y - min.y;
 				this._hh = h * 0.5;
-				if (!usesVertices) {
+				if (this.p.p5play.chainMode == 'center') {
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
 						vecs[i] = new pl.Vec2(
