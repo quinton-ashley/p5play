@@ -61,6 +61,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'rotationDrag',
 		'rotationLock',
 		'rotationSpeed',
+		'scale',
 		'shape',
 		'shapeColor',
 		'speed',
@@ -399,10 +400,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			w ??= group.w || group.width || group.diameter;
 			h ??= group.h || group.height;
 
-			let lastG = this.groups[this.groups.length - 1];
-
-			if (typeof x == 'function') x = x(lastG.length - 1);
-			if (typeof y == 'function') y = y(lastG.length - 1);
+			if (typeof x == 'function') x = x(group.length - 1);
+			if (typeof y == 'function') y = y(group.length - 1);
 
 			this.x = x;
 			this.y = y;
@@ -416,14 +415,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.h = h;
 			}
 
-			/**
-			 * Scales the appearance of the sprite but not its collider.
-			 *
-			 * @property scale
-			 * @type {Number}
-			 */
-			this.scale = 1;
-
+			this._scale = 1;
 			this.previousPosition = { x, y };
 			this.dest = { x, y };
 			this.vel.x = 0;
@@ -437,9 +429,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			for (let prop of spriteProps) {
 				if (prop == 'collider' || prop == 'x' || prop == 'y') continue;
-				let val = lastG[prop];
+				let val = group[prop];
 				if (val === undefined) continue;
-				if (typeof val == 'function') val = val(lastG.length - 1);
+				if (typeof val == 'function') val = val(group.length - 1);
 				if (typeof val == 'object') {
 					this[prop] = Object.assign({}, val);
 				} else {
@@ -498,11 +490,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @type {color}
 			 * @default a randomly generated color
 			 */
-			if (group.shapeColor) this.shapeColor = group.shapeColor;
 			if (!this.shapeColor)
 				this.shapeColor = this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
-
-			if (this.scale) this.scaleBy(this.scale);
 		}
 
 		/**
@@ -642,10 +631,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			props.density ??= this.density || 5;
 			props.friction ??= this.friction || 0.5;
 			props.restitution ??= this.bounciness || 0.2;
-			this.body.createFixture(props); /*RPC051521*/ /*RPC052521*/
+			this.body.createFixture(props);
 			if (!this.shape) {
 				this.shape = shape;
-			} else {
+			} else if (this.fixture.getNext()) {
 				this.shape = 'combo';
 			}
 			if (shape == 'circle') this._diameter = w;
@@ -1076,19 +1065,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Scales the sprite's visual size and physics body.
+		 * Scale of the sprite's physics body and appearance. Default is 1.
 		 *
-		 * @method scale
-		 * @param {Number}
+		 * @property scale
+		 * @type {Number}
 		 */
-		scaleBy(val) {
+		get scale() {
+			return this._scale;
+		}
+
+		set scale(val) {
 			if (val == 1) return;
 			this._w *= val;
 			this._hw *= val;
-			this._h *= val;
-			this._hh *= val;
+			if (this._h) {
+				this._h *= val;
+				this._hh *= val;
+			}
 			this._resizeCollider();
-			this.scale = val;
+			this._scale = val;
+			this.ani.scale.x = val;
+			this.ani.scale.y = val;
 		}
 
 		get shapeColor() {
@@ -1373,11 +1370,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_resizeCollider(w, h) {
 			if (!this.body) return;
 			if (this.shape == 'circle') {
-				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
-					let sh = fxt.m_shape;
-					let v = scaleTo({ x: w || this.w, y: 0 }, this.tileSize);
-					sh.m_radius = v.x * 0.5;
-				}
+				let fxt = this.fixture;
+				let sh = fxt.m_shape;
+				let v = scaleTo({ x: w || this.w, y: 0 }, this.tileSize);
+				sh.m_radius = v.x * 0.5;
 			} else {
 				let bodyProps = this._cloneBodyProps();
 				this.removeColliders();
@@ -1447,8 +1443,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @private
 		 */
 		_draw() {
-			if (this.animation && !this.debug) this.animation.draw(0, 0);
-			else if (this.body) {
+			if (this.animation && !this.debug) {
+				this.animation.draw(0, 0, undefined, this._scale, this._scale);
+			} else if (this.body) {
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 					this._drawFixture(fxt);
 				}
@@ -1499,7 +1496,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this.p.translate(x, y);
 			if (this.rotation) this.p.rotate(this.rotation);
-			this.p.scale(this.scale * this._mirror.x, this.scale * this._mirror.y);
+			this.p.scale(this._mirror.x, this._mirror.y);
+
 			this.p.fill(this.shapeColor);
 
 			this._draw();
@@ -2232,6 +2230,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.frameChanged = false;
 
 			this.rotation = 0;
+			this.scale = { x: 1, y: 1 };
 
 			// sequence mode
 			if (
@@ -2449,22 +2448,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Draws the animation at coordinate x and y.
 		 * Updates the frames automatically.
 		 *
+		 * Optional parameters effect the current draw cycle only and
+		 * are not saved between draw cycles.
+		 *
 		 * @method draw
 		 * @param {Number} x horizontal position
 		 * @param {Number} y vertical position
-		 * @param {Number} [r=0] rotation
+		 * @param {Number} [r] rotation
+		 * @param {Number} [sx] scale x
+		 * @param {Number} [sy] scale y
 		 */
-		draw(x, y, r) {
+		draw(x, y, r, sx, sy) {
 			this.x = x;
 			this.y = y;
-			if (r !== undefined) this.rotation = r;
 
 			if (!this.visible) return;
 
 			this.p.push();
 			this.p.imageMode(p5.prototype.CENTER);
 			this.p.translate(this.x, this.y);
-			this.p.rotate(this.rotation);
+			this.p.rotate(r || this.rotation);
+			this.p.scale(sx || this.scale.x, sy || this.scale.y);
 			let img = this.images[this.frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
