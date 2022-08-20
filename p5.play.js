@@ -4789,6 +4789,20 @@ p5.prototype.registerMethod('pre', function () {
 
 // called after each p5.js draw function call
 p5.prototype.registerMethod('post', function p5playPostDraw() {
+	if (!this.allSprites.length) return;
+
+	if (this.p5play.autoDrawSprites) {
+		this.allSprites.draw();
+		this.p5play.autoDrawSprites = true;
+	}
+
+	if (this.p5play.autoUpdateSprites) {
+		this.updateSprites();
+		this.p5play.autoUpdateSprites = true;
+	}
+
+	this.allSprites.cull(10000);
+
 	this.frame = this.frameCount;
 
 	for (let btn of ['left', 'center', 'right']) {
@@ -4839,8 +4853,8 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 			} else {
 				ms = this.p5play.mouseSprite;
 			}
+			// if mouse is pressing the sprite
 			if (ms) {
-				// mouse press is being held
 				ms.mouse.left = this.mouse.left;
 				ms.mouse.center = this.mouse.center;
 				ms.mouse.right = this.mouse.right;
@@ -4869,20 +4883,6 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		}
 		this.p5play.mouseSprites = sprites;
 	}
-
-	if (!this.allSprites.length) return;
-
-	if (this.p5play.autoDrawSprites) {
-		this.allSprites.draw();
-		this.p5play.autoDrawSprites = true;
-	}
-
-	if (this.p5play.autoUpdateSprites) {
-		this.updateSprites();
-		this.p5play.autoUpdateSprites = true;
-	}
-
-	this.allSprites.cull(10000);
 
 	this.cameraPop();
 });
