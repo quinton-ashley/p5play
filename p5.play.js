@@ -1607,12 +1607,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		moveTowards(destX, destY, tracking) {
 			if (!destX && !destY) return;
 			tracking ??= 0.1;
+			// let vec = new pl.Vec2(0, 0);
 			if (destX !== undefined && destX !== null) {
+				// vec.x = (destX - this.x) * tracking * this.tileSize * this.mass;
 				this.vel.x = (destX - this.x) * tracking * this.tileSize;
 			}
 			if (destY !== undefined && destY !== null) {
+				// vec.y = (destY - this.y) * tracking * this.tileSize * this.mass;
 				this.vel.y = (destY - this.y) * tracking * this.tileSize;
 			}
+			// this.body.applyForce(vec, new pl.Vec2(0, 0));
 		}
 
 		/**
@@ -2855,6 +2859,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					});
 				}
 			}
+
+			this.orbitAngle = 0;
 		}
 
 		/**
@@ -2878,6 +2884,26 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let i = 0; i < diff; i++) {
 				if (shouldAdd) this.add(new this.Sprite());
 				else this.remove(this[this.length - 1]);
+			}
+		}
+
+		resetCentroid() {
+			let x = 0;
+			let y = 0;
+			for (let s of this) {
+				x += s.x;
+				y += s.y;
+			}
+			this.centroid = { x: x / this.length, y: y / this.length };
+			return this.centroid;
+		}
+
+		resetDistancesFromCentroid() {
+			for (let s of this) {
+				s.distCentroid = {
+					x: s.x - this.centroid.x,
+					y: s.y - this.centroid.y
+				};
 			}
 		}
 
@@ -2968,13 +2994,51 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.overlaps[target] = callback || true;
 		}
 
-		move() {
-			console.warn("group.move() hasn't been implemented yet. Check discord for updates to p5.play.");
+		move(x, y, speed) {
+			let centroid = this.centroid;
+			let movements = [];
+			for (let s of this) {
+				let dest = {
+					x: s.x - centroid.x + x,
+					y: s.y - centroid.y + y
+				};
+				movements.push(s.move(dest.x, dest.y, speed));
+			}
+			return Promise.all(movements);
 		}
 
 		moveTowards(x, y, tracking) {
+			let centroid = this.resetCentroid();
 			for (let s of this) {
-				s.moveTowards(x, y, tracking);
+				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
+				let dest = {
+					x: s.distCentroid.x + x,
+					y: s.distCentroid.y + y
+				};
+				s.moveTowards(dest.x, dest.y, tracking);
+			}
+		}
+
+		/**
+		 * Rotates the group around its centroid.
+		 *
+		 * @method orbit
+		 * @param {Number} amount Amount of rotation
+		 */
+		orbit(amount) {
+			if (!this.centroid) this.resetCentroid();
+			this.orbitAngle += amount;
+			let angle = this.orbitAngle;
+			for (let s of this) {
+				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
+				let x = s.distCentroid.x;
+				let y = s.distCentroid.y;
+				let x2 = x * this.p.cos(angle) - y * this.p.sin(angle);
+				let y2 = x * this.p.sin(angle) + y * this.p.cos(angle);
+				x2 += this.centroid.x;
+				y2 += this.centroid.y;
+				s.vel.x = (x2 - s.x) * 0.1 * s.tileSize;
+				s.vel.y = (y2 - s.y) * 0.1 * s.tileSize;
 			}
 		}
 
