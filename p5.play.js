@@ -16,6 +16,7 @@
  */
 p5.prototype.registerMethod('init', function p5PlayInit() {
 	const log = console.log; // shortcut
+	this.log = console.log;
 
 	// store a reference to the p5 instance that p5play is being added to
 	let pInst = this;
@@ -33,7 +34,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.mouseTracking ??= true;
 	this.p5play.mouseSprite = null;
 	this.p5play.mouseSprites = [];
-	this.p5play.chainMode = 'center';
+	this.p5play.chainOrigin = 'center';
+	this.p5play.chainPoints = 'relative';
 
 	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
 	const scaleFrom = ({ x, y }, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
@@ -422,6 +424,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else {
 				this.w = w || (this.tileSize > 1 ? 1 : 50);
 				this.h = h;
+				if (h === undefined) this.shape = 'circle';
+				else this.shape = 'box';
 			}
 
 			this._scale = 1;
@@ -501,6 +505,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			if (!this.shapeColor)
 				this.shapeColor = this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
+
+			let shouldCreateSensor = false;
+			for (let g of this.groups) {
+				if (g._hasOverlaps) {
+					shouldCreateSensor = true;
+					break;
+				}
+			}
+			if (shouldCreateSensor && !this.sensor) this._createSensor();
 		}
 
 		/**
@@ -565,6 +578,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 				// if the path is an array of position arrays
 				let usesVertices = Array.isArray(path[0]);
+				let originMode = this.p.p5play.chainOrigin;
+				let pointMode = this.p.p5play.chainPoints;
 
 				function checkVert() {
 					if (vert.x < min.x) min.x = vert.x;
@@ -575,10 +590,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 				if (usesVertices) {
 					for (let i = 0; i < path.length; i++) {
-						// vert.x = path[i][0] - this.x;
-						// vert.y = path[i][1] - this.y;
-						vert.x = path[i][0];
-						vert.y = path[i][1];
+						if (pointMode == 'relative') {
+							vert.x = path[i][0];
+							vert.y = path[i][1];
+						} else {
+							// absolute
+							vert.x = path[i][0] - this.x;
+							vert.y = path[i][1] - this.y;
+						}
 						vecs.push({ x: vert.x, y: vert.y });
 						checkVert();
 					}
@@ -614,7 +633,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._hw = w * 0.5;
 				h = max.y - min.y;
 				this._hh = h * 0.5;
-				if (this.p.p5play.chainMode == 'center') {
+				if (originMode == 'center') {
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
 						vecs[i] = new pl.Vec2(
@@ -623,6 +642,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						);
 					}
 				} else {
+					// originMode is start
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
 						vecs[i] = new pl.Vec2((vec.x * this.tileSize) / plScale, (vec.y * this.tileSize) / plScale);
@@ -2035,6 +2055,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Function} [callback] The function to be called if overlap is positive
 		 */
 		collide(target, callback) {
+			if (!(target instanceof Sprite) && !(target instanceof Group)) {
+				throw new Error('collide target must be a sprite or a group');
+			}
 			this.collides[target] = callback || true;
 		}
 
@@ -2087,21 +2110,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Function} [callback] The function to be called if an overlap occurs
 		 */
 		overlap(target, callback) {
-			if (!this.sensor) {
-				let shape;
-				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
-					shape = fxt.m_shape;
-					break;
-				}
-
-				this.sensor = this.body.createFixture({
-					shape: shape,
-					isSensor: true
-				});
+			if (!(target instanceof Sprite) && !(target instanceof Group)) {
+				throw new Error('collide target must be a sprite or a group');
 			}
-
+			if (!this.sensor) this._createSensor();
 			this.overlaps[target] = callback || true;
 			return this.touching[target];
+		}
+
+		_createSensor() {
+			let shape;
+			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
+				shape = fxt.m_shape;
+				break;
+			}
+
+			this.sensor = this.body.createFixture({
+				shape: shape,
+				isSensor: true
+			});
 		}
 
 		/**
@@ -2899,7 +2926,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			diff = Math.abs(diff);
 			for (let i = 0; i < diff; i++) {
 				if (shouldAdd) this.add(new this.Sprite());
-				else this.remove(this[this.length - 1]);
+				else this[this.length - 1].remove();
 			}
 		}
 
@@ -2955,6 +2982,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Function} [callback] The function to be called when a collision occurs
 		 */
 		collide(target, callback) {
+			if (!(target instanceof Sprite) && !(target instanceof Group)) {
+				throw new Error('collide target must be a sprite or a group');
+			}
 			this.collides[target] = callback || true;
 		}
 
@@ -3007,6 +3037,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Function} [callback] The function to be called if overlap is positive
 		 */
 		overlap(target, callback) {
+			if (!(target instanceof Sprite) && !(target instanceof Group)) {
+				throw new Error('collide target must be a sprite or a group');
+			}
+			this._hasOverlaps = true;
+			for (let s of this) {
+				if (!s.sensor) s._createSensor();
+			}
+			if (target instanceof Group) {
+				for (let s of target) {
+					if (!s.sensor) s._createSensor();
+				}
+				target._hasOverlaps = true;
+			}
 			this.overlaps[target] = callback || true;
 		}
 
@@ -3174,58 +3217,45 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Removes all the sprites in the group
-		 * from the scene.
+		 * If no input is given all sprites in the group are removed.
 		 *
-		 * @method removeSprites
-		 */
-		removeSprites() {
-			this.removeAll();
-		}
-
-		/**
-		 * Removes all the sprites in the group
-		 * from the scene.
-		 *
-		 * @method removeAll
-		 */
-		removeAll() {
-			while (this.length > 0) {
-				this[0].remove();
-			}
-		}
-
-		/**
-		 * Removes a sprite from the group.
-		 * Does not remove the actual sprite, only the reference.
+		 * If a sprite or index is given, that sprite is removed from this
+		 * group and any group this group inherits from except for the
+		 * allSprites group.
 		 *
 		 * @method remove
 		 * @param {Sprite} item The sprite to be removed
 		 * @return {Boolean} true if sprite was found and removed
 		 */
 		remove(item) {
-			if (!(item instanceof Sprite)) {
-				throw new TypeError('you can only remove sprites from a group');
-			}
-
-			var i,
-				removed = false;
-			for (i = this.length - 1; i >= 0; i--) {
-				if (this[i] === item) {
-					this.splice(i, 1);
-					removed = true;
+			if (item === undefined) {
+				while (this.length > 0) {
+					this[0].remove();
 				}
+				return;
 			}
 
-			if (removed) {
-				for (i = item.groups.length - 1; i >= 0; i--) {
-					if (item.groups[i] === this) {
-						item.groups.splice(i, 1);
+			let idx;
+			if (typeof item == 'number') {
+				idx = item;
+			} else {
+				for (let i = this.length - 1; i >= 0; i--) {
+					if (this[i] === item) {
+						idx = i;
+						break;
 					}
 				}
 			}
 
-			return removed;
+			if (idx !== undefined) {
+				let removed = this[idx];
+				let gIdx = this[idx].groups.findIndex((g) => g.idNum == this.idNum);
+				this[idx].groups.splice(gIdx, 1);
+				this.splice(idx, 1);
+
+				return removed;
+			}
+			throw new Error('Sprite not found in group');
 		}
 
 		/**
@@ -4269,7 +4299,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	this.createCanvas = function () {
 		let args = [...arguments];
-		if (args.length < 2) {
+		if (typeof args[0] == 'string') {
+			let ratio = args[0].split(':');
+			let rW = Number(ratio[0]);
+			let rH = Number(ratio[1]);
+
+			let w = window.innerWidth;
+			let h = (window.innerWidth * rH) / rW;
+			if (h > window.innerHeight) {
+				w = (window.innerHeight * rW) / rH;
+				h = window.innerHeight;
+			}
+			args[0] = w;
+			args[1] = h;
+		} else if (args.length < 2) {
 			args[0] = 100;
 			args[1] = 100;
 		}
@@ -4278,6 +4321,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		this.canvas.tabIndex = 0;
 		this.world.resize();
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
+		let style = document.createElement('style');
+		style.innerHTML = `canvas { outline: none; }`;
+		document.head.appendChild(style);
 	};
 
 	const _background = this.background;
