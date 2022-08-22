@@ -3429,7 +3429,36 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.autoResetAnimations = false;
 
-			this.palettes = this.p.world?.palettes || [];
+			this.palettes = this.p.world?.palettes || [
+				{
+					// a
+					b: 'black',
+					c: 'crimson',
+					d: 'dark blue',
+					// e
+					f: 'fuchsia',
+					g: 'green',
+					h: 'hot pink',
+					i: 'blue', // indigo
+					// j
+					k: 'black',
+					l: 'lavender',
+					m: 'magenta',
+					n: 'brown',
+					o: 'orange',
+					p: 'pink',
+					// q
+					r: 'red',
+					s: 'sky blue',
+					t: 'turquoise',
+					u: 'blue',
+					v: 'violet',
+					w: 'white',
+					// x
+					y: 'yellow'
+					// z
+				}
+			];
 
 			this.groups = [this.p.allSprites];
 			this.groupsCreated = 1;
@@ -4024,7 +4053,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		let clr;
 		if (palette) clr = palette[c];
 		// if transparent
-		if (clr === '') return pInst.color(0, 0, 0, 0);
+		if (clr === '' || c === '.' || c === ' ') {
+			return pInst.color(0, 0, 0, 0);
+		}
 		return pInst.color(clr || c);
 	};
 
@@ -4058,7 +4089,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		palette ??= pInst.world.palettes[0];
 		let lines = txt; // accepts 2D arrays of characters
 		if (typeof txt == 'string') {
-			txt = txt.replace(/^[\n\t]+|\s+$/g, ''); // trim newlines
+			txt = txt.replace(/\r*\n\t+/g, '\n'); // trim leading tabs
+			txt = txt.replace(/\s+$/g, ''); // trim trailing whitespace
 			lines = txt.split('\n');
 		}
 		let w = 0;
@@ -4313,8 +4345,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			args[0] = w;
 			args[1] = h;
 		} else if (args.length < 2) {
-			args[0] = 100;
-			args[1] = 100;
+			args[0] = window.innerWidth;
+			args[1] = window.innerHeight;
 		}
 		if (args.length < 3) args[2] = 'p2d';
 		_createCanvas.call(pInst, ...args);
