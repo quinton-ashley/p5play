@@ -1453,12 +1453,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * You set the sprite's update function to your own custom update
+		 * function that will be run after every draw call or when
+		 * the updateSprites function is called.
+		 */
+		get update() {
+			return this._update;
+		}
+
+		set update(val) {
+			this._customUpdate = val;
+		}
+
+		/**
 		 * Updates the sprite. Called automatically at the end of the draw
 		 * cycle.
 		 *
 		 * @private
 		 */
-		update() {
+		_update() {
 			if (this.animation) this.animation.update();
 
 			if (!this.body) {
@@ -1473,6 +1486,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let prop in this.mouse) {
 				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
 			}
+
+			if (this._customUpdate) this._customUpdate();
 		}
 
 		/**
