@@ -1687,10 +1687,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} destX destination x
 		 * @param {Number} destY destination y
 		 * @param {Number} speed scalar
-		 * @param {Function} cb callback, called when movement is complete
 		 * @returns {Promise} resolves when the movement is complete
 		 */
-		move(destX, destY, speed, cb) {
+		move(destX, destY, speed) {
 			if (typeof destX == 'undefined') {
 				console.error('sprite.move ERROR: movement direction or destination not defined');
 				return;
@@ -1773,14 +1772,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					// check if the sprite has reached its destination
 					distX = Math.abs(this.x - this.dest.x);
 					distY = Math.abs(this.y - this.dest.y);
-				} while ((!destX || distX > margin) && (!destY || distY > margin));
+				} while ((destX && distX > margin) || (destY && distY > margin));
 				// stop moving the sprite, snap to destination
 				if (distX < margin) this.x = this.dest.x;
 				if (distY < margin) this.y = this.dest.y;
 				this.vel.x = 0;
 				this.vel.y = 0;
-				// if a callback was given, call it
-				if (typeof cb == 'function') cb();
 			})();
 		}
 
