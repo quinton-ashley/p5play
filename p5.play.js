@@ -40,6 +40,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.mouseSprites = [];
 	this.p5play.chainOrigin = 'center';
 	this.p5play.chainPoints = 'relative';
+	this.p5play.standardKeyboard = true;
 
 	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
 	const scaleFrom = ({ x, y }, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
@@ -1453,9 +1454,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * You set the sprite's update function to your own custom update
-		 * function that will be run after every draw call or when
+		 * You can set the sprite's update function to your own custom
+		 * update function that will be run after every draw call or when
 		 * the updateSprites function is called.
+		 *
+		 * @method update
 		 */
 		get update() {
 			return this._update;
@@ -1957,20 +1960,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			while (this.groups.length > 0) {
 				this.groups[0].remove(this);
 			}
-		}
-
-		/**
-		 * Deprecated. Use group.push(sprite) instead.
-		 * Adds the sprite to an existing group.
-		 *
-		 * @deprecated
-		 * @method addToGroup
-		 * @param {Group} group
-		 */
-		addToGroup(group) {
-			if (group instanceof Array) {
-				group.push(this);
-			} else this.p.print('addToGroup error: ' + group + ' is not a group');
 		}
 
 		/**
@@ -4225,8 +4214,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Delay
+	 * Delay for the specified time.
 	 *
+	 * @method delay
 	 * @param {Number} millisecond
 	 * @returns {Promise} A Promise that fulfills after the specified time.
 	 *
@@ -4248,8 +4238,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Delay
+	 * Sleep for the specified time.
 	 *
+	 * @method sleep
 	 * @param {Number} millisecond
 	 * @returns {Promise} A Promise that fulfills after the specified time.
 	 *
@@ -4278,78 +4269,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		});
 	};
 
-	let keyCodes = {
-		_: 189,
-		'-': 189,
-		',': 188,
-		';': 188,
-		':': 190,
-		'!': 49,
-		'?': 219,
-		'.': 190,
-		'"': 50,
-		'(': 56,
-		')': 57,
-		'§': 51,
-		'*': 187,
-		'/': 55,
-		'&': 54,
-		'#': 191,
-		'%': 53,
-		'°': 220,
-		'+': 187,
-		'=': 48,
-		"'": 191,
-		$: 52,
-		Alt: 18,
-		ArrowUp: 38,
-		ArrowDown: 40,
-		ArrowLeft: 37,
-		ArrowRight: 39,
-		CapsLock: 20,
-		Clear: 12,
-		Control: 17,
-		Delete: 46,
-		Escape: 27,
-		Insert: 45,
-		PageDown: 34,
-		PageUp: 33,
-		Shift: 16,
-		Tab: 9
-	};
-
-	/**
-	 * Get the keyCode of a key
-	 *
-	 * @method getKeyCode
-	 * @param {string} keyName
-	 * @returns {number} keyCode
-	 */
-	function getKeyCode(keyName) {
-		if (typeof keyName != 'string') return keyName;
-		let code = keyCodes[keyName];
-		if (code) return code;
-		return keyName.toUpperCase().charCodeAt(0);
-	}
-
 	let userDisabledP5Errors = p5.disableFriendlyErrors;
 	p5.disableFriendlyErrors = true;
-
-	// keyIsDown is a p5.js function
-	let _keyIsDown = this.keyIsDown;
-
-	/**
-	 * Use kb.pressing(keyName) instead.
-	 *
-	 * Check if user is pressing a key.
-	 *
-	 * @method keyIsDown
-	 * @param {string} keyName
-	 * @returns {boolean} true if key is down
-	 */
-	this.keyIsDown = function (keyName) {
-		return _keyIsDown.call(pInst, getKeyCode(keyName));
-	};
 
 	const _createCanvas = this.createCanvas;
 
@@ -4574,9 +4495,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * >1 means input is still being pressed
 	 * 12 means input was held, pressed for 12 frames
 	 * >12 means input was held, pressed for 12 or more frames
+	 *
+	 * @class InputDevice
 	 */
 	class InputDevice {
-		constructor() {}
+		constructor() {
+			/**
+			 * The amount of frames an input must be pressed to be considered held.
+			 * Default is 12.
+			 *
+			 * @property heldThreshold
+			 * @type {number}
+			 */
+			this.heldThreshold = 12;
+		}
 
 		init(inputs) {
 			for (let inp of inputs) {
@@ -4596,12 +4528,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		held(inp) {
 			inp ??= this.default;
-			return this[inp] == 12;
+			return this[inp] == this.heldThreshold;
 		}
 
 		holding(inp) {
 			inp ??= this.default;
-			return this[inp] >= 12;
+			return this[inp] >= this.heldThreshold;
 		}
 
 		released(inp) {
@@ -4622,7 +4554,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		dragging(inp) {
 			inp ??= this.default;
 			this.draggable = true;
-			return this[inp] >= 12;
+			return this[inp] >= this.heldThreshold;
 		}
 
 		get isOnCanvas() {
@@ -4739,11 +4671,51 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.kb = new KeyBoard();
 	this.keyboard = this.kb;
 
+	if (navigator.keyboard) {
+		const keyboard = navigator.keyboard;
+		keyboard.getLayoutMap().then((keyboardLayoutMap) => {
+			const key = keyboardLayoutMap.get('KeyW');
+			if (key != 'w') this.p5play.standardKeyboard = false;
+		});
+	} else {
+		// Firefox doesn't have navigator.keyboard
+		// so just make it use key codes
+		this.p5play.standardKeyboard = false;
+	}
+
+	function getKeyFromCode(e) {
+		let code = e.code;
+		if (code.length == 4 && code.slice(0, 3) == 'Key') {
+			return code[3].toLowerCase();
+		}
+		return e.key;
+	}
+
+	let simpleKeyControls = {
+		w: 'up',
+		s: 'down',
+		a: 'left',
+		d: 'right',
+		i: 'up2',
+		k: 'down2',
+		j: 'left2',
+		l: 'right2'
+	};
+
 	const _onkeydown = this._onkeydown;
 
 	this._onkeydown = function (e) {
-		if (!this.kb[e.key] || this.kb[e.key] < 0) {
-			this.kb[e.key] = 1;
+		let key = e.key;
+		if (!this.p5play.standardKeyboard) {
+			key = getKeyFromCode(e);
+		}
+		let keys = [key];
+		let k = simpleKeyControls[key];
+		if (k) keys.push(k);
+		for (let k of keys) {
+			if (!this.kb[k] || this.kb[k] < 0) {
+				this.kb[k] = 1;
+			}
 		}
 		_onkeydown.call(this, e);
 	};
@@ -4751,8 +4723,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	const _onkeyup = this._onkeyup;
 
 	this._onkeyup = function (e) {
-		if (this.kb[e.key] > 0) this.kb[e.key] = -1;
-		else this.kb[e.key] = -2;
+		let key = e.key;
+		if (!this.p5play.standardKeyboard) {
+			key = getKeyFromCode(e);
+		}
+		let keys = [key];
+		let k = simpleKeyControls[key];
+		if (k) keys.push(k);
+		for (let k of keys) {
+			if (this.kb[k] > 0) this.kb[k] = -1;
+			else this.kb[k] = -2;
+		}
 
 		_onkeyup.call(this, e);
 	};
@@ -4929,6 +4910,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	}
 
 	for (let k in this.kb) {
+		if (k == 'heldThreshold') continue;
 		if (this.kb[k] < 0) this.kb[k] = 0;
 		else if (this.kb[k] > 0) this.kb[k]++;
 	}
