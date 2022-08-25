@@ -1707,7 +1707,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			// if destX is actually the direction (up, down, left, or right)
 			if (typeof destX == 'string') {
 				// shift input parameters over by one
-				cb = arguments[2];
 				speed = arguments[1];
 				direction = arguments[0];
 				if (direction == 'up') this.dest.y--;
@@ -1788,8 +1787,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @method moveTo
 		 */
-		moveTo(destX, destY, speed, cb) {
-			return this.move(destX, destY, speed, cb);
+		moveTo(destX, destY, speed) {
+			return this.move(destX, destY, speed);
 		}
 
 		/**
