@@ -1136,6 +1136,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._shapeColor = val;
 			} else if (typeof val != 'object') {
 				this._shapeColor = this.p.color(val);
+			} else {
+				this._shapeColor = this.p.color(...val.levels);
 			}
 		}
 
@@ -1727,7 +1729,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (destY) this.dest.y = destY;
 			}
 
-			if (!destX && !destY) return;
+			this._destIdx++;
+			if (!destX && !destY) return true;
 
 			if (this.tileSize > 1) speed ??= 0.1;
 			speed ??= 1;
@@ -1752,7 +1755,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			// margin of error
 			let margin = totalSpeed + 0.01;
 
-			this._destIdx++;
 			let destIdx = this._destIdx;
 
 			return (async () => {
@@ -4446,18 +4448,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.frame = 0;
 
 	this.cameraPush = function () {
-		var camera = this.camera;
-
-		// awkward but necessary in order to have the camera at the center
-		// of the canvas by default
-		if (!camera.init && camera.x === 0 && camera.y === 0) {
-			camera.x = this.world.hw;
-			camera.y = this.world.hh;
-			camera.init = true;
-		}
-
-		camera.mouse.x = this.mouse.x + camera.x - this.world.hw;
-		camera.mouse.y = this.mouse.y + camera.y - this.world.hh;
+		let camera = this.camera;
 
 		if (!camera.active) {
 			camera.active = true;
@@ -4870,13 +4861,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 // called before each p5.js draw function call
 p5.prototype.registerMethod('pre', function () {
-	this.mouse.x = this.mouseX;
-	this.mouse.y = this.mouseY;
-
 	if (this.frameCount == 1) {
+		this.camera.x = this.world.hw;
+		this.camera.y = this.world.hh;
+		this.camera.init = true;
+
 		// this stops the right click menu from appearing
 		this.canvas.addEventListener('contextmenu', (event) => event.preventDefault());
 	}
+
+	this.mouse.x = (this.mouseX - this.world.hw) / this.camera.zoom + this.camera.x;
+	this.mouse.y = (this.mouseY - this.world.hh) / this.camera.zoom + this.camera.y;
+
+	this.camera.mouse.x = this.mouseX;
+	this.camera.mouse.y = this.mouseY;
 });
 
 // called after each p5.js draw function call
@@ -4921,10 +4919,10 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 			if (val == 0) this.p5play.mouseSprite = null;
 		}
 
-		let sprites = p5.prototype.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y);
+		let sprites = p5.prototype.getSpritesAt(this.mouse.x, this.mouse.y);
 		sprites.sort((a, b) => (a.layer - b.layer) * -1);
 
-		let uiSprites = p5.prototype.getSpritesAt(this.mouse.x, this.mouse.y, this.allSprites, false);
+		let uiSprites = p5.prototype.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
 		uiSprites.sort((a, b) => (a.layer - b.layer) * -1);
 
 		sprites = sprites.concat(uiSprites);
