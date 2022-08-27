@@ -1123,8 +1123,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			this._resizeCollider();
 			this._scale = val;
-			this.ani.scale.x = val;
-			this.ani.scale.y = val;
+			if (this.ani) {
+				this.ani.scale.x = val;
+				this.ani.scale.y = val;
+			}
 		}
 
 		get shapeColor() {
@@ -1356,10 +1358,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._diameter = val;
 
 			let prevShape = this.shape;
-			if (this.body && prevShape != 'circle' && prevShape != 'box') {
-				throw new Error('Invalid assignment to diameter on a non-circle or non-box sprite');
-			}
-			if (prevShape == 'box') {
+			if (prevShape != 'circle') {
 				let bodyProps;
 				if (this._collider == 'none') {
 					bodyProps = this._cloneBodyProps();
@@ -1377,7 +1376,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			this._w = val;
 			this._hw = val * 0.5;
-			if (prevShape == 'box') return;
+			if (prevShape != 'circle') return;
 			this._resizeCollider();
 		}
 		/**
