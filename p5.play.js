@@ -136,6 +136,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args = args.slice(1);
 			}
 
+			if (args.length == 1 && typeof args[0] == 'number') {
+				throw new Error(
+					"Invalid input parameters for the Sprite constructor. You can't only have one number! Specify both the x and y position of the sprite"
+				);
+			}
+
 			x = args[0];
 			y = args[1];
 			w = args[2];
@@ -520,7 +526,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					break;
 				}
 			}
-			if (shouldCreateSensor && !this.sensor) this._createSensor();
+			if (shouldCreateSensor && !this._hasOverlaps) this._createSensors();
 		}
 
 		/**
@@ -687,17 +693,42 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Removes the physics body collider from the sprite.
-		 *
-		 * Avoid using this method. It is more efficient to set the physics
-		 * body type of the sprite to 'none'.
+		 * Removes the physics body colliders from the sprite but not
+		 * overlap sensors.
 		 *
 		 * @method removeColliders
 		 */
 		removeColliders() {
-			if (!this.body) return;
-			this.p.world.destroyBody(this.body);
-			this.body = undefined;
+			this.collides = {};
+			this._removeFixtures(false);
+		}
+
+		/**
+		 * Removes overlap sensors from the sprite.
+		 *
+		 * @method removeSensors
+		 */
+		removeSensors() {
+			this.overlaps = {};
+			this._removeFixtures(true);
+		}
+
+		// removes sensors or colliders
+		_removeFixtures(isSensor) {
+			let prevFxt;
+			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
+				if (fxt.m_isSensor == isSensor) {
+					let _fxt = fxt.m_next;
+					fxt.destroyProxies(this.p.world.m_broadPhase);
+					if (!prevFxt) {
+						this.body.m_fixtureList = _fxt;
+					} else {
+						prevFxt.m_next = _fxt;
+					}
+				} else {
+					prevFxt = fxt;
+				}
+			}
 		}
 
 		/**
@@ -799,12 +830,24 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		set collider(val) {
 			if (this._collider == val) return;
-			this._collider = val;
 			let bodyProps;
-			if (this._collider == 'none') bodyProps = this._cloneBodyProps();
-			this.removeColliders();
+			if (this._collider != 'none') {
+				bodyProps = this._cloneBodyProps();
+			}
+
+			// remove body
+			if (this.body) {
+				this.p.world.destroyBody(this.body);
+				this.body = undefined;
+			}
+
+			// replace colliders and overlap sensors
+			this._collider = val;
 			if (this._collider != 'none') {
 				this.addCollider();
+				if (this._hasOverlaps) {
+					this._createSensors();
+				}
 				for (let prop in bodyProps) {
 					this[prop] = bodyProps[prop];
 				}
@@ -940,6 +983,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @property fixtureList
 		 */
 		get fixtureList() {
+			if (!this.body) return null;
 			return this.body.getFixtureList();
 		}
 
@@ -1121,7 +1165,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._h *= val;
 				this._hh *= val;
 			}
-			this._resizeCollider();
+			this._resizeCollider(val);
 			this._scale = val;
 			if (this.ani) {
 				this.ani.scale.x = val;
@@ -1267,9 +1311,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 			if (val == this._w) return;
+			let scale = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
-			this._resizeCollider();
+			this._resizeCollider({ x: scale });
 		}
 		get hw() {
 			return this._hw;
@@ -1313,9 +1358,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 			if (val == this._h) return;
+			let scale = val / this._h;
 			this._h = val;
 			this._hh = val * 0.5;
-			this._resizeCollider();
+			this._resizeCollider({ y: scale });
 		}
 		get hh() {
 			return this._hh;
@@ -1374,10 +1420,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 				this.shape = 'circle';
 			}
+			let scale = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
 			if (prevShape != 'circle') return;
-			this._resizeCollider();
+			this._resizeCollider(scale);
 		}
 		/**
 		 * The diameter of a circular sprite.
@@ -1407,19 +1454,34 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		// TODO make this work for other shapes
-		_resizeCollider(w, h) {
+		_resizeCollider(scale) {
 			if (!this.body) return;
+
+			if (typeof scale == 'number') {
+				scale = { x: scale, y: scale };
+			} else {
+				if (!scale.x) scale.x = 1;
+				if (!scale.y) scale.y = 1;
+			}
 			if (this.shape == 'circle') {
 				let fxt = this.fixture;
 				let sh = fxt.m_shape;
-				let v = scaleTo({ x: w || this.w, y: 0 }, this.tileSize);
-				sh.m_radius = v.x * 0.5;
+				sh.m_radius *= scale.x;
 			} else {
-				let bodyProps = this._cloneBodyProps();
-				this.removeColliders();
-				this.addCollider();
-				for (let prop in bodyProps) {
-					this[prop] = bodyProps[prop];
+				// let bodyProps = this._cloneBodyProps();
+				// this.removeColliders();
+				// this.addCollider();
+				// for (let prop in bodyProps) {
+				// 	this[prop] = bodyProps[prop];
+				// }
+
+				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
+					if (fxt.m_isSensor) continue;
+					let sh = fxt.m_shape;
+					for (let vert of sh.m_vertices) {
+						vert.x *= scale.x;
+						vert.y *= scale.y;
+					}
 				}
 			}
 		}
@@ -1502,7 +1564,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_draw() {
 			if (this.animation && !this.debug) {
 				this.animation.draw(0, 0, undefined, this._scale, this._scale);
-			} else if (this.body) {
+			} else if (this.fixture != null) {
 				if (this.shape == 'chain') this.p.stroke(this.shapeColor);
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 					this._drawFixture(fxt);
@@ -2127,22 +2189,29 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
 				throw new Error('collide target must be a sprite or a group');
 			}
-			if (!this.sensor) this._createSensor();
+			if (!this._hasOverlaps) this._createSensors();
+			if (target instanceof Sprite) {
+				if (!target._hasOverlaps) target._createSensors();
+			} else if (target instanceof Group) {
+				for (let s of target) {
+					if (!s._hasOverlaps) s._createSensor();
+				}
+				target._hasOverlaps = true;
+			}
 			this.overlaps[target] = callback || true;
 			return this.touching[target];
 		}
 
-		_createSensor() {
+		_createSensors() {
 			let shape;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				shape = fxt.m_shape;
-				break;
+				this.body.createFixture({
+					shape: shape,
+					isSensor: true
+				});
 			}
-
-			this.sensor = this.body.createFixture({
-				shape: shape,
-				isSensor: true
-			});
+			this._hasOverlaps = true;
 		}
 
 		/**
@@ -3054,7 +3123,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let s of this) {
 				if (!s.sensor) s._createSensor();
 			}
-			if (target instanceof Group) {
+			if (target instanceof Sprite) {
+				if (!target.sensor) target._createSensors();
+			} else if (target instanceof Group) {
 				for (let s of target) {
 					if (!s.sensor) s._createSensor();
 				}
@@ -3522,7 +3593,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let b = contact.m_fixtureB;
 
 			let contactType = 'collides';
-			if (a.isSensor() || b.isSensor()) contactType = 'overlaps';
+			if (a.isSensor()) contactType = 'overlaps';
 
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
@@ -3532,11 +3603,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			// log(a, b);
 			let cb = _findContactCB(contactType, a, b);
-			if (cb) {
-				this.contacts.push([cb, a, b]);
-				return;
-			}
-			cb = _findContactCB(contactType, b, a);
+			if (!cb) cb = _findContactCB(contactType, b, a);
 			if (cb) this.contacts.push([cb, b, a]);
 		}
 
@@ -3714,13 +3781,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		return false;
 	}
 
+	// an overlap occurs when two sensor fixtures touch
+	// a collision occurs when two collider fixtures touch
 	pl.Fixture.prototype.shouldCollide = function (that) {
 		// should this and that collide?
 		let a = this;
 		let b = that;
 
-		if (a.isSensor() || b.isSensor()) return true;
+		// overlap
+		if (a.isSensor() && b.isSensor()) return true;
 
+		// mismatched sensor + collider touching
+		if (a.isSensor() && !b.isSensor()) return false;
+		if (!a.isSensor() && b.isSensor()) return false;
+
+		// only collide if `a` doesn't have overlap enabled with `b`
 		a = a.m_body.sprite;
 		b = b.m_body.sprite;
 
