@@ -2194,7 +2194,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (!target._hasOverlaps) target._createSensors();
 			} else if (target instanceof Group) {
 				for (let s of target) {
-					if (!s._hasOverlaps) s._createSensor();
+					if (!s._hasOverlaps) s._createSensors();
 				}
 				target._hasOverlaps = true;
 			}
@@ -3121,13 +3121,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			this._hasOverlaps = true;
 			for (let s of this) {
-				if (!s.sensor) s._createSensor();
+				if (!s.sensor) s._createSensors();
 			}
 			if (target instanceof Sprite) {
 				if (!target.sensor) target._createSensors();
 			} else if (target instanceof Group) {
 				for (let s of target) {
-					if (!s.sensor) s._createSensor();
+					if (!s.sensor) s._createSensors();
 				}
 				target._hasOverlaps = true;
 			}
@@ -3603,6 +3603,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			// log(a, b);
 			let cb = _findContactCB(contactType, a, b);
+			if (cb) {
+				this.contacts.push([cb, a, b]);
+				return;
+			}
 			if (!cb) cb = _findContactCB(contactType, b, a);
 			if (cb) this.contacts.push([cb, b, a]);
 		}
