@@ -429,10 +429,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.x = x;
 			this.y = y;
 
+			this.mouse = new SpriteMouse();
+
 			if (collider != 'none' && collider != 'n') {
 				this._collider = collider;
 				this.addCollider(0, 0, w, h);
-				this.mouse = new SpriteMouse();
 			} else {
 				this.w = w || (this.tileSize > 1 ? 1 : 50);
 				this.h = h;
@@ -489,7 +490,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					'Sprite',
 					'Group',
 					'vel',
-					'mirror'
+					'mirror',
+					'mouse'
 				];
 				for (let d of deletes) {
 					delete traits[d];
@@ -2918,6 +2920,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			this.Group = SubGroup;
+
+			this.mouse = {
+				pressed: null,
+				pressing: null,
+				held: null,
+				holding: null,
+				released: null,
+				hoveredOn: null,
+				hovering: null,
+				hoveredOut: null
+			};
+			for (let state in this.mouse) {
+				this.mouse[state] = function (inp) {
+					for (let s of _this) {
+						if (s.mouse[state](inp)) return true;
+					}
+					return false;
+				};
+			}
 
 			let props = [...spriteProps, 'spriteSheet'];
 			for (let prop of props) {
