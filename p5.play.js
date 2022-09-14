@@ -398,8 +398,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (ani instanceof p5.Image) {
 					this.addAni(ani);
 				} else {
-					if (typeof ani == 'string') this.changeAni(ani);
-					else this._animation = ani;
+					if (typeof ani == 'string') this._changeAni(ani);
+					else this._animation = ani.clone();
 				}
 				let ts = this.tileSize;
 				if (!w && this.ani.w != 1) {
@@ -1992,7 +1992,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (!ani) {
 				for (let g of this.groups) {
 					ani = g.animations[label];
-					if (ani) break;
+					if (ani) {
+						ani = ani.clone();
+						break;
+					}
 				}
 			}
 			if (!ani) {
@@ -2346,6 +2349,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.looping = true;
 
 			/**
+			 * Ends the loop on frame 0 instead of the last frame.
+			 * This is useful for animations that are symmetric.
+			 * For example a walking cycle where the first frame is the
+			 * same as the last frame.
+			 *
+			 * @property endOnFirstFrame
+			 * @type {Boolean}
+			 * @default false
+			 */
+			this.endOnFirstFrame = false;
+
+			/**
 			 * True if frame changed during the last draw cycle
 			 *
 			 * @property frameChanged
@@ -2355,6 +2370,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this.rotation = 0;
 			this.scale = { x: 1, y: 1 };
+
+			if (args.length == 0) return;
 
 			// sequence mode
 			if (
@@ -2440,6 +2457,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let sheet = parent.spriteSheet;
 				let atlas;
 				if (args[0] instanceof p5.Image || typeof args[0] == 'string') {
+					if (args.length >= 3) {
+						throw new Error('SpriteAnimation error: the name of animation should go first');
+					}
 					sheet = args[0];
 					atlas = args[1];
 				} else {
@@ -2568,6 +2588,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		clone() {
+			let ani = new SpriteAnimation();
+			ani.spriteSheet = this.spriteSheet;
+			ani.images = this.images.slice();
+			ani.offset.x = this.offset.x;
+			ani.offset.y = this.offset.y;
+			ani.frameDelay = this.frameDelay;
+			ani.playing = this.playing;
+			ani.looping = this.looping;
+			ani.rotation = this.rotation;
+			return ani;
+		}
+
 		/**
 		 * Draws the animation at coordinate x and y.
 		 * Updates the frames automatically.
@@ -2623,6 +2656,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			if (this.playing && this.cycles % this.frameDelay === 0) {
+				this.frameChanged = true;
+
+				if ((this.targetFrame == -1 && this.frame == this.lastFrame) || this.frame == this.targetFrame) {
+					if (this.endOnFirstFrame) this.frame = 0;
+					if (this.looping) this.targetFrame = -1;
+					else this.playing = false;
+					this.onComplete(); //fire when on last frame
+					if (!this.looping) return;
+				}
+
 				//going to target frame up
 				if (this.targetFrame > this.frame && this.targetFrame !== -1) {
 					this.frame++;
@@ -2635,22 +2678,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				} else if (this.looping) {
 					//advance frame
 					//if next frame is too high
-					if (this.frame >= this.lastFrame) this.frame = 0;
-					else this.frame++;
+					if (this.frame >= this.lastFrame) {
+						this.frame = 0;
+					} else this.frame++;
 				} else {
 					//if next frame is too high
 					if (this.frame < this.lastFrame) this.frame++;
 				}
 			}
-			if (
-				this.onComplete &&
-				((this.targetFrame == -1 && this.frame == this.lastFrame) || this.frame == this.targetFrame)
-			) {
-				if (this.looping) this.targetFrame = -1;
-				this.onComplete(); //fire when on last frame
-			}
-
-			if (previousFrame !== this.frame) this.frameChanged = true;
 		}
 
 		/**
@@ -3361,6 +3396,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Removes all sprites from the group and destroys the group.
+		 *
+		 * @method removeAll
+		 */
+		removeAll() {
+			this.remove();
+		}
+
+		/**
 		 * Returns the highest depth in a group
 		 *
 		 * @method maxDepth
@@ -3957,7 +4001,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		if (fxts.length > 0) {
 			for (let s of group) {
 				if (!s.body) continue;
-				if ( fxts.includes(s.body.m_fixtureList) ) {
+				if (fxts.includes(s.body.m_fixtureList)) {
 					if (s._cameraActiveWhenDrawn == cameraActiveWhenDrawn) sprites.push(s);
 				}
 			}
@@ -4979,7 +5023,9 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	this.frame = this.frameCount;
 
 	if (this.p5play.autoDrawSprites) {
+		this.camera.on();
 		this.allSprites.draw();
+		this.camera.off();
 		this.p5play.autoDrawSprites = true;
 	}
 
