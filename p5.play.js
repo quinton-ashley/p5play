@@ -418,8 +418,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				collider = 'dynamic';
 			}
 
-			x ??= group.x || this.p.width / this.p.allSprites.tileSize / 2;
-			y ??= group.y || this.p.height / this.p.allSprites.tileSize / 2;
+			x ??= group.x;
+			if (x === undefined) x = this.p.width / this.p.allSprites.tileSize / 2;
+			y ??= group.y;
+			if (y === undefined) y = this.p.height / this.p.allSprites.tileSize / 2;
 			w ??= group.w || group.width || group.diameter;
 			h ??= group.h || group.height;
 
