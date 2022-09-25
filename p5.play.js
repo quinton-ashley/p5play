@@ -40,7 +40,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.mouseSprites = [];
 	this.p5play.chainOrigin = 'center';
 	this.p5play.chainPoints = 'relative';
-	this.p5play.standardKeyboard = true;
+	this.p5play.standardizeKeyboard = false;
 
 	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
 	const scaleFrom = ({ x, y }, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
@@ -1310,10 +1310,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._w;
 		}
 		set w(val) {
-			if (val < 0) {
-				this.remove();
-				return;
-			}
+			if (val < 0) val = 0.01;
 			if (val == this._w) return;
 			let scale = val / this._w;
 			this._w = val;
@@ -1353,10 +1350,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._h;
 		}
 		set h(val) {
-			if (val < 0) {
-				this.remove();
-				return;
-			}
+			if (val < 0) val = 0.01;
 			if (this.shape == 'circle') {
 				this.w = val;
 				return;
@@ -4828,14 +4822,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	if (navigator.keyboard) {
 		const keyboard = navigator.keyboard;
-		keyboard.getLayoutMap().then((keyboardLayoutMap) => {
-			const key = keyboardLayoutMap.get('KeyW');
-			if (key != 'w') this.p5play.standardKeyboard = false;
-		});
+		try {
+			keyboard.getLayoutMap().then((keyboardLayoutMap) => {
+				const key = keyboardLayoutMap.get('KeyW');
+				if (key != 'w') this.p5play.standardizeKeyboard = true;
+			});
+		} catch (e) {
+			this.p5play.standardizeKeyboard = true;
+		}
 	} else {
 		// Firefox doesn't have navigator.keyboard
 		// so just make it use key codes
-		this.p5play.standardKeyboard = false;
+		this.p5play.standardizeKeyboard = true;
 	}
 
 	function getKeyFromCode(e) {
@@ -4861,7 +4859,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	this._onkeydown = function (e) {
 		let key = e.key;
-		if (!this.p5play.standardKeyboard) {
+		if (this.p5play.standardizeKeyboard) {
 			key = getKeyFromCode(e);
 		}
 		let keys = [key];
@@ -4879,7 +4877,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	this._onkeyup = function (e) {
 		let key = e.key;
-		if (!this.p5play.standardKeyboard) {
+		if (this.p5play.standardizeKeyboard) {
 			key = getKeyFromCode(e);
 		}
 		let keys = [key];
@@ -4961,14 +4959,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		_update() {
-			this.gamepad = navigator.getGamepads()[this.id];
-			if (!this.gamepad) return; // contro disconnected
+			this.gamepad = navigator.getGamepads()[this.gamepad.index];
+			// TODO
+			// if (this.index != this.gamepad.index) {
+			// 	return; // contro disconnected
+			// }
 			let pad = this.gamepad;
 
 			// buttons
 			for (let name in this._btns) {
 				let idx = this._btns[name];
-				if (pad.buttons[idx]) this[name]++;
+				if (pad.buttons[idx].pressed) this[name]++;
 				else this[name] = 0;
 			}
 
@@ -4996,11 +4997,26 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				_this._addContro(e.gamepad);
 			});
 
+			this.default = 'a';
+
 			let methods = ['pressed', 'pressing', 'held', 'holding', 'released'];
 			for (let m of methods) {
-				this[m] = () => {
-					if (this[0]) this[0][m]();
+				this[m] = (inp) => {
+					if (this[0]) return this[0][m](inp);
 				};
+			}
+
+			let props = ['leftStick', 'rightStick'];
+			for (let prop of props) {
+				this[prop] = {};
+				for (let axis of ['x', 'y']) {
+					Object.defineProperty(this[prop], axis, {
+						get() {
+							if (_this[0]) return _this[0][prop][axis];
+							return 0;
+						}
+					});
+				}
 			}
 		}
 
@@ -5013,13 +5029,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		_update() {
 			for (let i = 0; i < this.length; i++) {
-				if (!contro._poll()) {
+				let connected = this[i]._update();
+				if (!connected) {
 					this.splice(i, 1);
 					i--;
 				}
 			}
-
-			requestAnimationFrame(this._update);
 		}
 	}
 
@@ -5042,6 +5057,8 @@ p5.prototype.registerMethod('pre', function () {
 
 	this.camera.mouse.x = this.mouseX;
 	this.camera.mouse.y = this.mouseY;
+
+	this.contro._update();
 });
 
 // called after each p5.js draw function call
