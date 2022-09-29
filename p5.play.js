@@ -777,6 +777,24 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// }
 
 		/**
+		 * This property disables the ability for a sprite to "sleep".
+		 *
+		 * "Sleeping" sprites are not included in the physics simulation, a
+		 * sprite starts "sleeping" when it stops moving and doesn't collide
+		 * with anything that it wasn't already touching.
+		 *
+		 * @property {Boolean} allowSleeping
+		 * @default true
+		 */
+		get allowSleeping() {
+			return this.body.getSleepingAllowed();
+		}
+
+		set allowSleeping(val) {
+			this.body.setSleepingAllowed(val);
+		}
+
+		/**
 		 * Reference to the sprite's current animation.
 		 *
 		 * @property animation
@@ -1189,6 +1207,24 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else {
 				this._shapeColor = this.p.color(...val.levels);
 			}
+		}
+
+		/**
+		 * Wake a sprite up or put it to sleep.
+		 *
+		 * "Sleeping" sprites are not included in the physics simulation, a
+		 * sprite starts "sleeping" when it stops moving and doesn't collide
+		 * with anything that it wasn't already touching.
+		 *
+		 * @property {Boolean} isAwake
+		 * @default true
+		 */
+		get sleeping() {
+			return this.body.isAwake();
+		}
+
+		set sleeping(val) {
+			return this.body.setAwake(!val);
 		}
 
 		/**
@@ -3330,7 +3366,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Remove sprites that go outside the culling boundary
+		 * Remove sprites that go outside the given culling boundary
+		 * relative to the camera.
 		 *
 		 * @method cull
 		 * @param {Number} top|size The distance that sprites can move below the p5.js canvas before they are removed. *OR* The distance sprites can travel outside the screen on all sides before they get removed.
@@ -3354,10 +3391,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				throw new TypeError('The callback to group.cull must be a function');
 			}
 
-			let minX = -left;
-			let minY = -top;
-			let maxX = this.p.width + right;
-			let maxY = this.p.height + bottom;
+			let cx = this.p.camera.x - this.p.world.hw / this.p.camera.zoom;
+			let cy = this.p.camera.y - this.p.world.hh / this.p.camera.zoom;
+
+			let minX = -left + cx;
+			let minY = -top + cy;
+			let maxX = this.p.width + right + cx;
+			let maxY = this.p.height + bottom + cy;
 
 			for (let s of this) {
 				if (s.x < minX || s.y < minY || s.x > maxX || s.y > maxY) {
@@ -3578,10 +3618,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			/**
 			 * If false, animations that are stopped before they are completed,
-			 * typically by a call to sprite.changeAni, will start at the frame
-			 * they were stopped at. If true, animations will always start playing from
-			 * frame 0 unless specified by the user in a separate anim.changeFrame
-			 * call.
+			 * typically by a call to sprite.changeAni, will restart at the
+			 * frame they were stopped at. If true, animations will always
+			 * start playing from frame 0 unless specified by the user in a
+			 * separate `anim.changeFrame` call.
 			 *
 			 * @property autoResetAnimations
 			 * @type {SpriteAnimation}
@@ -3703,6 +3743,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		set autoCull(val) {
 			this.p.allSprites.autoCull = val;
+		}
+
+		get allowSleeping() {
+			return this.getAllowSleeping();
+		}
+
+		set allowSleeping(val) {
+			this.setAllowSleeping(val);
 		}
 	}
 
