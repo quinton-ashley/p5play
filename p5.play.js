@@ -488,7 +488,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					'overlaps',
 					'animation',
 					'animations',
-					'shouldCull',
+					'autoCull',
 					'Sprite',
 					'Group',
 					'vel',
@@ -2940,11 +2940,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.overlaps = {};
 
 			// mainly for internal use
-			// shouldCull as a property of allSprites only refers to the default allSprites cull
+			// autoCull as a property of allSprites only refers to the default allSprites cull
 			// in the post draw function, if the user calls cull on allSprites it should work
-			// for any other group made by users shouldCull affects whether cull removes sprites or not
+			// for any other group made by users autoCull affects whether cull removes sprites or not
 			// by default for allSprites it is set to true, for all other groups it is undefined
-			this.shouldCull;
+			this.autoCull;
 
 			this.idNum = 0;
 
@@ -3342,8 +3342,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * removed by default
 		 */
 		cull(top, bottom, left, right, cb) {
-			if (this.shouldCull === false && !this._isAllSpritesGroup) return;
-
 			if (left === undefined) {
 				let size = top;
 				cb = bottom;
@@ -3367,10 +3365,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					else s.remove();
 				}
 			}
-
-			// no need to cull allSprites again post draw
-			// if the user used cull on allSprites to redefine the cull boundary
-			if (this._isAllSpritesGroup) this.shouldCull = false;
 		}
 
 		/**
@@ -3702,6 +3696,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			a.touching[b] = false;
 			b.touching[a] = false;
 		}
+
+		get autoCull() {
+			return this.p.allSprites.autoCull;
+		}
+
+		set autoCull(val) {
+			this.p.allSprites.autoCull = val;
+		}
 	}
 
 	/**
@@ -3928,7 +3930,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						continue;
 					}
 					let s;
-					for (s of pInst.world.allSprites) {
+					for (s of pInst.allSprites) {
 						if (s.tile == t) {
 							wasFound = true;
 							break;
@@ -4589,7 +4591,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @property allSprites
 	 */
 	this.allSprites = new Group();
-	this.allSprites.shouldCull = true;
+	this.allSprites.autoCull = true;
 	this.allSprites.tileSize = 1;
 
 	/**
@@ -4822,12 +4824,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	if (navigator.keyboard) {
 		const keyboard = navigator.keyboard;
-		try {
+		if (window == window.top) {
 			keyboard.getLayoutMap().then((keyboardLayoutMap) => {
 				const key = keyboardLayoutMap.get('KeyW');
 				if (key != 'w') this.p5play.standardizeKeyboard = true;
 			});
-		} catch (e) {
+		} else {
 			this.p5play.standardizeKeyboard = true;
 		}
 	} else {
@@ -5077,7 +5079,9 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.p5play.autoUpdateSprites = true;
 	}
 
-	this.allSprites.cull(10000);
+	if (this.allSprites.autoCull) {
+		this.allSprites.cull(10000);
+	}
 
 	for (let btn of ['left', 'center', 'right']) {
 		if (this.mouse[btn] < 0) this.mouse[btn] = 0;
