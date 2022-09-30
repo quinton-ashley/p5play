@@ -4312,6 +4312,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		palette ??= pInst.world.palettes[0];
 		let lines = txt; // accepts 2D arrays of characters
 		if (typeof txt == 'string') {
+			txt = txt.trim();
 			txt = txt.replace(/\r*\n\t+/g, '\n'); // trim leading tabs
 			txt = txt.replace(/\s+$/g, ''); // trim trailing whitespace
 			lines = txt.split('\n');
