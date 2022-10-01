@@ -3872,7 +3872,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		on() {
 			if (!this.active) {
-				this.p.cameraPush.call(this.p);
+				this.p.push();
+				this.p.scale(this.zoom);
+				this.p.translate(-this.x + this.p.world.hw / this.zoom, -this.y + this.p.world.hh / this.zoom);
 				this.active = true;
 			}
 		}
@@ -3886,7 +3888,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		off() {
 			if (this.active) {
-				this.p.cameraPop.call(this.p);
+				this.p.pop();
 				this.active = false;
 			}
 		}
@@ -4659,24 +4661,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 */
 	this.frame = 0;
 
-	this.cameraPush = function () {
-		let camera = this.camera;
-
-		if (!camera.active) {
-			camera.active = true;
-			this.push();
-			this.scale(camera.zoom);
-			this.translate(-camera.x + this.world.hw / camera.zoom, -camera.y + this.world.hh / camera.zoom);
-		}
-	};
-
-	this.cameraPop = function () {
-		if (this.camera.active) {
-			this.pop();
-			this.camera.active = false;
-		}
-	};
-
 	/**
 	 * The default camera. Use this to pan and zoom the camera.
 	 *
@@ -5212,5 +5196,5 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.p5play.mouseSprites = sprites;
 	}
 
-	this.cameraPop();
+	this.camera.off();
 });
