@@ -1049,6 +1049,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// 	return this.body.getInertia();
 		// }
 
+		get img() {
+			return this._animation;
+		}
+
+		set img(val) {
+			this.changeAni(val);
+		}
+
 		get isMoving() {
 			return this.vel.x != 0 || this.vel.y != 0;
 		}
@@ -1634,10 +1642,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (
 				this.shape != 'chain' &&
 				this.p.camera.active &&
-				(x < this.p.camera.bound.min.x ||
-					x > this.p.camera.bound.max.x ||
-					y < this.p.camera.bound.min.y ||
-					y > this.p.camera.bound.max.y)
+				(x + this.w < this.p.camera.bound.min.x ||
+					x - this.w > this.p.camera.bound.max.x ||
+					y + this.h < this.p.camera.bound.min.y ||
+					y - this.h > this.p.camera.bound.max.y)
 			) {
 				return;
 			}
