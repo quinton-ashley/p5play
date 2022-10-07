@@ -129,7 +129,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args = args.slice(1);
 			}
 
-			if (args[0] !== undefined && !Array.isArray(args[0]) && typeof args[0] !== 'number') {
+			if (args[0] !== undefined && typeof args[0] !== 'number') {
 				// ani instanceof p5.Image
 				// shift
 				ani = args[0];
@@ -1991,7 +1991,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return new Promise((resolve) => {
 					this._changeAni(name);
 					if (start < 0) {
-						start = this.animation.images.length + start;
+						start = this.animation.length + start;
 					}
 					if (start) this.animation.frame = start;
 					if (end != undefined) this.animation.goToFrame(end);
@@ -2292,8 +2292,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @class SpriteAnimation
 	 * @constructor
 	 */
-	class SpriteAnimation {
+	class SpriteAnimation extends Array {
 		constructor() {
+			super();
 			this.p = pInst;
 			let args = [...arguments];
 
@@ -2317,14 +2318,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.name = args[0];
 				args = args.slice(1);
 			}
-
-			/**
-			 * Array of frames (p5.Image)
-			 *
-			 * @property images
-			 * @type {Array}
-			 */
-			this.images = [];
 
 			/**
 			 * The index of the current frame that the animation is on.
@@ -2411,7 +2404,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.rotation = 0;
 			this.scale = { x: 1, y: 1 };
 
-			if (args.length == 0) return;
+			if (args.length == 0 || typeof args[0] == 'number') return;
 
 			// sequence mode
 			if (
@@ -2454,8 +2447,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				// images don't belong to the same sequence
 				// they are just two separate images with numbers
 				if (to && prefix1 != prefix2) {
-					this.images.push(this.p.loadImage(from));
-					this.images.push(this.p.loadImage(to));
+					this.push(this.p.loadImage(from));
+					this.push(this.p.loadImage(to));
 				} else {
 					// Our numbers likely have leading zeroes, which means that some
 					// browsers (e.g., PhantomJS) will interpret them as base 8 (octal)
@@ -2479,14 +2472,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 							// Use nf() to number format 'i' into the amount of digits
 							// ex: 14 with 4 digits is 0014
 							fileName = prefix1 + this.p.nf(i, digits1) + '.png';
-							this.images.push(this.p.loadImage(fileName));
+							this.push(this.p.loadImage(fileName));
 						}
 					} // case: case img1, img2
 					else {
 						for (let i = num1; i <= num2; i++) {
 							// Use nf() to number format 'i' into four digits
 							fileName = prefix1 + i + '.png';
-							this.images.push(this.p.loadImage(fileName));
+							this.push(this.p.loadImage(fileName));
 						}
 					}
 				}
@@ -2609,7 +2602,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 					// add all the frames in the animation to the frames array
 					for (let i = 0; i < frameCount; i++) {
-						_this.images.push({ x, y, w, h });
+						_this.push({ x, y, w, h });
 						x += w;
 						if (x >= _this.spriteSheet.width) {
 							x = 0;
@@ -2622,8 +2615,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			else {
 				// list of images
 				for (let i = 0; i < args.length; i++) {
-					if (args[i] instanceof p5.Image) this.images.push(args[i]);
-					else this.images.push(this.p.loadImage(args[i]));
+					if (args[i] instanceof p5.Image) this.push(args[i]);
+					else this.push(this.p.loadImage(args[i]));
 				}
 			}
 		}
@@ -2631,7 +2624,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		clone() {
 			let ani = new SpriteAnimation();
 			ani.spriteSheet = this.spriteSheet;
-			ani.images = this.images.slice();
+			for (let i = 0; i < this.length; i++) {
+				ani.push(this[i]);
+			}
 			ani.offset.x = this.offset.x;
 			ani.offset.y = this.offset.y;
 			ani.frameDelay = this.frameDelay;
@@ -2666,7 +2661,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p.translate(this.x, this.y);
 			this.p.rotate(r || this.rotation);
 			this.p.scale(sx || this.scale.x, sy || this.scale.y);
-			let img = this.images[this.frame];
+			let img = this[this.frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
 					let { x, y, w, h } = img; // image info
@@ -2690,7 +2685,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.frameChanged = false;
 
 			//go to frame
-			if (this.images.length === 1) {
+			if (this.length === 1) {
 				this.playing = false;
 				this.frame = 0;
 			}
@@ -2797,8 +2792,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} frame Frame number (starts from 0).
 		 */
 		changeFrame(f) {
-			if (f < this.images.length) this.frame = f;
-			else this.frame = this.images.length - 1;
+			if (f < this.length) this.frame = f;
+			else this.frame = this.length - 1;
 
 			this.targetFrame = -1;
 			//this.playing = false;
@@ -2810,7 +2805,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @method nextFrame
 		 */
 		nextFrame() {
-			if (this.frame < this.images.length - 1) this.frame = this.frame + 1;
+			if (this.frame < this.length - 1) this.frame = this.frame + 1;
 			else if (this.looping) this.frame = 0;
 
 			this.targetFrame = -1;
@@ -2824,7 +2819,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		previousFrame() {
 			if (this.frame > 0) this.frame = this.frame - 1;
-			else if (this.looping) this.frame = this.images.length - 1;
+			else if (this.looping) this.frame = this.length - 1;
 
 			this.targetFrame = -1;
 			this.playing = false;
@@ -2837,7 +2832,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} toFrame Frame number destination (starts from 0)
 		 */
 		goToFrame(toFrame) {
-			if (toFrame < 0 || toFrame >= this.images.length) {
+			if (toFrame < 0 || toFrame >= this.length) {
 				return;
 			}
 
@@ -2875,7 +2870,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		get lastFrame() {
-			return this.images.length - 1;
+			return this.length - 1;
 		}
 
 		/**
@@ -2886,7 +2881,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		get frameImage() {
 			let f = this.frame;
-			let img = this.images[f];
+			let img = this[f];
 			if (img instanceof p5.Image) return img;
 
 			let { x, y, w, h } = img; // image info
@@ -2900,10 +2895,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		get width() {
-			if (this.images[this.frame] instanceof p5.Image) {
-				return this.images[this.frame].width;
-			} else if (this.images[this.frame]) {
-				return this.images[this.frame].w;
+			if (this[this.frame] instanceof p5.Image) {
+				return this[this.frame].width;
+			} else if (this[this.frame]) {
+				return this[this.frame].w;
 			}
 			return 1;
 		}
@@ -2913,12 +2908,24 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		get height() {
-			if (this.images[this.frame] instanceof p5.Image) {
-				return this.images[this.frame].height;
-			} else if (this.images[this.frame]) {
-				return this.images[this.frame].h;
+			if (this[this.frame] instanceof p5.Image) {
+				return this[this.frame].height;
+			} else if (this[this.frame]) {
+				return this[this.frame].h;
 			}
 			return 1;
+		}
+
+		get frames() {
+			let frames = [];
+			for (let i = 0; i < this.length; i++) {
+				frames.push(this[i]);
+			}
+			return frames;
+		}
+
+		get images() {
+			return this.frames;
 		}
 	}
 
