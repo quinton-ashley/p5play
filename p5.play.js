@@ -86,6 +86,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'yLock'
 	];
 
+	let eventTypes = {
+		_collisions: ['_collides', '_colliding', '_collided'],
+		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
+	};
+
 	/**
 	 * Take a look at the Sprite reference pages before reading these docs.
 	 * https://p5play.org/learn/sprite.html
@@ -119,7 +124,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 */
 	class Sprite {
 		constructor(x, y, w, h, collider) {
+			this.idNum = pInst.world.spritesCreated;
+			pInst.world.spritesCreated++;
 			this.p = pInst;
+
 			let args = [...arguments];
 
 			let group, ani;
@@ -251,20 +259,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.visible = true;
 
-			this.mouseIsOver = 0;
-			this.mouseIsPressed = 0;
-
 			/**
 			 * Contains all the collision callback functions for this sprite
 			 * when it comes in contact with other sprites or groups.
 			 */
-			this.collides = {};
+			this._collides = {};
+			this._colliding = {};
+			this._collided = {};
 
+			this._overlap = {};
 			/**
 			 * Contains all the overlap callback functions for this sprite
 			 * when it comes in contact with other sprites or groups.
 			 */
-			this.overlaps = {};
+			this._overlaps = {};
+			this._overlapping = {};
+			this._overlapped = {};
+
+			this._collisions = new Map();
+			this._overlappers = new Map();
 
 			this.tileSize = group.tileSize;
 
@@ -377,23 +390,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			};
 
-			/**
-			 * Object containing information about the most recent collision/overlapping
-			 * To be typically used in combination with Sprite.overlap or Sprite.collide
-			 * functions.
-			 * The properties are touching.left, touching.right, touching.top,
-			 * touching.bottom and are either true or false depending on the side of the
-			 * collider.
-			 *
-			 * @property touching
-			 * @type {Object}
-			 */
-			this.touching = {};
-			this.touching.left = null;
-			this.touching.right = null;
-			this.touching.top = null;
-			this.touching.bottom = null;
-
 			if (ani) {
 				if (ani instanceof p5.Image) {
 					this.addAni(ani);
@@ -452,8 +448,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.drag = 0;
 			this.debug = false;
 			this._shift = {};
-			this.idNum = this.p.world.spritesCreated;
-			this.p.world.spritesCreated++;
 
 			for (let prop of spriteProps) {
 				if (prop == 'collider' || prop == 'x' || prop == 'y') continue;
@@ -484,8 +478,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					'p',
 					'parent',
 					'length',
-					'collides',
-					'overlaps',
+					'_collides',
+					'_colliding',
+					'_collided',
+					'_collisions',
+					'_overlap',
+					'_overlaps',
+					'_overlapping',
+					'_overlapped',
+					'_overlappers',
 					'animation',
 					'animations',
 					'autoCull',
@@ -703,7 +704,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @method removeColliders
 		 */
 		removeColliders() {
-			this.collides = {};
+			this._collides = {};
+			this._colliding = {};
+			this._collided = {};
 			this._removeFixtures(false);
 		}
 
@@ -713,7 +716,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @method removeSensors
 		 */
 		removeSensors() {
-			this.overlaps = {};
+			this._overlap = {};
+			this._overlaps = {};
+			this._overlapping = {};
+			this._overlapped = {};
 			this._removeFixtures(true);
 		}
 
@@ -781,7 +787,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * "Sleeping" sprites are not included in the physics simulation, a
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
-		 * with anything that it wasn't already touching.
+		 * with anything that it wasn't already _touching.
 		 *
 		 * @property {Boolean} allowSleeping
 		 * @default true
@@ -1222,7 +1228,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * "Sleeping" sprites are not included in the physics simulation, a
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
-		 * with anything that it wasn't already touching.
+		 * with anything that it wasn't already _touching.
 		 *
 		 * @property {Boolean} isAwake
 		 * @default true
@@ -1593,6 +1599,28 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			for (let prop in this.mouse) {
 				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
+			}
+
+			let a = this;
+			for (let event in eventTypes) {
+				for (let entry of this[event]) {
+					let contactType;
+					let b = entry[0];
+					let f = entry[1] + 1;
+					this[event].set(b, f);
+					if (f == -1) {
+						contactType = eventTypes[event][2];
+						this[event].delete(b);
+					} else if (f == 1) {
+						contactType = eventTypes[event][0];
+					} else {
+						contactType = eventTypes[event][1];
+					}
+					if (b instanceof Group) continue;
+
+					let cb = _findContactCB(contactType, a, b);
+					if (typeof cb == 'function') cb(a, b, f);
+				}
 			}
 
 			if (this._customUpdate) this._customUpdate();
@@ -2154,83 +2182,71 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// 	return this.p.world.createJoint(j);
 		// }
 
-		/**
-		 * Checks if the the sprite is colliding with another sprite or a group.
-		 * The check is performed using the sprite's physics body (colliders).
-		 *
-		 * A callback function can be specified to perform additional operations
-		 * when contact occurs. If the target is a group the function will be called
-		 * for each single sprite colliding. The parameter of the function are
-		 * respectively the current sprite and the colliding sprite.
-		 *
-		 * @example
-		 *     sprite.collide(otherSprite, explosion);
-		 *
-		 *     function explosion(spriteA, spriteB) {
-		 *       spriteA.remove();
-		 *       spriteB.score++;
-		 *     }
-		 *
-		 * @method collide
-		 * @param {Sprite|Group} target Sprite or group to check against the current one
-		 * @param {Function} [callback] The function to be called if overlap is positive
-		 */
-		collide(target, callback) {
+		_ensureCollide(target, callback) {
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
 				throw new Error('collide target must be a sprite or a group');
 			}
-			this.collides[target] = callback || true;
 		}
 
 		/**
-		 * Deprecated, use sprite.collide instead.
+		 * @method collide
+		 * @deprecated use collides instead
+		 */
+		collide(target, callback) {
+			return this.collides(target, callback);
+		}
+
+		/**
+		 * Returns true on the first frame that the sprite collides with the
+		 * target sprite or group.
 		 *
-		 * @deprecated
-		 * @method bounce
+		 * Custom collision event handling can be done by using this function
+		 * in an if statement or adding a callback as the second parameter.
+		 *
+		 * @method collides
 		 * @param {Sprite|Group} target
-		 * @param {Function} callback
+		 * @param {Function} [callback]
 		 */
-		bounce(target, callback) {
-			this.collide(target, callback);
+		collides(target, callback) {
+			this._ensureCollide(target, callback);
+			this._collides[target] = callback || true;
+			return this._collisions.get(target) == 1;
 		}
 
 		/**
-		 * Deprecated, use sprite.collide instead.
+		 * Returns true while the sprite is colliding with the target
+		 * sprite or group.
 		 *
-		 * @deprecated
-		 * @method displace
+		 * @method colliding
 		 * @param {Sprite|Group} target
-		 * @param {Function} callback
+		 * @param {Function} [callback]
+		 * @return {Boolean}
 		 */
-		displace(target, callback) {
-			this.collide(target, callback);
+		colliding(target, callback) {
+			this._ensureCollide(target, callback);
+			this._colliding[target] = callback || true;
+			return this._collisions.get(target) > 0;
 		}
 
 		/**
-		 * Checks if this sprite is overlapping with another sprite or a group.
-		 * The check is performed using the sprite's physics body (colliders).
+		 * Returns true on the first frame that the sprite no longer overlaps
+		 * with the target sprite or group.
 		 *
-		 * A callback function can be specified to perform additional operations
-		 * when contact occurs. If the target is a group the function will be called
-		 * for each single sprite overlapping. The parameters of the callback function
-		 * are the current sprite and the overlapping sprite.
-		 *
-		 * Since v3, this function only needs to be called once, it doesn't need to be
-		 * used in the p5.js draw loop.
-		 *
-		 * @example
-		 *   sprite.overlap(otherSprite, pickup);
-		 *
-		 *   function pickup(spriteA, spriteB) {
-		 *     spriteA.remove();
-		 *     spriteB.itemCount++;
-		 *   }
-		 *
-		 * @method overlap
-		 * @param {Sprite|Group} target Sprite or group to check against the current one
-		 * @param {Function} [callback] The function to be called if an overlap occurs
+		 * @method collided
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 * @return {Boolean}
 		 */
-		overlap(target, callback) {
+		collided(target, callback) {
+			this._ensureCollide(target, callback);
+			this._collided[target] = callback || true;
+			return this._collisions.get(target) == -1;
+		}
+
+		// TODO
+		// displaces(target, callback) {}
+
+		_ensureOverlap(target, callback) {
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
 				throw new Error('collide target must be a sprite or a group');
 			}
@@ -2238,13 +2254,69 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (target instanceof Sprite) {
 				if (!target._hasOverlaps) target._createSensors();
 			} else if (target instanceof Group) {
-				for (let s of target) {
-					if (!s._hasOverlaps) s._createSensors();
+				if (!target._hasOverlaps) {
+					for (let s of target) {
+						if (!s._hasOverlaps) s._createSensors();
+					}
+					target._hasOverlaps = true;
 				}
-				target._hasOverlaps = true;
 			}
-			this.overlaps[target] = callback || true;
-			return this.touching[target];
+			this._overlap[target] = true;
+		}
+
+		/**
+		 * @method overlap
+		 * @deprecated use overlaps instead
+		 */
+		overlap(target, callback) {
+			return this.overlaps(target, callback);
+		}
+
+		/**
+		 * Returns true on the first frame that the sprite overlaps with the
+		 * target sprite or group.
+		 *
+		 * Custom overlap event handling can be done by using this function
+		 * in an if statement or adding a callback as the second parameter.
+		 *
+		 * @method overlaps
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 */
+		overlaps(target, callback) {
+			this._ensureOverlap(target, callback);
+			this._overlaps[target] = callback || true;
+			return this._overlappers.get(target) == 1;
+		}
+
+		/**
+		 * Returns true while the sprite is overlapping with the target
+		 * sprite or group.
+		 *
+		 * @method overlapping
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 * @return {Boolean}
+		 */
+		overlapping(target, callback) {
+			this._ensureOverlap(target, callback);
+			this._overlapping[target] = callback || true;
+			return this._overlappers.get(target) > 0;
+		}
+
+		/**
+		 * Returns true on the first frame that the sprite no longer overlaps
+		 * with the target sprite or group.
+		 *
+		 * @method overlapped
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 * @return {Boolean}
+		 */
+		overlapped(target, callback) {
+			this._ensureOverlap(target, callback);
+			this._overlapped[target] = callback || true;
+			return this._overlappers.get(target) == -1;
 		}
 
 		_createSensors() {
@@ -2959,6 +3031,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args = args.slice(1);
 			}
 			super(...args);
+			this.idNum = 0;
 			this.p = pInst;
 
 			// if all sprites doesn't exist yet,
@@ -2979,16 +3052,24 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * Contains all the collision callback functions for this group
 			 * when it comes in contact with other sprites or groups.
-			 * @property collides
+			 * @property _collides
 			 */
-			this.collides = {};
+			this._collides = {};
+			this._colliding = {};
+			this._collided = {};
 
+			this._overlap = {};
 			/**
 			 * Contains all the overlap callback functions for this group
 			 * when it comes in contact with other sprites or groups.
-			 * @property overlaps
+			 * @property _overlaps
 			 */
-			this.overlaps = {};
+			this._overlaps = {};
+			this._overlapping = {};
+			this._overlapped = {};
+
+			this._collisions = new Map();
+			this._overlappers = new Map();
 
 			// mainly for internal use
 			// autoCull as a property of allSprites only refers to the default allSprites cull
@@ -2996,8 +3077,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			// for any other group made by users autoCull affects whether cull removes sprites or not
 			// by default for allSprites it is set to true, for all other groups it is undefined
 			this.autoCull;
-
-			this.idNum = 0;
 
 			if (this.p.world) {
 				this.idNum = this.p.world.groupsCreated;
@@ -3024,14 +3103,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.Group = SubGroup;
 
 			this.mouse = {
-				pressed: null,
+				presses: null,
 				pressing: null,
-				held: null,
+				pressed: null,
+				holds: null,
 				holding: null,
+				held: null,
 				released: null,
-				hoveredOn: null,
+				hovers: null,
 				hovering: null,
-				hoveredOut: null
+				hovered: null
 			};
 			for (let state in this.mouse) {
 				this.mouse[state] = function (inp) {
@@ -3163,104 +3244,151 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		_ensureCollide(target, callback) {
+			if (!(target instanceof Sprite) && !(target instanceof Group)) {
+				throw new Error('collide target must be a sprite or a group');
+			}
+		}
+
 		/**
-		 * Checks if a sprite in the group is colliding with another sprite or a group.
-		 * The check is performed using the sprite's physics body (colliders).
-		 *
-		 * A callback function can be specified to perform additional operations
-		 * when contact occurs. If the target is a group the function will be called
-		 * for each single sprite colliding. The parameter of the function are
-		 * respectively the current sprite and the colliding sprite.
-		 *
-		 * Since v3, this function only needs to be called once, it doesn't need to be
-		 * used in the p5.js draw loop.
-		 *
-		 * @example
-		 *     group.collide(otherSprite, explosion);
-		 *
-		 *     function explosion(spriteA, spriteB) {
-		 *       spriteA.remove();
-		 *       spriteB.score++;
-		 *     }
-		 *
 		 * @method collide
-		 * @param {Sprite|Group} target Sprite or group to check against the current one
-		 * @param {Function} [callback] The function to be called when a collision occurs
+		 * @deprecated use collides instead
 		 */
 		collide(target, callback) {
+			return this.collides(target, callback);
+		}
+
+		/**
+		 * Returns true on the first frame that the group collides with the
+		 * target sprite or group.
+		 *
+		 * Custom collision event handling can be done by using this function
+		 * in an if statement or adding a callback as the second parameter.
+		 *
+		 * @method collides
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 */
+		collides(target, callback) {
+			this._ensureCollide(target, callback);
+			this._collides[target] = callback || true;
+			return this._collisions.get(target) == 1;
+		}
+
+		/**
+		 * Returns true while the group is colliding with the target
+		 * sprite or group.
+		 *
+		 * @method colliding
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 * @return {Boolean}
+		 */
+		colliding(target, callback) {
+			this._ensureCollide(target, callback);
+			this._colliding[target] = callback || true;
+			return this._collisions.get(target) > 0;
+		}
+
+		/**
+		 * Returns true on the first frame that the group no longer overlaps
+		 * with the target sprite or group.
+		 *
+		 * @method collided
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 * @return {Boolean}
+		 */
+		collided(target, callback) {
+			this._ensureCollide(target, callback);
+			this._collided[target] = callback || true;
+			return this._collisions.get(target) == -1;
+		}
+
+		// TODO
+		// displaces(target, callback) {}
+
+		_ensureOverlap(target, callback) {
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
 				throw new Error('collide target must be a sprite or a group');
 			}
-			this.collides[target] = callback || true;
-		}
-
-		/**
-		 * Deprecated, use group.collide instead.
-		 *
-		 * @deprecated
-		 * @method bounce
-		 * @param {Sprite|Group} target
-		 * @param {Function} callback
-		 */
-		bounce(target, callback) {
-			this.collide(target, callback);
-		}
-
-		/**
-		 * Deprecated, use group.collide instead.
-		 *
-		 * @deprecated
-		 * @method displace
-		 * @param {Sprite|Group} target
-		 * @param {Function} callback
-		 */
-		displace(target, callback) {
-			this.collide(target, callback);
-		}
-
-		/**
-		 * Checks if a sprite in the group is overlapping with another sprite or a group.
-		 * The check is performed using the sprite's physics body (colliders).
-		 *
-		 * A callback function can be specified to perform additional operations
-		 * when contact occurs. If the target is a group the function will be called
-		 * for each single sprite overlapping. The parameter of the function are
-		 * respectively the current sprite and the overlapping sprite.
-		 *
-		 * Since v3, this function only needs to be called once, it doesn't need to be
-		 * used in the p5.js draw loop.
-		 *
-		 * @example
-		 *     group.overlap(otherSprite, pickup);
-		 *
-		 *     function pickup(spriteA, spriteB) {
-		 *       spriteA.remove();
-		 *       spriteB.itemCount++;
-		 *     }
-		 *
-		 * @method overlap
-		 * @param {Sprite|Group} target Sprite or group to check against the current one
-		 * @param {Function} [callback] The function to be called if overlap is positive
-		 */
-		overlap(target, callback) {
-			if (!(target instanceof Sprite) && !(target instanceof Group)) {
-				throw new Error('collide target must be a sprite or a group');
-			}
-			this._hasOverlaps = true;
-			for (let s of this) {
-				if (!s._hasOverlaps) s._createSensors();
+			if (!this._hasOverlaps) {
+				for (let s of this) {
+					if (!s._hasOverlaps) s._createSensors();
+				}
+				this._hasOverlaps = true;
 			}
 			if (target instanceof Sprite) {
 				if (!target._hasOverlaps) target._createSensors();
 			} else if (target instanceof Group) {
-				for (let s of target) {
-					if (!s._hasOverlaps) s._createSensors();
+				if (!target._hasOverlaps) {
+					for (let s of target) {
+						if (!s._hasOverlaps) s._createSensors();
+					}
+					target._hasOverlaps = true;
 				}
-				target._hasOverlaps = true;
 			}
-			this.overlaps[target] = callback || true;
+			this._overlap[target] = true;
 		}
 
+		/**
+		 * @method overlap
+		 * @deprecated use overlaps instead
+		 */
+		overlap(target, callback) {
+			return this.overlaps(target, callback);
+		}
+
+		/**
+		 * Returns true on the first frame that the group overlaps with the
+		 * target sprite or group.
+		 *
+		 * Custom overlap event handling can be done by using this function
+		 * in an if statement or adding a callback as the second parameter.
+		 *
+		 * @method overlaps
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 */
+		overlaps(target, callback) {
+			this._ensureOverlap(target, callback);
+			this._overlaps[target] = callback || true;
+			return this._overlappers.get(target) == 1;
+		}
+
+		/**
+		 * Returns true while the group is overlapping with the target
+		 * sprite or group.
+		 *
+		 * @method overlapping
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 * @return {Boolean}
+		 */
+		overlapping(target, callback) {
+			this._ensureOverlap(target, callback);
+			this._overlapping[target] = callback || true;
+			return this._overlappers.get(target) > 0;
+		}
+
+		/**
+		 * Returns true on the first frame that the group no longer overlaps
+		 * with the target sprite or group.
+		 *
+		 * @method overlapped
+		 * @param {Sprite|Group} target
+		 * @param {Function} [callback]
+		 * @return {Boolean}
+		 */
+		overlapped(target, callback) {
+			this._ensureOverlap(target, callback);
+			this._overlapped[target] = callback || true;
+			return this._overlappers.get(target) == -1;
+		}
+
+		/**
+		 * @method move
+		 */
 		move(x, y, speed) {
 			let centroid = this.centroid;
 			let movements = [];
@@ -3274,6 +3402,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return Promise.all(movements);
 		}
 
+		/**
+		 * @method moveTowards
+		 */
 		moveTowards(x, y, tracking) {
 			let centroid = this.resetCentroid();
 			for (let s of this) {
@@ -3725,31 +3856,71 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			// Get both fixtures
 			let a = contact.m_fixtureA;
 			let b = contact.m_fixtureB;
-
-			let contactType = 'collides';
-			if (a.isSensor()) contactType = 'overlaps';
-
+			let t = '_collisions';
+			if (a.isSensor()) t = '_overlappers';
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
 
-			a.touching[b] = true;
-			b.touching[a] = true;
+			a[t].set(b, 0);
+			b[t].set(a, 0);
 
-			// log(a, b);
-			let cb = _findContactCB(contactType, a, b);
-			if (cb) {
-				this.contacts.push([cb, a, b]);
-				return;
+			for (let g of b.groups) {
+				g[t].set(a, g[t].get(a) || 0);
+				a[t].set(g, a[t].get(g) || 0);
 			}
-			if (!cb) cb = _findContactCB(contactType, b, a);
-			if (cb) this.contacts.push([cb, b, a]);
+
+			for (let g of a.groups) {
+				g[t].set(b, g[t].get(b) || 0);
+				b[t].set(g, b[t].get(g) || 0);
+				for (let g2 of b.groups) {
+					g[t].set(g2, g[t].get(g2) || 0);
+					g2[t].set(g, g2[t].get(g) || 0);
+				}
+			}
 		}
 
 		_endContact(contact) {
-			let a = contact.m_fixtureA.m_body.sprite;
-			let b = contact.m_fixtureB.m_body.sprite;
-			a.touching[b] = false;
-			b.touching[a] = false;
+			let a = contact.m_fixtureA;
+			let b = contact.m_fixtureB;
+			let contactType = '_collisions';
+			if (a.isSensor()) contactType = '_overlappers';
+			a = a.m_body.sprite;
+			b = b.m_body.sprite;
+
+			a[contactType].set(b, -2);
+			b[contactType].set(a, -2);
+
+			for (let g of b.groups) {
+				let inContact = false;
+				for (let s of g) {
+					if (s[contactType].get(a) >= 0) {
+						inContact = true;
+						break;
+					}
+				}
+				if (!inContact) {
+					g[contactType].set(a, -2);
+					a[contactType].set(g, -2);
+				}
+			}
+
+			for (let g of a.groups) {
+				let inContact = false;
+				for (let s of g) {
+					if (s[contactType].get(b) >= 0) {
+						inContact = true;
+						break;
+					}
+				}
+				if (!inContact) {
+					g[contactType].set(b, -2);
+					b[contactType].set(g, -2);
+					for (let g2 of b.groups) {
+						g[contactType].set(g2, -2);
+						g2[contactType].set(g, -2);
+					}
+				}
+			}
 		}
 
 		get autoCull() {
@@ -3912,7 +4083,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 *
 	 * @private
-	 * @param {String} type "collides" or "overlaps"
+	 * @param {String} type "collide" or "overlap"
 	 * @param {Sprite} s0
 	 * @param {Sprite} s1
 	 * @returns contact cb if one can be found between the two sprites
@@ -3921,43 +4092,54 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		let cb = s0[type][s1];
 		if (cb) return cb;
 
-		for (let g1 of s1.groups) {
-			cb = s0[type][g1];
-			if (cb) return cb;
+		let s1IsSprite = s1 instanceof Sprite;
+
+		if (s1IsSprite) {
+			for (let g1 of s1.groups) {
+				cb = s0[type][g1];
+				if (cb) return cb;
+			}
 		}
 
-		for (let g0 of s0.groups) {
-			cb = g0[type][s1];
-			if (cb) return cb;
-			for (let g1 of s1.groups) {
-				cb = g0[type][g1];
+		if (s0 instanceof Sprite) {
+			for (let g0 of s0.groups) {
+				cb = g0[type][s1];
 				if (cb) return cb;
+				if (s1IsSprite) {
+					for (let g1 of s1.groups) {
+						cb = g0[type][g1];
+						if (cb) return cb;
+					}
+				}
 			}
 		}
 		return false;
 	}
 
-	// an overlap occurs when two sensor fixtures touch
-	// a collision occurs when two collider fixtures touch
+	/**
+	 * This planck function should've be named "shouldContact", because that's what
+	 * it actually decides.
+	 */
 	pl.Fixture.prototype.shouldCollide = function (that) {
-		// should this and that collide?
+		// should this and that produce a contact event?
 		let a = this;
 		let b = that;
 
-		// overlap
+		// sensors overlap (returning true doesn't mean they will collide it means
+		// they're included in begin contact and end contact events)
 		if (a.isSensor() && b.isSensor()) return true;
+		// ignore contact events between a sensor and a non-sensor
+		if (a.isSensor() || b.isSensor()) return false;
+		// else test if the two non-sensor colliders should overlap
 
-		// mismatched sensor + collider touching
-		if (a.isSensor() && !b.isSensor()) return false;
-		if (!a.isSensor() && b.isSensor()) return false;
-
-		// only collide if `a` doesn't have overlap enabled with `b`
 		a = a.m_body.sprite;
 		b = b.m_body.sprite;
 
-		let cb = _findContactCB('overlaps', a, b);
-		if (!cb) cb = _findContactCB('overlaps', b, a);
-		if (cb) return false;
+		// if `a` has an overlap enabled with `b` their colliders should not produce a
+		// contact event, the overlap contact event is between their sensors
+		let shouldOverlap = _findContactCB('_overlap', a, b);
+		if (!shouldOverlap) shouldOverlap = _findContactCB('_overlap', b, a);
+		if (shouldOverlap) return false;
 		return true;
 	};
 
@@ -4042,13 +4224,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		// 2nd and 3rd arguments are velocity and position iterations
 		this.world.step(timeStep || 1 / 60, velocityIterations || 8, positionIterations || 3);
-
-		for (let c of this.world.contacts) {
-			if (typeof c[0] == 'function') {
-				c[0](c[1], c[2]);
-			}
-		}
-		this.world.contacts = [];
 
 		for (let s of this.allSprites) {
 			s.update();
@@ -4703,10 +4878,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * The amount of frames an input must be pressed to be considered held.
 			 * Default is 12.
 			 *
-			 * @property heldThreshold
+			 * @property holdThreshold
 			 * @type {number}
 			 */
-			this.heldThreshold = 12;
+			this.holdThreshold = 12;
 		}
 
 		init(inputs) {
@@ -4715,7 +4890,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
-		pressed(inp) {
+		presses(inp) {
 			inp ??= this.default;
 			return this[inp] == 1 || this[inp] == -2;
 		}
@@ -4725,19 +4900,31 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this[inp] > 0 || this[inp] == -2;
 		}
 
-		held(inp) {
+		holds(inp) {
 			inp ??= this.default;
-			return this[inp] == this.heldThreshold;
+			return this[inp] == this.holdThreshold;
 		}
 
 		holding(inp) {
 			inp ??= this.default;
-			return this[inp] >= this.heldThreshold;
+			return this[inp] >= this.holdThreshold;
+		}
+
+		releases(inp) {
+			inp ??= this.default;
+			return this[inp] == -1 || this[inp] == -2;
+		}
+
+		pressed(inp) {
+			return this.releases(inp);
+		}
+
+		held(inp) {
+			return this.releases(inp);
 		}
 
 		released(inp) {
-			inp ??= this.default;
-			return this[inp] == -1 || this[inp] == -2;
+			return this.releases(inp);
 		}
 	}
 
@@ -4753,7 +4940,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		dragging(inp) {
 			inp ??= this.default;
 			this.draggable = true;
-			return this[inp] >= this.heldThreshold;
+			return this[inp] >= this.holdThreshold;
 		}
 
 		get isOnCanvas() {
@@ -4774,7 +4961,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.hover = 0;
 		}
 
-		hoveredOn() {
+		hovers() {
 			return this.hover == 1;
 		}
 
@@ -4782,7 +4969,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.hover > 0;
 		}
 
-		hoveredOut() {
+		hovered() {
 			return this.hover == -1;
 		}
 	}
@@ -4852,13 +5039,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * 
 	 * @property kb (keyboard)
 	 * @example
-	// pressed
-	if (kb.pressed('x')) {
+	// presses
+	if (kb.presses('x')) {
 		player.jump();
 	}
  
-	// held
-	if (kb.held('e')) {
+	// holds
+	if (kb.holds('e')) {
 		player.chargeAttack();
 	}
 
@@ -5049,7 +5236,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this.default = 'a';
 
-			let methods = ['pressed', 'pressing', 'held', 'holding', 'released'];
+			let methods = ['presses', 'pressing', 'pressed', 'holds', 'holding', 'held', 'released'];
 			for (let m of methods) {
 				this[m] = (inp) => {
 					if (this[0]) return this[0][m](inp);
@@ -5143,7 +5330,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	}
 
 	for (let k in this.kb) {
-		if (k == 'heldThreshold') continue;
+		if (k == 'holdThreshold') continue;
 		if (this.kb[k] < 0) this.kb[k] = 0;
 		else if (this.kb[k] > 0) this.kb[k]++;
 	}
