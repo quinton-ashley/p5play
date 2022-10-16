@@ -882,6 +882,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		get color() {
+			return this.shapeColor;
+		}
+
+		set color(val) {
+			this.shapeColor = val;
+		}
+
 		/**
 		 * The density of the sprite's physics body.
 		 *
@@ -2216,18 +2224,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Returns true while the sprite is colliding with the target
-		 * sprite or group.
+		 * Returns a truthy value while the sprite is colliding with the
+		 * target sprite or group. The value is the number of frames that
+		 * the sprite has been colliding with the target.
 		 *
 		 * @method colliding
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
-		 * @return {Boolean}
+		 * @return {Number} frames
 		 */
 		colliding(target, callback) {
 			this._ensureCollide(target, callback);
 			this._colliding[target] = callback || true;
-			return this._collisions.get(target) > 0;
+			let val = this._collisions.get(target);
+			return val > 0 ? val : 0;
 		}
 
 		/**
@@ -2292,18 +2302,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Returns true while the sprite is overlapping with the target
-		 * sprite or group.
+		 * Returns a truthy value while the sprite is overlapping with the
+		 * target sprite or group. The value returned is the number of
+		 * frames the sprite has been overlapping with the target.
 		 *
 		 * @method overlapping
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
-		 * @return {Boolean}
+		 * @return {Number} frames
 		 */
 		overlapping(target, callback) {
 			this._ensureOverlap(target, callback);
 			this._overlapping[target] = callback || true;
-			return this._overlappers.get(target) > 0;
+			let val = this._overlappers.get(target);
+			return val > 0 ? val : 0;
 		}
 
 		/**
@@ -3278,18 +3290,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Returns true while the group is colliding with the target
-		 * sprite or group.
+		 * Returns a truthy value while the group is colliding with the
+		 * target sprite or group. The value is the number of frames that
+		 * the group has been colliding with the target.
 		 *
 		 * @method colliding
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
-		 * @return {Boolean}
+		 * @return {Number} frames
 		 */
 		colliding(target, callback) {
 			this._ensureCollide(target, callback);
 			this._colliding[target] = callback || true;
-			return this._collisions.get(target) > 0;
+			let val = this._collisions.get(target);
+			return val > 0 ? val : 0;
 		}
 
 		/**
@@ -3359,18 +3373,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Returns true while the group is overlapping with the target
-		 * sprite or group.
+		 * Returns a truthy value while the group is overlapping with the
+		 * target sprite or group. The value returned is the number of
+		 * frames the group has been overlapping with the target.
 		 *
 		 * @method overlapping
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
-		 * @return {Boolean}
+		 * @return {Number} frames
 		 */
 		overlapping(target, callback) {
 			this._ensureOverlap(target, callback);
 			this._overlapping[target] = callback || true;
-			return this._overlappers.get(target) > 0;
+			let val = this._overlappers.get(target);
+			return val > 0 ? val : 0;
 		}
 
 		/**
