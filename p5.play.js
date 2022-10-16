@@ -4701,6 +4701,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		if (args.length < 3) args[2] = 'p2d';
 		_createCanvas.call(pInst, ...args);
 		this.canvas.tabIndex = 0;
+		log(this.canvas);
+		this.canvas.addEventListener('keydown', function (e) {
+			if (
+				e.key == ' ' ||
+				e.key == '/' ||
+				e.key == 'ArrowUp' ||
+				e.key == 'ArrowDown' ||
+				e.key == 'ArrowLeft' ||
+				e.key == 'ArrowRight'
+			) {
+				e.preventDefault();
+			}
+		});
 		this.world.resize();
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 		let style = document.createElement('style');
@@ -4864,13 +4877,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Root class for storing the state of inputs (mouse, keyboard,
 	 * gamepads).
 	 *
+	 * -3 means input was released after being held, pressed for 12 frames
 	 * -2 means input was pressed and released on the same frame
 	 * -1 means input was released
 	 * 0 means input is not pressed
 	 * 1 means input was pressed
 	 * >1 means input is still being pressed
-	 * 12 means input was held, pressed for 12 frames
-	 * >12 means input was held, pressed for 12 or more frames
+	 * 12 means input was held
+	 * >12 means input is being held
 	 *
 	 * @class InputDevice
 	 */
@@ -4902,6 +4916,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this[inp] > 0 || this[inp] == -2;
 		}
 
+		pressed(inp) {
+			return this.released(inp);
+		}
+
 		holds(inp) {
 			inp ??= this.default;
 			return this[inp] == this.holdThreshold;
@@ -4912,21 +4930,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this[inp] >= this.holdThreshold;
 		}
 
-		releases(inp) {
-			inp ??= this.default;
-			return this[inp] == -1 || this[inp] == -2;
-		}
-
-		pressed(inp) {
-			return this.releases(inp);
-		}
-
 		held(inp) {
-			return this.releases(inp);
+			inp ??= this.default;
+			return this[inp] == -3;
 		}
 
 		released(inp) {
-			return this.releases(inp);
+			inp ??= this.default;
+			return this[inp] <= -1;
+		}
+
+		releases(inp) {
+			return this.released(inp);
 		}
 	}
 
@@ -5010,12 +5025,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
 
-		if (this.mouse[btn] > 1) this.mouse[btn] = -1;
+		if (this.mouse[btn] >= this.mouse.holdThreshold) {
+			this.mouse[btn] = -3;
+		} else if (this.mouse[btn] > 0) this.mouse[btn] = -1;
 		else this.mouse[btn] = -2;
 
 		if (this.p5play.mouseSprite) {
 			if (this.p5play.mouseSprite.mouse.hover > 0) {
-				if (this.p5play.mouseSprite.mouse[btn] > 1) {
+				if (this.p5play.mouseSprite.mouse[btn] >= this.mouse.holdThreshold) {
+					this.p5play.mouseSprite.mouse[btn] = -3;
+				} else if (this.p5play.mouseSprite.mouse[btn] > 0) {
 					this.p5play.mouseSprite.mouse[btn] = -1;
 				} else {
 					this.p5play.mouseSprite.mouse[btn] = -2;
@@ -5123,7 +5142,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		let k = simpleKeyControls[key];
 		if (k) keys.push(k);
 		for (let k of keys) {
-			if (this.kb[k] > 0) this.kb[k] = -1;
+			if (this.kb[k] >= this.kb.holdThreshold) {
+				this.kb[k] = -3;
+			} else if (this.kb[k] > 0) this.kb[k] = -1;
 			else this.kb[k] = -2;
 		}
 
