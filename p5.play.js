@@ -49,6 +49,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	let spriteProps = [
 		'bounciness',
 		'collider',
+		'color',
 		'density',
 		'd',
 		'debug',
@@ -71,7 +72,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'rotationSpeed',
 		'scale',
 		'shape',
-		'shapeColor',
 		'speed',
 		'static',
 		'text',
@@ -516,11 +516,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * If no image or animations are set this is color of the
 			 * placeholder rectangle
 			 *
-			 * @property shapeColor
+			 * @property color
 			 * @type {color}
 			 * @default a randomly generated color
 			 */
-			this.shapeColor ??= this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
+			this.color ??= this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
 
 			this.textColor ??= this.p.color(0);
 
@@ -883,11 +883,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		get color() {
-			return this.shapeColor;
+			return this._color;
 		}
 
 		set color(val) {
-			this.shapeColor = val;
+			if (val instanceof p5.Color) {
+				this._color = val;
+			} else if (typeof val != 'object') {
+				this._color = this.p.color(val);
+			} else {
+				this._color = this.p.color(...val.levels);
+			}
+		}
+
+		get shapeColor() {
+			return this._color;
+		}
+
+		set shapeColor(val) {
+			this.color = val;
 		}
 
 		/**
@@ -1214,20 +1228,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.ani) {
 				this.ani.scale.x = val;
 				this.ani.scale.y = val;
-			}
-		}
-
-		get shapeColor() {
-			return this._shapeColor;
-		}
-
-		set shapeColor(val) {
-			if (val instanceof p5.Color) {
-				this._shapeColor = val;
-			} else if (typeof val != 'object') {
-				this._shapeColor = this.p.color(val);
-			} else {
-				this._shapeColor = this.p.color(...val.levels);
 			}
 		}
 
@@ -1645,7 +1645,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.animation && !this.debug) {
 				this.animation.draw(0, 0, undefined, this._scale, this._scale);
 			} else if (this.fixture != null) {
-				if (this.shape == 'chain') this.p.stroke(this.shapeColor);
+				if (this.shape == 'chain') this.p.stroke(this.color);
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 					this._drawFixture(fxt);
 				}
@@ -1704,7 +1704,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.rotation) this.p.rotate(this.rotation);
 			this.p.scale(this._mirror.x, this._mirror.y);
 
-			this.p.fill(this.shapeColor);
+			this.p.fill(this.color);
 
 			this._draw();
 
