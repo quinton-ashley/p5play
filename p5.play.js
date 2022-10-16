@@ -1608,9 +1608,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					let b = entry[0];
 					let f = entry[1] + 1;
 					this[event].set(b, f);
-					if (f == -1) {
-						contactType = eventTypes[event][2];
+					if (f == 0) {
 						this[event].delete(b);
+						continue;
+					} else if (f == -1) {
+						contactType = eventTypes[event][2];
 					} else if (f == 1) {
 						contactType = eventTypes[event][0];
 					} else {
