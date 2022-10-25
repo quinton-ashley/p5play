@@ -4820,6 +4820,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			cb = args[args.length - 1];
 		}
 		if (img) {
+			img.calls++;
 			// if not finished loading, add callback to the list
 			if (!img.modified) {
 				if (cb) img.cbs.push(cb);
@@ -4835,16 +4836,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			_img.h = _img.height;
 			for (let cb of _img.cbs) {
 				cb();
+			}
+			for (let i = 1; i < _img.calls; i++) {
 				pInst._decrementPreload();
 			}
 			_img.cbs = [];
 		});
 		img.cbs = [];
-		if (typeof args[1] == 'number') {
-			img.width = img.w = args[1];
-			if (typeof args[2] == 'number') img.height = img.h = args[2];
-			else img.height = img.h = img.w;
-		}
+		img.calls = 1;
+
+		// not desirable
+		// if (typeof args[1] == 'number') {
+		// 	img.width = img.w = args[1];
+		// 	if (typeof args[2] == 'number') img.height = img.h = args[2];
+		// 	else img.height = img.h = img.w;
+		// }
+
 		if (cb) img.cbs.push(cb);
 		img.url = url;
 		pInst.p5play.images[url] = img;
