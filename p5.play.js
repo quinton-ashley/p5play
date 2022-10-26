@@ -61,6 +61,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'friction',
 		'h',
 		'height',
+		'heading',
 		'isSuperFast',
 		'kinematic',
 		'layer',
@@ -1824,7 +1825,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Move the sprite to a destination position
+		 * Move the sprite to a destination position or use a direction name:
+		 * 'up', 'down', 'left', 'right', 'upLeft', 'upRight', 'downLeft',
+		 * 'downRight'
 		 *
 		 * @method move
 		 * @param {Number} destX destination x
@@ -1850,10 +1853,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				// shift input parameters over by one
 				speed = arguments[1];
 				direction = arguments[0];
-				if (direction == 'up') this.dest.y--;
-				if (direction == 'down') this.dest.y++;
-				if (direction == 'left') this.dest.x--;
-				if (direction == 'right') this.dest.x++;
+				if (direction == 'up' || direction.slice(0, 2) == 'up') {
+					this.dest.y = Math.round(this.y - 1);
+				}
+				if (direction == 'down' || direction.slice(0, 4) == 'down') {
+					this.dest.y = Math.round(this.y + 1);
+				}
+				if (direction == 'left' || direction.includes('Left')) {
+					this.dest.x = Math.round(this.x - 1);
+				}
+				if (direction == 'right' || direction.includes('Right')) {
+					this.dest.x = Math.round(this.x + 1);
+				}
 				destX = destY = false;
 				if (/(up|down)/.test(direction)) {
 					destY = true;
@@ -1861,7 +1872,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (/(left|right)/.test(direction)) {
 					destX = true;
 				}
-				this.direction = direction;
+				this.heading = direction;
 			} else {
 				if (destX == this.x) destX = false;
 				if (destX) this.dest.x = destX;
@@ -4717,7 +4728,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		if (args.length < 3) args[2] = 'p2d';
 		_createCanvas.call(pInst, ...args);
 		this.canvas.tabIndex = 0;
-		log(this.canvas);
+		// log(this.canvas);
 		this.canvas.addEventListener('keydown', function (e) {
 			if (
 				e.key == ' ' ||
@@ -4736,6 +4747,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		style.innerHTML = `canvas { outline: none; }`;
 		document.head.appendChild(style);
 	};
+
+	class Canvas {
+		constructor() {
+			createCanvas(...arguments);
+		}
+	}
 
 	const _background = this.background;
 
@@ -4863,6 +4880,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.SpriteAnimation = SpriteAnimation;
 	this.Group = Group;
 	this.World = World;
+	this.Canvas = Canvas;
 
 	/**
 	 * A group of all the sprites.
