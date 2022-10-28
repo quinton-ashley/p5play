@@ -4837,11 +4837,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			cb = args[args.length - 1];
 		}
 		if (img) {
-			img.calls++;
 			// if not finished loading, add callback to the list
 			if (!img.modified) {
-				if (cb) img.cbs.push(cb);
-				else pInst._decrementPreload();
+				if (cb) {
+					img.cbs.push(cb);
+					img.calls++;
+				} else pInst._decrementPreload();
 			} else {
 				if (cb) cb(); // if already loaded, call callback immediately
 				pInst._decrementPreload();
