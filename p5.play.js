@@ -93,7 +93,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Take a look at the Sprite reference pages before reading these docs.
+	 * Look at the Sprite reference pages before reading these docs.
+	 *
 	 * https://p5play.org/learn/sprite.html
 	 *
 	 * Every sprite you create is added to the allSprites
@@ -2368,6 +2369,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	}
 
 	/**
+	 * Look at the Animation reference pages before reading these docs.
+	 *
+	 * https://p5play.org/learn/sprite_animation.html
+	 *
 	 * A SpriteAnimation object contains a series of images (p5.Image objects)
 	 * that can be displayed sequentially.
 	 *
@@ -3027,6 +3032,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	}
 
 	/**
+	 * Look at the Group reference pages before reading these docs.
+	 *
+	 * https://p5play.org/learn/group.html
+	 *
 	 * In p5.play groups are collections of sprites with similar behavior.
 	 * For example a group may contain all the coin sprites that the
 	 * player can collect.
@@ -3043,7 +3052,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * a group.
 	 *
 	 * The top level group is a p5 instance level variable named
-	 * 'allSprites' that contains all the sprites.
+	 * 'allSprites' that contains all the sprites added to the sketch.
 	 *
 	 * @class Group
 	 * @constructor
@@ -3757,7 +3766,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			};
 
 	/**
-	 * World
+	 * Look at the World reference pages before reading these docs.
+	 *
+	 * https://p5play.org/learn/world.html
+	 *
+	 * @class World
+	 * @constructor
 	 */
 	class World extends pl.World {
 		constructor() {
@@ -3970,6 +3984,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	}
 
 	/**
+	 * Look at the Camera reference pages before reading these docs.
+	 *
+	 * https://p5play.org/learn/camera.html
+	 *
 	 * A camera facilitates scrolling and zooming for scenes extending beyond
 	 * the canvas. A camera has a position, a zoom factor, and the mouse
 	 * coordinates relative to the view.
@@ -4172,6 +4190,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		return true;
 	};
 
+	/**
+	 * Look at the Tiles reference pages before reading these docs.
+	 *
+	 * https://p5play.org/learn/tiles.html
+	 *
+	 * @class Tiles
+	 * @constructor
+	 * @param {String} tiles
+	 * @param {Number} x
+	 * @param {Number} y
+	 * @param {Number} w
+	 * @param {Number} h
+	 */
 	class Tiles {
 		constructor(tiles, x, y, w, h) {
 			if (typeof tiles == 'string') tiles = tiles.split('\n');
@@ -4225,10 +4256,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.Tiles = Tiles;
 
 	/**
+	 * Look at the p5.play reference pages before reading these docs.
+	 *
+	 * https://p5play.org/learn/sprite.html
+	 *
 	 * @class p5.play
 	 */
 
 	/**
+	 * Equivalent to `new Tiles`
+	 *
 	 * @method createTiles
 	 * @param {String|Array} tiles String or array of strings
 	 */
@@ -4315,7 +4352,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		return sprites[0];
 	};
 
-	// some code from https://github.com/bobcgausa/cook-js
+	// TODO implement planck joints
+	// the following code is from https://github.com/bobcgausa/cook-js
 
 	// const debugDraw = (canvas, scale, world) => {
 	// 	const context = canvas.getContext('2d');
@@ -4593,7 +4631,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Creates a new sprite.
+	 * Creates a new sprite. Equivalent to `new Sprite()`
 	 *
 	 * @returns {Sprite}
 	 */
@@ -4602,7 +4640,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Creates a new group of sprites.
+	 * Creates a new group of sprites. Equivalent to `new Group()`
 	 *
 	 * @returns {Group}
 	 */
@@ -4646,7 +4684,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Delay for the specified time.
+	 * Delay code execution in an async function for the specified time.
 	 *
 	 * @method delay
 	 * @param {Number} millisecond
@@ -4670,7 +4708,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Sleep for the specified time.
+	 * Sleep for the specified time. Equivalent to the delay function.
 	 *
 	 * @method sleep
 	 * @param {Number} millisecond
@@ -4706,6 +4744,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	const _createCanvas = this.createCanvas;
 
+	/**
+	 * Equivalent to p5.js createCanvas function and `new Canvas()`
+	 *
+	 * In p5.play a canvas can be created with an aspect ratio in the
+	 * format `width:height`. For example `new Canvas('16:9')` will create
+	 * the largest possible canvas with a 16:9 aspect ratio.
+	 *
+	 * This function also disables the default keydown responses for
+	 * the arrow keys, slash, and spacebar. This is to prevent the
+	 * browser from scrolling the page when the user is playing a game using
+	 * common keyboard commands.
+	 *
+	 * @method createCanvas
+	 * @param {Number} width|ratio
+	 * @param {Number} height
+	 */
 	this.createCanvas = function () {
 		let args = [...arguments];
 		if (typeof args[0] == 'string') {
@@ -4817,10 +4871,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	const _loadImage = this.loadImage;
 
 	/**
-	 * Just like the p5.js loadImage function except it also accepts
-	 * width and height parameters in addition to a callback.
-	 * It also caches images so that they are only loaded once.
-	 * It also adds a url property to the image object.
+	 * Just like the p5.js loadImage function except it also caches images
+	 * so that they are only loaded once. Multiple calls to loadImage with
+	 * the same path will return the same image object. It also adds the
+	 * image's url as a property of the image object.
 	 *
 	 * @method loadImage
 	 * @param {string} url
@@ -4844,7 +4898,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					img.calls++;
 				} else pInst._decrementPreload();
 			} else {
-				if (cb) cb(); // if already loaded, call callback immediately
+				if (cb) cb(); // if already loaded, run the callback immediately
 				pInst._decrementPreload();
 			}
 			return img;
@@ -4859,21 +4913,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				pInst._decrementPreload();
 			}
 			_img.cbs = [];
+			pInst.p5play.images.onLoad(img);
 		});
 		img.cbs = [];
 		img.calls = 1;
-
-		// not desirable
-		// if (typeof args[1] == 'number') {
-		// 	img.width = img.w = args[1];
-		// 	if (typeof args[2] == 'number') img.height = img.h = args[2];
-		// 	else img.height = img.h = img.w;
-		// }
-
 		if (cb) img.cbs.push(cb);
 		img.url = url;
 		pInst.p5play.images[url] = img;
-		pInst.p5play.images.onLoad(img);
 		return img;
 	};
 
@@ -4916,6 +4962,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.camera = new Camera();
 
 	/**
+	 * Look at the Input reference pages before reading these docs.
+	 *
+	 * https://p5play.org/learn/input_devices.html
+	 *
 	 * Root class for storing the state of inputs (mouse, keyboard,
 	 * gamepads).
 	 *
