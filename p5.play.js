@@ -139,8 +139,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			if (
 				args[0] !== undefined &&
-				typeof args[0] !== 'number' &&
-				(args[0] instanceof SpriteAnimation || args[0] instanceof p5.Image)
+				isNaN(args[0]) &&
+				(typeof args[0] == 'string' || args[0] instanceof SpriteAnimation || args[0] instanceof p5.Image)
 			) {
 				// shift
 				ani = args[0];
@@ -2109,12 +2109,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let _ani = (name, start, end) => {
 				return new Promise((resolve) => {
 					this._changeAni(name);
-					if (start < 0) {
-						start = this.animation.length + start;
-					}
+					if (start < 0) start = this.animation.length + start;
 					if (start) this.animation.frame = start;
-					if (end != undefined) this.animation.goToFrame(end);
-					// this.playing = true;
+
+					if (end !== undefined) this.animation.goToFrame(end);
+					else if (this.frame == this.lastFrame) resolve();
+
 					this.animation.onComplete = () => {
 						resolve();
 					};
@@ -2673,7 +2673,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 				let _this = this;
 
-				if (sheet instanceof p5.Image && sheet.modified) {
+				if (sheet instanceof p5.Image && sheet.width != 1 && sheet.height != 1) {
 					this.spriteSheet = sheet;
 					_generateSheetFrames();
 				} else {
@@ -4962,7 +4962,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		if (img) {
 			// if not finished loading, add callback to the list
-			if (!img.modified) {
+			if (img.width == 1 && img.height == 1) {
 				if (cb) {
 					img.cbs.push(cb);
 					img.calls++;
@@ -4982,6 +4982,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let i = 1; i < _img.calls; i++) {
 				pInst._decrementPreload();
 			}
+			// delete _img.calls;
+			// delete _img.cbs;
 			_img.cbs = [];
 			pInst.p5play.images.onLoad(img);
 		});
