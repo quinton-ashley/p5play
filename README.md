@@ -39,6 +39,13 @@ Need help getting started with local p5.play development? Check out this [guide]
 
 Take a look at [p5play-web][] for information about how to contribute to the development of p5.play
 
+## Support p5.play
+
+This open source project took thousands of hours to create and it continues to be updated and maintained by Quinton Ashley. p5.play will always be available for free, but your support would be greatly appreciated. Please consider donating!
+
+[![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto)
+[![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley)
+
 [p5.play]: https://molleindustria.github.io/p5.play/
 [p5.js]: https://p5js.org
 [p5play.molleindustria.org]: https://molleindustria.github.io/p5.play/

@@ -38,8 +38,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.mouseTracking ??= true;
 	this.p5play.mouseSprite = null;
 	this.p5play.mouseSprites = [];
-	this.p5play.chainOrigin = 'center';
-	this.p5play.chainPoints = 'relative';
 	this.p5play.standardizeKeyboard = false;
 
 	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
@@ -139,8 +137,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args = args.slice(1);
 			}
 
-			if (args[0] !== undefined && typeof args[0] !== 'number') {
-				// ani instanceof p5.Image
+			if (
+				args[0] !== undefined &&
+				typeof args[0] !== 'number' &&
+				(args[0] instanceof SpriteAnimation || args[0] instanceof p5.Image)
+			) {
 				// shift
 				ani = args[0];
 				args = args.slice(1);
@@ -157,6 +158,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			w = args[2];
 			h = args[3];
 			collider = args[4];
+			this.originMode = 'center';
 
 			if (Array.isArray(x)) {
 				x = undefined;
@@ -167,6 +169,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			if (Array.isArray(w) || (!isNaN(w) && typeof h == 'string')) {
+				if (typeof w != 'number' && Array.isArray(w[0])) {
+					this.originMode = 'start';
+				}
 				collider = h;
 				h = undefined;
 			} else if (isNaN(w)) {
@@ -213,15 +218,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.removed = false;
 
-			/**
-			 * The kind of shape: 'box', 'circle', 'polygon', or 'chain'
-			 *
-			 * @property shape
-			 * @type {String}
-			 * @default box
-			 */
-			this.shape;
-
 			if (group) {
 				group.push(this);
 				if (!ani) {
@@ -239,7 +235,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (group.static) collider ??= 'static';
 			collider ??= group.collider;
 
-			this.shape = group.shape;
+			this._shape = group.shape;
 
 			/**
 			 * Cycles before self removal.
@@ -417,7 +413,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			x ??= group.x;
-			if (x === undefined) x = this.p.width / this.p.allSprites.tileSize / 2;
+			if (x === undefined) {
+				x = this.p.width / this.p.allSprites.tileSize / 2;
+				this._vertexMode = true;
+			}
 			y ??= group.y;
 			if (y === undefined) y = this.p.height / this.p.allSprites.tileSize / 2;
 			w ??= group.w || group.width || group.diameter;
@@ -437,8 +436,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else {
 				this.w = w || (this.tileSize > 1 ? 1 : 50);
 				this.h = h;
-				if (h === undefined) this.shape = 'circle';
-				else this.shape = 'box';
+				if (h === undefined) this._shape = 'circle';
+				else this._shape = 'box';
 			}
 
 			this._scale = 1;
@@ -462,6 +461,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this[prop] = val;
 				}
 			}
+
+			let gvx = group.vel.x || 0;
+			let gvy = group.vel.y || 0;
+			if (typeof gvx == 'function') gvx = gvx(group.length - 1);
+			if (typeof gvy == 'function') gvy = gvy(group.length - 1);
+			this.setVelocity(gvx, gvy);
 
 			// custom group properties "sprite group traits"
 			// that are non-default sprite properties
@@ -545,14 +550,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} offsetY distance from the center of the sprite
 		 */
 		addCollider(offsetX, offsetY, w, h) {
-			if (!this.body) {
-				this.body = this.p.world.createBody({
-					position: scaleTo({ x: this.x, y: this.y }, this.tileSize),
-					type: this.collider
-				});
-				this.body.sprite = this;
-			}
-
 			let path, shape;
 
 			offsetX ??= 0;
@@ -598,8 +595,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 				// if the path is an array of position arrays
 				let usesVertices = Array.isArray(path[0]);
-				let originMode = this.p.p5play.chainOrigin;
-				let pointMode = this.p.p5play.chainPoints;
 
 				function checkVert() {
 					if (vert.x < min.x) min.x = vert.x;
@@ -609,14 +604,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 
 				if (usesVertices) {
+					if (this._vertexMode) {
+						this.x = path[0][0];
+						this.y = path[0][1];
+					}
 					for (let i = 0; i < path.length; i++) {
-						if (pointMode == 'relative') {
-							vert.x = path[i][0];
-							vert.y = path[i][1];
-						} else {
-							// absolute
+						if (this._vertexMode) {
+							if (i == 0) continue;
 							vert.x = path[i][0] - this.x;
 							vert.y = path[i][1] - this.y;
+						} else {
+							vert.x += path[i][0];
+							vert.y += path[i][1];
 						}
 						vecs.push({ x: vert.x, y: vert.y });
 						checkVert();
@@ -643,7 +642,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (
 					Math.round(vert.x * 1e6) / 1e6 == 0 &&
 					Math.round(vert.y * 1e6) / 1e6 == 0 &&
-					vecs.length - 1 <= pl.Settings.maxPolygonVertices
+					vecs.length - 1 <= pl.Settings.maxPolygonVertices &&
+					this._shape != 'chain'
 				) {
 					shape = 'polygon';
 				} else {
@@ -653,7 +653,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._hw = w * 0.5;
 				h = max.y - min.y;
 				this._hh = h * 0.5;
-				if (originMode == 'center') {
+
+				if (this.originMode == 'center') {
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
 						vecs[i] = new pl.Vec2(
@@ -662,7 +663,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						);
 					}
 				} else {
-					// originMode is start
+					// origin is start
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
 						vecs[i] = new pl.Vec2((vec.x * this.tileSize) / plScale, (vec.y * this.tileSize) / plScale);
@@ -683,11 +684,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			props.density ??= this.density || 5;
 			props.friction ??= this.friction || 0.5;
 			props.restitution ??= this.bounciness || 0.2;
+
+			if (!this.body) {
+				this.body = this.p.world.createBody({
+					position: scaleTo({ x: this.x, y: this.y }, this.tileSize),
+					type: this.collider
+				});
+				this.body.sprite = this;
+			}
 			this.body.createFixture(props);
-			if (!this.shape) {
-				this.shape = shape;
+			if (!this._shape) {
+				this._shape = shape;
 			} else if (this.fixture.getNext()) {
-				this.shape = 'combo';
+				this._shape = 'combo';
 			}
 			if (shape == 'circle') this._diameter = w;
 			else {
@@ -860,9 +869,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		set collider(val) {
 			if (this._collider == val) return;
+			this._collider = val;
+			this._reset();
+		}
+
+		_reset() {
 			let bodyProps;
 			if (this._collider != 'none') {
 				bodyProps = this._cloneBodyProps();
+			}
+
+			let v;
+			if (this._shape == 'chain' || this._shape == 'polygon') {
+				v = this._getVertices(true);
 			}
 
 			// remove body
@@ -872,9 +891,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			// replace colliders and overlap sensors
-			this._collider = val;
 			if (this._collider != 'none') {
-				this.addCollider();
+				if (v) {
+					this.addCollider(0, 0, v);
+				} else {
+					this.addCollider();
+				}
 				if (this._hasOverlaps) {
 					this._createSensors();
 				}
@@ -884,6 +906,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		/**
+		 * The sprite's current color. By default sprites get a random color.
+		 *
+		 * @property color
+		 * @type {p5.Color}
+		 */
 		get color() {
 			return this._color;
 		}
@@ -1306,16 +1334,37 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.body.applyTorque(val, true);
 		}
 
-		// get transform() {
-		// 	const t = this.body.getTransform();
-		// 	return { position: scaleFrom(t.p), angle: asin(t.q.s) };
-		// }
-		// set transform({ position, angle }) {
-		// 	this.body.setTransform(scaleTo(position), angle);
-		// }
-		// get world() {
-		// 	return this.body.getWorld();
-		// }
+		/**
+		 * The sprite's vertices.
+		 *
+		 * @property vertices
+		 * @type {Array} An array of p5.Vector objects.
+		 */
+		get vertices() {
+			return this._getVertices();
+		}
+
+		_getVertices(output2DArrays) {
+			let s = this.body.getFixtureList().getShape();
+			let v = [...s.m_vertices];
+			if (s.m_type == 'polygon') v.unshift(v.at(-1));
+			let x = this.x;
+			let y = this.y;
+			if (this.originMode == 'center') {
+				let minX = Math.min(...v.map((v) => v.x));
+				let minY = Math.min(...v.map((v) => v.y));
+				x = this._hw + minX;
+				y = this._hh + minY;
+			}
+			for (let i = 0; i < v.length; i++) {
+				let arr = [v[i].x * plScale + x, v[i].y * plScale + y];
+				if (output2DArrays) v[i] = arr;
+				else v[i] = pInst.createVector(arr[0], arr[1]);
+			}
+			return v;
+		}
+
+		// TODO set vertices
 
 		/**
 		 * The horizontal position of the sprite.
@@ -1469,14 +1518,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 				this.removeColliders();
 				this._h = undefined;
-				this.shape = undefined;
+				this._shape = undefined;
 				if (this._collider != 'none') {
 					this.addCollider(0, 0, val);
 					for (let prop in bodyProps) {
 						this[prop] = bodyProps[prop];
 					}
 				}
-				this.shape = 'circle';
+				this._shape = 'circle';
 			}
 			let scale = val / this._w;
 			this._w = val;
@@ -1575,6 +1624,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
+		 *
+		 * @property shape
+		 * @type {String}
+		 * @default box
+		 */
+		get shape() {
+			return this._shape;
+		}
+
+		set shape(val) {
+			if (this._shape == val) return;
+			this._shape = val;
+			this._reset();
+		}
+
+		/**
 		 * You can set the sprite's update function to your own custom
 		 * update function that will be run after every draw call or when
 		 * the updateSprites function is called.
@@ -1647,15 +1713,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.animation && !this.debug) {
 				this.animation.draw(0, 0, undefined, this._scale, this._scale);
 			} else if (this.fixture != null) {
-				if (this.shape == 'chain') this.p.stroke(this.color);
+				if (this._shape == 'chain') this.p.stroke(this.color);
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 					this._drawFixture(fxt);
 				}
 			} else {
 				this.p.stroke(120);
-				if (this.shape == 'box') {
+				if (this._shape == 'box') {
 					this.p.rect(0, 0, this.w, this.h);
-				} else if (this.shape == 'circle') {
+				} else if (this._shape == 'circle') {
 					this.p.circle(0, 0, this.d);
 				}
 			}
@@ -1754,12 +1820,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Set the velocity vector.
 		 *
-		 * @deprecated
-		 * @param {Number} x horizontal velocity
+		 * @param {Number} vector|x vector or horizontal velocity
 		 * @param {Number} y vertical velocity
 		 */
 		setVelocity(x, y) {
-			this.body.setLinearVelocity(new pl.Vec2(x, y));
+			if (typeof x == 'object') {
+				y = x.y;
+				x = x.x;
+			}
+			this.vel.x = x;
+			this.vel.y = y;
 		}
 
 		/**
@@ -1777,7 +1847,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} [direction] angle
 		 */
 		setSpeed(speed, direction) {
-			console.warn('setSpeed is deprecated. Set direction and set speed separately instead.');
+			console.warn('setSpeed is deprecated. Set sprite.direction and sprite.speed separately instead.');
 			if (direction) this.direction = direction;
 			this.speed = speed;
 		}
@@ -3196,8 +3266,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						get() {
 							let val = _this[objProp]['_' + prop];
 							let i = _this.length - 1;
-							if (val === undefined && this.p.world && !_this._isAllSpritesGroup) {
-								let parent = this.p.world.groups[_this.parent];
+							if (val === undefined && _this.p.world && !_this._isAllSpritesGroup) {
+								let parent = _this.p.world.groups[_this.parent];
 								if (parent) {
 									val = parent[objProp][prop];
 									i = parent.length - 1;
@@ -4998,13 +5068,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		/**
+		 * Attempt to auto-correct the user's input. Inheriting classes
+		 * override this method.
+		 */
+		ac(inp) {
+			return inp;
+		}
+
 		presses(inp) {
 			inp ??= this.default;
+			if (this[inp] === undefined) inp = this.ac(inp);
 			return this[inp] == 1 || this[inp] == -2;
 		}
 
 		pressing(inp) {
 			inp ??= this.default;
+			if (this[inp] === undefined) inp = this.ac(inp);
 			return this[inp] > 0 || this[inp] == -2;
 		}
 
@@ -5014,21 +5094,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		holds(inp) {
 			inp ??= this.default;
+			if (this[inp] === undefined) inp = this.ac(inp);
 			return this[inp] == this.holdThreshold;
 		}
 
 		holding(inp) {
 			inp ??= this.default;
+			if (this[inp] === undefined) inp = this.ac(inp);
 			return this[inp] >= this.holdThreshold;
 		}
 
 		held(inp) {
 			inp ??= this.default;
+			if (this[inp] === undefined) inp = this.ac(inp);
 			return this[inp] == -3;
 		}
 
 		released(inp) {
 			inp ??= this.default;
+			if (this[inp] === undefined) inp = this.ac(inp);
 			return this[inp] <= -1;
 		}
 
@@ -5044,6 +5128,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.init(inputs);
 			this.default = 'left';
 			this.draggable = false;
+		}
+
+		ac(inp) {
+			if (inp.slice(0, 4)) inp = 'left';
+			else if (inp.slice(0, 5) == 'right') inp = 'right';
+			else if (inp.slice(0, 6) == 'middle') inp = 'center';
+			else inp = inp.toLowerCase();
+			return inp;
 		}
 
 		dragging(inp) {
@@ -5119,14 +5211,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		if (this.mouse[btn] >= this.mouse.holdThreshold) {
 			this.mouse[btn] = -3;
-		} else if (this.mouse[btn] > 0) this.mouse[btn] = -1;
+		} else if (this.mouse[btn] > 1) this.mouse[btn] = -1;
 		else this.mouse[btn] = -2;
 
 		if (this.p5play.mouseSprite) {
-			if (this.p5play.mouseSprite.mouse.hover > 0) {
+			if (this.p5play.mouseSprite.mouse.hover > 1) {
 				if (this.p5play.mouseSprite.mouse[btn] >= this.mouse.holdThreshold) {
 					this.p5play.mouseSprite.mouse[btn] = -3;
-				} else if (this.p5play.mouseSprite.mouse[btn] > 0) {
+				} else if (this.p5play.mouseSprite.mouse[btn] > 1) {
 					this.p5play.mouseSprite.mouse[btn] = -1;
 				} else {
 					this.p5play.mouseSprite.mouse[btn] = -2;
@@ -5144,6 +5236,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		constructor() {
 			super();
 			this.default = ' ';
+		}
+
+		ac(inp) {
+			if (inp.length == 1) return inp.toLowerCase();
+			else return inp[0].toUpperCase() + inp.slice(1).toLowerCase();
 		}
 	}
 
@@ -5236,7 +5333,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		for (let k of keys) {
 			if (this.kb[k] >= this.kb.holdThreshold) {
 				this.kb[k] = -3;
-			} else if (this.kb[k] > 0) this.kb[k] = -1;
+			} else if (this.kb[k] > 1) this.kb[k] = -1;
 			else this.kb[k] = -2;
 		}
 
@@ -5308,6 +5405,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				leftTrigger: 4,
 				rightTrigger: 5
 			};
+		}
+
+		ac(inp) {
+			return inp.toLowerCase();
 		}
 
 		_update() {
