@@ -443,12 +443,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._scale = 1;
 			this.previousPosition = { x, y };
 			this.dest = { x, y };
-			this.vel.x = 0;
-			this.vel.y = 0;
 			this._destIdx = 0;
 			this.drag = 0;
 			this.debug = false;
 			this._shift = {};
+
+			let gvx = group.vel.x || 0;
+			let gvy = group.vel.y || 0;
+			if (typeof gvx == 'function') gvx = gvx(group.length - 1);
+			if (typeof gvy == 'function') gvy = gvy(group.length - 1);
+			this.vel.x = gvx;
+			this.vel.y = gvy;
 
 			for (let prop of spriteProps) {
 				if (prop == 'collider' || prop == 'x' || prop == 'y') continue;
@@ -461,12 +466,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this[prop] = val;
 				}
 			}
-
-			let gvx = group.vel.x || 0;
-			let gvy = group.vel.y || 0;
-			if (typeof gvx == 'function') gvx = gvx(group.length - 1);
-			if (typeof gvy == 'function') gvy = gvy(group.length - 1);
-			this.setVelocity(gvx, gvy);
 
 			// custom group properties "sprite group traits"
 			// that are non-default sprite properties
@@ -2115,6 +2114,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 					if (start) this.animation.frame = start;
 					if (end != undefined) this.animation.goToFrame(end);
+					// this.playing = true;
 					this.animation.onComplete = () => {
 						resolve();
 					};
@@ -4874,7 +4874,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	class Canvas {
 		constructor() {
-			createCanvas(...arguments);
+			pInst.createCanvas(...arguments);
 		}
 	}
 
@@ -5240,7 +5240,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		ac(inp) {
 			if (inp.length == 1) return inp.toLowerCase();
-			else return inp[0].toUpperCase() + inp.slice(1).toLowerCase();
+			if (!isNaN(inp)) {
+				if (inp == 38) return 'ArrowUp';
+				if (inp == 40) return 'ArrowDown';
+				if (inp == 37) return 'ArrowLeft';
+				if (inp == 39) return 'ArrowRight';
+				throw new Error('Use key names with the keyboard input functions, not key codes!');
+			}
+			return inp[0].toUpperCase() + inp.slice(1).toLowerCase();
 		}
 	}
 
