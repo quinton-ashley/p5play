@@ -43,6 +43,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
 	const scaleFrom = ({ x, y }, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
 	const fixRound = (val) => (Math.abs(val - Math.round(val)) <= pl.Settings.linearSlop ? Math.round(val) : val);
+	const isArrowFunction = (fn) =>
+		!/^(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*(?:(?:(?:async\s(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*)?function|class)(?:\s|(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*)|(?:[_$\w][\w0-9_$]*\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\()|(?:\[\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*(?:(?:['][^']+['])|(?:["][^"]+["]))\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\]\())/.test(
+			fn.toString()
+		);
 
 	let spriteProps = [
 		'bounciness',
@@ -540,7 +544,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				for (let prop in traits) {
 					let val = g[prop];
 					if (val === undefined) continue;
-					// if (typeof val == 'function') val = val();
+					if (typeof val == 'function') {
+						if (isArrowFunction(val)) val = val();
+					}
 					if (typeof val == 'object') {
 						this[prop] = Object.assign({}, val);
 					} else {
@@ -1912,21 +1918,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Move a sprite towards a position
 		 *
 		 * @method moveTowards
-		 * @param {Number} destX destination x
-		 * @param {Number} destY destination y
+		 * @param {Number} x destination x
+		 * @param {Number} y destination y
 		 * @param {Number} tracking 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking
 		 */
-		moveTowards(destX, destY, tracking) {
-			if (!destX && !destY) return;
-			tracking ??= 0.1;
-			// let vec = new pl.Vec2(0, 0);
-			if (destX !== undefined && destX !== null) {
-				// vec.x = (destX - this.x) * tracking * this.tileSize * this.mass;
-				this.vel.x = (destX - this.x) * tracking * this.tileSize;
+		moveTowards(x, y, tracking) {
+			if (typeof x != 'number') {
+				tracking = y;
+				y = x.y;
+				x = x.x;
 			}
-			if (destY !== undefined && destY !== null) {
+			if (x === undefined && y === undefined) return;
+			tracking ??= 0.1;
+
+			// let vec = new pl.Vec2(0, 0);
+			if (x !== undefined && x !== null) {
+				// vec.x = (destX - this.x) * tracking * this.tileSize * this.mass;
+				this.vel.x = (x - this.x) * tracking * this.tileSize;
+			}
+			if (y !== undefined && y !== null) {
 				// vec.y = (destY - this.y) * tracking * this.tileSize * this.mass;
-				this.vel.y = (destY - this.y) * tracking * this.tileSize;
+				this.vel.y = (y - this.y) * tracking * this.tileSize;
 			}
 			// this.body.applyForce(vec, new pl.Vec2(0, 0));
 		}
@@ -3551,6 +3563,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @method moveTowards
 		 */
 		moveTowards(x, y, tracking) {
+			if (typeof x != 'number') {
+				tracking = y;
+				y = x.y;
+				x = x.x;
+			}
+			if (x === undefined && y === undefined) return;
 			let centroid = this.resetCentroid();
 			for (let s of this) {
 				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
