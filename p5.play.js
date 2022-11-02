@@ -168,15 +168,46 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				collider = args[2];
 			}
 
-			if (Array.isArray(w) || (!isNaN(w) && typeof h == 'string')) {
+			// if (w is chain array) or (diameter/side length and h is a
+			// collider type or the name of a regular polygon)
+			if (Array.isArray(w) || typeof h == 'string') {
+				if (!isNaN(w)) w = Number(w);
 				if (typeof w != 'number' && Array.isArray(w[0])) {
 					this.originMode = 'start';
 				}
-				collider = h;
-				h = undefined;
+				if (h !== undefined) {
+					let abr = h.slice(0, 2);
+					// h is a collider type
+					if (abr == 'dy' || abr == 'st' || abr == 'ki' || abr == 'no') {
+						collider = h;
+					} else {
+						// h is the name of a regular polygon
+						if (h == 'circle') h == undefined;
+						else if (h == 'triangle') w = [w, -120, 3];
+						else if (h == 'square') w = [w, -90, 4];
+						else if (h == 'pentagon') w = [w, -72, 5];
+						else if (h == 'hexagon') w = [w, -60, 6];
+						else if (h == 'septagon') w = [w, -51.4285714286, 7];
+						else if (h == 'octagon') w = [w, -45, 8];
+						else if (h == 'enneagon') w = [w, -40, 9];
+						else if (h == 'decagon') w = [w, -36, 10];
+						else if (h == 'hendecagon') w = [w, -32.7272727273, 11];
+						else if (h == 'dodecagon') w = [w, -30, 12];
+					}
+					h = undefined;
+				}
 			} else if (isNaN(w)) {
 				collider = w;
 				w = undefined;
+			}
+
+			if (collider !== undefined) {
+				collider = collider.toLowerCase();
+				let abr = collider.slice(0, 2);
+				if (abr == 'dy') collider = 'dynamic';
+				if (abr == 'st') collider = 'static';
+				if (abr == 'ki') collider = 'kinematic';
+				if (abr == 'no') collider = 'none';
 			}
 
 			/**
@@ -881,6 +912,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let v;
 			if (this._shape == 'chain' || this._shape == 'polygon') {
 				v = this._getVertices(true);
+				this._vertexMode = true;
 			}
 
 			// remove body
@@ -1600,23 +1632,28 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @returns true if valid
 		 */
 		_isConvexPoly(vecs) {
-			for (let i = 0; i < vecs.length; ++i) {
-				const i1 = i;
-				const i2 = i < vecs.length - 1 ? i1 + 1 : 0;
-				const p = vecs[i1];
-				const e = pl.Vec2.sub(vecs[i2], p);
+			loopk: for (let k = 0; k < 2; k++) {
+				if (k == 1) vecs = vecs.reverse();
+				for (let i = 0; i < vecs.length; ++i) {
+					const i1 = i;
+					const i2 = i < vecs.length - 1 ? i1 + 1 : 0;
+					const p = vecs[i1];
+					const e = pl.Vec2.sub(vecs[i2], p);
 
-				for (let j = 0; j < vecs.length; ++j) {
-					if (j == i1 || j == i2) {
-						continue;
-					}
+					for (let j = 0; j < vecs.length; ++j) {
+						if (j == i1 || j == i2) {
+							continue;
+						}
 
-					const v = pl.Vec2.sub(vecs[j], p);
-					const c = pl.Vec2.cross(e, v);
-					if (c < 0.0) {
-						return false;
+						const v = pl.Vec2.sub(vecs[j], p);
+						const c = pl.Vec2.cross(e, v);
+						if (c < 0.0) {
+							if (k == 0) continue loopk;
+							else return false;
+						}
 					}
 				}
+				break;
 			}
 
 			return true;
