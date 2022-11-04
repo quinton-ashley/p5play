@@ -1944,6 +1944,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 *
+		 * @method moveAway
+		 */
+		moveAway(x, y, tracking) {
+			this.moveTowards(...arguments);
+			this.vel.x *= -1;
+			this.vel.y *= -1;
+		}
+
+		/**
 		 * Move the sprite to a destination position or use a direction name:
 		 * 'up', 'down', 'left', 'right', 'upLeft', 'upRight', 'downLeft',
 		 * 'downRight'
@@ -3581,6 +3591,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * @method moveAway
+		 */
+		moveAway(x, y, tracking) {
+			if (typeof x != 'number') {
+				tracking = y;
+				y = x.y;
+				x = x.x;
+			}
+			if (x === undefined && y === undefined) return;
+			let centroid = this.resetCentroid();
+			for (let s of this) {
+				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
+				let dest = {
+					x: s.distCentroid.x + x,
+					y: s.distCentroid.y + y
+				};
+				s.moveAway(dest.x, dest.y, tracking);
+			}
+		}
+
+		/**
 		 * Rotates the group around its centroid.
 		 *
 		 * @method orbit
@@ -4898,8 +4929,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				w = (window.innerHeight * rW) / rH;
 				h = window.innerHeight;
 			}
-			args[0] = w;
-			args[1] = h;
+			args[0] = Math.round(w);
+			args[1] = Math.round(h);
 		} else if (args.length < 2) {
 			args[0] = window.innerWidth;
 			args[1] = window.innerHeight;
