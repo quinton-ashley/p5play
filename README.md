@@ -8,42 +8,15 @@
 
 p5.play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated by Paolo Pedercini [@molleindustria][] . If you have any questions or problems use the help channels on [discord](https://discord.gg/3UTbqUgmPF) or make an [issue report][] on this GitHub repository or email <qashto@gmail.com>
 
-## Using p5.play
-
-You can easily use p5.play by adding the following script tags to your html within the head or body tag.
-
-```html
-<!-- Version 3 -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/addons/p5.sound.min.js"></script>
-<script src="https://p5play.org/v3/planck.js"></script>
-<script src="https://p5play.org/v3/p5.play.js"></script>
-```
-
-```html
-<!-- Version 2 (Legacy) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/addons/p5.sound.min.js"></script>
-<script src="https://p5play.org/v2/p5.play.js"></script>
-```
-
-You can also install the [p5.play npm package][].
-
-```
-npm install p5.play
-```
-
-Need help getting started with local p5.play development? Check out this [guide](https://github.com/molleindustria/p5.play/wiki/Get-Started).
-
-## Development of p5.play
-
-Take a look at [p5play-web][] for information about how to contribute to the development of p5.play
-
 ## Support p5.play
 
 This open source project took thousands of hours to create and it continues to be updated and maintained by Quinton Ashley. p5.play will always be available for free, but your support would be greatly appreciated. Please consider donating!
 
 [![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto) [![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley)
+
+## Development of p5.play
+
+Take a look at [p5play-web][] for information about how to contribute to the development of p5.play
 
 [p5.play]: https://molleindustria.github.io/p5.play/
 [p5.js]: https://p5js.org

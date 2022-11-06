@@ -32,7 +32,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	pl.Settings.velocityThreshold = 0.19;
 	let plScale = 60;
 
-	this.p5play = this.p5play || {};
+	this.p5play = this.p5play || {
+		os: {
+			emulated: false
+		}
+	};
 	this.p5play.autoDrawSprites ??= true;
 	this.p5play.autoUpdateSprites ??= true;
 	this.p5play.mouseTracking ??= true;
@@ -4954,8 +4958,34 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		this.world.resize();
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 		let style = document.createElement('style');
-		style.innerHTML = `canvas { outline: none; }`;
+
+		/* prevent callout to copy image, etc when tap to hold */
+		/* prevent webkit from resizing text to fit */
+		/* prevent copy paste, to allow, change 'none' to 'text' */
+		style.innerHTML = `canvas { 
+			outline: none;
+			-webkit-touch-callout: none;
+			-webkit-text-size-adjust: none;
+			-webkit-user-select: none;
+			overscroll-behavior: none;
+		}
+		main{
+			overscroll-behavior: none;
+		}`;
 		document.head.appendChild(style);
+
+		let idx = navigator.userAgent.indexOf('iPhone OS');
+		if (idx > -1) {
+			let version = navigator.userAgent.substring(idx + 10, idx + 12);
+			this.p5play.version = version;
+			if (version < 16) {
+				pixelDensity(1);
+			}
+			this.p5play.os.platform = 'iOS';
+			this.p5play.os.version = version;
+		} else if (navigator.userAgentData !== undefined) {
+			this.p5play.os.platform = navigator.userAgentData.platform;
+		}
 	};
 
 	class Canvas {
@@ -5265,11 +5295,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	const _onmousedown = this._onmousedown;
 
-	this._onmousedown = function (e) {
-		let btn = 'left';
-		if (e.button === 1) btn = 'center';
-		else if (e.button === 2) btn = 'right';
-
+	const __onmousedown = function (btn) {
 		this.mouse[btn]++;
 
 		let ms;
@@ -5286,17 +5312,28 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			this.p5play.mouseSprite = ms;
 		}
-
-		_onmousedown.call(this, e);
 	};
 
-	const _onmouseup = this._onmouseup;
-
-	this._onmouseup = function (e) {
+	this._onmousedown = function (e) {
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
 
+		__onmousedown.call(this, btn);
+
+		_onmousedown.call(this, e);
+	};
+
+	const _ontouchstart = this._ontouchstart;
+
+	this._ontouchstart = function (e) {
+		__onmousedown.call(this, 'left');
+		_ontouchstart.call(this, e);
+	};
+
+	const _onmouseup = this._onmouseup;
+
+	const __onmouseup = function (btn) {
 		if (this.mouse[btn] >= this.mouse.holdThreshold) {
 			this.mouse[btn] = -3;
 		} else if (this.mouse[btn] > 1) this.mouse[btn] = -1;
@@ -5316,8 +5353,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.p5play.mouseSprite.mouse.draggable = false;
 			}
 		}
+	};
 
+	this._onmouseup = function (e) {
+		let btn = 'left';
+		if (e.button === 1) btn = 'center';
+		else if (e.button === 2) btn = 'right';
+
+		__onmouseup.call(this, btn);
 		_onmouseup.call(this, e);
+	};
+
+	const _ontouchend = this._ontouchend;
+
+	this._ontouchend = function (e) {
+		__onmouseup.call(this, 'left');
+		_ontouchend.call(this, e);
 	};
 
 	class KeyBoard extends InputDevice {
