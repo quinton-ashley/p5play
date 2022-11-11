@@ -45,6 +45,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.standardizeKeyboard = false;
 
 	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
+	const scaleXTo = (x, tileSize) => (x * tileSize) / plScale;
 	const scaleFrom = ({ x, y }, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
 	const fixRound = (val) => (Math.abs(val - Math.round(val)) <= pl.Settings.linearSlop ? Math.round(val) : val);
 	const isArrowFunction = (fn) =>
@@ -761,6 +762,74 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._removeFixtures(false);
 		}
 
+		addJoint(bodyB, type, props, anchor) {
+			let bodyA = this;
+			props ??= {};
+			/*
+			 * frequencyHz, dampingRatio, collideConnected, userData, ratio,
+			 * enableLimit, enableMotor, lowerAngle, maxMotorTorque
+			 * maxMotorForce, motorSpeed, referenceAngle, upperAngle, maxForce
+			 * maxTorque, localAxisA, angularOffset, joint1, joint2,
+			 * correctionFactor
+			 */
+			props = Object.assign(props, {
+				bodyA: this.body,
+				bodyB: bodyB.body,
+				length: props.length != undefined ? scaleXTo(props.length) : null,
+				maxLength: props.maxLength != undefined ? scaleXTo(props.maxLength) : null,
+				lengthA: props.lengthA != undefined ? scaleXTo(props.lengthA) : null,
+				lengthB: props.lengthB != undefined ? scaleXTo(props.lengthB) : null,
+				groundAnchorA: props.groundAnchorA ? scaleXTo(props.groundAnchorA) : new pl.Vec2(0, 0),
+				groundAnchorB: props.groundAnchorB ? scaleXTo(props.groundAnchorB) : new pl.Vec2(0, 0),
+				upperTranslation: props.upperTranslation ? scaleXTo(props.upperTranslation) : 1,
+				lowerTranslation: props.lowerTranslation ? scaleXTo(props.lowerTranslation) : 1,
+				linearOffset: props.linearOffset ? scaleTo(props.linearOffset) : new pl.Vec2(0, 0)
+			});
+
+			if (anchor) {
+				props.localAnchorA = bodyA.body.getLocalPoint(scaleTo(anchor));
+				props.localAnchorB = bodyB.body.getLocalPoint(scaleTo(anchor));
+			} else {
+				props.localAnchorA = props.localAnchorA ? scaleTo(props.localAnchorA) : new pl.Vec2(0, 0);
+				props.localAnchorB = props.localAnchorB ? scaleTo(props.localAnchorB) : new pl.Vec2(0, 0);
+			}
+
+			let j;
+			if (type == 'distance') {
+				j = pl.DistanceJoint(j);
+			} else if (type == 'pulley') {
+				j = pl.PulleyJoint(j);
+			} else if (type == 'wheel') {
+				j = pl.WheelJoint(j);
+			} else if (type == 'rope') {
+				j = pl.RopeJoint(j);
+			} else if (type == 'weld') {
+				j = pl.WeldJoint(j);
+			} else if (type == 'revolute') {
+				j = pl.RevoluteJoint(j);
+			} else if (type == 'gear') {
+				j = pl.GearJoint(j);
+			} else if (type == 'friction') {
+				j = pl.FrictionJoint(j);
+			} else if (type == 'motor') {
+				j = pl.MotorJoint(j);
+			} else if (type == 'prismatic') {
+				j = pl.PrismaticJoint(j);
+			} else if (type == 'mouse') {
+				/*j = new box2d.b2MouseJointDef();
+        j.bodyA = bodyA!=null?bodyA.body:b2world.CreateBody(new box2d.b2BodyDef());
+        j.bodyB = bodyB.body;
+        j.target = b2scaleTo(props.xy);
+        j.collideConnected = true;
+        j.maxForce = props.maxForce||(1000.0 * bodyB.body.GetMass());
+        j.frequencyHz = props.frequency||5;  // Try a value less than 5 (0 for no elasticity)
+        j.dampingRatio = props.damping||0.9; // Ranges between 0 and 1 (1 for no springiness)
+        bodyB.body.SetAwake(true);
+        bodyA=bodyB;*/
+			}
+			return this.p.world.createJoint(j);
+		}
+
 		/**
 		 * Removes overlap sensors from the sprite.
 		 *
@@ -1019,6 +1088,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._direction;
 		}
 		set direction(val) {
+			if (typeof val == 'string') {
+				this._heading = val;
+
+				let dir = val.toLowerCase().replaceAll(/[ _-]/g, '');
+				let dirs = {
+					up: -90,
+					down: 90,
+					left: 180,
+					right: 0,
+					upright: -45,
+					rightup: -45,
+					upleft: -135,
+					leftup: -135,
+					downright: 45,
+					rightdown: 45,
+					downleft: 135,
+					leftdown: 135
+				};
+				val = dirs[dir];
+			}
+
 			this._direction = val;
 			let speed = this.speed;
 			this.vel.x = this.p.cos(val) * speed;
@@ -1127,6 +1217,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setFriction(val);
 			}
+		}
+
+		/**
+		 * The sprite's heading. This is a string that can be set to
+		 * "up", "down", "left", "right", "upRight", "upLeft", "downRight"
+		 *
+		 * It ignores cardinal direction word order, capitalization, spaces,
+		 * underscores, and dashes.
+		 *
+		 * @property heading
+		 * @type {String}
+		 */
+		get heading() {
+			return this._heading;
+		}
+		set heading(val) {
+			this.direction = val;
 		}
 
 		/**
@@ -1586,19 +1693,28 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.d = val;
 		}
 
+		/**
+		 * The radius of a circular sprite.
+		 * @property r
+		 * @type {Number}
+		 */
 		get r() {
 			return this._hw;
 		}
-
 		set r(val) {
-			throw new Error("Unable to change the value of radius directly, change the sprite's diameter instead");
+			this.d = val * 2;
 		}
 
+		/**
+		 * The radius of a circular sprite.
+		 * @property radius
+		 * @type {Number}
+		 */
 		get radius() {
 			return this._hw;
 		}
 		set radius(val) {
-			throw new Error("Unable to change the value of radius directly, change the sprite's diameter instead");
+			this.d = val * 2;
 		}
 
 		// TODO make this work for other shapes
@@ -1914,23 +2030,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.vel.y += this.p.sin(angle) * speed;
 		}
 
-		getDirection() {
-			return this.direction;
-		}
-
 		/**
-		 * Move a sprite towards a position
+		 * Move a sprite towards a position.
 		 *
 		 * @method moveTowards
-		 * @param {Number} x destination x
+		 * @param {Number|Object} x|position destination x or any object with x and y properties
 		 * @param {Number} y destination y
-		 * @param {Number} tracking 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking
+		 * @param {Number} tracking [optional] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
 		 */
 		moveTowards(x, y, tracking) {
 			if (typeof x != 'number') {
+				let obj = x;
+				if (obj == this.p.mouse && !this.p.mouse.active) return;
+				if (obj.x === undefined || obj.y === undefined) {
+					console.error(
+						'sprite.moveTowards/moveAway ERROR: movement destination not defined, object given with no x or y properties'
+					);
+					return;
+				}
 				tracking = y;
-				y = x.y;
-				x = x.x;
+				y = obj.y;
+				x = obj.x;
 			}
 			if (x === undefined && y === undefined) return;
 			tracking ??= 0.1;
@@ -1948,74 +2068,91 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Move a sprite away from a position.
 		 *
 		 * @method moveAway
+		 * @param {Number|Object} x|position x or any object with x and y properties
+		 * @param {Number} y
+		 * @param {Number} repel [optional] the higher the value, the faster the sprite moves away. Default is 0.1 (10% repel).
 		 */
-		moveAway(x, y, tracking) {
+		moveAway(x, y, repel) {
 			this.moveTowards(...arguments);
 			this.vel.x *= -1;
 			this.vel.y *= -1;
 		}
 
 		/**
-		 * Move the sprite to a destination position or use a direction name:
-		 * 'up', 'down', 'left', 'right', 'upLeft', 'upRight', 'downLeft',
-		 * 'downRight'
+		 * Move the sprite a certain distance from its current position.
 		 *
 		 * @method move
-		 * @param {Number} destX destination x
-		 * @param {Number} destY destination y
-		 * @param {Number} speed scalar
-		 * @returns {Promise} resolves when the movement is complete
+		 * @param {Number} direction [optional]
+		 * @param {Number} speed [optional]
+		 * @param {Number} distance
+		 * @returns {Promise} resolves when the movement is complete or cancelled
 		 */
-		move(destX, destY, speed) {
-			if (typeof destX == 'undefined') {
+		move(direction, speed, distance) {
+			if (arguments.length == 1) {
+				direction = this.direction;
+				distance = arguments[0];
+			} else if (arguments.length > 1) {
+				this.direction = direction;
+			}
+			distance ??= 1;
+			return this.moveTo(
+				this.x + this.p.cos(this.direction) * distance,
+				this.y + this.p.sin(this.direction) * distance,
+				speed
+			);
+		}
+
+		/**
+		 * Move the sprite to a position.
+		 *
+		 * @method moveTo
+		 * @param {Number|Object} x|position destination x or any object with x and y properties
+		 * @param {Number} y destination y
+		 * @param {Number} speed [optional]
+		 * @returns {Promise} resolves when the movement is complete or cancelled
+		 */
+		moveTo(x, y) {
+			if (typeof x == 'undefined') {
 				console.error('sprite.move ERROR: movement direction or destination not defined');
 				return;
 			}
+			let speed = arguments[2];
+			if (typeof x != 'number') {
+				let obj = x;
+				if (obj == this.p.mouse && !this.p.mouse.active) return;
+				if (obj.x === undefined || obj.y === undefined) {
+					console.error(
+						'sprite.moveTo ERROR: movement destination not defined, object given with no x or y properties'
+					);
+					return;
+				}
+				speed = y;
+				y = obj.y;
+				x = obj.x;
+			}
 			this.dest.x = this.x;
 			this.dest.y = this.y;
-			// if the sprite is moving stop it from moving in the direction it used to be moving in
-			// if (this.isMoving) {
-			// 	this.velocity.x = 0;
-			// 	this.velocity.y = 0;
-			// }
+
 			let direction = true;
-			// if destX is actually the direction (up, down, left, or right)
-			if (typeof destX == 'string') {
-				// shift input parameters over by one
-				speed = arguments[1];
-				direction = arguments[0];
-				if (direction == 'up' || direction.slice(0, 2) == 'up') {
-					this.dest.y = Math.round(this.y - 1);
-				}
-				if (direction == 'down' || direction.slice(0, 4) == 'down') {
-					this.dest.y = Math.round(this.y + 1);
-				}
-				if (direction == 'left' || direction.includes('Left')) {
-					this.dest.x = Math.round(this.x - 1);
-				}
-				if (direction == 'right' || direction.includes('Right')) {
-					this.dest.x = Math.round(this.x + 1);
-				}
-				destX = destY = false;
-				if (/(up|down)/.test(direction)) {
-					destY = true;
-				}
-				if (/(left|right)/.test(direction)) {
-					destX = true;
-				}
-				this.heading = direction;
-			} else {
-				if (destX == this.x) destX = false;
-				if (destX) this.dest.x = destX;
-				if (destY == this.y) destY = false;
-				if (destY) this.dest.y = destY;
+
+			if (x == this.x) x = false;
+			else {
+				this.dest.x = x;
+				x = true;
+			}
+			if (y == this.y) y = false;
+			else {
+				this.dest.y = y;
+				y = true;
 			}
 
 			this._destIdx++;
-			if (!destX && !destY) return true;
+			if (!x && !y) return true;
 
+			if (this.speed) speed ??= this.speed;
 			if (this.tileSize > 1) speed ??= 0.1;
 			speed ??= 1;
 			if (speed <= 0) {
@@ -2023,21 +2160,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				speed = Math.abs(speed);
 			}
 
-			let dist = Math.max(Math.abs(this.x - this.dest.x), Math.abs(this.y - this.dest.y));
+			let a = this.dest.y - this.y;
+			let b = this.dest.x - this.x;
+			let c = Math.sqrt(a * a + b * b);
 
-			let percent = speed / dist;
+			let percent = speed / c;
 
-			this.vel.x = (this.dest.x - this.x) * percent;
-			this.vel.y = (this.dest.y - this.y) * percent;
-
-			let totalSpeed = Math.sqrt(this.vel.x ** 2 + this.vel.y ** 2);
+			this.vel.x = b * percent;
+			this.vel.y = a * percent;
 
 			// estimate how many frames it will take for the sprite
 			// to reach its destination
-			let frames = Math.floor(dist / totalSpeed) - 5;
+			let frames = Math.floor(c / speed) - 5;
 
 			// margin of error
-			let margin = totalSpeed + 0.01;
+			let margin = speed + 0.01;
 
 			let destIdx = this._destIdx;
 
@@ -2045,6 +2182,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let distX = margin + margin;
 				let distY = margin + margin;
 				do {
+					if (destIdx != this._destIdx) return;
+
 					await p5.prototype.delay();
 
 					// skip calculations if not close enough to destination yet
@@ -2053,27 +2192,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						continue;
 					}
 
-					if (destIdx != this._destIdx) return;
-
 					// check if the sprite has reached its destination
 					distX = Math.abs(this.x - this.dest.x);
 					distY = Math.abs(this.y - this.dest.y);
-				} while ((destX && distX > margin) || (destY && distY > margin));
+				} while ((x && distX > margin) || (y && distY > margin));
 				// stop moving the sprite, snap to destination
 				if (distX < margin) this.x = this.dest.x;
 				if (distY < margin) this.y = this.dest.y;
 				this.vel.x = 0;
 				this.vel.y = 0;
 			})();
-		}
-
-		/**
-		 * Same as sprite.move
-		 *
-		 * @method moveTo
-		 */
-		moveTo(destX, destY, speed) {
-			return this.move(destX, destY, speed);
 		}
 
 		/**
@@ -2157,17 +2285,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (anis.length == 1 && Array.isArray(anis[0])) {
 				anis = anis[0];
 			}
-			let count = ++this._aniChanged;
-
-			for (let i = 0; i < anis.length; i++) {
-				if (typeof anis[i] == 'string') anis[i] = { name: anis[i] };
-				let ani = anis[i];
-				if (ani.name[0] == '!') {
-					ani.name = ani.name.slice(1);
-					ani.start = -1;
-					ani.end = 0;
-				}
-			}
 
 			let _ani = (name, start, end) => {
 				return new Promise((resolve) => {
@@ -2186,10 +2303,29 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			for (let i = 0; i < anis.length; i++) {
 				let ani = anis[i];
-				if (ani.name == '*') {
-					if (count == this._aniChanged) i = 0;
-					continue;
+				if (ani instanceof SpriteAnimation || ani instanceof p5.Image) {
+					anis[i] = this.addAni(ani);
+					ani = anis[i];
 				}
+				if (typeof ani == 'string') {
+					anis[i] = { name: ani };
+					ani = anis[i];
+				}
+				if (ani.name[0] == '!') {
+					ani.name = ani.name.slice(1);
+					ani.start = -1;
+					ani.end = 0;
+				}
+			}
+
+			// let count = ++this._aniChanged;
+
+			for (let i = 0; i < anis.length; i++) {
+				let ani = anis[i];
+				// if () { // TODO repeat
+				// 	if (count == this._aniChanged) i = 0;
+				// 	continue;
+				// }
 				let { name, start, end } = ani;
 				await _ani(name, start, end);
 			}
@@ -2258,84 +2394,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		toString() {
 			return 's' + this.idNum;
 		}
-
-		// createJoint(type, { body }, props, anchor) {
-		// 	let j;
-		// 	const bodyA = this;
-		// 	j = {
-		// 		bodyA: this.body,
-		// 		bodyB: body,
-		// 		length: props.length != undefined ? props.length / plScale : null,
-		// 		frequencyHz: props.frequencyHz,
-		// 		dampingRatio: props.dampingRatio,
-		// 		collideConnected: props.collideConnected,
-		// 		maxLength: props.maxLength != undefined ? props.maxLength / plScale : null,
-		// 		userData: props.userData,
-		// 		lengthA: props.lengthA != undefined ? props.lengthA / plScale : null,
-		// 		lengthB: props.lengthB != undefined ? props.lengthB / plScale : null,
-		// 		ratio: props.ratio,
-		// 		groundAnchorA: props.groundAnchorA ? scaleTo(props.groundAnchorA) : new pl.Vec2(0, 0),
-		// 		groundAnchorB: props.groundAnchorB ? scaleTo(props.groundAnchorB) : new pl.Vec2(0, 0),
-		// 		enableLimit: props.enableLimit,
-		// 		enableMotor: props.enableMotor,
-		// 		lowerAngle: props.lowerAngle,
-		// 		maxMotorTorque: props.maxMotorTorque,
-		// 		maxMotorForce: props.maxMotorForce,
-		// 		motorSpeed: props.motorSpeed,
-		// 		referenceAngle: props.referenceAngle,
-		// 		upperAngle: props.upperAngle,
-		// 		maxForce: props.maxForce,
-		// 		maxTorque: props.maxTorque,
-		// 		localAxisA: props.localAxisA,
-		// 		upperTranslation: props.upperTranslation ? props.upperTranslation / plScale : 1,
-		// 		lowerTranslation: props.lowerTranslation ? props.lowerTranslation / plScale : 1,
-		// 		angularOffset: props.angularOffset,
-		// 		joint1: props.joint1,
-		// 		joint2: props.joint2,
-		// 		correctionFactor: props.correctionFactor,
-		// 		linearOffset: props.linearOffset ? scaleTo(props.linearOffset) : new pl.Vec2(0, 0)
-		// 	};
-		// 	if (anchor) {
-		// 		j.localAnchorA = bodyA.body.getLocalPoint(scaleTo(anchor));
-		// 		j.localAnchorB = body.getLocalPoint(scaleTo(anchor));
-		// 	} else {
-		// 		j.localAnchorA = props.localAnchorA ? scaleTo(props.localAnchorA) : new pl.Vec2(0, 0);
-		// 		j.localAnchorB = props.localAnchorB ? scaleTo(props.localAnchorB) : new pl.Vec2(0, 0);
-		// 	}
-		// 	if (type == 'distance') {
-		// 		j = pl.DistanceJoint(j);
-		// 	} else if (type == 'pulley') {
-		// 		j = pl.PulleyJoint(j);
-		// 	} else if (type == 'wheel') {
-		// 		j = pl.WheelJoint(j);
-		// 	} else if (type == 'rope') {
-		// 		j = pl.RopeJoint(j);
-		// 	} else if (type == 'weld') {
-		// 		j = pl.WeldJoint(j);
-		// 	} else if (type == 'revolute') {
-		// 		j = pl.RevoluteJoint(j);
-		// 	} else if (type == 'gear') {
-		// 		j = pl.GearJoint(j);
-		// 	} else if (type == 'friction') {
-		// 		j = pl.FrictionJoint(j);
-		// 	} else if (type == 'motor') {
-		// 		j = pl.MotorJoint(j);
-		// 	} else if (type == 'prismatic') {
-		// 		j = pl.PrismaticJoint(j);
-		// 	} else if (type == 'mouse') {
-		// 		/*j = new box2d.b2MouseJointDef();
-		//         j.bodyA = bodyA!=null?bodyA.body:b2world.CreateBody(new box2d.b2BodyDef());
-		//         j.bodyB = bodyB.body;
-		//         j.target = b2scaleTo(props.xy);
-		//         j.collideConnected = true;
-		//         j.maxForce = props.maxForce||(1000.0 * bodyB.body.GetMass());
-		//         j.frequencyHz = props.frequency||5;  // Try a value less than 5 (0 for no elasticity)
-		//         j.dampingRatio = props.damping||0.9; // Ranges between 0 and 1 (1 for no springiness)
-		//         bodyB.body.SetAwake(true);
-		//         bodyA=bodyB;*/
-		// 	}
-		// 	return this.p.world.createJoint(j);
-		// }
 
 		_ensureCollide(target, callback) {
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
@@ -3617,6 +3675,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		/**
 		 * Rotates the group around its centroid.
+		 *
+		 * TODO experimental function, subject to change!
 		 *
 		 * @method orbit
 		 * @param {Number} amount Amount of rotation
@@ -4955,6 +5015,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				e.preventDefault();
 			}
 		});
+		this.canvas.addEventListener(
+			'mouseover',
+			() => {
+				this.mouse.isOnCanvas = true;
+				this.mouse.active = true;
+			},
+			false
+		);
+		this.canvas.addEventListener(
+			'mouseleave',
+			() => {
+				this.mouse.isOnCanvas = false;
+			},
+			false
+		);
 		this.world.resize();
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 		let style = document.createElement('style');
@@ -5246,6 +5321,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.init(inputs);
 			this.default = 'left';
 			this.draggable = false;
+			this.isOnCanvas = false;
+			this.active = false;
 		}
 
 		ac(inp) {
@@ -5260,10 +5337,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			inp ??= this.default;
 			this.draggable = true;
 			return this[inp] >= this.holdThreshold;
-		}
-
-		get isOnCanvas() {
-			return this.x >= 0 && this.x < pInst.width && this.y >= 0 && this.y < pInst.height;
 		}
 	}
 
@@ -5297,6 +5370,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	const __onmousedown = function (btn) {
 		this.mouse[btn]++;
+		this.mouse.active = true;
 
 		let ms;
 		if (this.p5play.mouseSprites.length) {
