@@ -2085,24 +2085,33 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Move the sprite a certain distance from its current position.
 		 *
 		 * @method move
-		 * @param {Number} direction [optional]
+		 * @param {Number|String} direction [optional]
 		 * @param {Number} speed [optional]
-		 * @param {Number} distance
+		 * @param {Number} distance [optional]
 		 * @returns {Promise} resolves when the movement is complete or cancelled
 		 */
 		move(direction, speed, distance) {
+			let dirNameMode = isNaN(arguments[0]);
 			if (arguments.length == 1) {
-				direction = this.direction;
-				distance = arguments[0];
+				if (!dirNameMode) {
+					// move(distance)
+					direction = this.direction;
+					distance = arguments[0];
+				} else {
+					// move(direction)
+					this.direction = direction;
+				}
 			} else if (arguments.length > 1) {
 				this.direction = direction;
 			}
 			distance ??= 1;
-			return this.moveTo(
-				this.x + this.p.cos(this.direction) * distance,
-				this.y + this.p.sin(this.direction) * distance,
-				speed
-			);
+			let x = this.x + this.p.cos(this.direction) * distance;
+			let y = this.y + this.p.sin(this.direction) * distance;
+			if (dirNameMode) {
+				x = Math.round(x);
+				y = Math.round(y);
+			}
+			return this.moveTo(x, y, speed);
 		}
 
 		/**
@@ -2114,12 +2123,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} speed [optional]
 		 * @returns {Promise} resolves when the movement is complete or cancelled
 		 */
-		moveTo(x, y) {
+		moveTo(x, y, speed) {
 			if (typeof x == 'undefined') {
 				console.error('sprite.move ERROR: movement direction or destination not defined');
 				return;
 			}
-			let speed = arguments[2];
 			if (typeof x != 'number') {
 				let obj = x;
 				if (obj == this.p.mouse && !this.p.mouse.active) return;
@@ -3616,9 +3624,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @method move
+		 * @method moveTo
 		 */
-		move(x, y, speed) {
+		moveTo(x, y, speed) {
 			let centroid = this.centroid;
 			let movements = [];
 			for (let s of this) {
