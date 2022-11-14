@@ -762,8 +762,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._removeFixtures(false);
 		}
 
-		addJoint(bodyB, type, props, anchor) {
-			let bodyA = this;
+		/**
+		 * Adds a joint between this sprite and another sprite.
+		 *
+		 * @method addJoint
+		 * @param {Sprite} spriteB the sprite to add a joint to
+		 * @param {String} [type] the type of joint
+		 * @param {Object} [props] the joint options
+		 */
+		addJoint(spriteB, type, props) {
+			let spriteA = this;
 			props ??= {};
 			/*
 			 * frequencyHz, dampingRatio, collideConnected, userData, ratio,
@@ -772,9 +780,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * maxTorque, localAxisA, angularOffset, joint1, joint2,
 			 * correctionFactor
 			 */
+			if (props.motorSpeed) props.enableMotor = true;
+
+			// function genProps(a, b) {
 			props = Object.assign(props, {
-				bodyA: this.body,
-				bodyB: bodyB.body,
+				bodyA: spriteA.body,
+				bodyB: spriteB.body,
 				length: props.length != undefined ? scaleXTo(props.length) : null,
 				maxLength: props.maxLength != undefined ? scaleXTo(props.maxLength) : null,
 				lengthA: props.lengthA != undefined ? scaleXTo(props.lengthA) : null,
@@ -785,36 +796,55 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				lowerTranslation: props.lowerTranslation ? scaleXTo(props.lowerTranslation) : 1,
 				linearOffset: props.linearOffset ? scaleTo(props.linearOffset) : new pl.Vec2(0, 0)
 			});
-
-			if (anchor) {
-				props.localAnchorA = bodyA.body.getLocalPoint(scaleTo(anchor));
-				props.localAnchorB = bodyB.body.getLocalPoint(scaleTo(anchor));
+			if (props.anchorA) {
+				props.localAnchorA = scaleTo(props.anchorA);
+			} else if (props.localAnchorA) {
+				props.localAnchorA = scaleTo(props.localAnchorA);
 			} else {
-				props.localAnchorA = props.localAnchorA ? scaleTo(props.localAnchorA) : new pl.Vec2(0, 0);
-				props.localAnchorB = props.localAnchorB ? scaleTo(props.localAnchorB) : new pl.Vec2(0, 0);
+				props.localAnchorA = new pl.Vec2(0, 0);
 			}
+			if (props.anchorB) {
+				props.localAnchorB = scaleTo(props.anchorB);
+			} else if (props.localAnchorB) {
+				props.localAnchorB = scaleTo(props.localAnchorB);
+			} else {
+				props.localAnchorB = new pl.Vec2(0, 0);
+			}
+			// 	return props;
+			// }
 
+			type ??= 'distance';
 			let j;
 			if (type == 'distance') {
-				j = pl.DistanceJoint(j);
+				j = pl.DistanceJoint(props);
+			} else if (type == 'orbit') {
+				// let s = new Sprite([
+				// 	[spriteA.x, spriteA.y],
+				// 	[spriteB.x, spriteB.y]
+				// ]);
+				// s.overlaps(allSprites);
+				// j = pl.DistanceJoint(genProps(spriteA, s));
+				// this.p.world.createJoint(j);
+				// genProps(s, spriteB);
+				// j = pl.RevoluteJoint(props, s.body, spriteB.body, spriteB.body.getWorldCenter());
 			} else if (type == 'pulley') {
-				j = pl.PulleyJoint(j);
+				j = pl.PulleyJoint(props);
 			} else if (type == 'wheel') {
-				j = pl.WheelJoint(j);
+				j = pl.WheelJoint(props);
 			} else if (type == 'rope') {
-				j = pl.RopeJoint(j);
+				j = pl.RopeJoint(props);
 			} else if (type == 'weld') {
-				j = pl.WeldJoint(j);
+				j = pl.WeldJoint(props);
 			} else if (type == 'revolute') {
-				j = pl.RevoluteJoint(j);
+				j = pl.RevoluteJoint(props, spriteA.body, spriteB.body, spriteA.body.getWorldCenter());
 			} else if (type == 'gear') {
-				j = pl.GearJoint(j);
+				j = pl.GearJoint(props);
 			} else if (type == 'friction') {
-				j = pl.FrictionJoint(j);
+				j = pl.FrictionJoint(props);
 			} else if (type == 'motor') {
-				j = pl.MotorJoint(j);
+				j = pl.MotorJoint(props);
 			} else if (type == 'prismatic') {
-				j = pl.PrismaticJoint(j);
+				j = pl.PrismaticJoint(props);
 			} else if (type == 'mouse') {
 				/*j = new box2d.b2MouseJointDef();
         j.bodyA = bodyA!=null?bodyA.body:b2world.CreateBody(new box2d.b2BodyDef());
@@ -4823,6 +4853,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 		img.updatePixels();
+		img.w = img.width;
+		img.h = img.height;
 		pInst.p5play.images.onLoad(img);
 		return img; // return the p5 graphics object
 	};
@@ -5062,7 +5094,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let version = navigator.userAgent.substring(idx + 10, idx + 12);
 			this.p5play.version = version;
 			if (version < 16) {
-				pixelDensity(1);
+				pInst.pixelDensity(1);
 			}
 			this.p5play.os.platform = 'iOS';
 			this.p5play.os.version = version;
