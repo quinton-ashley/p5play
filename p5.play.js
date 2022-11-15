@@ -146,6 +146,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args = args.slice(1);
 			}
 
+			if (!args.length) this._noArgs = true;
+
 			if (
 				args[0] !== undefined &&
 				isNaN(args[0]) &&
@@ -909,7 +911,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				'dynamic',
 				'static',
 				'kinematic',
-				'collider'
+				'collider',
+				'heading',
+				'direction'
 			];
 			for (let del of deletes) {
 				let i = props.indexOf(del);
