@@ -5124,7 +5124,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.background = function () {
 		let args = arguments;
 		let c;
-		if (args.length == 1) {
+		if (args.length == 1 && args[0] instanceof p5.Color) {
 			c = p5.prototype.colorPal(args[0]);
 		}
 		if (c !== undefined) _background.call(this, c);
