@@ -5105,12 +5105,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		} else if (navigator.userAgentData !== undefined) {
 			this.p5play.os.platform = navigator.userAgentData.platform;
 		}
+
+		return this.canvas;
 	};
 
-	class Canvas {
-		constructor() {
-			pInst.createCanvas(...arguments);
-		}
+	function Canvas() {
+		return pInst.createCanvas(...arguments);
 	}
 
 	const _background = this.background;
