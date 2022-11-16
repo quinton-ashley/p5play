@@ -5044,7 +5044,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			args[1] = window.innerHeight;
 		}
 		if (args.length < 3) args[2] = 'p2d';
-		_createCanvas.call(pInst, ...args);
+		let can = _createCanvas.call(pInst, ...args);
 		this.canvas.tabIndex = 0;
 		// log(this.canvas);
 		this.canvas.addEventListener('keydown', function (e) {
@@ -5106,7 +5106,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p5play.os.platform = navigator.userAgentData.platform;
 		}
 
-		return this.canvas;
+		return can;
 	};
 
 	function Canvas() {
