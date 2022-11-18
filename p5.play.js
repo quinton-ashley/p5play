@@ -5026,6 +5026,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 */
 	this.createCanvas = function () {
 		let args = [...arguments];
+		let isFullScreen = false;
 		if (typeof args[0] == 'string') {
 			let ratio = args[0].split(':');
 			let rW = Number(ratio[0]);
@@ -5039,9 +5040,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			args[0] = Math.round(w);
 			args[1] = Math.round(h);
-		} else if (args.length < 2) {
+		} else if (args.length == 1) {
+			args[1] = args[0];
+		} else if (!args.length) {
 			args[0] = window.innerWidth;
 			args[1] = window.innerHeight;
+			isFullScreen = true;
 		}
 		if (args.length < 3) args[2] = 'p2d';
 		let can = _createCanvas.call(pInst, ...args);
@@ -5081,7 +5085,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/* prevent callout to copy image, etc when tap to hold */
 		/* prevent webkit from resizing text to fit */
 		/* prevent copy paste, to allow, change 'none' to 'text' */
-		style.innerHTML = `canvas { 
+		style.innerHTML = `
+		canvas { 
 			outline: none;
 			-webkit-touch-callout: none;
 			-webkit-text-size-adjust: none;
@@ -5091,6 +5096,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		main{
 			overscroll-behavior: none;
 		}`;
+		if (isFullScreen) {
+			style.innerHTML = 'html,\nbody,\n' + style.innerHTML;
+			style.innerHTML += `
+			html, body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}`;
+		}
 		document.head.appendChild(style);
 
 		let idx = navigator.userAgent.indexOf('iPhone OS');
@@ -5124,7 +5138,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.background = function () {
 		let args = arguments;
 		let c;
-		if (args.length == 1 && args[0] instanceof p5.Color) {
+		if (args.length == 1 && (typeof args[0] == 'string' || args[0] instanceof p5.Color)) {
 			c = p5.prototype.colorPal(args[0]);
 		}
 		if (c !== undefined) _background.call(this, c);
