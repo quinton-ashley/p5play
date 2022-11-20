@@ -1079,6 +1079,26 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * The sprite's current text color. By default sprites get a random text color.
+		 *
+		 * @property textColor
+		 * @type {p5.Color}
+		 */
+		get textColor() {
+			return this._textColor;
+		}
+
+		set textColor(val) {
+			if (val instanceof p5.Color) {
+				this._textColor = val;
+			} else if (typeof val != 'object') {
+				this._textColor = this.p.color(val);
+			} else {
+				this._textColor = this.p.color(...val.levels);
+			}
+		}
+
+		/**
 		 * The density of the sprite's physics body.
 		 *
 		 * @property density
