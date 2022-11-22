@@ -159,9 +159,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			if (args.length == 1 && typeof args[0] == 'number') {
-				throw new Error(
-					"Invalid input parameters for the Sprite constructor. You can't only have one number! Specify both the x and y position of the sprite"
-				);
+				throw new FriendlyError('Sprite', 0, [args[0]]);
 			}
 
 			x = args[0];
@@ -187,6 +185,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this.originMode = 'start';
 				}
 				if (h !== undefined) {
+					if (Array.isArray(h)) {
+						throw new FriendlyError('Sprite', 1, [`[[${w}], [${h}]]`]);
+					}
 					let abr = h.slice(0, 2);
 					// h is a collider type
 					if (abr == 'dy' || abr == 'st' || abr == 'ki' || abr == 'no') {
@@ -1632,7 +1633,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._hw;
 		}
 		set hw(val) {
-			throw new Error("Unable to change the value of halfWidth directly, change the sprite's width instead");
+			throw new FriendlyError('Sprite.hw');
 		}
 		/**
 		 * The width of the sprite.
@@ -1649,7 +1650,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.hw;
 		}
 		set halfWidth(val) {
-			throw new Error("Unable to change the value of halfWidth directly, change the sprite's width instead");
+			throw new FriendlyError('Sprite.hw');
 		}
 		/**
 		 * The height of the sprite.
@@ -1676,7 +1677,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._hh;
 		}
 		set hh(val) {
-			throw new Error("Unable to change the value of halfHeight directly, change the sprite's height instead");
+			throw new FriendlyError('Sprite.hh');
 		}
 		/**
 		 * The height of the sprite.
@@ -1693,7 +1694,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.hh;
 		}
 		set halfHeight(val) {
-			throw new Error("Unable to change the value of halfHeight directly, change the sprite's height instead");
+			throw new FriendlyError('Sprite.hh');
 		}
 		/**
 		 * The diameter of a circular sprite.
@@ -2316,9 +2317,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} speed
 		 */
 		rotate(angle, speed) {
-			if (!angle) {
-				throw new Error('angle must be a number greater or less than zero');
-			}
+			if (typeof angle != 'number') throw new FriendlyError();
+			if (angle == 0) return;
 			let ang = this.rotation + angle;
 			let mod = ang - this.rotation > 0 ? 1 : -1;
 			this.rotationSpeed = speed * mod;
@@ -2421,7 +2421,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			if (!ani) {
 				this.p.noLoop();
-				throw new Error('changeAnimation error: no animation named ' + label);
+				throw new FriendlyError('Sprite.changeAnimation', [label]);
 			}
 			this._animation = ani;
 			this.animation.name = label;
@@ -2459,7 +2459,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		_ensureCollide(target, callback) {
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
-				throw new Error('collide target must be a sprite or a group');
+				throw new FriendlyError('Sprite.collisions', 0, [target]);
+			}
+			if (callback && typeof callback != 'function') {
+				throw new FriendlyError('Sprite.collisions', 1);
 			}
 		}
 
@@ -2525,7 +2528,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		_ensureOverlap(target, callback) {
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
-				throw new Error('collide target must be a sprite or a group');
+				throw new Error('Sprite.overlaps', 0, [target]);
+			}
+			if (callback && typeof callback != 'function') {
+				throw new FriendlyError('Sprite.overlaps', 1);
 			}
 			if (!this._hasOverlaps) this._createSensors();
 			if (target instanceof Sprite) {
@@ -2776,7 +2782,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 				// make sure the extensions are fine
 				if (from.slice(-4) != '.png' || (to && to.slice(-4) != '.png')) {
-					throw new Error('SpriteAnimation error: you need to use .png files (filename ' + from + ')');
+					throw new FriendlyError('SpriteAnimation', 0, [from]);
 				}
 
 				let digits1 = 0;
@@ -2846,7 +2852,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let atlas;
 				if (args[0] instanceof p5.Image || typeof args[0] == 'string') {
 					if (args.length >= 3) {
-						throw new Error('SpriteAnimation error: the name of animation should go first');
+						throw new FriendlyError('SpriteAnimation', 1);
 					}
 					sheet = args[0];
 					atlas = args[1];
@@ -5264,6 +5270,94 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		return img;
 	};
 
+	let errorMessages = {
+		generic: [
+			'Ah! I found an error',
+			'Oh no! Something went wrong',
+			'Oof! Something went wrong',
+			'Houston, we have a problem',
+			'Whoops, having trouble here'
+		],
+		Sprite: {
+			constructor: {
+				base: "Sorry I'm unable to make a new Sprite",
+				0: "What is $0 for? If you're trying to specify the x position of the sprite, please specify the y position as well.",
+				1: "If you're trying to specify points for a chain Sprite, please use an array of position arrays:\n$0"
+			},
+			hw: "I can't change the halfWidth of a Sprite directly, change the sprite's width instead.",
+			hh: "I can't change the halfHeight of a Sprite directly, change the sprite's height instead.",
+			rotate: 'The angle of rotation must be a number.',
+			changeAnimation: `I can't find any animation named "$0".`,
+			collisions: {
+				0: "I can't make that sprite collide with $0. Sprites can only collide with another sprite or a group.",
+				1: 'The collision callback has to be a function.'
+			},
+			overlaps: {
+				0: "I can't make that sprite overlap with $0. Sprites can only overlap with another sprite or a group.",
+				1: 'The overlap callback has to be a function.'
+			}
+		},
+		SpriteAnimation: {
+			constructor: {
+				base: "Hey so, I tried to make a new SpriteAnimation but couldn't",
+				0: `I don't know how to display this type of image: "$0". I can only use ".png" image files.`,
+				1: 'The name of the animation must be the first input parameter.'
+			}
+		},
+		Group: {
+			constructor: {
+				base: "Hmm awkward! Well it seems I can't make that new Group you wanted"
+			}
+		}
+	};
+
+	/**
+	 *
+	 * @param {String} func is the name of the function the error was thrown in
+	 * @param {Number} errorNum is the error's code number
+	 * @param {Array} e is an array with references to the cause of the error
+	 */
+	class FriendlyError extends Error {
+		constructor(func, errorNum, e) {
+			super();
+
+			if (typeof func != 'string') {
+				e = errorNum;
+				errorNum = func;
+				func = this.stack.match(/\n\s*at ([^\(]*)/)[1];
+				func = func.slice(0, -1);
+			}
+			if (typeof errorNum != 'number') {
+				e = errorNum;
+				errorNum = undefined;
+			}
+			if (func.slice(0, 3) == 'new') func = func.slice(4);
+			func = func.split('.');
+			let className = func[0];
+			func = func[1] || 'constructor';
+
+			let ln = this.stack.match(/\/([^p\/][^5][^\/:]*:[^\/:]+):/);
+			if (ln) {
+				ln = ln[1].split(':');
+				ln = ' in ' + ln[0] + ' at line ' + ln[1] + '. ';
+			} else ln = '.';
+
+			e = e || [];
+
+			let m = errorMessages[className][func];
+			let msg;
+			if (m.base) msg = m.base + ln;
+			else msg = errorMessages.generic[Math.floor(Math.random() * errorMessages.generic.length)] + ln;
+			if (errorNum !== undefined) m = m[errorNum];
+			m = m.replace(/\$([0-9]+)/g, (m, n) => {
+				return e[n];
+			});
+			msg += m;
+
+			p5._friendlyError(msg, func);
+		}
+	}
+
 	this.Sprite = Sprite;
 	this.SpriteAnimation = SpriteAnimation;
 	this.Group = Group;
@@ -5481,6 +5575,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this._ontouchstart = function (e) {
 		__onmousedown.call(this, 'left');
 		_ontouchstart.call(this, e);
+		e.preventDefault();
 	};
 
 	const _onmouseup = this._onmouseup;
