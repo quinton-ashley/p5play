@@ -5089,21 +5089,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				e.preventDefault();
 			}
 		});
-		this.canvas.addEventListener(
-			'mouseover',
-			() => {
-				this.mouse.isOnCanvas = true;
-				this.mouse.active = true;
-			},
-			false
-		);
-		this.canvas.addEventListener(
-			'mouseleave',
-			() => {
-				this.mouse.isOnCanvas = false;
-			},
-			false
-		);
+		this.canvas.addEventListener('mouseover', () => {
+			this.mouse.isOnCanvas = true;
+			this.mouse.active = true;
+		});
+		this.canvas.addEventListener('mouseleave', () => {
+			this.mouse.isOnCanvas = false;
+		});
+		this.canvas.addEventListener('touchstart', (e) => {
+			e.preventDefault();
+		});
 		this.world.resize();
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 		let style = document.createElement('style');
@@ -5575,7 +5570,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this._ontouchstart = function (e) {
 		__onmousedown.call(this, 'left');
 		_ontouchstart.call(this, e);
-		e.preventDefault();
 	};
 
 	const _onmouseup = this._onmouseup;
