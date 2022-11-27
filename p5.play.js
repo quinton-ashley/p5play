@@ -99,6 +99,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
 	};
 
+	p5.Vector.prototype._angleBetween = p5.Vector.prototype.angleBetween;
+	p5.Vector.prototype.angleBetween = function (v) {
+		let a = this._angleBetween(v);
+		if (!isNaN(a)) return a;
+		return 0;
+	};
+
 	/**
 	 * Look at the Sprite reference pages before reading these docs.
 	 *
@@ -324,12 +331,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			let _this = this;
 
-			/**
-			 * Set position using .x and .y instead.
-			 *
-			 * @deprecated
-			 */
-			this.position = {
+			// this.x and this.y are getters and setters that change this._pos
+			// internally and this.pos and this.position get this._position
+			this._pos = {
+				x: 0,
+				y: 0
+			};
+
+			this._position = {
 				get x() {
 					return _this.x;
 				},
@@ -344,44 +353,40 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			};
 
-			this._pos = {
-				x: 0,
-				y: 0
-			};
-
+			// this._vel is used if the Sprite has no physics body
 			this._vel = {
 				x: 0,
 				y: 0
 			};
 
-			/**
-			 * A vector representing how fast the sprite is moving horizontally
-			 * and vertically.
-			 *
-			 * @property vel
-			 */
-			this.vel = {
-				get x() {
+			// this._velocity extends p5.Vector
+			this._velocity = pInst.createVector.call(pInst);
+
+			Object.defineProperty(this._velocity, 'x', {
+				get() {
 					let val;
 					if (!_this.body) val = _this._vel.x;
 					else val = _this.body.getLinearVelocity().x;
 					return fixRound(val / _this.tileSize);
 				},
-				set x(val) {
+				set(val) {
 					val *= _this.tileSize;
 					if (_this.body) {
 						_this.body.setLinearVelocity(new pl.Vec2(val, _this.body.getLinearVelocity().y));
 					} else {
 						_this._vel.x = val;
 					}
-				},
-				get y() {
+				}
+			});
+
+			Object.defineProperty(this._velocity, 'y', {
+				get() {
 					let val;
 					if (!_this.body) val = _this._vel.y;
 					else val = _this.body.getLinearVelocity().y;
 					return fixRound(val / _this.tileSize);
 				},
-				set y(val) {
+				set(val) {
 					val *= _this.tileSize;
 					if (_this.body) {
 						_this.body.setLinearVelocity(new pl.Vec2(_this.body.getLinearVelocity().x, val));
@@ -389,27 +394,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						_this._vel.y = val;
 					}
 				}
-			};
-
-			/**
-			 * Verbose/legacy version of sprite.vel
-			 *
-			 * @property velocity
-			 */
-			this.velocity = {
-				get x() {
-					return _this.vel.x;
-				},
-				set x(val) {
-					_this.vel.x = val;
-				},
-				get y() {
-					return _this.vel.y;
-				},
-				set y(val) {
-					_this.vel.y = val;
-				}
-			};
+			});
 
 			this._mirror = {
 				x: 1,
@@ -488,7 +473,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.dest = { x, y };
 			this._destIdx = 0;
 			this.drag = 0;
+
+			/**
+			 * When the sprite.debug property is set to true you can see the
+			 * sprite's physics body collider.
+			 *
+			 * @property debug
+			 * @type {boolean}
+			 * @default false
+			 */
 			this.debug = false;
+
 			this._shift = {};
 
 			let gvx = group.vel.x || 0;
@@ -1872,6 +1867,40 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._customUpdate = val;
 		}
 
+		get pos() {
+			return this._position;
+		}
+
+		set pos(val) {
+			this.x = val.x;
+			this.y = val.y;
+		}
+
+		get position() {
+			return this._position;
+		}
+
+		set position(val) {
+			this.pos = val;
+		}
+
+		get vel() {
+			return this._velocity;
+		}
+
+		set vel(val) {
+			this.vel.x = val.x;
+			this.vel.y = val.y;
+		}
+
+		set velocity(val) {
+			this.vel = val;
+		}
+
+		get velocity() {
+			return this._velocity;
+		}
+
 		/**
 		 * Updates the sprite. Called automatically at the end of the draw
 		 * cycle.
@@ -2035,10 +2064,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Set the velocity vector.
+		 * Deprecated: use sprite.vel instead.
 		 *
+		 * Sets the velocity vector.
+		 *
+		 * @method setVelocity
+		 * @deprecated
 		 * @param {Number} vector|x vector or horizontal velocity
 		 * @param {Number} y vertical velocity
+		 * @example
+		 * sprite.vel = createVector(1, 2);
+		 * // OR
+		 * sprite.vel.x = 1;
+		 * sprite.vel.y = 2;
 		 */
 		setVelocity(x, y) {
 			if (typeof x == 'object') {
@@ -2245,7 +2283,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let distX = margin + margin;
 				let distY = margin + margin;
 				do {
-					if (destIdx != this._destIdx) return;
+					if (destIdx != this._destIdx) return false;
 
 					await p5.prototype.delay();
 
@@ -2264,6 +2302,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (distY < margin) this.y = this.dest.y;
 				this.vel.x = 0;
 				this.vel.y = 0;
+				return true;
 			})();
 		}
 
@@ -2304,29 +2343,85 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {*} tracking
 		 */
 		rotateTowards(x, y, tracking) {
+			throw new Error("sprite.rotateTowards This function hasn't been implemented yet.");
 			// tracking ??= 0.1;
 			// console.log(angle, this.rotation, ang);
 			// this.angularVelocity = (angle - this.rotation) * tracking;
 		}
 
 		/**
-		 * Rotates the sprite to an angle with a specified speed.
+		 * Finds the minimium amount the sprite would have to rotate to "face" a position
+		 * at a rotation.
+		 *
+		 * @param {Number|Object} x|position
+		 * @param {Number} y
+		 * @param {Number} facing rotation angle the sprite should be at when "facing" the position, default is 0
+		 * @returns
+		 */
+		angleTo(x, y, facing) {
+			if (typeof x != 'number') {
+				let obj = x;
+				if (obj == this.p.mouse && !this.p.mouse.active) return 0;
+				if (obj.x === undefined || obj.y === undefined) {
+					console.error(
+						'sprite.angleTo ERROR: rotation destination not defined, object given with no x or y properties'
+					);
+					return 0;
+				}
+				facing = y;
+				y = obj.y;
+				x = obj.x;
+			}
+
+			if (Math.abs(x - this.x) < 0.01 && Math.abs(y - this.y) < 0.01) {
+				return 0;
+			}
+
+			facing ??= 0;
+
+			let ang = this.p.atan2(y - this.y, x - this.x) + facing;
+			let dist1 = ang - (this.rotation % 360);
+			let dist2 = 360 - Math.abs(dist1);
+			dist2 *= dist1 < 0 ? 1 : -1;
+			return Math.abs(dist1) < Math.abs(dist2) ? dist1 : dist2;
+		}
+
+		rotateTo(x, y, facing, speed) {
+			let angle = this.angleTo(x, y, facing);
+
+			if (typeof x != 'number') speed = facing;
+
+			this.rotate(angle, speed);
+		}
+
+		/**
+		 * Rotates the sprite by an amount at a specified speed.
 		 *
 		 * @method rotate
 		 * @param {Number} angle
 		 * @param {Number} speed
 		 */
 		rotate(angle, speed) {
-			if (typeof angle != 'number') throw new FriendlyError();
+			if (isNaN(angle)) throw new FriendlyError();
 			if (angle == 0) return;
+			let absA = Math.abs(angle);
+			speed ??= absA;
+			if (absA < speed) return;
+
 			let ang = this.rotation + angle;
-			let mod = ang - this.rotation > 0 ? 1 : -1;
-			this.rotationSpeed = speed * mod;
+			let cw = angle > 0;
+			this.rotationSpeed = speed * (cw ? 1 : -1);
+
+			let frames = Math.ceil(absA / speed);
+			this._rotateIdx ??= 0;
+			this._rotateIdx++;
+			let _rotateIdx = this._rotateIdx;
 
 			return (async () => {
-				let cw = ang > this.rotation;
-				while ((cw && this.rotation < ang) || (!cw && this.rotation > ang)) {
+				while (frames > 0) {
+					if (this._rotateIdx != _rotateIdx) return;
 					await p5.prototype.delay();
+					frames--;
 				}
 				this.rotationSpeed = 0;
 				this.rotation = ang;
@@ -2903,7 +2998,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						}
 					}
 
-					let { w, h, width, height, size, pos, line, x, y, frames, delay, rotation } = atlas;
+					let { w, h, width, height, frameSize, size, pos, line, x, y, frames, delay, rotation } = atlas;
+					size ??= frameSize;
 					if (delay) _this.frameDelay = delay;
 					if (rotation) _this.rotation = rotation;
 
@@ -3100,8 +3196,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @method stop
 		 */
-		stop() {
+		stop(frame) {
 			this.playing = false;
+			if (frame) this.frame = frame;
 		}
 
 		/**
@@ -3445,7 +3542,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				});
 			}
 
-			this.vel = {};
+			this.vel = pInst.createVector.call(pInst);
 			this.mirror = {};
 
 			let objProps = { vel: ['x', 'y'], mirror: ['x', 'y'] };
@@ -4296,27 +4393,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p = pInst;
 			let _this = this;
 
-			/**
-			 * Camera position.
-			 *
-			 * @deprecated
-			 * @property position
-			 */
-			this.position = {
-				get x() {
-					return _this.x;
-				},
-				set x(val) {
-					_this.x = val;
-				},
-				get y() {
-					return _this.y;
-				},
-				set y(val) {
-					_this.y = val;
-				}
-			};
-
 			this._pos = { x: 0, y: 0 };
 
 			/**
@@ -4362,6 +4438,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			if (x) this.x = x;
 			if (y) this.y = y;
+		}
+
+		get pos() {
+			return this._pos;
+		}
+
+		get position() {
+			return this._pos;
 		}
 
 		get x() {
@@ -5484,12 +5568,38 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	class Mouse extends InputDevice {
 		constructor() {
 			super();
+			let _this = this;
+
+			// this.x and this.y store the actual position values of the mouse
+			this._position = {
+				get x() {
+					return _this.x;
+				},
+				set x(val) {
+					_this.x = val;
+				},
+				get y() {
+					return _this.y;
+				},
+				set y(val) {
+					_this.y = val;
+				}
+			};
+
 			let inputs = ['x', 'y', 'left', 'center', 'right'];
 			this.init(inputs);
 			this.default = 'left';
 			this.draggable = false;
 			this.isOnCanvas = false;
 			this.active = false;
+		}
+
+		get pos() {
+			return this._position;
+		}
+
+		get position() {
+			return this._position;
 		}
 
 		ac(inp) {
@@ -5670,6 +5780,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		this.p5play.standardizeKeyboard = true;
 	}
 
+	/**
+	 * Deprecated method, use kb.pressing(key) instead.
+	 *
+	 * @deprecated
+	 * @method keyIsDown
+	 * @param {String} key
+	 */
+	p5.prototype.keyIsDown = function (key) {
+		return this.kb.pressing(key);
+	};
+
 	function getKeyFromCode(e) {
 		let code = e.code;
 		if (code.length == 4 && code.slice(0, 3) == 'Key') {
@@ -5683,6 +5804,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		s: 'down',
 		a: 'left',
 		d: 'right',
+		ArrowUp: 'up',
+		ArrowDown: 'down',
+		ArrowLeft: 'left',
+		ArrowRight: 'right',
 		i: 'up2',
 		k: 'down2',
 		j: 'left2',
