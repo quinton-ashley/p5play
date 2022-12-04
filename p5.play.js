@@ -2395,11 +2395,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Rotates the sprite by an amount at a specified speed.
+		 * Rotates the sprite by an amount at a specified angles per frame speed.
 		 *
 		 * @method rotate
-		 * @param {Number} angle
-		 * @param {Number} speed
+		 * @param {Number} angle rotate by this amount
+		 * @param {Number} speed in angles per frame
 		 */
 		rotate(angle, speed) {
 			if (isNaN(angle)) throw new FriendlyError();
@@ -2423,6 +2423,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					await p5.prototype.delay();
 					frames--;
 				}
+
+				while (Math.abs(this.rotationSpeed) < Math.abs(ang - this.rotation)) {
+					await p5.prototype.delay();
+				}
+				if (ang - this.rotation < 0.01) {
+					this.rotationSpeed = ang - this.rotation;
+					await p5.prototype.delay();
+				}
+
 				this.rotationSpeed = 0;
 				this.rotation = ang;
 			})();
