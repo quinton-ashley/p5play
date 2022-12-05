@@ -327,7 +327,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._collisions = new Map();
 			this._overlappers = new Map();
 
-			this.tileSize = group.tileSize;
+			this.tileSize = group.tileSize || 1;
 
 			let _this = this;
 
@@ -569,7 +569,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.color ??= this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
 
 			this.textColor ??= this.p.color(0);
-			this.textSize ??= this.textSize == 1 ? 12 : 0.8;
+			this.textSize ??= this.tileSize == 1 ? this.p.textSize() : 0.8;
 
 			let shouldCreateSensor = false;
 			for (let g of this.groups) {
@@ -2337,27 +2337,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * TODO: Rotates the sprite towards a position or angle.
-		 *
 		 * @method rotateTowards
-		 * @param {*} angle
-		 * @param {*} tracking
+		 * @param {*} x position to rotate towards
+		 * @param {*} y position to rotate towards
+		 * @param {*} facing rotation angle the sprite should be at when "facing" the position, default is 0
+		 * @param {*} tracking percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
 		 */
-		rotateTowards(x, y, tracking) {
-			throw new Error("sprite.rotateTowards This function hasn't been implemented yet.");
-			// tracking ??= 0.1;
-			// console.log(angle, this.rotation, ang);
-			// this.angularVelocity = (angle - this.rotation) * tracking;
+		rotateTowards(x, y, facing, tracking) {
+			let angle = this.angleTo(x, y, facing);
+			tracking ??= 0.1;
+			this.rotationSpeed = angle * tracking;
 		}
 
 		/**
-		 * Finds the minimium amount the sprite would have to rotate to "face" a position
-		 * at a rotation.
+		 * Finds the minimium amount the sprite would have to rotate to
+		 * "face" a position at a rotation.
 		 *
+		 * @method angleTo
 		 * @param {Number|Object} x|position
 		 * @param {Number} y
 		 * @param {Number} facing rotation angle the sprite should be at when "facing" the position, default is 0
-		 * @returns
+		 * @returns {Number} minimum angle of rotation to face the position
 		 */
 		angleTo(x, y, facing) {
 			if (typeof x != 'number') {
@@ -2387,6 +2387,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return Math.abs(dist1) < Math.abs(dist2) ? dist1 : dist2;
 		}
 
+		/**
+		 * Rotates the sprite to a position at a rotation.
+		 *
+		 * @method rotateTo
+		 * @param {Number|Object} x|position
+		 * @param {Number} y
+		 * @param {Number} facing rotation angle the sprite should be at when "facing" the position, default is 0
+		 * @param {Number} speed in angles per frame
+		 * @returns Promise
+		 */
 		rotateTo(x, y, facing, speed) {
 			let angle = this.angleTo(x, y, facing);
 
@@ -2401,6 +2411,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @method rotate
 		 * @param {Number} angle rotate by this amount
 		 * @param {Number} speed in angles per frame
+		 * @returns Promise
 		 */
 		rotate(angle, speed) {
 			if (isNaN(angle)) throw new FriendlyError();
