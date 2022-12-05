@@ -569,6 +569,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.color ??= this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
 
 			this.textColor ??= this.p.color(0);
+			this.textSize ??= this.textSize == 1 ? 12 : 0.8;
 
 			let shouldCreateSensor = false;
 			for (let g of this.groups) {
@@ -1966,15 +1967,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else {
 				this.p.stroke(120);
 				if (this._shape == 'box') {
-					this.p.rect(0, 0, this.w, this.h);
+					this.p.rect(0, 0, this.w * this.tileSize, this.h * this.tileSize);
 				} else if (this._shape == 'circle') {
-					this.p.circle(0, 0, this.d);
+					this.p.circle(0, 0, this.d * this.tileSize);
 				}
 			}
 			if (this.text) {
 				this.p.textAlign(this.p.CENTER, this.p.CENTER);
 				this.p.fill(this.textColor);
-				this.p.textSize(this.textSize);
+				this.p.textSize(this.textSize * this.tileSize);
 				this.p.text(this.text, 0, 0);
 			}
 		}
@@ -4696,10 +4697,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// Query the world for overlapping shapes.
 		let fxts = [];
 		pInst.world.queryAABB(aabb, (fxt) => {
-			if (!fxt.getBody().isStatic()) {
-				if (fxt.getShape().testPoint(fxt.getBody().getTransform(), convertedPoint)) {
-					fxts.push(fxt);
-				}
+			if (fxt.getShape().testPoint(fxt.getBody().getTransform(), convertedPoint)) {
+				fxts.push(fxt);
 			}
 			return true;
 		});
