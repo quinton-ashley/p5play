@@ -569,7 +569,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.color ??= this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
 
 			this.textColor ??= this.p.color(0);
-			this.textSize ??= this.tileSize == 1 ? this.p.textSize() : 0.8;
+			this.textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
 
 			let shouldCreateSensor = false;
 			for (let g of this.groups) {
