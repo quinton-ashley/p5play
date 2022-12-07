@@ -632,6 +632,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let vert = { x: 0, y: 0 };
 				let min = { x: 0, y: 0 };
 				let max = { x: 0, y: 0 };
+				let least = { x: Number.MAX_SAFE_INTEGER, y: Number.MAX_SAFE_INTEGER };
 
 				// if the path is an array of position arrays
 				let usesVertices = Array.isArray(path[0]);
@@ -651,6 +652,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					for (let i = 0; i < path.length; i++) {
 						if (this._vertexMode) {
 							if (i == 0) continue;
+							if (path[i][0] < least.x) least.x = path[i][0];
+							if (path[i][1] < least.y) least.y = path[i][1];
 							vert.x = path[i][0] - this.x;
 							vert.y = path[i][1] - this.y;
 						} else {
@@ -658,6 +661,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 							vert.y += path[i][1];
 						}
 						vecs.push({ x: vert.x, y: vert.y });
+
 						checkVert();
 					}
 				} else {
@@ -694,19 +698,26 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				h = max.y - min.y;
 				this._hh = h * 0.5;
 
-				if (this.originMode == 'center') {
+				if (shape == 'polygon' && this._vertexMode) {
+					this.x = least.x + this._hw;
+					this.y = least.y + this._hh;
+					log(this.x, this.y);
+				}
+
+				if (this.originMode == 'start' && shape == 'chain') {
+					for (let i = 0; i < vecs.length; i++) {
+						let vec = vecs[i];
+						vecs[i] = new pl.Vec2((vec.x * this.tileSize) / plScale, (vec.y * this.tileSize) / plScale);
+					}
+				} else {
+					// origin is center
+					this.originMode = 'center';
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
 						vecs[i] = new pl.Vec2(
 							((vec.x - this._hw - min.x) * this.tileSize) / plScale,
 							((vec.y - this._hh - min.y) * this.tileSize) / plScale
 						);
-					}
-				} else {
-					// origin is start
-					for (let i = 0; i < vecs.length; i++) {
-						let vec = vecs[i];
-						vecs[i] = new pl.Vec2((vec.x * this.tileSize) / plScale, (vec.y * this.tileSize) / plScale);
 					}
 				}
 				if (shape == 'polygon') {
@@ -960,7 +971,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get animation() {
 			return this._animation;
 		}
-
 		set animation(val) {
 			this.changeAni(val);
 		}
@@ -968,7 +978,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get ani() {
 			return this._animation;
 		}
-
 		set ani(val) {
 			this.changeAni(val);
 		}
@@ -1006,7 +1015,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get collider() {
 			return this._collider;
 		}
-
 		set collider(val) {
 			if (this._collider == val) return;
 			this._collider = val;
@@ -1056,7 +1064,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get color() {
 			return this._color;
 		}
-
 		set color(val) {
 			if (val instanceof p5.Color) {
 				this._color = val;
@@ -1070,7 +1077,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get shapeColor() {
 			return this._color;
 		}
-
 		set shapeColor(val) {
 			this.color = val;
 		}
@@ -1084,7 +1090,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get textColor() {
 			return this._textColor;
 		}
-
 		set textColor(val) {
 			if (val instanceof p5.Color) {
 				this._textColor = val;
@@ -1155,7 +1160,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					downright: 45,
 					rightdown: 45,
 					downleft: 135,
-					leftdown: 135
+					leftdown: 135,
+					forward: this.rotation,
+					backward: this.rotation + 180
 				};
 				val = dirs[dir];
 			}
@@ -1309,8 +1316,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get img() {
 			return this._animation;
 		}
-
 		set img(val) {
+			this.changeAni(val);
+		}
+
+		get image() {
+			return this._animation;
+		}
+		set image(val) {
 			this.changeAni(val);
 		}
 
@@ -2179,25 +2192,35 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Move the sprite a certain distance from its current position.
 		 *
 		 * @method move
+		 * @param {Number} distance [optional]
 		 * @param {Number|String} direction [optional]
 		 * @param {Number} speed [optional]
-		 * @param {Number} distance [optional]
 		 * @returns {Promise} resolves when the movement is complete or cancelled
+		 *
+		 * @example
+		 * sprite.move(distance);
+		 * sprite.move(distance, direction);
+		 * sprite.move(distance, direction, speed);
+		 *
+		 * sprite.move(directionName);
+		 * sprite.move(directionName, speed);
+		 * sprite.move(directionName, speed, distance); // deprecated usage
 		 */
-		move(direction, speed, distance) {
+		move(distance, direction, speed) {
 			let dirNameMode = isNaN(arguments[0]);
-			if (arguments.length == 1) {
-				if (!dirNameMode) {
-					// move(distance)
-					direction = this.direction;
-					distance = arguments[0];
-				} else {
-					// move(direction)
-					this.direction = direction;
+			if (dirNameMode) {
+				direction = arguments[0];
+				speed = arguments[1];
+				distance = arguments[2];
+				if (distance !== undefined) {
+					console.warn(
+						`In p5.play v3.3.0 the parameter ordering for the move() function was changed to: move(distance, direction, speed).`
+					);
 				}
-			} else if (arguments.length > 1) {
-				this.direction = direction;
+			} else {
+				dirNameMode = isNaN(direction);
 			}
+			if (direction !== undefined) this.direction = direction;
 			distance ??= 1;
 			let x = this.x + this.p.cos(this.direction) * distance;
 			let y = this.y + this.p.sin(this.direction) * distance;
@@ -2259,7 +2282,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			speed ??= 1;
 			if (speed <= 0) {
 				console.warn('sprite.move: speed should be a positive number');
-				speed = Math.abs(speed);
+				return;
 			}
 
 			let a = this.dest.y - this.y;
@@ -2394,7 +2417,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number|Object} x|position
 		 * @param {Number} y
 		 * @param {Number} facing rotation angle the sprite should be at when "facing" the position, default is 0
-		 * @param {Number} speed in angles per frame
+		 * @param {Number} speed the amount of rotation per frame, default is 1
 		 * @returns Promise
 		 */
 		rotateTo(x, y, facing, speed) {
@@ -2409,16 +2432,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Rotates the sprite by an amount at a specified angles per frame speed.
 		 *
 		 * @method rotate
-		 * @param {Number} angle rotate by this amount
-		 * @param {Number} speed in angles per frame
+		 * @param {Number} angle the amount to rotate the sprite
+		 * @param {Number} speed the amount of rotation per frame, default is 1
 		 * @returns Promise
 		 */
 		rotate(angle, speed) {
 			if (isNaN(angle)) throw new FriendlyError();
 			if (angle == 0) return;
 			let absA = Math.abs(angle);
-			speed ??= absA;
-			if (absA < speed) return;
+			speed ??= 1;
+			if (speed > absA) speed = absA;
 
 			let ang = this.rotation + angle;
 			let cw = angle > 0;
@@ -2430,20 +2453,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let _rotateIdx = this._rotateIdx;
 
 			return (async () => {
-				while (frames > 0) {
-					if (this._rotateIdx != _rotateIdx) return;
-					await p5.prototype.delay();
-					frames--;
-				}
+				if (frames > 1) {
+					while (frames > 0) {
+						if (this._rotateIdx != _rotateIdx) return;
+						await p5.prototype.delay();
+						frames--;
+					}
 
-				while (Math.abs(this.rotationSpeed) < Math.abs(ang - this.rotation)) {
+					while (Math.abs(this.rotationSpeed) < Math.abs(ang - this.rotation)) {
+						await p5.prototype.delay();
+					}
+					if (Math.abs(ang - this.rotation) > 0.01) {
+						this.rotationSpeed = ang - this.rotation;
+						await p5.prototype.delay();
+					}
+				} else {
 					await p5.prototype.delay();
 				}
-				if (ang - this.rotation < 0.01) {
-					this.rotationSpeed = ang - this.rotation;
-					await p5.prototype.delay();
-				}
-
 				this.rotationSpeed = 0;
 				this.rotation = ang;
 			})();
@@ -2742,6 +2768,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.animation.name;
 		}
 	}
+
+	this.Turtle = function (size) {
+		if (pInst.allSprites.tileSize > 1) {
+			throw new Error(`Turtle can't be used when allSprites.tileSize is greater than 1.`);
+		}
+		size ??= 25;
+		let t = new Sprite(pInst.width * 0.5, pInst.height * 0.5, [
+			[size, size * 0.4],
+			[-size, size * 0.4],
+			[0, size * -0.8]
+		]);
+		t.color = 'green';
+		t._isTurtleSprite = true;
+		let _move = t.move;
+		t.move = function (distance) {
+			return _move.call(this, this.rotation, 1, distance);
+		};
+		return t;
+	};
 
 	/**
 	 * Look at the Animation reference pages before reading these docs.
@@ -3609,13 +3654,34 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get ani() {
 			return this._animation;
 		}
+		set ani(val) {
+			this.addAni(val);
+			for (let s of this) s.changeAni(val);
+		}
 
 		get animation() {
 			return this._animation;
 		}
+		set animation(val) {
+			this.ani = val;
+		}
 
 		get anis() {
 			return this.animations;
+		}
+
+		get img() {
+			return this._animation;
+		}
+		set img(val) {
+			this.ani = val;
+		}
+
+		get image() {
+			return this._animation;
+		}
+		set image(val) {
+			this.ani = val;
 		}
 
 		set amount(val) {
@@ -5325,7 +5391,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @param {number} [height]
 	 * @param {function} [callback]
 	 */
-	this.loadImage = function () {
+	this.loadImg = this.loadImage = function () {
 		let args = arguments;
 		let url = args[0];
 		let img = pInst.p5play.images[url];
