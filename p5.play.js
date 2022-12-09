@@ -1467,7 +1467,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._scale;
 		}
 		set scale(val) {
-			if (val == 1) return;
+			if (val == this._scale) return;
 			this._w *= val;
 			this._hw *= val;
 			if (this._h) {
@@ -5926,7 +5926,7 @@ canvas {
 	 */
 	p5.prototype.keyIsDown = function (keyCode) {
 		throw new Error(
-			`The p5.js keyIsDown function is outdated and can't be used in p5.play. Trust me, you'll see that the p5.play kb.pressing function is much better. It uses key name strings are easier to write and make your code easier to read! https://p5play.org/learn/input_devices.html The p5.js keyIsDown function relies on key codes and custom constants for key codes, which are not only hard to remember but were also deprecated in the JavaScript language standards over six years ago and shouldn't be used in new projects. More info: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode`
+			`The p5.js keyIsDown function is outdated and can't be used in p5.play. Trust me, you'll see that the p5.play kb.pressing function is much better. It uses key name strings that are easier to write and easier to read! https://p5play.org/learn/input_devices.html The p5.js keyIsDown function relies on key codes and custom constants for key codes, which are not only hard to remember but were also deprecated in the JavaScript language standards over six years ago and shouldn't be used in new projects. More info: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode`
 		);
 	};
 
