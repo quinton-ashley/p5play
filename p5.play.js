@@ -5243,10 +5243,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		if (typeof args[0] == 'string') {
 			ratio = args[0].split(':');
 		}
-		if (typeof args[1] != 'number') {
+		if (!args.length) {
+			args[0] = window.innerWidth;
+			args[1] = window.innerHeight;
+			isFullScreen = true;
+		} else if (typeof args[0] == 'number' && typeof args[1] != 'number') {
 			args[2] = args[1];
 			args[1] = args[0];
 		}
+
 		if (args[2] == 'pixelated') {
 			pixelated = true;
 			isFullScreen = true;
@@ -5269,10 +5274,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args[0] = w;
 				args[1] = h;
 			}
-		} else if (!args.length) {
-			args[0] = window.innerWidth;
-			args[1] = window.innerHeight;
-			isFullScreen = true;
 		}
 		if (args.length < 3) args[2] = 'p2d';
 		let can = _createCanvas.call(pInst, ...args);
