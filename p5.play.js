@@ -1,7 +1,7 @@
 /**
  * p5.play
  *
- * @version 3
+ * @version 3.3
  * @author quinton-ashley
  * @year 2022
  * @license gpl-v3-only
@@ -197,7 +197,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 					let abr = h.slice(0, 2);
 					// h is a collider type
-					if (abr == 'dy' || abr == 'st' || abr == 'ki' || abr == 'no') {
+					if (
+						h == 'd' ||
+						h == 's' ||
+						h == 'k' ||
+						h == 'n' ||
+						abr == 'dy' ||
+						abr == 'st' ||
+						abr == 'ki' ||
+						abr == 'no'
+					) {
 						collider = h;
 					} else {
 						// h is the name of a regular polygon
@@ -218,15 +227,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else if (isNaN(w)) {
 				collider = w;
 				w = undefined;
-			}
-
-			if (collider !== undefined) {
-				collider = collider.toLowerCase();
-				let abr = collider.slice(0, 2);
-				if (abr == 'dy') collider = 'dynamic';
-				if (abr == 'st') collider = 'static';
-				if (abr == 'ki') collider = 'kinematic';
-				if (abr == 'no') collider = 'none';
 			}
 
 			/**
@@ -439,6 +439,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (!collider || typeof collider != 'string') {
 				collider = 'dynamic';
 			}
+			this.collider = collider;
 
 			x ??= group.x;
 			if (x === undefined) {
@@ -458,8 +459,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this.mouse = new SpriteMouse();
 
-			if (collider != 'none' && collider != 'n') {
-				this._collider = collider;
+			if (this.collider != 'none') {
 				this.addCollider(0, 0, w, h);
 			} else {
 				this.w = w || (this.tileSize > 1 ? 1 : 50);
@@ -1016,9 +1016,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._collider;
 		}
 		set collider(val) {
+			val = val.toLowerCase();
+			let c = val[0];
+			if (c == 'd') val = 'dynamic';
+			if (c == 's') val = 'static';
+			if (c == 'k') val = 'kinematic';
+			if (c == 'n') val = 'none';
+
 			if (this._collider == val) return;
+
+			let oldCollider = this._collider;
+
 			this._collider = val;
-			this._reset();
+			if (oldCollider !== undefined) this._reset();
 		}
 
 		_reset() {
@@ -5228,21 +5238,37 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.createCanvas = function () {
 		let args = [...arguments];
 		let isFullScreen = false;
+		let pixelated = false;
+		let w, h, ratio;
 		if (typeof args[0] == 'string') {
-			let ratio = args[0].split(':');
+			ratio = args[0].split(':');
+		}
+		if (typeof args[1] != 'number') {
+			args[2] = args[1];
+			args[1] = args[0];
+		}
+		if (args[2] == 'pixelated') {
+			pixelated = true;
+			isFullScreen = true;
+			ratio = [args[0], args[1]];
+		}
+		if (ratio) {
 			let rW = Number(ratio[0]);
 			let rH = Number(ratio[1]);
 
-			let w = window.innerWidth;
-			let h = (window.innerWidth * rH) / rW;
+			w = window.innerWidth;
+			h = (window.innerWidth * rH) / rW;
 			if (h > window.innerHeight) {
 				w = (window.innerHeight * rW) / rH;
 				h = window.innerHeight;
 			}
-			args[0] = Math.round(w);
-			args[1] = Math.round(h);
-		} else if (args.length == 1) {
-			args[1] = args[0];
+			w = Math.round(w);
+			h = Math.round(h);
+
+			if (!pixelated) {
+				args[0] = w;
+				args[1] = h;
+			}
 		} else if (!args.length) {
 			args[0] = window.innerWidth;
 			args[1] = window.innerHeight;
@@ -5276,32 +5302,47 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		});
 		this.world.resize();
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
-		let style = document.createElement('style');
 
 		/* prevent callout to copy image, etc when tap to hold */
 		/* prevent webkit from resizing text to fit */
 		/* prevent copy paste, to allow, change 'none' to 'text' */
-		style.innerHTML = `
-		canvas { 
-			outline: none;
-			-webkit-touch-callout: none;
-			-webkit-text-size-adjust: none;
-			-webkit-user-select: none;
-			overscroll-behavior: none;
-		}
-		main{
-			overscroll-behavior: none;
-		}`;
+		let style = `
+canvas { 
+	outline: none;
+	-webkit-touch-callout: none;
+	-webkit-text-size-adjust: none;
+	-webkit-user-select: none;
+	overscroll-behavior: none;
+}
+main{
+	overscroll-behavior: none;
+}`;
 		if (isFullScreen) {
-			style.innerHTML = 'html,\nbody,\n' + style.innerHTML;
-			style.innerHTML += `
-			html, body {
-				margin: 0;
-				padding: 0;
-				overflow: hidden;
-			}`;
+			style = 'html,\nbody,\n' + style;
+			style += `
+html, body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+main {
+	margin: auto;
+	display: flex;
+	align-content: center;
+	justify-content: center;
+}`;
 		}
-		document.head.appendChild(style);
+		if (pixelated) {
+			style += `
+canvas {
+	image-rendering: pixelated;
+	width: ${w}px!important;
+	height: ${h}px!important;
+}`;
+		}
+		let styleElem = document.createElement('style');
+		styleElem.innerHTML = style;
+		document.head.appendChild(styleElem);
 
 		let idx = navigator.userAgent.indexOf('iPhone OS');
 		if (idx > -1) {
@@ -5314,6 +5355,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p5play.os.version = version;
 		} else if (navigator.userAgentData !== undefined) {
 			this.p5play.os.platform = navigator.userAgentData.platform;
+		}
+
+		if (pixelated) {
+			pInst.pixelDensity(1);
+			pInst.noSmooth();
 		}
 
 		return can;
