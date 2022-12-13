@@ -463,12 +463,45 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.addCollider(0, 0, w, h);
 			} else {
 				this.w = w || (this.tileSize > 1 ? 1 : 50);
-				this.h = h;
-				if (h === undefined) this._shape = 'circle';
+				this.h = h || this.w;
+				if (w !== undefined && h === undefined) this._shape = 'circle';
 				else this._shape = 'box';
 			}
 
-			this._scale = 1;
+			this._scale = new Scale();
+
+			Object.defineProperty(this._scale, 'x', {
+				get() {
+					return this._x;
+				},
+				set(val) {
+					if (val == this._x) return;
+					let scalarX = val / this._x;
+					_this._w *= scalarX;
+					_this._hw *= scalarX;
+					_this._resizeCollider({ x: scalarX, y: 1 });
+					this._x = val;
+					this._avg = (this._x + this._y) * 0.5;
+				}
+			});
+
+			Object.defineProperty(this._scale, 'y', {
+				get() {
+					return this._y;
+				},
+				set(val) {
+					if (val == this._y) return;
+					let scalarY = val / this._y;
+					if (_this._h) {
+						this._h *= scalarY;
+						this._hh *= scalarY;
+					}
+					_this._resizeCollider({ x: 1, y: scalarY });
+					this._y = val;
+					this._avg = (this._x + this._y) * 0.5;
+				}
+			});
+
 			this.previousPosition = { x, y };
 			this.dest = { x, y };
 			this._destIdx = 0;
@@ -579,6 +612,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 			if (shouldCreateSensor && !this._hasOverlaps) this._createSensors();
+
+			this._dimensionsUndefined = w === undefined && h === undefined;
 		}
 
 		/**
@@ -1133,9 +1168,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @property depth
 		 */
 		get depth() {
+			console.warn('sprite.depth is deprecated, use sprite.layer instead');
 			return this.layer;
 		}
 		set depth(val) {
+			console.warn('sprite.depth is deprecated, use sprite.layer instead');
 			this.layer = val;
 		}
 
@@ -1311,9 +1348,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @property immovable
 		 */
 		get immovable() {
+			console.warn('sprite.immovable is deprecated, use sprite.static instead');
 			return this.body.isStatic();
 		}
 		set immovable(val) {
+			console.warn('sprite.immovable is deprecated, use sprite.static instead');
 			if (val) this.body.setStatic();
 		}
 		// set impulse(val) {
@@ -1458,24 +1497,44 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Scale of the sprite's physics body. Default is 1.
+		 * Scale of the sprite's physics body. Default is {x: 1, y: 1}
+		 *
+		 * The getter for sprite.scale returns the scale as an object with
+		 * x and y properties.
+		 *
+		 * The valueOf function for sprite.scale returns the scale as a
+		 * number. This enables users to do things like `sprite.scale *= 2`
+		 * to double the sprite's scale.
 		 *
 		 * @property scale
-		 * @type {Number}
+		 * @type {Object}
 		 */
 		get scale() {
 			return this._scale;
 		}
 		set scale(val) {
-			if (val == this._scale) return;
-			this._w *= val;
-			this._hw *= val;
-			if (this._h) {
-				this._h *= val;
-				this._hh *= val;
+			if (val <= 0) val = 0.01;
+			if (typeof val === 'number') {
+				val = { x: val, y: val };
 			}
-			this._resizeCollider(val);
-			this._scale = val;
+			if (val.x == this._scale._x && val.y == this._scale._y) return;
+
+			let scalars = {
+				x: val.x / this._scale._x,
+				y: val.y / this._scale._y
+			};
+
+			this._w *= scalars.x;
+			this._hw *= scalars.x;
+			if (this._h) {
+				this._h *= scalars.y;
+				this._hh *= scalars.y;
+			}
+			this._resizeCollider(scalars);
+
+			this._scale._x = val.x;
+			this._scale._y = val.y;
+			this._scale._avg = val.x;
 		}
 
 		/**
@@ -1510,6 +1569,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @deprecated
 		 */
 		getSpeed() {
+			console.warn('getSpeed() is deprecated, use sprite.speed instead');
 			return this.speed;
 		}
 		/**
@@ -1638,10 +1698,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		set w(val) {
 			if (val < 0) val = 0.01;
 			if (val == this._w) return;
-			let scale = val / this._w;
+			this._dimensionsUndefined = false;
+			let scalarX = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
-			this._resizeCollider({ x: scale });
+			this._resizeCollider({ x: scalarX, y: 1 });
 		}
 		get hw() {
 			return this._hw;
@@ -1682,10 +1743,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 			if (val == this._h) return;
-			let scale = val / this._h;
+			this._dimensionsUndefined = false;
+			let scalarY = val / this._h;
 			this._h = val;
 			this._hh = val * 0.5;
-			this._resizeCollider({ y: scale });
+			this._resizeCollider({ x: 1, y: scalarY });
 		}
 		get hh() {
 			return this._hh;
@@ -1744,11 +1806,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 				this._shape = 'circle';
 			}
-			let scale = val / this._w;
+			let scalar = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
 			if (prevShape != 'circle') return;
-			this._resizeCollider(scale);
+			this._resizeCollider({ x: scalar, y: scalar });
 		}
 		/**
 		 * The diameter of a circular sprite.
@@ -1786,34 +1848,26 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.d = val * 2;
 		}
 
-		// TODO make this work for other shapes
-		_resizeCollider(scale) {
+		/**
+		 * Resizes the collider of the sprite.
+		 *
+		 * @param {*} scalars
+		 * @returns
+		 */
+		_resizeCollider(scalars) {
 			if (!this.body) return;
 
-			if (typeof scale == 'number') {
-				scale = { x: scale, y: scale };
-			} else {
-				if (!scale.x) scale.x = 1;
-				if (!scale.y) scale.y = 1;
-			}
 			if (this.shape == 'circle') {
 				let fxt = this.fixture;
 				let sh = fxt.m_shape;
-				sh.m_radius *= scale.x;
+				sh.m_radius *= scalars.x;
 			} else {
-				// let bodyProps = this._cloneBodyProps();
-				// this.removeColliders();
-				// this.addCollider();
-				// for (let prop in bodyProps) {
-				// 	this[prop] = bodyProps[prop];
-				// }
-
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 					if (fxt.m_isSensor) continue;
 					let sh = fxt.m_shape;
 					for (let vert of sh.m_vertices) {
-						vert.x *= scale.x;
-						vert.y *= scale.y;
+						vert.x *= scalars.x;
+						vert.y *= scalars.y;
 					}
 				}
 			}
@@ -2098,6 +2152,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * sprite.vel.y = 2;
 		 */
 		setVelocity(x, y) {
+			console.warn('setVelocity() is deprecated. Set sprite.vel instead.');
 			if (typeof x == 'object') {
 				y = x.y;
 				x = x.x;
@@ -2347,6 +2402,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number}  y Direction y coordinate
 		 */
 		attractionPoint(magnitude, x, y) {
+			console.warn('sprite.attractionPoint is deprecated, use sprite.moveTowards instead');
 			let angle = this.p.atan2(y - this.y, x - this.x);
 			this.vel.x += this.p.cos(angle) * magnitude;
 			this.vel.y += this.p.sin(angle) * magnitude;
@@ -2614,8 +2670,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Alias for collides
+		 *
 		 * @method collide
-		 * @deprecated use collides instead
 		 */
 		collide(target, callback) {
 			return this.collides(target, callback);
@@ -2695,8 +2752,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Alias for overlaps
+		 *
 		 * @method overlap
-		 * @deprecated use overlaps instead
 		 */
 		overlap(target, callback) {
 			return this.overlaps(target, callback);
@@ -2770,6 +2828,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @returns the name of the sprite's current animation
 		 */
 		getAnimationLabel() {
+			console.warn('sprite.getAnimationLabel is deprecated. Use sprite.animation.name instead.');
 			return this.animation.name;
 		}
 	}
@@ -2929,7 +2988,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.frameChanged = false;
 
 			this.rotation = 0;
-			this.scale = { x: 1, y: 1 };
+			this._scale = new Scale();
 
 			if (args.length == 0 || typeof args[0] == 'number') return;
 
@@ -3149,6 +3208,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		get scale() {
+			return this._scale;
+		}
+		set scale(val) {
+			if (typeof val == 'number') {
+				val = { x: val, y: val };
+			}
+			this._scale._x = val.x;
+			this._scale._y = val.y;
+			this._scale._avg = val.x;
+		}
+
 		clone() {
 			let ani = new SpriteAnimation();
 			ani.spriteSheet = this.spriteSheet;
@@ -3188,7 +3259,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p.imageMode(p5.prototype.CENTER);
 			this.p.translate(this.x, this.y);
 			this.p.rotate(r || this.rotation);
-			this.p.scale(sx || this.scale.x, sy || this.scale.y);
+			this.p.scale(sx || this._scale.x, sy || this._scale.y);
 			let img = this[this.frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
@@ -3321,6 +3392,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} frame Frame number (starts from 0).
 		 */
 		changeFrame(f) {
+			console.warn('Deprecated, change the ani.frame property directly.');
 			if (f < this.length) this.frame = f;
 			else this.frame = this.length - 1;
 
@@ -3383,6 +3455,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @return {Number} Current frame (starts from 0)
 		 */
 		getFrame() {
+			console.warn('Deprecated, use ani.frame instead.');
 			return this.frame;
 		}
 
@@ -3395,6 +3468,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @return {Number} Last frame number (starts from 0)
 		 */
 		getLastFrame() {
+			console.warn('Deprecated, use ani.lastFrame instead.');
 			return this.lastFrame;
 		}
 
@@ -3733,8 +3807,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Alias for collides.
+		 *
 		 * @method collide
-		 * @deprecated use collides instead
 		 */
 		collide(target, callback) {
 			return this.collides(target, callback);
@@ -3816,8 +3891,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Alias for overlaps.
+		 *
 		 * @method overlap
-		 * @deprecated use overlaps instead
 		 */
 		overlap(target, callback) {
 			return this.overlaps(target, callback);
@@ -3950,6 +4026,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} amount Amount of rotation
 		 */
 		orbit(amount) {
+			console.warn('group.orbit is an experimental and subject to change in the future!');
 			if (!this.centroid) this.resetCentroid();
 			this.orbitAngle += amount;
 			let angle = this.orbitAngle;
@@ -3974,17 +4051,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} i The index of the object to retrieve
 		 */
 		get(i) {
+			console.warn('Deprecated: use group[i] instead of group.get(i)');
 			return this[i];
 		}
 
 		/**
-		 * Checks if the group contains a sprite.
+		 * Use group.includes(sprite) instead.
 		 *
+		 * @deprecated
 		 * @method contains
 		 * @param {Sprite} sprite The sprite to search
 		 * @return {Number} Index or -1 if not found
 		 */
 		contains(sprite) {
+			console.warn('Deprecated: use group.includes(sprite) instead of group.contains(sprite)');
 			return this.indexOf(sprite) > -1;
 		}
 
@@ -4217,11 +4297,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 				this.animations[name] = ani;
 				this._animation = ani;
-				// TODO resize sprite collider to animation dimensions
-				// if (this._isAllSpritesGroup) {
-				// 	this.w = ani.w;
-				// 	this.h = ani.h;
-				// }
+
+				if (this._dimensionsUndefined) {
+					this.w = ani.w;
+					this.h = ani.h;
+				}
 				return ani;
 			};
 
@@ -4747,6 +4827,36 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	p5.prototype.createTiles = function (tiles, x, y, w, h) {
 		return new Tiles(tiles, x, y, w, h);
 	};
+
+	class Scale {
+		constructor() {
+			this._x = 1;
+			this._y = 1;
+			this._avg = 1;
+		}
+
+		valueOf() {
+			return this._avg;
+		}
+
+		get x() {
+			return this._x;
+		}
+		set x(val) {
+			if (val == this._x) return;
+			this._x = val;
+			this._avg = (this._x + this._y) * 0.5;
+		}
+
+		get y() {
+			return this._y;
+		}
+		set y(val) {
+			if (val == this._y) return;
+			this._y = val;
+			this._avg = (this._x + this._y) * 0.5;
+		}
+	}
 
 	/**
 	 * This function is automatically called at the end of the p5.js draw
@@ -5873,7 +5983,9 @@ canvas {
 				if (inp == 40) return 'ArrowDown';
 				if (inp == 37) return 'ArrowLeft';
 				if (inp == 39) return 'ArrowRight';
-				throw new Error('Use key names with the keyboard input functions, not key codes!');
+				throw new Error(
+					'Use key names with the keyboard input functions, not key codes! If you are trying to detect if the user pressed a number key make it a string, e.g. "1" or "2".'
+				);
 			}
 			return inp[0].toUpperCase() + inp.slice(1).toLowerCase();
 		}
