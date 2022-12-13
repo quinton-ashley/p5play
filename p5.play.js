@@ -784,14 +784,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else if (this.fixture.getNext()) {
 				this._shape = 'combo';
 			}
-			if (shape == 'circle') this._diameter = w;
-			else {
-				this._h = h;
-				this._hh = h * 0.5;
-			}
 
 			this._w = w;
 			this._hw = w * 0.5;
+
+			if (shape == 'circle') {
+				this._diameter = w;
+				this._h = w;
+				this._hh = this._hw;
+			} else {
+				this._h = h;
+				this._hh = h * 0.5;
+			}
 		}
 
 		/**
@@ -1809,6 +1813,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let scalar = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
+			this._h = val;
+			this._hh = this._hw;
 			if (prevShape != 'circle') return;
 			this._resizeCollider({ x: scalar, y: scalar });
 		}
@@ -4457,10 +4463,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.origin.x -= this.p.allSprites.tileSize * 0.5;
 				this.origin.y -= this.p.allSprites.tileSize * 0.5;
 			}
-			this.hw = w * 0.5;
-			this.hh = h * 0.5;
-			this.halfWidth = this.hw;
-			this.halfHeight = this.hh;
+			this._hw = w * 0.5;
+			this._hh = h * 0.5;
 		}
 
 		_beginContact(contact) {
