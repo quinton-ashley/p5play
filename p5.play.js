@@ -4463,8 +4463,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.origin.x -= this.p.allSprites.tileSize * 0.5;
 				this.origin.y -= this.p.allSprites.tileSize * 0.5;
 			}
-			this._hw = w * 0.5;
-			this._hh = h * 0.5;
+			this.hw = w * 0.5;
+			this.hh = h * 0.5;
 		}
 
 		_beginContact(contact) {
