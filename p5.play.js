@@ -424,9 +424,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					else this._animation = ani.clone();
 				}
 				let ts = this.tileSize;
-				if (!w && this.ani.w != 1) {
+				if (!w && (this.ani.w != 1 || this.ani.h != 1)) {
 					w = this.ani.w / ts;
-					if (this.shape != 'circle' && this.ani.h > 1) {
+					if (this.shape != 'circle') {
 						h = this.ani.h / ts;
 					}
 				}
@@ -4304,7 +4304,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.animations[name] = ani;
 				this._animation = ani;
 
-				if (this._dimensionsUndefined) {
+				// only works if the animation was loaded in preload
+				if (this._dimensionsUndefined && (ani.w != 1 || ani.h != 1)) {
 					this.w = ani.w;
 					this.h = ani.h;
 				}
