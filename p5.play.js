@@ -2944,7 +2944,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @type {Number}
 			 * @default 4
 			 */
-			this.frameDelay = 4;
+			this._frameDelay = 4;
 
 			/**
 			 * True if the animation is currently playing.
@@ -3212,6 +3212,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					else this.push(this.p.loadImage(args[i]));
 				}
 			}
+		}
+
+		get frameDelay() {
+			return this._frameDelay;
+		}
+
+		set frameDelay(val) {
+			if (val <= 0) val = 1;
+			this._frameDelay = val;
 		}
 
 		get scale() {
