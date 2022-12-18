@@ -718,49 +718,77 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						ang *= mod;
 					}
 				}
-				if (
-					Math.round(vert.x * 1e6) / 1e6 == 0 &&
-					Math.round(vert.y * 1e6) / 1e6 == 0 &&
-					vecs.length - 1 <= pl.Settings.maxPolygonVertices &&
-					this._shape != 'chain'
-				) {
+				if (Math.round(vert.x * 1e6) / 1e6 == 0 && Math.round(vert.y * 1e6) / 1e6 == 0) {
 					shape = 'polygon';
 				} else {
 					shape = 'chain';
 				}
+
+				if (this.originMode == 'start' && shape == 'polygon') {
+					this.originMode = 'center';
+				}
+
+				let isConvex = false;
+				if (shape == 'polygon' && this._isConvexPoly(vecs.slice(0, -1))) {
+					isConvex = true;
+				} else {
+					shape = 'chain';
+				}
+
+				if (vecs.length - 1 > pl.Settings.maxPolygonVertices || this._shape == 'chain') {
+					shape = 'chain';
+				}
+
 				w = max.x - min.x;
 				this._hw = w * 0.5;
 				h = max.y - min.y;
 				this._hh = h * 0.5;
 
-				if (shape == 'polygon' && this._vertexMode) {
-					this.x = least.x + this._hw;
-					this.y = least.y + this._hh;
-					log(this.x, this.y);
-				}
-
-				if (this.originMode == 'start' && shape == 'chain') {
+				if (this.originMode == 'start') {
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
 						vecs[i] = new pl.Vec2((vec.x * this.tileSize) / plScale, (vec.y * this.tileSize) / plScale);
 					}
 				} else {
 					// origin is center
-					this.originMode = 'center';
+
+					let centerX = 0;
+					let centerY = 0;
+					// if (!this._vertexMode || isConvex) {
+					// use centroid of a triangle method to get center
+					// average of all vertices
+					let sumX = 0;
+					let sumY = 0;
+					for (let i = 0; i < vecs.length; i++) {
+						sumX += vecs[i].x;
+						sumY += vecs[i].y;
+					}
+					// last vertex is same as first
+					let vl = vecs.length;
+					if (shape == 'polygon' || isConvex) vl--;
+					centerX = sumX / vl;
+					centerY = sumY / vl;
+					// }
+					// use bounding box method to get center
+					// centerX = this._hw - min.x;
+					// centerY = this._hh - min.y;
+					// }
+					if (this._vertexMode) {
+						this.x = least.x + centerX;
+						this.y = least.y + centerY;
+					}
+
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
 						vecs[i] = new pl.Vec2(
-							((vec.x - this._hw - min.x) * this.tileSize) / plScale,
-							((vec.y - this._hh - min.y) * this.tileSize) / plScale
+							((vec.x - centerX) * this.tileSize) / plScale,
+							((vec.y - centerY) * this.tileSize) / plScale
 						);
 					}
 				}
 				if (shape == 'polygon') {
-					if (this._isConvexPoly(vecs.slice(0, -1))) {
-						s = pl.Polygon(vecs);
-					} else shape = 'chain';
-				}
-				if (shape == 'chain') {
+					s = pl.Polygon(vecs);
+				} else if (shape == 'chain') {
 					s = pl.Chain(vecs, false);
 					props.density = 0;
 					props.restitution = 0;
@@ -1879,6 +1907,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		_isPoly(vecs) {
+			let first = vecs[0];
+			let last = vecs[vecs.length - 1];
+			return first.x;
+		}
+
 		/**
 		 * Validate convexity.
 		 *
@@ -2856,14 +2890,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		let t = new Sprite(size, size, [
 			[size, size * 0.4],
 			[-size, size * 0.4],
-			[0, size * -0.8]
+			[0, -size * 0.8]
 		]);
 		t.color = 'green';
 		t._isTurtleSprite = true;
+		t._prevPos = { x: t.x, y: t.y };
 		let _move = t.move;
-		t.move = function () {
-			return _move.call(this, ...arguments);
+		t.move = async function () {
+			this._prevPos.x = this.x;
+			this._prevPos.y = this.y;
+			await _move.call(this, ...arguments);
 		};
+
+		// t.draw = function () {
+		// 	triangle();
+		// };
 		return t;
 	};
 
