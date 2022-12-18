@@ -2430,10 +2430,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @method rotateTowards
 		 * @param {*} x position to rotate towards
 		 * @param {*} y position to rotate towards
-		 * @param {*} facing rotation angle the sprite should be at when "facing" the position, default is 0
 		 * @param {*} tracking percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
+		 * @param {*} facing rotation angle the sprite should be at when "facing" the position, default is 0
 		 */
-		rotateTowards(x, y, facing, tracking) {
+		rotateTowards(x, y, tracking, facing) {
+			if (typeof x != 'number') {
+				facing = tracking;
+				tracking = y;
+				y = facing;
+			}
 			let angle = this.angleTo(x, y, facing);
 			tracking ??= 0.1;
 			this.rotationSpeed = angle * tracking;
@@ -2483,16 +2488,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @method rotateTo
 		 * @param {Number|Object} x|position
 		 * @param {Number} y
-		 * @param {Number} facing rotation angle the sprite should be at when "facing" the position, default is 0
 		 * @param {Number} speed the amount of rotation per frame, default is 1
+		 * @param {Number} facing rotation angle the sprite should be at when "facing" the position, default is 0
 		 * @returns Promise
 		 */
-		rotateTo(x, y, facing, speed) {
+		rotateTo(x, y, speed, facing) {
+			if (typeof x != 'number') {
+				facing = speed;
+				speed = y;
+				y = facing;
+			}
+
 			let angle = this.angleTo(x, y, facing);
 
-			if (typeof x != 'number') speed = facing;
-
-			this.rotate(angle, speed);
+			return this.rotate(angle, speed);
 		}
 
 		/**
@@ -2844,7 +2853,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			throw new Error(`Turtle can't be used when allSprites.tileSize is greater than 1.`);
 		}
 		size ??= 25;
-		let t = new Sprite(pInst.width * 0.5, pInst.height * 0.5, [
+		let t = new Sprite(size, size, [
 			[size, size * 0.4],
 			[-size, size * 0.4],
 			[0, size * -0.8]
@@ -2852,8 +2861,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		t.color = 'green';
 		t._isTurtleSprite = true;
 		let _move = t.move;
-		t.move = function (distance) {
-			return _move.call(this, this.rotation, 1, distance);
+		t.move = function () {
+			return _move.call(this, ...arguments);
 		};
 		return t;
 	};
