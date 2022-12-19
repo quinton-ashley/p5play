@@ -718,31 +718,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						ang *= mod;
 					}
 				}
-				if (Math.round(vert.x * 1e6) / 1e6 == 0 && Math.round(vert.y * 1e6) / 1e6 == 0) {
-					shape = 'polygon';
-				} else {
-					shape = 'chain';
-				}
-
-				if (this.originMode == 'start' && shape == 'polygon') {
-					this.originMode = 'center';
-				}
-
-				let isConvex = false;
-				if (shape == 'polygon' && this._isConvexPoly(vecs.slice(0, -1))) {
-					isConvex = true;
-				} else {
-					shape = 'chain';
-				}
-
-				if (vecs.length - 1 > pl.Settings.maxPolygonVertices || this._shape == 'chain') {
-					shape = 'chain';
-				}
 
 				w = max.x - min.x;
 				this._hw = w * 0.5;
 				h = max.y - min.y;
 				this._hh = h * 0.5;
+
+				if (Math.round(vert.x * 1e6) / 1e6 == 0 && Math.round(vert.y * 1e6) / 1e6 == 0) {
+					shape = 'polygon';
+					this.originMode = 'center';
+				} else {
+					shape = 'chain';
+				}
+
+				let isConvex = false;
+				if (shape == 'polygon' && this._isConvexPoly(vecs.slice(0, -1))) {
+					isConvex = true;
+				}
 
 				if (this.originMode == 'start') {
 					for (let i = 0; i < vecs.length; i++) {
@@ -759,13 +751,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					// average of all vertices
 					let sumX = 0;
 					let sumY = 0;
-					for (let i = 0; i < vecs.length; i++) {
-						sumX += vecs[i].x;
-						sumY += vecs[i].y;
-					}
+
 					// last vertex is same as first
 					let vl = vecs.length;
 					if (shape == 'polygon' || isConvex) vl--;
+					for (let i = 0; i < vl; i++) {
+						sumX += vecs[i].x;
+						sumY += vecs[i].y;
+					}
+
 					centerX = sumX / vl;
 					centerY = sumY / vl;
 					// }
@@ -786,6 +780,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						);
 					}
 				}
+
+				if (!isConvex || vecs.length - 1 > pl.Settings.maxPolygonVertices || this._shape == 'chain') {
+					shape = 'chain';
+				}
+
 				if (shape == 'polygon') {
 					s = pl.Polygon(vecs);
 				} else if (shape == 'chain') {
