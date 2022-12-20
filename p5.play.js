@@ -817,8 +817,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			if (shape == 'circle') {
 				this._diameter = w;
-				this._h = w;
-				this._hh = this._hw;
 			} else {
 				this._h = h;
 				this._hh = h * 0.5;
@@ -1089,7 +1087,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (c == 'k') val = 'kinematic';
 			if (c == 'n') val = 'none';
 
-			if (this._collider == val) return;
+			if (val == this._collider) return;
 
 			let oldCollider = this._collider;
 
@@ -1781,7 +1779,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._resizeCollider({ x: 1, y: scalarY });
 		}
 		get hh() {
-			return this._hh;
+			return this._hh || this._hw;
 		}
 		set hh(val) {
 			throw new FriendlyError('Sprite.hh');
@@ -4027,7 +4025,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @method moveTo
 		 */
 		moveTo(x, y, speed) {
-			let centroid = this.centroid;
+			if (typeof x != 'number') {
+				let obj = x;
+				if (obj == this.p.mouse && !this.p.mouse.active) return;
+				speed = y;
+				y = obj.y;
+				x = obj.x;
+			}
+			let centroid = this.resetCentroid();
 			let movements = [];
 			for (let s of this) {
 				let dest = {
@@ -4044,12 +4049,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		moveTowards(x, y, tracking) {
 			if (typeof x != 'number') {
+				let obj = x;
+				if (obj == this.p.mouse && !this.p.mouse.active) return;
 				tracking = y;
-				y = x.y;
-				x = x.x;
+				y = obj.y;
+				x = obj.x;
 			}
 			if (x === undefined && y === undefined) return;
-			let centroid = this.resetCentroid();
+			this.resetCentroid();
 			for (let s of this) {
 				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
 				let dest = {
@@ -4065,12 +4072,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		moveAway(x, y, tracking) {
 			if (typeof x != 'number') {
+				let obj = x;
+				if (obj == this.p.mouse && !this.p.mouse.active) return;
 				tracking = y;
-				y = x.y;
-				x = x.x;
+				y = obj.y;
+				x = obj.x;
 			}
 			if (x === undefined && y === undefined) return;
-			let centroid = this.resetCentroid();
+			this.resetCentroid();
 			for (let s of this) {
 				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
 				let dest = {
