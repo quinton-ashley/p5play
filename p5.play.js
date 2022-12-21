@@ -1331,10 +1331,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.body.getFixtureList();
 		}
 
-		// set force(val) {
-		// 	this.body.applyForceToCenter(val, true);
-		// }
-
 		/**
 		 * The amount the sprite's physics body resists moving
 		 * when rubbing against another physics body.
@@ -2171,6 +2167,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					sh.m_vertex2.y * plScale
 				);
 			}
+		}
+
+		/**
+		 * EXPERIMENTAL implementation!
+		 *
+		 * Apply a force that is scaled to the sprite's mass.
+		 *
+		 * @method applyForce
+		 * @param {p5.Vector|Array} vec force vector
+		 */
+		applyForce(vec) {
+			if (Array.isArray(vec)) {
+				vec = new pl.Vec2(vec[0], vec[1]);
+			} else {
+				vec = new pl.Vec2(vec.x, vec.y);
+			}
+			this.body.applyForceToCenter(vec.mul(this.body.m_mass), false);
 		}
 
 		/**
