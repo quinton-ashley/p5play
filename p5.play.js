@@ -2066,6 +2066,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		_draw() {
 			if (this.animation && !this.debug) {
+				this.p.scale(this._mirror.x * this._scale.x, this._mirror.y * this._scale.y);
 				this.animation.draw();
 			} else if (this.fixture != null) {
 				if (this._shape == 'chain') this.p.stroke(this.color);
