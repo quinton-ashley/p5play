@@ -746,7 +746,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 					let centerX = 0;
 					let centerY = 0;
-					// if (!this._vertexMode || isConvex) {
 					// use centroid of a triangle method to get center
 					// average of all vertices
 					let sumX = 0;
@@ -767,7 +766,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					// centerX = this._hw - min.x;
 					// centerY = this._hh - min.y;
 					// }
-					if (this._vertexMode) {
+					if (this._vertexMode && usesVertices) {
 						this.x = least.x + centerX;
 						this.y = least.y + centerY;
 					}
