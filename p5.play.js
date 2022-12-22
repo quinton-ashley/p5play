@@ -32,10 +32,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	pl.Settings.velocityThreshold = 0.19;
 	let plScale = 60;
 
-	this.p5play = this.p5play || {
-		os: {
-			emulated: false
-		}
+	this.p5play = this.p5play || {};
+	this.p5play.os ??= {
+		emulated: false
 	};
 	this.p5play.autoDrawSprites ??= true;
 	this.p5play.autoUpdateSprites ??= true;
@@ -44,9 +43,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.mouseSprites = [];
 	this.p5play.standardizeKeyboard = false;
 
+	// scale to planck coordinates from p5 coordinates
 	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
 	const scaleXTo = (x, tileSize) => (x * tileSize) / plScale;
+
+	// scale from planck coordinates to p5 coordinates
 	const scaleFrom = ({ x, y }, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
+
 	const fixRound = (val) => (Math.abs(val - Math.round(val)) <= pl.Settings.linearSlop ? Math.round(val) : val);
 	const isArrowFunction = (fn) =>
 		!/^(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*(?:(?:(?:async\s(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*)?function|class)(?:\s|(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*)|(?:[_$\w][\w0-9_$]*\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\()|(?:\[\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*(?:(?:['][^']+['])|(?:["][^"]+["]))\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\]\())/.test(
@@ -2170,20 +2173,31 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * EXPERIMENTAL implementation!
+		 * EXPERIMENTAL implementation for beta testing!
 		 *
 		 * Apply a force that is scaled to the sprite's mass.
 		 *
 		 * @method applyForce
-		 * @param {p5.Vector|Array} vec force vector
+		 * @param {p5.Vector|Array} forceVector force vector
+		 * @param {p5.Vector|Array} [forceOrigin] force origin
 		 */
-		applyForce(vec) {
-			if (Array.isArray(vec)) {
-				vec = new pl.Vec2(vec[0], vec[1]);
+		applyForce(forceVector, forceOrigin) {
+			if (!this.body) return;
+			if (Array.isArray(forceVector)) {
+				forceVector = new pl.Vec2(forceVector[0], forceVector[1]);
 			} else {
-				vec = new pl.Vec2(vec.x, vec.y);
+				forceVector = new pl.Vec2(forceVector.x || 0, forceVector.y || 0);
 			}
-			this.body.applyForceToCenter(vec.mul(this.body.m_mass), false);
+			if (forceOrigin) {
+				if (Array.isArray(forceOrigin)) {
+					forceOrigin = new pl.Vec2(forceOrigin[0], forceOrigin[1]);
+				} else {
+					forceOrigin = new pl.Vec2(forceOrigin.x || 0, forceOrigin.y || 0);
+				}
+				this.body.applyForce(forceVector.mul(this.body.m_mass), forceOrigin, false);
+			} else {
+				this.body.applyForceToCenter(forceVector.mul(this.body.m_mass), false);
+			}
 		}
 
 		/**
@@ -2701,6 +2715,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		remove() {
 			if (this.body) this.p.world.destroyBody(this.body);
+			this.body = null;
 			this.removed = true;
 
 			//when removed from the "scene" also remove all the references in all the groups
@@ -4024,6 +4039,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * EXPERIMENTAL implementation for beta testing!
+		 *
+		 * Apply a force that is scaled to the sprite's mass.
+		 *
+		 * @method applyForce
+		 * @param {p5.Vector|Array} forceVector force vector
+		 * @param {p5.Vector|Array} [forceOrigin] force origin
+		 */
+		applyForce(forceVector, forceOrigin) {
+			for (let s of this) {
+				s.applyForce(forceVector, forceOrigin);
+			}
+		}
+
+		/**
 		 * @method move
 		 */
 		move(distance, direction, speed) {
@@ -4341,6 +4371,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 				if (sprite.visible) sprite.draw();
 			}
+		}
+
+		update() {
+			throw new Error('Use the updateSprites function instead to control whether sprites are updated or not.');
 		}
 	}
 
