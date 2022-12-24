@@ -1089,6 +1089,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (c == 'k') val = 'kinematic';
 			if (c == 'n') val = 'none';
 
+			if (this._collider === undefined) {
+				this._collider = val;
+				return;
+			}
 			if (val == this._collider) return;
 
 			let oldCollider = this._collider;
@@ -1126,7 +1130,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this._createSensors();
 				}
 				for (let prop in bodyProps) {
-					this[prop] = bodyProps[prop];
+					if (bodyProps[prop] !== undefined) {
+						this[prop] = bodyProps[prop];
+					}
 				}
 			}
 		}
@@ -1144,7 +1150,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (val instanceof p5.Color) {
 				this._color = val;
 			} else if (typeof val != 'object') {
-				this._color = this.p.color(val);
+				if (typeof val == 'string' && val.length == 1) {
+					this._color = p5.prototype.colorPal(val);
+				} else {
+					this._color = this.p.color(val);
+				}
 			} else {
 				this._color = this.p.color(...val.levels);
 			}
@@ -1293,6 +1303,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Boolean}
 		 */
 		get dynamic() {
+			if (!this.body) return undefined;
 			return this.body.isDynamic();
 		}
 		set dynamic(val) {
@@ -1306,10 +1317,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Boolean}
 		 */
 		get rotationLock() {
+			if (!this.body) return undefined;
 			return this.body.isFixedRotation();
 		}
 		set rotationLock(val) {
-			this.body.setFixedRotation(val);
+			if (this.body) this.body.setFixedRotation(val);
 		}
 
 		/**
@@ -1415,10 +1427,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Boolean}
 		 */
 		get isSuperFast() {
+			if (!this.body) return undefined;
 			return this.body.isBullet();
 		}
 		set isSuperFast(val) {
-			this.body.setBullet(val);
+			if (this.body) this.body.setBullet(val);
 		}
 
 		// get joint() {
@@ -1435,6 +1448,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Boolean}
 		 */
 		get kinematic() {
+			if (!this.body) return undefined;
 			return this.body.isKinematic();
 		}
 		set kinematic(val) {
@@ -1447,9 +1461,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Number}
 		 */
 		get mass() {
+			if (!this.body) return undefined;
 			return this.body.getMass();
 		}
 		set mass(val) {
+			if (!this.body) return;
 			let t = this.massData;
 			t.mass = val;
 			this.body.setMassData(t);
@@ -1503,10 +1519,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Number}
 		 */
 		get rotationDrag() {
+			if (!this.body) return undefined;
 			return this.body.getAngularDamping();
 		}
 		set rotationDrag(val) {
-			this.body.setAngularDamping(val);
+			if (this.body) this.body.setAngularDamping(val);
 		}
 		/**
 		 * The speed of the sprite's rotation.
@@ -1619,6 +1636,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Boolean}
 		 */
 		get static() {
+			if (!this.body) return undefined;
 			return this.body.isStatic();
 		}
 		set static(val) {
@@ -1828,7 +1846,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (this._collider != 'none') {
 					this.addCollider(0, 0, val);
 					for (let prop in bodyProps) {
-						this[prop] = bodyProps[prop];
+						if (bodyProps[prop] !== undefined) {
+							this[prop] = bodyProps[prop];
+						}
 					}
 				}
 				this._shape = 'circle';
@@ -5471,6 +5491,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		let w, h, ratio;
 		if (typeof args[0] == 'string') {
 			ratio = args[0].split(':');
+			if (args[1] == 'fullscreen') {
+				isFullScreen = true;
+			}
 		}
 		if (!args.length) {
 			args[0] = window.innerWidth;
@@ -6103,9 +6126,10 @@ canvas {
 				if (inp == 37) return 'ArrowLeft';
 				if (inp == 39) return 'ArrowRight';
 				throw new Error(
-					'Use key names with the keyboard input functions, not key codes! If you are trying to detect if the user pressed a number key make it a string, e.g. "1" or "2".'
+					'Use key names with the keyboard input functions, not key codes! If you are trying to detect if the user pressed a number key make it a string. For example: "5"'
 				);
 			}
+			if (inp == 'space' || inp == 'spacebar') return ' ';
 			return inp[0].toUpperCase() + inp.slice(1).toLowerCase();
 		}
 	}
