@@ -2085,8 +2085,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		_draw() {
 			if (this.animation && !this.debug) {
-				this.p.scale(this._mirror.x * this._scale.x, this._mirror.y * this._scale.y);
-				this.animation.draw();
+				this.animation.draw(0, 0, 0, this._scale.x, this._scale.y);
 			} else if (this.fixture != null) {
 				if (this._shape == 'chain') this.p.stroke(this.color);
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
@@ -3365,11 +3364,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			if (!this.visible) return;
 
+			sx ??= 1;
+			sy ??= 1;
+
 			this.p.push();
 			this.p.imageMode(p5.prototype.CENTER);
 			this.p.translate(this.x, this.y);
 			this.p.rotate(r || this.rotation);
-			this.p.scale(sx || this._scale.x, sy || this._scale.y);
+			this.p.scale(sx * this._scale.x, sy * this._scale.y);
 			let img = this[this.frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
