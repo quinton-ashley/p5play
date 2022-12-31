@@ -1160,7 +1160,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._color = val;
 			} else if (typeof val != 'object') {
 				if (typeof val == 'string' && val.length == 1) {
-					this._color = p5.prototype.colorPal(val);
+					this._color = this.colorPal(val);
 				} else {
 					this._color = this.p.color(val);
 				}
@@ -3136,6 +3136,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.rotation = 0;
 			this._scale = new Scale();
 
+			parent.addAni(this);
+
 			if (args.length == 0 || typeof args[0] == 'number') return;
 
 			// sequence mode
@@ -3449,7 +3451,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this.p.image(img, this.offset.x, this.offset.y);
 				}
 			} else {
-				this.p.print('Warning undefined frame ' + this.frame);
+				log(
+					'Warning: ' +
+						this.name +
+						' animation not loaded yet or frame ' +
+						this.frame +
+						' does not exist. Load this animation in the p5.js preload function if you need to use it at the start of your program.'
+				);
 			}
 
 			this.p.pop();
@@ -5124,7 +5132,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @method createTiles
 	 * @param {String|Array} tiles String or array of strings
 	 */
-	p5.prototype.createTiles = function (tiles, x, y, w, h) {
+	this.createTiles = function (tiles, x, y, w, h) {
 		return new Tiles(tiles, x, y, w, h);
 	};
 
@@ -5167,7 +5175,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @param {Number} velocityIterations
 	 * @param {Number} positionIterations
 	 */
-	p5.prototype.updateSprites = function (timeStep, velocityIterations, positionIterations) {
+	this.updateSprites = function (timeStep, velocityIterations, positionIterations) {
 		for (let s of this.allSprites) {
 			s.previousPosition.x = s.x;
 			s.previousPosition.y = s.y;
@@ -5190,7 +5198,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @param {Number} y
 	 * @returns
 	 */
-	p5.prototype.getSpritesAt = function (x, y, group, cameraActiveWhenDrawn) {
+	this.getSpritesAt = function (x, y, group, cameraActiveWhenDrawn) {
 		cameraActiveWhenDrawn ??= true;
 		const convertedPoint = new pl.Vec2(x / plScale, y / plScale);
 		const aabb = new pl.AABB();
@@ -5229,8 +5237,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @param {Number} y
 	 * @returns
 	 */
-	p5.prototype.getSpriteAt = function (x, y, group) {
-		let sprites = p5.prototype.getSpritesAt(x, y, group);
+	this.getSpriteAt = function (x, y, group) {
+		let sprites = this.getSpritesAt(x, y, group);
 		sprites.sort((a, b) => (a.layer - b.layer) * -1);
 		return sprites[0];
 	};
@@ -5409,7 +5417,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * in the system's palettes array.
 	 * @returns a hex color string for use by p5.js functions
 	 */
-	p5.prototype.colorPal = (c, palette) => {
+	this.colorPal = (c, palette) => {
 		if (c instanceof p5.Color) return c;
 		if (typeof palette == 'number') {
 			palette = pInst.world.palettes[palette];
@@ -5446,7 +5454,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 *
 	 * let img = spriteArt(str);
 	 */
-	p5.prototype.spriteArt = (txt, scale, palette) => {
+	this.spriteArt = (txt, scale, palette) => {
 		scale ??= 1;
 		if (typeof palette == 'number') {
 			palette = pInst.world.palettes[palette];
@@ -5471,7 +5479,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let j = 0; j < lines[i].length; j++) {
 				for (let sX = 0; sX < scale; sX++) {
 					for (let sY = 0; sY < scale; sY++) {
-						let c = p5.prototype.colorPal(lines[i][j], palette);
+						let c = this.colorPal(lines[i][j], palette);
 						img.set(j * scale + sX, i * scale + sY, c);
 					}
 				}
@@ -5494,7 +5502,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @deprecated
 	 * @method drawSprites
 	 */
-	p5.prototype.drawSprite = function (sprite) {
+	this.drawSprite = function (sprite) {
 		if (pInst.frameCount == 1) console.warn('drawSprite() is deprecated, use sprite.draw() instead.');
 		sprite.draw();
 	};
@@ -5509,7 +5517,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @deprecated
 	 * @method drawSprites
 	 */
-	p5.prototype.drawSprites = function (group) {
+	this.drawSprites = function (group) {
 		if (pInst.frameCount == 1) console.warn('drawSprites() is deprecated, use group.draw() instead.');
 		group ??= pInst.allSprites;
 		group.draw();
@@ -5520,7 +5528,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 *
 	 * @returns {Sprite}
 	 */
-	p5.prototype.createSprite = function () {
+	this.createSprite = function () {
 		return new Sprite(...arguments);
 	};
 
@@ -5529,29 +5537,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 *
 	 * @returns {Group}
 	 */
-	p5.prototype.createGroup = function () {
+	this.createGroup = function () {
 		return new Group(...arguments);
 	};
 
 	/**
-	 * Loads an animation.
-	 * Use this in the preload p5.js function.
+	 * Loads an animation. Equivalent to `new SpriteAnimation()`
+	 *
+	 * Load animations in the preload p5.js function if you need to use
+	 * them when your program starts.
 	 *
 	 * @method loadAni
 	 * @returns {SpriteAnimation}
 	 */
-	p5.prototype.loadAni = p5.prototype.loadAnimation = function () {
-		let args = [...arguments];
-		let parent, name;
-
-		if (args[0] instanceof Sprite || args[0] instanceof Group) {
-			parent = args[0];
-			args = args.slice(1);
-		}
-
-		parent ??= this.allSprites;
-		let sa = parent.addAnimation(...args);
-		return sa;
+	/**
+	 * Alias for loadAni
+	 *
+	 * @method loadAnimation
+	 * @returns {SpriteAnimation}
+	 */
+	this.loadAni = this.loadAnimation = function () {
+		return new SpriteAnimation(...arguments);
 	};
 
 	/**
@@ -5563,7 +5569,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @param {Number} y Y coordinate
 	 *
 	 */
-	p5.prototype.animation = function (ani, x, y, r, sX, sY) {
+	this.animation = function (ani, x, y, r, sX, sY) {
 		if (ani.visible) ani.update();
 		ani.draw(x, y, r, sX, sY);
 	};
@@ -5605,7 +5611,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * }
 	 */
 	p5.prototype.sleep = (millisecond) => {
-		return this.delay(millisecond);
+		return p5.prototype.delay(millisecond);
 	};
 
 	/**
@@ -5615,7 +5621,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @param {p5.Sound} sound
 	 * @returns {Promise}
 	 */
-	p5.prototype.play = (sound) => {
+	this.play = (sound) => {
 		if (!sound.play) throw new Error('Tried to play a sound but the sound is not a sound object: ' + sound);
 		// TODO reject if sound not found
 		return new Promise((resolve, reject) => {
@@ -5691,7 +5697,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		if (args.length < 3) args[2] = 'p2d';
 		let can = _createCanvas.call(pInst, ...args);
 		this.canvas.tabIndex = 0;
-		// log(this.canvas);
 		this.canvas.addEventListener('keydown', function (e) {
 			if (
 				e.key == ' ' ||
@@ -5795,7 +5800,7 @@ canvas {
 		let args = arguments;
 		let c;
 		if (args.length == 1 && (typeof args[0] == 'string' || args[0] instanceof p5.Color)) {
-			c = p5.prototype.colorPal(args[0]);
+			c = this.colorPal(args[0]);
 		}
 		if (c !== undefined) _background.call(this, c);
 		else _background.call(this, ...args);
@@ -5813,7 +5818,7 @@ canvas {
 		let args = arguments;
 		let c;
 		if (args.length == 1) {
-			c = p5.prototype.colorPal(args[0]);
+			c = this.colorPal(args[0]);
 		}
 		if (c !== undefined) _fill.call(this, c);
 		else _fill.call(this, ...args);
@@ -5831,7 +5836,7 @@ canvas {
 		let args = arguments;
 		let c;
 		if (args.length == 1) {
-			c = p5.prototype.colorPal(args[0]);
+			c = this.colorPal(args[0]);
 		}
 		if (c !== undefined) _stroke.call(this, c);
 		else _stroke.call(this, ...args);
@@ -5867,7 +5872,7 @@ canvas {
 		}
 		if (img) {
 			// if not finished loading, add callback to the list
-			if (img.width == 1 && img.height == 1) {
+			if ((img.width == 1 && img.height == 1) || !img.pixels.length) {
 				if (cb) {
 					img.cbs.push(cb);
 					img.calls++;
@@ -5878,7 +5883,13 @@ canvas {
 			}
 			return img;
 		}
-		img = _loadImage.call(pInst, url, (_img) => {
+		const _cb = (_img) => {
+			// if (!_img.pixels.length) {
+			// 	log('hi');
+			// 	_loadImage.call(pInst, url, _cb);
+			// 	return;
+			// }
+
 			_img.w = _img.width;
 			_img.h = _img.height;
 			for (let cb of _img.cbs) {
@@ -5891,7 +5902,8 @@ canvas {
 			// delete _img.cbs;
 			_img.cbs = [];
 			pInst.p5play.images.onLoad(img);
-		});
+		};
+		img = _loadImage.call(pInst, url, _cb);
 		img.cbs = [];
 		img.calls = 1;
 		if (cb) img.cbs.push(cb);
@@ -6335,13 +6347,13 @@ canvas {
 	}
 
 	/**
-	 * Deprecated, use kb.pressing(key) instead.
+	 * Obsolete: Use kb.pressing(key) instead.
 	 *
-	 * @deprecated
+	 * @obsolete
 	 * @method keyIsDown
 	 * @param {String} key
 	 */
-	p5.prototype.keyIsDown = function (keyCode) {
+	this.keyIsDown = function (keyCode) {
 		throw new Error(
 			`The p5.js keyIsDown function is outdated and can't be used in p5.play. Trust me, you'll see that the p5.play kb.pressing function is much better. It uses key name strings that are easier to write and easier to read! https://p5play.org/learn/input_devices.html The p5.js keyIsDown function relies on key codes and custom constants for key codes, which are not only hard to remember but were also deprecated in the JavaScript language standards over six years ago and shouldn't be used in new projects. More info: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode`
 		);
@@ -6628,10 +6640,10 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 			if (val == 0) this.p5play.mouseSprite = null;
 		}
 
-		let sprites = p5.prototype.getSpritesAt(this.mouse.x, this.mouse.y);
+		let sprites = this.getSpritesAt(this.mouse.x, this.mouse.y);
 		sprites.sort((a, b) => (a.layer - b.layer) * -1);
 
-		let uiSprites = p5.prototype.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
+		let uiSprites = this.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
 		uiSprites.sort((a, b) => (a.layer - b.layer) * -1);
 
 		sprites = sprites.concat(uiSprites);
