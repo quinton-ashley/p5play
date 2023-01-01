@@ -1,7 +1,7 @@
 /**
  * p5.play
  *
- * @version 3.3
+ * @version 3.4
  * @author quinton-ashley
  * @year 2022
  * @license gpl-v3-only
