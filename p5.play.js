@@ -1882,11 +1882,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.remove();
 				return;
 			}
-			if (this._diameter == val) return;
-			this._diameter = val;
-
-			let prevShape = this.shape;
-			if (prevShape != 'circle') {
+			let shapeChange = this.shape != 'circle';
+			if (!shapeChange) {
+				if (this._diameter == val) return;
+				this._diameter = val;
+			} else {
 				let bodyProps;
 				if (this._collider == 'none') {
 					bodyProps = this._cloneBodyProps();
@@ -1909,7 +1909,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._hw = val * 0.5;
 			this._h = val;
 			this._hh = this._hw;
-			if (prevShape != 'circle') return;
+			if (shapeChange) return;
 			this._resizeCollider({ x: scalar, y: scalar });
 		}
 		/**
@@ -2026,9 +2026,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		set shape(val) {
-			if (this._shape == val) return;
-			this._shape = val;
-			this._reset();
+			if (val == this._shape) return;
+
+			let validShapes = ['box', 'circle', 'chain', 'polygon'];
+			if (validShapes.indexOf(val) == -1) {
+				throw new Error(
+					'Invalid shape type: "' + val + '"\nThe valid shape types are: "' + validShapes.join('", "') + '"'
+				);
+			}
+
+			if (val == 'circle') {
+				this.d = this.w;
+			} else {
+				this._shape = val;
+				this._reset();
+			}
 		}
 
 		/**
