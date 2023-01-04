@@ -2705,7 +2705,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			for (let i = 0; i < anis.length; i++) {
 				let ani = anis[i];
-				if (ani instanceof SpriteAnimation || ani instanceof p5.Image) {
+				if (
+					ani instanceof SpriteAnimation ||
+					ani instanceof p5.Image ||
+					(typeof ani == 'string' && ani.length != 1 && ani.includes('.'))
+				) {
 					anis[i] = this.addAni(ani);
 					ani = anis[i];
 				}
