@@ -1614,11 +1614,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default true
 		 */
 		get sleeping() {
-			return this.body.isAwake();
+			if (this.body) return this.body.isAwake();
+			return undefined;
 		}
 
 		set sleeping(val) {
-			return this.body.setAwake(!val);
+			if (this.body) this.body.setAwake(!val);
+		}
+
+		/**
+		 * @deprecated
+		 */
+		getSpeed() {
+			console.warn('getSpeed() is deprecated, use sprite.speed instead');
+			return this.speed;
 		}
 
 		/**
@@ -1630,21 +1639,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get speed() {
 			return this.p.createVector(this.vel.x, this.vel.y).mag();
 		}
-
-		/**
-		 * @deprecated
-		 */
-		getSpeed() {
-			console.warn('getSpeed() is deprecated, use sprite.speed instead');
-			return this.speed;
-		}
-		/**
-		 * The sprite's speed.
-		 *
-		 * @property speed
-		 * @type {Number}
-		 * @param {Number} speed that the sprite will move at in the direction of its current rotation
-		 */
 		set speed(val) {
 			let angle = this.direction;
 			this.vel.x = this.p.cos(angle) * val;
@@ -3866,7 +3860,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					super(_this, ...arguments);
 				}
 			}
-
+			this.GroupSprite = GroupSprite;
 			this.Sprite = GroupSprite;
 
 			class SubGroup extends Group {
@@ -3874,7 +3868,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					super(_this, ...arguments);
 				}
 			}
-
+			this.SubGroup = SubGroup;
 			this.Group = SubGroup;
 
 			this.mouse = {
@@ -4378,8 +4372,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Adds a sprite to the group. Returns true if the sprite was added
-		 * because it was not already in the group.
+		 * Alias for push.
 		 *
 		 * @method add
 		 * @param {Sprite} s The sprite to be added
@@ -4729,7 +4722,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.on('end-contact', this._endContact);
 
 			/**
-			 * Gravity vector
+			 * Gravity vector (x, y)
+			 *
+			 * All sprites getting
 			 *
 			 * @property gravity
 			 */
@@ -4738,12 +4733,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					return _this.m_gravity.x;
 				},
 				set x(val) {
+					for (let s of _this.p.allSprites) {
+						s.sleeping = false;
+					}
 					_this.m_gravity.x = _this.p.round(val || 0);
 				},
 				get y() {
 					return _this.m_gravity.y;
 				},
 				set y(val) {
+					for (let s of _this.p.allSprites) {
+						s.sleeping = false;
+					}
 					_this.m_gravity.y = _this.p.round(val || 0);
 				}
 			};
@@ -6671,6 +6672,7 @@ canvas {
 	}
 
 	this.contro = new Contros();
+	this.controllers = this.contro;
 });
 
 // called before each p5.js draw function call
