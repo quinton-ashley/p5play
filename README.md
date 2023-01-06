@@ -12,7 +12,7 @@ p5.play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated
 
 This open source project took thousands of hours to create and it continues to be updated and maintained by Quinton Ashley. p5.play will always be available for free, but your support would be greatly appreciated. Please consider donating!
 
-[![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto) [![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley)
+[![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto) [![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley) [![Patreon](https://img.shields.io/badge/Patreon-@p5play-orange.svg)](https://www.patreon.com/p5play)
 
 ## Development of p5.play
 
