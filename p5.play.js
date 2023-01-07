@@ -564,7 +564,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					'animations',
 					'autoCull',
 					'Sprite',
+					'GroupSprite',
 					'Group',
+					'SubGroup',
 					'vel',
 					'mirror',
 					'mouse'
