@@ -590,13 +590,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			/**
-			 * If no image or animations are set this is color of the
-			 * placeholder rectangle
-			 *
-			 * @property color
-			 * @type {color}
-			 * @default a randomly generated color
+			 * @property strokeWeight
+			 * @type {Number}
+			 * @default undefined
 			 */
+			this.strokeWeight;
+
 			this.color ??= this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
 
 			this.textColor ??= this.p.color(0);
@@ -824,9 +823,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Removes the physics body colliders from the sprite but not
 		 * overlap sensors.
 		 *
-		 * @method removeColliders
+		 * @private _removeColliders
 		 */
-		removeColliders() {
+		_removeColliders() {
 			this._collides = {};
 			this._colliding = {};
 			this._collided = {};
@@ -935,9 +934,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Removes overlap sensors from the sprite.
 		 *
-		 * @method removeSensors
+		 * @private _removeSensors
 		 */
-		removeSensors() {
+		_removeSensors() {
 			this._overlap = {};
 			this._overlaps = {};
 			this._overlapping = {};
@@ -1142,6 +1141,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		_parseColor(val) {
+			if (val instanceof p5.Color) {
+				return val;
+			} else if (typeof val != 'object') {
+				if (typeof val == 'string' && val.length == 1) {
+					return this.p.colorPal(val);
+				} else {
+					return this.p.color(val);
+				}
+			}
+			return this.p.color(...val.levels);
+		}
+
 		/**
 		 * The sprite's current color. By default sprites get a random color.
 		 *
@@ -1152,25 +1164,69 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._color;
 		}
 		set color(val) {
-			if (val instanceof p5.Color) {
-				this._color = val;
-			} else if (typeof val != 'object') {
-				if (typeof val == 'string' && val.length == 1) {
-					this._color = this.colorPal(val);
-				} else {
-					this._color = this.p.color(val);
-				}
-			} else {
-				this._color = this.p.color(...val.levels);
-			}
+			this._color = this._parseColor(val);
 		}
-
-		// deprecated
+		/**
+		 * @deprecated shapeColor
+		 */
 		get shapeColor() {
 			return this._color;
 		}
 		set shapeColor(val) {
 			this.color = val;
+		}
+
+		/**
+		 * Alias for sprite.fillColor
+		 *
+		 * @property fill
+		 * @type {p5.Color}
+		 */
+		get fill() {
+			return this._color;
+		}
+		set fill(val) {
+			this._color = this._parseColor(val);
+		}
+
+		/**
+		 * Alias for sprite.color
+		 *
+		 * @property fillColor
+		 * @type {p5.Color}
+		 */
+		get fillColor() {
+			return this._color;
+		}
+		set fillColor(val) {
+			this._color = this._parseColor(val);
+		}
+
+		/**
+		 * Alias for sprite.strokeColor
+		 *
+		 * @property stroke
+		 * @type {p5.Color}
+		 */
+		get stroke() {
+			return this._stroke;
+		}
+		set stroke(val) {
+			this._stroke = this._parseColor(val);
+		}
+
+		/**
+		 * The sprite's stroke current color. By default the stroke of a sprite
+		 * indicates its collider type.
+		 *
+		 * @property strokeColor
+		 * @type {p5.Color}
+		 */
+		get strokeColor() {
+			return this._stroke;
+		}
+		set strokeColor(val) {
+			this._stroke = this._parseColor(val);
 		}
 
 		/**
@@ -1183,13 +1239,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._textColor;
 		}
 		set textColor(val) {
-			if (val instanceof p5.Color) {
-				this._textColor = val;
-			} else if (typeof val != 'object') {
-				this._textColor = this.p.color(val);
-			} else {
-				this._textColor = this.p.color(...val.levels);
-			}
+			this._textColor = this._parseColor(val);
 		}
 
 		/**
@@ -1887,7 +1937,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (this._collider == 'none') {
 					bodyProps = this._cloneBodyProps();
 				}
-				this.removeColliders();
+				this._removeSensors();
+				this._removeColliders();
 				this._h = undefined;
 				this._shape = undefined;
 				if (this._collider != 'none') {
@@ -2137,15 +2188,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @private
 		 */
 		_draw() {
+			if (this.strokeWeight) this.p.strokeWeight(this.strokeWeight);
 			if (this.animation && !this.debug) {
 				this.animation.draw(0, 0, 0, this._scale.x, this._scale.y);
 			} else if (this.fixture != null) {
-				if (this._shape == 'chain') this.p.stroke(this.color);
+				if (this._shape == 'chain') this.p.stroke(this.stroke || this.color);
+				else if (this._stroke) this.p.stroke(this._stroke);
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 					this._drawFixture(fxt);
 				}
 			} else {
-				this.p.stroke(120);
+				this.p.stroke(this._stroke || 120);
 				if (this._shape == 'box') {
 					this.p.rect(0, 0, this.w * this.tileSize, this.h * this.tileSize);
 				} else if (this._shape == 'circle') {
