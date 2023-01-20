@@ -2876,11 +2876,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		_ensureCollide(target, callback) {
+			if (!target) {
+				throw new FriendlyError('Sprite.collide', 2);
+			}
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
-				throw new FriendlyError('Sprite.collisions', 0, [target]);
+				throw new FriendlyError('Sprite.collide', 0, [target]);
 			}
 			if (callback && typeof callback != 'function') {
-				throw new FriendlyError('Sprite.collisions', 1);
+				throw new FriendlyError('Sprite.collide', 1, [callback]);
 			}
 		}
 
@@ -2938,11 +2941,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		_ensureOverlap(target, callback) {
+			if (!target) {
+				throw new FriendlyError('Sprite.overlap', 2);
+			}
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
-				throw new Error('Sprite.overlaps', 0, [target]);
+				throw new FriendlyError('Sprite.overlap', 0, [target]);
 			}
 			if (callback && typeof callback != 'function') {
-				throw new FriendlyError('Sprite.overlaps', 1);
+				throw new FriendlyError('Sprite.overlap', 1, [callback]);
 			}
 			if (!this._hasOverlaps) this._createSensors();
 			if (target instanceof Sprite) {
@@ -4140,8 +4146,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		_ensureCollide(target, callback) {
+			if (!target) {
+				throw new FriendlyError('Group.collide', 2);
+			}
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
-				throw new Error('collide target must be a sprite or a group');
+				throw new FriendlyError('Group.collide', 0, [target]);
+			}
+			if (callback && typeof callback != 'function') {
+				throw new FriendlyError('Group.collide', 1, [callback]);
 			}
 		}
 
@@ -4198,12 +4210,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._collisions.get(target) == -1;
 		}
 
-		// TODO
-		// displaces(target, callback) {}
-
 		_ensureOverlap(target, callback) {
+			if (!target) {
+				throw new FriendlyError('Group.overlap', 2);
+			}
 			if (!(target instanceof Sprite) && !(target instanceof Group)) {
-				throw new Error('collide target must be a sprite or a group');
+				throw new FriendlyError('Group.overlap', 0, [target]);
+			}
+			if (callback && typeof callback != 'function') {
+				throw new FriendlyError('Group.overlap', 1, [callback]);
 			}
 			if (!this._hasOverlaps) {
 				for (let s of this) {
@@ -6032,13 +6047,15 @@ canvas {
 			hh: "I can't change the halfHeight of a Sprite directly, change the sprite's height instead.",
 			rotate: 'The angle of rotation must be a number.',
 			changeAnimation: `I can't find any animation named "$0".`,
-			collisions: {
+			collide: {
 				0: "I can't make that sprite collide with $0. Sprites can only collide with another sprite or a group.",
-				1: 'The collision callback has to be a function.'
+				1: 'The collision callback has to be a function.',
+				2: "You're trying to check for an collision with a sprite or group that doesn't exist!"
 			},
-			overlaps: {
+			overlap: {
 				0: "I can't make that sprite overlap with $0. Sprites can only overlap with another sprite or a group.",
-				1: 'The overlap callback has to be a function.'
+				1: 'The overlap callback has to be a function.',
+				2: "You're trying to check for an overlap with a sprite or group that doesn't exist!"
 			}
 		},
 		SpriteAnimation: {
@@ -6054,6 +6071,8 @@ canvas {
 			}
 		}
 	};
+	errorMessages.Group.collide = errorMessages.Sprite.collide;
+	errorMessages.Group.overlap = errorMessages.Sprite.overlap;
 
 	/**
 	 * @private
