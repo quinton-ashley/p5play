@@ -630,7 +630,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			offsetX ??= 0;
 			offsetY ??= 0;
 			w ??= this._w;
-			h ??= this._h;
+			if (this.shape && this.shape != 'circle') {
+				h ??= this._h;
+			}
 
 			if (Array.isArray(w)) {
 				path = w;
@@ -5781,9 +5783,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let rH = Number(ratio[1]);
 
 			w = window.innerWidth;
-			h = (window.innerWidth * rH) / rW;
+			h = window.innerWidth * (rH / rW);
 			if (h > window.innerHeight) {
-				w = (window.innerHeight * rW) / rH;
+				w = window.innerHeight * (rW / rH);
 				h = window.innerHeight;
 			}
 			w = Math.round(w);
