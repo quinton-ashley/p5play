@@ -90,9 +90,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'w',
 		'width',
 		'x',
-		'xLock',
-		'y',
-		'yLock'
+		'y'
 	];
 
 	let eventTypes = {
@@ -233,6 +231,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 *
 			 * @property groups
 			 * @type {Array}
+			 * @default [allSprites]
 			 */
 			this.groups = [];
 			this.p.allSprites.push(this);
@@ -501,8 +500,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			});
 
-			this.previousPosition = { x, y };
-			this.dest = { x, y };
+			/**
+			 * The sprite's position on the previous frame.
+			 *
+			 * @property prevPos
+			 * @type {object}
+			 */
+			this.prevPos = { x, y };
+
+			this._dest = { x, y };
 			this._destIdx = 0;
 			this.drag = 0;
 
@@ -1017,7 +1023,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
 		 * with anything that it wasn't already _touching.
 		 *
-		 * @property {Boolean} allowSleeping
+		 * @property allowSleeping
+		 * @type {Boolean}
 		 * @default true
 		 */
 		get allowSleeping() {
@@ -1057,6 +1064,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property bounciness
 		 * @type {Number}
+		 * @default 0.2
 		 */
 		get bounciness() {
 			if (!this.fixture) return;
@@ -1086,6 +1094,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property collider
 		 * @type {String}
+		 * @default 'dynamic'
 		 */
 		get collider() {
 			return this._collider;
@@ -1164,6 +1173,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property color
 		 * @type {p5.Color}
+		 * @default random color
 		 */
 		get color() {
 			return this._color;
@@ -1186,6 +1196,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property fill
 		 * @type {p5.Color}
+		 * @default random color
 		 */
 		get fill() {
 			return this._color;
@@ -1199,6 +1210,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property fillColor
 		 * @type {p5.Color}
+		 * @default random color
 		 */
 		get fillColor() {
 			return this._color;
@@ -1235,10 +1247,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * The sprite's current text color. By default sprites get a random text color.
+		 * The sprite's current text color. Black by default.
 		 *
 		 * @property textColor
 		 * @type {p5.Color}
+		 * @default black (#000000)
 		 */
 		get textColor() {
 			return this._textColor;
@@ -1283,6 +1296,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property direction
 		 * @type {Number}
+		 * @default 0 ("right")
 		 */
 		get direction() {
 			if (this.body && (this.vel.x !== 0 || this.vel.y !== 0)) {
@@ -1326,6 +1340,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property drag
 		 * @type {Number}
+		 * @default 0
 		 */
 		get drag() {
 			if (this.body) return this.body.getLinearDamping();
@@ -1369,6 +1384,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property dynamic
 		 * @type {Boolean}
+		 * @default true
 		 */
 		get dynamic() {
 			if (!this.body) return undefined;
@@ -1383,6 +1399,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property rotationLock
 		 * @type {Boolean}
+		 * @default false
 		 */
 		get rotationLock() {
 			if (!this.body) return undefined;
@@ -1396,8 +1413,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Returns the first node in a linked list of the planck physics
 		 * body's fixtures.
 		 *
-		 * @private
-		 * @property fixture
+		 * @private fixture
 		 */
 		get fixture() {
 			return this.fixtureList;
@@ -1406,8 +1422,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Returns the first node in a linked list of the planck physics
 		 * body's fixtures.
 		 *
-		 * @private
-		 * @property fixtureList
+		 * @private fixtureList
 		 */
 		get fixtureList() {
 			if (!this.body) return null;
@@ -1420,6 +1435,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property friction
 		 * @type {Number}
+		 * @default 0.5
 		 */
 		get friction() {
 			if (!this.fixture) return;
@@ -1440,6 +1456,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property heading
 		 * @type {String}
+		 * @default undefined
 		 */
 		get heading() {
 			return this._heading;
@@ -1511,6 +1528,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property isSuperFast
 		 * @type {Boolean}
+		 * @default false
 		 */
 		get isSuperFast() {
 			if (!this.body) return undefined;
@@ -1532,6 +1550,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property kinematic
 		 * @type {Boolean}
+		 * @default false
 		 */
 		get kinematic() {
 			if (!this.body) return undefined;
@@ -1575,10 +1594,24 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// }
 
 		/**
+		 * Verbose alias for sprite.prevPos
+		 *
+		 * @property previousPosition
+		 * @type {object}
+		 */
+		get previousPosition() {
+			return this.prevPos;
+		}
+		set previousPosition(val) {
+			this.prevPos = val;
+		}
+
+		/**
 		 * The angle of the sprite's rotation, not the direction it is moving.
 		 *
 		 * @property rotation
 		 * @type {Number}
+		 * @default 0
 		 */
 		get rotation() {
 			if (!this.body) return this._angle || 0;
@@ -1603,6 +1636,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property rotationDrag
 		 * @type {Number}
+		 * @default 0
 		 */
 		get rotationDrag() {
 			if (!this.body) return undefined;
@@ -1616,6 +1650,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property rotationSpeed
 		 * @type {Number}
+		 * @default 0
 		 */
 		get rotationSpeed() {
 			if (this.body) return this.body.getAngularVelocity();
@@ -1637,7 +1672,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * to double the sprite's scale.
 		 *
 		 * @property scale
-		 * @type {Object}
+		 * @type {Number|Object}
+		 * @default 1
 		 */
 		get scale() {
 			return this._scale;
@@ -1679,7 +1715,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default true
 		 */
 		get sleeping() {
-			if (this.body) return this.body.isAwake();
+			if (this.body) return !this.body.isAwake();
 			return undefined;
 		}
 
@@ -1700,6 +1736,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property speed
 		 * @type {Number}
+		 * @default 0
 		 */
 		get speed() {
 			return this.p.createVector(this.vel.x, this.vel.y).mag();
@@ -1715,6 +1752,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @property static
 		 * @type {Boolean}
+		 * @default false
 		 */
 		get static() {
 			if (!this.body) return undefined;
@@ -1722,19 +1760,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set static(val) {
 			if (val) this.collider = 'static';
-		}
-
-		/**
-		 * Apply a torque on the sprite's physics body.
-		 * Torque is the force that causes rotation.
-		 * A positive torque will rotate the sprite clockwise.
-		 * A negative torque will rotate the sprite counter-clockwise.
-		 *
-		 * @property torque
-		 * @param {Number} torque The amount of torque to apply.
-		 */
-		set torque(val) {
-			this.body.applyTorque(val, true);
 		}
 
 		/**
@@ -2023,6 +2048,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 				}
 			}
+			if (this.collider == 'static') this.body.synchronizeFixtures();
 		}
 
 		/**
@@ -2152,9 +2178,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.x += this.vel.x;
 				this.y += this.vel.y;
 			}
-
-			if (this.xLock) this.x = this.previousPosition.x;
-			if (this.yLock) this.y = this.previousPosition.y;
 
 			for (let prop in this.mouse) {
 				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
@@ -2326,6 +2349,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else {
 				this.body.applyForceToCenter(forceVector.mul(this.body.m_mass), false);
 			}
+		}
+
+		/**
+		 * Apply a torque on the sprite's physics body.
+		 * Torque is the force that causes rotation.
+		 * A positive torque will rotate the sprite clockwise.
+		 * A negative torque will rotate the sprite counter-clockwise.
+		 *
+		 * @method applyTorque
+		 * @param {Number} torque The amount of torque to apply.
+		 */
+		applyTorque(val) {
+			this.body.applyTorque(val, true);
 		}
 
 		/**
@@ -2508,19 +2544,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				y = obj.y;
 				x = obj.x;
 			}
-			this.dest.x = this.x;
-			this.dest.y = this.y;
+			this._dest.x = this.x;
+			this._dest.y = this.y;
 
 			let direction = true;
 
 			if (x == this.x) x = false;
 			else {
-				this.dest.x = x;
+				this._dest.x = x;
 				x = true;
 			}
 			if (y == this.y) y = false;
 			else {
-				this.dest.y = y;
+				this._dest.y = y;
 				y = true;
 			}
 
@@ -2535,8 +2571,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 
-			let a = this.dest.y - this.y;
-			let b = this.dest.x - this.x;
+			let a = this._dest.y - this.y;
+			let b = this._dest.x - this.x;
 			let c = Math.sqrt(a * a + b * b);
 
 			let percent = speed / c;
@@ -2568,12 +2604,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 
 					// check if the sprite has reached its destination
-					distX = Math.abs(this.x - this.dest.x);
-					distY = Math.abs(this.y - this.dest.y);
+					distX = Math.abs(this.x - this._dest.x);
+					distY = Math.abs(this.y - this._dest.y);
 				} while ((x && distX > margin) || (y && distY > margin));
 				// stop moving the sprite, snap to destination
-				if (distX < margin) this.x = this.dest.x;
-				if (distY < margin) this.y = this.dest.y;
+				if (distX < margin) this.x = this._dest.x;
+				if (distY < margin) this.y = this._dest.y;
 				this.vel.x = 0;
 				this.vel.y = 0;
 				return true;
@@ -2599,7 +2635,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		snap(o, dist) {
-			if (o.isMoving || o.x != o.dest.x || o.y != o.dest.y || !this.isMoving) return;
+			if (o.isMoving || o.x != o._dest.x || o.y != o._dest.y || !this.isMoving) return;
 			dist ??= 1 || this.tileSize * 0.1;
 			if (Math.abs(this.x) % 1 >= dist || Math.abs(this.y) % 1 >= dist) {
 				return;
@@ -3446,6 +3482,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * or an object with x and/or y properties.
 		 *
 		 * @property scale
+		 * @type {Number|Object}
+		 * @default 1
 		 */
 		get scale() {
 			return this._scale;
@@ -4982,6 +5020,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 *
 			 * @property zoom
 			 * @type {Number}
+			 * @default 1
 			 */
 			this.zoom = zoom || 1;
 
@@ -4999,10 +5038,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				y: this.p.mouseY
 			};
 			/**
-			 * @property {Number} mouse.x
+			 * @property mouse.x
+			 * @type {Number}
 			 */
 			/**
-			 * @property {Number} mouse.y
+			 * @property mouse.y
+			 * @type {Number}
 			 */
 
 			/**
@@ -5012,6 +5053,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 *
 			 * @property active
 			 * @type {Boolean}
+			 * @default false
 			 */
 			this.active = false;
 
@@ -5107,7 +5149,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Used internally to find a contact callback between two sprites.
 	 *
-	 * @private
+	 * @private _findContactCB
 	 * @param {String} type "collide" or "overlap"
 	 * @param {Sprite} s0
 	 * @param {Sprite} s1
@@ -5294,8 +5336,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 */
 	this.updateSprites = function (timeStep, velocityIterations, positionIterations) {
 		for (let s of this.allSprites) {
-			s.previousPosition.x = s.x;
-			s.previousPosition.y = s.y;
+			s.prevPos.x = s.x;
+			s.prevPos.y = s.y;
 		}
 
 		// 2nd and 3rd arguments are velocity and position iterations
