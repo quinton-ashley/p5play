@@ -6,17 +6,17 @@
 
 ### Join the [p5.play community Discord server](https://discord.gg/3UTbqUgmPF) to ask questions and meet other people making games with p5.play!
 
-p5.play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated by Paolo Pedercini [@molleindustria][] . If you have any questions or problems use the help channels on [discord](https://discord.gg/3UTbqUgmPF) or make an [issue report][] on this GitHub repository or email <qashto@gmail.com>
+p5.play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated by Paolo Pedercini [@molleindustria][]. If you have any questions or problems use the help channels on [discord](https://discord.gg/3UTbqUgmPF) or make an [issue report][] on this GitHub repository or email <info@p5play.org>
 
 ## Support p5.play
 
-This open source project took thousands of hours to create and it continues to be updated and maintained by Quinton Ashley. p5.play will always be available for free, but your support would be greatly appreciated. Please consider donating!
+It took thousands of hours for [@quinton-ashley][] to upgrade this open source project and he continues to maintain it! p5.play will always be available for free, but your support would be greatly appreciated. If you use p5.play professionally in your lessons or commercial games, please consider donating!
 
 [![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto) [![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley) [![Patreon](https://img.shields.io/badge/Patreon-@p5play-orange.svg)](https://www.patreon.com/p5play)
 
 ## Development of p5.play
 
-Take a look at [p5play-web][] for information about how to contribute to the development of p5.play
+Take a look at the [p5play-web][] GitHub repository for information about how to contribute to the development of p5.play.
 
 [p5.play]: https://molleindustria.github.io/p5.play/
 [p5.js]: https://p5js.org

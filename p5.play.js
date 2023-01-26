@@ -1412,8 +1412,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Returns the first node in a linked list of the planck physics
 		 * body's fixtures.
-		 *
-		 * @private fixture
 		 */
 		get fixture() {
 			return this.fixtureList;
@@ -1421,8 +1419,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Returns the first node in a linked list of the planck physics
 		 * body's fixtures.
-		 *
-		 * @private fixtureList
 		 */
 		get fixtureList() {
 			if (!this.body) return null;
@@ -1486,26 +1482,26 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// }
 
 		/**
-		 * A reference to the sprite's current animation.
+		 * A reference to the sprite's current image.
 		 *
 		 * @property img
 		 * @type {SpriteAnimation}
 		 */
 		get img() {
-			return this._animation;
+			return this._animation.frameImage;
 		}
 		set img(val) {
 			this.changeAni(val);
 		}
 
 		/**
-		 * A reference to the sprite's current animation.
+		 * A reference to the sprite's current image.
 		 *
 		 * @property image
 		 * @type {SpriteAnimation}
 		 */
 		get image() {
-			return this._animation;
+			return this._animation.frameImage;
 		}
 		set image(val) {
 			this.changeAni(val);
@@ -1575,9 +1571,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			t.mass = val;
 			this.body.setMassData(t);
 		}
-		/**
-		 * @private
-		 */
+
 		get massData() {
 			const t = { I: 0, center: new pl.Vec2(0, 0), mass: 0 };
 			this.body.getMassData(t);
@@ -1632,7 +1626,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 		/**
-		 * The amount of the sprite resists rotating.
+		 * The amount the sprite resists rotating.
 		 *
 		 * @property rotationDrag
 		 * @type {Number}
@@ -2028,7 +2022,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Resizes the collider of the sprite.
 		 *
-		 * @private
+		 * @private _resizeCollider
 		 * @param {*} scalars The x and y scalars to resize the collider by.
 		 */
 		_resizeCollider(scalars) {
@@ -2054,7 +2048,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Validate convexity.
 		 *
-		 * @private
+		 * @private _isConvexPoly
 		 * @param vecs {Array} an array of planck.Vec2 vertices
 		 * @returns true if the polygon is convex
 		 */
@@ -2168,7 +2162,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Updates the sprite. Called automatically at the end of the draw
 		 * cycle.
 		 *
-		 * @private
+		 * @private _update
 		 */
 		_update() {
 			if (this.animation) this.animation.update();
@@ -2213,7 +2207,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Default draw
 		 *
-		 * @private
+		 * @private _draw
 		 */
 		_draw() {
 			if (this.strokeWeight) this.p.strokeWeight(this.strokeWeight);
@@ -2245,7 +2239,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Displays the Sprite with rotation and scaling applied before
 		 * the sprite's draw function is called.
 		 *
-		 * @private
+		 * @private _display
 		 */
 		_display() {
 			let x = this.p.width * 0.5 - this.p.world.origin.x + this.x * this.tileSize;
@@ -2293,7 +2287,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Draws a fixture. Used to draw the sprite's physics body.
 		 *
-		 * @private
+		 * @private _drawFixture
 		 */
 		_drawFixture(fxt) {
 			const sh = fxt.m_shape;
@@ -3567,9 +3561,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p.pop();
 		}
 
-		/**
-		 * @private
-		 */
 		update() {
 			this.cycles++;
 			var previousFrame = this.frame;
@@ -4116,25 +4107,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.animations;
 		}
 		/**
-		 * Reference to the group's current animation.
+		 * Reference to the group's current image.
 		 *
 		 * @property img
 		 * @type {SpriteAnimation}
 		 */
 		get img() {
-			return this._animation;
+			return this._animation.frameImage;
 		}
 		set img(val) {
 			this.ani = val;
 		}
 		/**
-		 * Reference to the group's current animation.
+		 * Reference to the group's current image.
 		 *
 		 * @property image
 		 * @type {SpriteAnimation}
 		 */
 		get image() {
-			return this._animation;
+			return this._animation.frameImage;
 		}
 		set image(val) {
 			this.ani = val;
@@ -6117,7 +6108,9 @@ canvas {
 	errorMessages.Group.overlap = errorMessages.Sprite.overlap;
 
 	/**
-	 * @private
+	 * A FriendlyError is a custom error class that extends the native JS Error class.
+	 *
+	 * @private FriendlyError
 	 * @param {String} func is the name of the function the error was thrown in
 	 * @param {Number} errorNum is the error's code number
 	 * @param {Array} e is an array with references to the cause of the error
@@ -6257,8 +6250,7 @@ canvas {
 		/**
 		 * Initializes the input's values to zero.
 		 *
-		 * @private
-		 * @method init
+		 * @private init
 		 */
 		init(inputs) {
 			for (let inp of inputs) {
@@ -6270,8 +6262,7 @@ canvas {
 		 * Attempt to auto-correct the user's input. Inheriting classes
 		 * override this method.
 		 *
-		 * @private
-		 * @method ac
+		 * @private ac
 		 */
 		ac(inp) {
 			return inp;
@@ -6609,11 +6600,11 @@ canvas {
 	};
 
 	/**
-	 * @private getKeyFromCode
+	 * @private _getKeyFromCode
 	 * @param {*} e keyboard event
 	 * @returns key name
 	 */
-	function getKeyFromCode(e) {
+	function _getKeyFromCode(e) {
 		let code = e.code;
 		if (code.length == 4 && code.slice(0, 3) == 'Key') {
 			return code[3].toLowerCase();
@@ -6641,7 +6632,7 @@ canvas {
 	this._onkeydown = function (e) {
 		let key = e.key;
 		if (this.p5play.standardizeKeyboard) {
-			key = getKeyFromCode(e);
+			key = _getKeyFromCode(e);
 		}
 		let keys = [key];
 		let k = simpleKeyControls[key];
@@ -6659,7 +6650,7 @@ canvas {
 	this._onkeyup = function (e) {
 		let key = e.key;
 		if (this.p5play.standardizeKeyboard) {
-			key = getKeyFromCode(e);
+			key = _getKeyFromCode(e);
 		}
 		let keys = [key];
 		let k = simpleKeyControls[key];
