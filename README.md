@@ -1,12 +1,12 @@
-# <img src="https://p5play.org/logo.svg" width="64"> p5.play ![](https://img.shields.io/github/package-json/v/molleindustria/p5.play) ![](https://img.shields.io/github/license/molleindustria/p5.play)
+# <img src="https://p5play.org/logo.svg" width="64"> p5.play ![](https://img.shields.io/github/package-json/v/quinton-ashley/p5.play) ![](https://img.shields.io/github/license/quinton-ashley/p5.play)
 
 [p5.play][] is a 2D game engine made by Computer Science teachers to help you turn your game ideas into JavaScript code!
 
 ### Learn how to use p5.play at https://p5play.org
 
-### Join the [p5.play community Discord server](https://discord.gg/3UTbqUgmPF) to ask questions and meet other people making games with p5.play!
+### Join the [p5.play community Discord server][] to ask questions and meet other people making games with p5.play!
 
-p5.play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated by Paolo Pedercini [@molleindustria][]. If you have any questions or problems use the help channels on [discord](https://discord.gg/3UTbqUgmPF) or make an [issue report][] on this GitHub repository or email <info@p5play.org>
+p5.play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated by Paolo Pedercini [@molleindustria][]. If you have any questions or problems use the help channels on [discord][] or make an [issue report][] on this GitHub repository or email <info@p5play.org>
 
 ## Support p5.play
 
@@ -18,19 +18,10 @@ It took thousands of hours for [@quinton-ashley][] to upgrade this open source p
 
 Take a look at the [p5play-web][] GitHub repository for information about how to contribute to the development of p5.play.
 
-[p5.play]: https://molleindustria.github.io/p5.play/
-[p5.js]: https://p5js.org
-[p5play.molleindustria.org]: https://molleindustria.github.io/p5.play/
-[p5.play library]: https://molleindustria.github.io/p5.play/lib/p5.play.js
-[p5.play npm package]: https://www.npmjs.com/package/p5.play
-[p5.play website]: https://molleindustria.github.io/p5.play/
-[documentation]: https://p5play.molleindustria.org/p5.play/docs/
-[example projects]: https://molleindustria.github.io/p5.play/examples
-[p5.play version 3]: https://github.com/molleindustria/p5.play/wiki/p5.play-Version-3
-[try it out today!]: https://editor.p5js.org/quinton-ashley/sketches/szN_XdV5O
-[issue report]: https://github.com/molleindustria/p5.play/issues
-[gh-pages branch]: https://github.com/molleindustria/p5.play/tree/gh-pages
+[p5.play]: https://p5play.org
+[issue report]: https://github.com/quinton-ashley/p5.play/issues
 [@quinton-ashley]: https://github.com/quinton-ashley
 [@molleindustria]: https://github.com/molleindustria
-[version 3]: https://github.com/molleindustria/p5.play/wiki/p5.play-Version-3
 [p5play-web]: https://github.com/quinton-ashley/p5play-web
+[p5.play community discord server]: https://discord.gg/3UTbqUgmPF
+[discord]: https://discord.gg/3UTbqUgmPF
