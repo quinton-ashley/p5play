@@ -2837,6 +2837,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		async changeAni(anis) {
 			if (anis instanceof SpriteAnimation) anis = [anis];
+			else anis = [...arguments];
 
 			let _ani = (name, start, end) => {
 				return new Promise((resolve) => {
