@@ -5403,7 +5403,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Returns the sprites at a position.
 	 *
-	 * @method getSpriteAt
+	 * @method getSpritesAt
 	 * @param {Number} x
 	 * @param {Number} y
 	 * @returns
