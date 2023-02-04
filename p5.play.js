@@ -2835,10 +2835,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @returns A promise that fulfills when the animation or sequence of animations
 		 * completes
 		 */
-		async changeAni(...anis) {
-			if (anis.length == 1 && Array.isArray(anis[0])) {
-				anis = anis[0];
-			}
+		async changeAni(anis) {
+			if (anis instanceof SpriteAnimation) anis = [anis];
 
 			let _ani = (name, start, end) => {
 				return new Promise((resolve) => {
@@ -2862,12 +2860,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					ani instanceof p5.Image ||
 					(typeof ani == 'string' && ani.length != 1 && ani.includes('.'))
 				) {
-					anis[i] = this.addAni(ani);
-					ani = anis[i];
+					ani = this.addAni(ani);
+					anis[i] = ani;
 				}
 				if (typeof ani == 'string') {
-					anis[i] = { name: ani };
-					ani = anis[i];
+					ani = { name: ani };
+					anis[i] = ani;
 				}
 				if (ani.name[0] == '!') {
 					ani.name = ani.name.slice(1);
