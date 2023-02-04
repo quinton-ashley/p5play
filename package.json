@@ -1,8 +1,8 @@
 {
-	"name": "p5.play",
+	"name": "p5play",
 	"author": "quinton-ashley <qashto@gmail.com> (https://quintos.org)",
 	"bugs": {
-		"url": "https://github.com/quinton-ashley/p5.play/issues"
+		"url": "https://github.com/quinton-ashley/p5play/issues"
 	},
 	"contributors": [
 		"Paolo Pedercini <info@molleindustria.it>"
@@ -22,10 +22,10 @@
 		"generative"
 	],
 	"license": "GPL-3.0-only",
-	"homepage": "https://github.com/quinton-ashley/p5.play#readme",
+	"homepage": "https://github.com/quinton-ashley/p5play#readme",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/quinton-ashley/p5.play.git"
+		"url": "git+https://github.com/quinton-ashley/p5play.git"
 	},
 	"scripts": {
 		"v": "npm version patch --force",
