@@ -7,7 +7,7 @@
 	"contributors": [
 		"Paolo Pedercini <info@molleindustria.it>"
 	],
-	"description": "A p5.js library for making games and interactive art!",
+	"description": "p5play is for creating interactive art and games with the Box2D physics engine.",
 	"keywords": [
 		"p5play",
 		"p5.js",
@@ -33,5 +33,5 @@
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "3.5.21"
+	"version": "3.5.22"
 }
