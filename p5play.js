@@ -1,12 +1,12 @@
 /**
- * p5.play
+ * p5play
  * @version 3.5
  * @author quinton-ashley
  * @license gpl-v3-only
  */
 p5.prototype.registerMethod('init', function p5PlayInit() {
 	if (typeof window.planck == 'undefined') {
-		throw new Error('planck.js must be loaded before p5.play');
+		throw new Error('planck.js must be loaded before p5play');
 	}
 
 	// store a reference to the p5 instance that p5play is being added to
@@ -2554,7 +2554,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				distance = arguments[2];
 				if (distance !== undefined) {
 					console.warn(
-						`In p5.play v3.3.0 the parameter ordering for the move() function was changed to: move(distance, direction, speed).`
+						`In p5play v3.3.0 the parameter ordering for the move() function was changed to: move(distance, direction, speed).`
 					);
 				}
 			} else {
@@ -3165,7 +3165,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * can be used without being added to a sprite first.
 	 *
 	 * An animation can be created either from a list of images or sequentially
-	 * numbered images. p5.play will try to detect the sequence pattern.
+	 * numbered images. p5play will try to detect the sequence pattern.
 	 *
 	 * For example if the image file path is "image1.png" and the last frame
 	 * index is 3 then "image2.png" and "image3.png" will be loaded as well.
@@ -3950,7 +3950,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 *
 	 * https://p5play.org/learn/group.html
 	 *
-	 * In p5.play groups are collections of sprites with similar behavior.
+	 * In p5play groups are collections of sprites with similar behavior.
 	 * For example a group may contain all the coin sprites that the
 	 * player can collect.
 	 *
@@ -5332,11 +5332,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.Tiles = Tiles;
 
 	/**
-	 * Look at the p5.play reference pages before reading these docs.
+	 * Look at the p5play reference pages before reading these docs.
 	 *
 	 * https://p5play.org/learn
 	 *
-	 * @class p5.play
+	 * @class p5play
 	 */
 
 	/**
@@ -5852,7 +5852,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Equivalent to p5.js createCanvas function and `new Canvas()`
 	 *
-	 * In p5.play a canvas can be created with an aspect ratio in the
+	 * In p5play a canvas can be created with an aspect ratio in the
 	 * format `width:height`. For example `new Canvas('16:9')` will create
 	 * the largest possible canvas with a 16:9 aspect ratio.
 	 *
@@ -6658,7 +6658,7 @@ canvas {
 	 */
 	this.keyIsDown = function (keyCode) {
 		throw new Error(
-			`The p5.js keyIsDown function is outdated and can't be used in p5.play. Trust me, you'll see that the p5.play kb.pressing function is much better. It uses key name strings that are easier to write and easier to read! https://p5play.org/learn/input_devices.html The p5.js keyIsDown function relies on key codes and custom constants for key codes, which are not only hard to remember but were also deprecated in the JavaScript language standards over six years ago and shouldn't be used in new projects. More info: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode`
+			`The p5.js keyIsDown function is outdated and can't be used in p5play. Trust me, you'll see that the p5play kb.pressing function is much better. It uses key name strings that are easier to write and easier to read! https://p5play.org/learn/input_devices.html The p5.js keyIsDown function relies on key codes and custom constants for key codes, which are not only hard to remember but were also deprecated in the JavaScript language standards over six years ago and shouldn't be used in new projects. More info: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode`
 		);
 	};
 
@@ -6910,10 +6910,10 @@ canvas {
 
 			// test if the broswer supports the HTML5 Gamepad API
 			// all modern browsers do, this is really just to prevent
-			// p5.play's Jest tests from failing
+			// p5play's Jest tests from failing
 			if (!navigator?.getGamepads) return;
 
-			// if the page was not reloaded, but p5.play sketch was,
+			// if the page was not reloaded, but p5play sketch was,
 			// then gamepads could be already connected
 			// so they need to be added as Contro objects
 			let gps = navigator.getGamepads();
