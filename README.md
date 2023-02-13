@@ -10,7 +10,7 @@ p5play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated 
 
 ## Support p5play
 
-It took thousands of hours (not an exaggeration!) to upgrade and maintain this open source project. p5play will always be available for free, but your support would be greatly appreciated. If you use p5play professionally in your lessons or commercial games, please consider donating!
+p5play is an open source project and will always be available for free, but your support would be greatly appreciated. If you use p5play professionally in your lessons or commercial games, please consider donating!
 
 [![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto) [![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley) [![Patreon](https://img.shields.io/badge/Patreon-@p5play-orange.svg)](https://www.patreon.com/p5play)
 

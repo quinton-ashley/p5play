@@ -2249,7 +2249,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 					if (b instanceof this.p.Group) continue;
 
-					let cb = _findContactCB.call(this.p, contactType, a, b);
+					let cb = this.p.world._findContactCB(contactType, a, b);
 					if (typeof cb == 'function') cb(a, b, f);
 				}
 			}
@@ -4379,8 +4379,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * EXPERIMENTAL implementation for beta testing!
-		 *
 		 * Apply a force that is scaled to the sprite's mass.
 		 *
 		 * @method applyForce
@@ -5015,6 +5013,43 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		/**
+		 * Used internally to find a contact callback between two sprites.
+		 *
+		 * @private _findContactCB
+		 * @param {String} type "collide" or "overlap"
+		 * @param {Sprite} s0
+		 * @param {Sprite} s1
+		 * @returns contact cb if one can be found between the two sprites
+		 */
+		_findContactCB(type, s0, s1) {
+			let cb = s0[type][s1];
+			if (cb) return cb;
+
+			let s1IsSprite = s1 instanceof this.p.Sprite;
+
+			if (s1IsSprite) {
+				for (let g1 of s1.groups) {
+					cb = s0[type][g1];
+					if (cb) return cb;
+				}
+			}
+
+			if (s0 instanceof this.p.Sprite) {
+				for (let g0 of s0.groups) {
+					cb = g0[type][s1];
+					if (cb) return cb;
+					if (s1IsSprite) {
+						for (let g1 of s1.groups) {
+							cb = g0[type][g1];
+							if (cb) return cb;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
 		get autoCull() {
 			return this.p.allSprites.autoCull;
 		}
@@ -5195,44 +5230,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	}; //end camera class
 
 	/**
-	 * Used internally to find a contact callback between two sprites.
-	 *
-	 * @private _findContactCB
-	 * @param {String} type "collide" or "overlap"
-	 * @param {Sprite} s0
-	 * @param {Sprite} s1
-	 * @returns contact cb if one can be found between the two sprites
-	 */
-	function _findContactCB(type, s0, s1) {
-		let cb = s0[type][s1];
-		if (cb) return cb;
-
-		let s1IsSprite = s1 instanceof this.Sprite;
-
-		if (s1IsSprite) {
-			for (let g1 of s1.groups) {
-				cb = s0[type][g1];
-				if (cb) return cb;
-			}
-		}
-
-		if (s0 instanceof this.Sprite) {
-			for (let g0 of s0.groups) {
-				cb = g0[type][s1];
-				if (cb) return cb;
-				if (s1IsSprite) {
-					for (let g1 of s1.groups) {
-						cb = g0[type][g1];
-						if (cb) return cb;
-					}
-				}
-			}
-		}
-		return false;
-	}
-	/**
-	 * This planck function should've be named "shouldContact", because that's what
-	 * it actually decides.
+	 * This planck function should've been named "shouldContact",
+	 * because that's what it actually decides.
 	 *
 	 * Here we override it to allow for overlap events between sprites.
 	 */
@@ -5253,8 +5252,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		// if `a` has an overlap enabled with `b` their colliders should not produce a
 		// contact event, the overlap contact event is between their sensors
-		let shouldOverlap = _findContactCB.call(pInst, '_overlap', a, b);
-		if (!shouldOverlap) shouldOverlap = _findContactCB.call(pInst, '_overlap', b, a);
+		let shouldOverlap = a.p.world._findContactCB('_overlap', a, b);
+		if (!shouldOverlap) shouldOverlap = a.p.world._findContactCB('_overlap', b, a);
 		if (shouldOverlap) return false;
 		return true;
 	};
