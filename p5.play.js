@@ -3133,7 +3133,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			throw new Error(`Turtle can't be used when allSprites.tileSize is greater than 1.`);
 		}
 		size ??= 25;
-		let t = new this.Sprite(size, size, [
+		let t = new pInst.Sprite(size, size, [
 			[size, size * 0.4],
 			[-size, size * 0.4],
 			[0, -size * 0.8]
