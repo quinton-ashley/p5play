@@ -138,13 +138,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
 	};
 
-	p5.Vector.prototype._angleBetween = p5.Vector.prototype.angleBetween;
-	p5.Vector.prototype.angleBetween = function (v) {
-		let a = this._angleBetween(v);
-		if (!isNaN(a)) return a;
-		return 0;
-	};
-
 	/**
 	 * Look at the Sprite reference pages before reading these docs.
 	 *
