@@ -24,12 +24,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.os ??= {
 		emulated: false
 	};
-	this.p5play.autoDrawSprites ??= true;
-	this.p5play.autoUpdateSprites ??= true;
-	this.p5play.mouseTracking ??= true;
-	this.p5play.mouseSprite = null;
-	this.p5play.mouseSprites = [];
-	this.p5play.standardizeKeyboard = false;
+	this.p5play.standardizeKeyboard ??= false;
 
 	// change the angle mode to degrees
 	this.angleMode('degrees');
@@ -87,6 +82,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	}
 
 	let spriteProps = [
+		'autoDraw',
+		'autoUpdate',
 		'bounciness',
 		'collider',
 		'color',
@@ -108,6 +105,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'layer',
 		'life',
 		'mass',
+		'resetAnimationsOnChange',
 		'rotation',
 		'rotationDrag',
 		'rotationLock',
@@ -251,19 +249,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.animations = {};
 
 			/**
-			 * If false, animations that are stopped before they are completed,
-			 * typically by a call to sprite.changeAni, will start at the frame
-			 * they were stopped at. If true, animations will always start playing from
-			 * frame 0 unless specified by the user in a separate anim.changeFrame
-			 * call.
-			 *
-			 * @property autoResetAnimations
-			 * @type {SpriteAnimation}
-			 * @default false
-			 */
-			this.autoResetAnimations;
-
-			/**
 			 * True if the sprite was removed from the world
 			 *
 			 * @property removed
@@ -331,6 +316,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._collisions = new Map();
 			this._overlappers = new Map();
 
+			/**
+			 * The tile size is used to change the size of one unit of
+			 * measurement for the sprite.
+			 *
+			 * For example, if the tile size is 16, then a sprite with
+			 * x=1 and y=1 will be drawn at position (16, 16) on the canvas.
+			 *
+			 * @property tileSize
+			 * @type {Number}
+			 * @default 1
+			 */
 			this.tileSize = group.tileSize || 1;
 
 			let _this = this;
@@ -537,6 +533,41 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (typeof gvy == 'function') gvy = gvy(group.length - 1);
 			this.vel.x = gvx;
 			this.vel.y = gvy;
+
+			/**
+			 * autoDraw is a property of all groups that controls whether
+			 * a group is automatically drawn to the screen after the end
+			 * of each draw cycle.
+			 *
+			 * It only needs to be set to false once and then it will
+			 * remain false for the rest of the sketch, unless changed.
+			 *
+			 * @property autoDraw
+			 * @type {Boolean}
+			 * @default true
+			 */
+			/**
+			 * autoUpdate is a property of all groups that controls whether
+			 * a group is automatically updated after the end of each draw
+			 * cycle.
+			 *
+			 * It only needs to be set to false once and then it will
+			 * remain false for the rest of the sketch, unless changed.
+			 *
+			 * @property autoUpdate
+			 * @type {Boolean}
+			 * @default true
+			 */
+			/**
+			 * If false, animations will always start playing from the frame
+			 * they were stopped at. If true, when the sprite changes the
+			 * animation its currently displaying, it will start playing
+			 * from frame 0.
+			 *
+			 * @property resetAnimationsOnChange
+			 * @type {SpriteAnimation}
+			 * @default false
+			 */
 
 			for (let prop of spriteProps) {
 				if (prop == 'collider' || prop == 'x' || prop == 'y') continue;
@@ -2162,9 +2193,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * You can set the sprite's update function to your own custom
-		 * update function that will be run after every draw call or when
-		 * the updateSprites function is called.
+		 * You can set the sprite's update function to a custom
+		 * update function which by default, will be run after every p5.js
+		 * draw call.
+		 *
+		 * This function updates the sprite's animation, mouse, and
+		 *
+		 * There's no way to individually update a sprite or group
+		 * of sprites in the physics simulation though.
 		 *
 		 * @method update
 		 */
@@ -2210,25 +2246,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._velocity;
 		}
 
-		/**
-		 * Updates the sprite. Called automatically at the end of the draw
-		 * cycle.
-		 *
-		 * @private _update
-		 */
 		_update() {
 			if (this.animation) this.animation.update();
-
-			if (!this.body) {
-				this.rotation += this._rotationSpeed;
-				this.x += this.vel.x;
-				this.y += this.vel.y;
-			}
 
 			for (let prop in this.mouse) {
 				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
 			}
 
+			if (this._customUpdate) this._customUpdate();
+
+			if (this.autoUpdate) this.autoUpdate = null;
+		}
+
+		_step() {
+			if (!this.body) {
+				this.rotation += this._rotationSpeed;
+				this.x += this.vel.x;
+				this.y += this.vel.y;
+				return;
+			}
 			// for each type of collision and overlap event
 			let a = this;
 			for (let event in eventTypes) {
@@ -2253,8 +2289,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					if (typeof cb == 'function') cb(a, b, f);
 				}
 			}
-
-			if (this._customUpdate) this._customUpdate();
 		}
 
 		/**
@@ -2332,9 +2366,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._draw();
 
 			this.p.pop();
-			this.p.p5play.autoDrawSprites = false;
-
 			this._cameraActiveWhenDrawn = this.p.camera.active;
+
+			if (this.autoDraw) this.autoDraw = null;
 		}
 
 		/**
@@ -2925,14 +2959,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._animation = ani;
 			this.animation.name = label;
 			// reset to frame 0 of that animation
-			if (this.autoResetAnimations || (this.autoResetAnimations !== false && this.p.world.autoResetAnimations)) {
-				this.animation.frame = 0;
-			}
+			if (this.resetAnimationsOnChange) this.animation.frame = 0;
 		}
 
 		/**
-		 * Removes the Sprite from the sketch.
-		 * The removed Sprite will not be drawn or updated anymore.
+		 * Removes the Sprite from the sketch and all the groups it
+		 * belongs to.
+		 *
+		 * When a sprite is removed it will not be drawn or updated anymore.
+		 * If it has a physics body, it will be removed from the
+		 * physics world simulation.
+		 *
+		 * There's no way to undo this operation. If you want to hide a
+		 * sprite use `sprite.visible = false` instead.
 		 *
 		 * @method remove
 		 */
@@ -3975,6 +4014,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.idNum = 0;
 			this.p = pInst;
 
+			if (typeof args[0] == 'number') return;
+			for (let s of this) {
+				if (!(s instanceof this.p.Sprite)) {
+					throw new Error('A group can only contain sprites');
+				}
+			}
+
 			// if all sprites doesn't exist yet,
 			// this group is the allSprites group
 			if (!this.p.allSprites) this._isAllSpritesGroup = true;
@@ -4009,13 +4055,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this._collisions = new Map();
 			this._overlappers = new Map();
-
-			// mainly for internal use
-			// autoCull as a property of allSprites only refers to the default allSprites cull
-			// in the post draw function, if the user calls cull on allSprites it should work
-			// for any other group made by users autoCull affects whether cull removes sprites or not
-			// by default for allSprites it is set to true, for all other groups it is undefined
-			this.autoCull;
 
 			if (this.p.world) {
 				this.idNum = this.p.world.groupsCreated;
@@ -4126,6 +4165,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			this._orbitAngle = 0;
+
+			if (this._isAllSpritesGroup) {
+				/**
+				 * autoCull is a property of the allSprites group only,
+				 * that controls whether sprites are automatically removed
+				 * when they are 10,000 pixels away from the camera.
+				 *
+				 * It only needs to be set to false once and then it will
+				 * remain false for the rest of the sketch, unless changed.
+				 *
+				 * @property autoCull
+				 * @type {Boolean}
+				 */
+				this.autoCull = true;
+				this.tileSize = 1;
+			}
+
+			this.autoDraw = true;
+			this.autoUpdate = true;
 		}
 
 		/**
@@ -4592,6 +4650,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Function} [cb(sprite)] The callback is given the sprite that
 		 * passed the cull boundary, if no callback is given the sprite is
 		 * removed by default
+		 * @return {Number} The number of sprites culled
 		 */
 		cull(top, bottom, left, right, cb) {
 			if (left === undefined) {
@@ -4614,20 +4673,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let maxX = this.p.width + right + cx;
 			let maxY = this.p.height + bottom + cy;
 
+			let culled = 0;
 			for (let s of this) {
 				if (s.x < minX || s.y < minY || s.x > maxX || s.y > maxY) {
-					if (cb) cb(s);
+					culled++;
+					if (cb) cb(s, culled);
 					else s.remove();
 				}
 			}
+			return culled;
 		}
 
 		/**
 		 * If no input is given all sprites in the group are removed.
 		 *
-		 * If a sprite or index is given, that sprite is removed from this
-		 * group and any group this group inherits from except for the
-		 * allSprites group.
+		 * If a sprite or index is given, that sprite is removed from the
+		 * group, but not from the sketch or any other groups it may be in.
 		 *
 		 * @method remove
 		 * @param {Sprite} item The sprite to be removed
@@ -4721,12 +4782,34 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					i--;
 					continue;
 				}
-				if (sprite.visible) sprite.draw();
+				if (sprite.visible && (!this.p.p5play._inPostDraw || sprite.autoDraw)) {
+					sprite.draw();
+				}
 			}
+			if (this._autoDraw) this._autoDraw = null;
 		}
 
+		/**
+		 * Updates all the sprites in the group. See sprite.update for
+		 * more information.
+		 *
+		 * By default, allSprites.update is called after every draw call.
+		 *
+		 * @method update
+		 */
 		update() {
-			throw new Error('Use the updateSprites function instead to control whether sprites are updated or not.');
+			for (let s of this) {
+				if (!this.p.p5play._inPostDraw || this.autoUpdate) {
+					s.update();
+				}
+			}
+			if (this._autoUpdate) this._autoUpdate = null;
+		}
+
+		_step() {
+			for (let s of this) {
+				s._step();
+			}
 		}
 	};
 
@@ -4846,50 +4929,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			};
 			this.resize();
 
-			/**
-			 * If false, animations that are stopped before they are completed,
-			 * typically by a call to sprite.changeAni, will restart at the
-			 * frame they were stopped at. If true, animations will always
-			 * start playing from frame 0 unless specified by the user in a
-			 * separate `anim.changeFrame` call.
-			 *
-			 * @property autoResetAnimations
-			 * @type {SpriteAnimation}
-			 * @default false
-			 */
-			this.autoResetAnimations = false;
-
-			this.palettes = this.p.world?.palettes || [
-				{
-					a: 'aqua',
-					b: 'black',
-					c: 'crimson',
-					d: 'dark blue',
-					// e
-					f: 'fuchsia',
-					g: 'green',
-					h: 'hot pink',
-					i: 'blue', // indigo
-					// j
-					k: 'black',
-					l: 'lavender',
-					m: 'magenta',
-					n: 'brown',
-					o: 'orange',
-					p: 'pink',
-					// q
-					r: 'red',
-					s: 'sky blue',
-					t: 'turquoise',
-					u: 'blue',
-					v: 'violet',
-					w: 'white',
-					// x
-					y: 'yellow'
-					// z
-				}
-			];
-
 			this.groups = [this.p.allSprites];
 			this.groupsCreated = 1;
 			this.spritesCreated = 0;
@@ -4925,6 +4964,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					_this.m_gravity.y = _this.p.round(val || 0);
 				}
 			};
+
+			this.mouseTracking ??= true;
+			this.mouseSprite = null;
+			this.mouseSprites = [];
+
+			this.autoStep = true;
 		}
 
 		resize(w, h) {
@@ -4940,6 +4985,81 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			this.hw = w * 0.5;
 			this.hh = h * 0.5;
+		}
+
+		/**
+		 * Performs a physics simulation step that advances all sprites'
+		 * forward in time by 1/60th of a second if no timeStep is given.
+		 *
+		 * This function is automatically called at the end of the p5.js draw
+		 * loop, unless it was already called inside the draw loop.
+		 *
+		 * @method step
+		 * @param {Number} timeStep - time step in seconds
+		 * @param {Number} velocityIterations
+		 * @param {Number} positionIterations
+		 */
+		step(timeStep, velocityIterations, positionIterations) {
+			for (let s of this.p.allSprites) {
+				s.prevPos.x = s.x;
+				s.prevPos.y = s.y;
+			}
+			super.step(timeStep || 1 / (this.p._targetFrameRate || 60), velocityIterations || 8, positionIterations || 3);
+			this.p.allSprites._step();
+			if (this.autoStep) this.autoStep = null;
+		}
+
+		/**
+		 * Returns the sprites at a position.
+		 *
+		 * @method getSpritesAt
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @returns
+		 */
+		getSpritesAt(x, y, group, cameraActiveWhenDrawn) {
+			cameraActiveWhenDrawn ??= true;
+			const convertedPoint = new pl.Vec2(x / plScale, y / plScale);
+			const aabb = new pl.AABB();
+			aabb.lowerBound = new pl.Vec2(convertedPoint.x - 0.001, convertedPoint.y - 0.001);
+			aabb.upperBound = new pl.Vec2(convertedPoint.x + 0.001, convertedPoint.y + 0.001);
+
+			// Query the world for overlapping shapes.
+			let fxts = [];
+			this.queryAABB(aabb, (fxt) => {
+				if (fxt.getShape().testPoint(fxt.getBody().getTransform(), convertedPoint)) {
+					fxts.push(fxt);
+				}
+				return true;
+			});
+
+			group ??= this.p.allSprites;
+
+			let sprites = [];
+			if (fxts.length > 0) {
+				for (let s of group) {
+					if (!s.body) continue;
+					if (fxts.includes(s.body.m_fixtureList)) {
+						if (s._cameraActiveWhenDrawn == cameraActiveWhenDrawn) sprites.push(s);
+					}
+				}
+			}
+			return sprites;
+		}
+
+		/**
+		 * Returns the sprite at the top most layer position where
+		 * the mouse click occurs
+		 *
+		 * @method getSpriteAt
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @returns
+		 */
+		getSpriteAt(x, y, group) {
+			let sprites = this.getSpritesAt(x, y, group);
+			sprites.sort((a, b) => (a.layer - b.layer) * -1);
+			return sprites[0];
 		}
 
 		_beginContact(contact) {
@@ -5048,14 +5168,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 			return false;
-		}
-
-		get autoCull() {
-			return this.p.allSprites.autoCull;
-		}
-
-		set autoCull(val) {
-			this.p.allSprites.autoCull = val;
 		}
 
 		get allowSleeping() {
@@ -5372,80 +5484,34 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	}
 
 	/**
-	 * This function is automatically called at the end of the p5.js draw
-	 * loop, unless it was already called in the draw loop.
+	 * Deprecated. Use world.step and allSprites.update instead.
 	 *
-	 * @method updateSprites
-	 * @param {Number} timeStep
-	 * @param {Number} velocityIterations
-	 * @param {Number} positionIterations
+	 * @deprected updateSprites
 	 */
-	this.updateSprites = function (timeStep, velocityIterations, positionIterations) {
-		for (let s of this.allSprites) {
-			s.prevPos.x = s.x;
-			s.prevPos.y = s.y;
-		}
-
-		// 2nd and 3rd arguments are velocity and position iterations
-		this.world.step(timeStep || 1 / (this._targetFrameRate || 60), velocityIterations || 8, positionIterations || 3);
-
-		for (let s of this.allSprites) {
-			s.update();
-		}
-		this.p5play.autoUpdateSprites = false;
+	this.updateSprites = function () {
+		if (this.frameCount == 1) console.warn('updateSprites() is deprecated, use world.step() instead.');
+		this.world.step(...arguments);
+		this.allSprites.update();
 	};
 
 	/**
-	 * Returns the sprites at a position.
+	 * Use world.getSpritesAt instead
 	 *
+	 * @deprecated
 	 * @method getSpritesAt
-	 * @param {Number} x
-	 * @param {Number} y
-	 * @returns
 	 */
-	this.getSpritesAt = function (x, y, group, cameraActiveWhenDrawn) {
-		cameraActiveWhenDrawn ??= true;
-		const convertedPoint = new pl.Vec2(x / plScale, y / plScale);
-		const aabb = new pl.AABB();
-		aabb.lowerBound = new pl.Vec2(convertedPoint.x - 0.001, convertedPoint.y - 0.001);
-		aabb.upperBound = new pl.Vec2(convertedPoint.x + 0.001, convertedPoint.y + 0.001);
-
-		// Query the world for overlapping shapes.
-		let fxts = [];
-		pInst.world.queryAABB(aabb, (fxt) => {
-			if (fxt.getShape().testPoint(fxt.getBody().getTransform(), convertedPoint)) {
-				fxts.push(fxt);
-			}
-			return true;
-		});
-
-		group ??= pInst.allSprites;
-
-		let sprites = [];
-		if (fxts.length > 0) {
-			for (let s of group) {
-				if (!s.body) continue;
-				if (fxts.includes(s.body.m_fixtureList)) {
-					if (s._cameraActiveWhenDrawn == cameraActiveWhenDrawn) sprites.push(s);
-				}
-			}
-		}
-		return sprites;
+	this.getSpritesAt = function () {
+		return this.world.getSpritesAt(...arguments);
 	};
 
 	/**
-	 * Returns the sprite at the top most layer position where
-	 * the mouse click occurs
+	 * Use world.getSpriteAt instead
 	 *
+	 * @deprecated
 	 * @method getSpriteAt
-	 * @param {Number} x
-	 * @param {Number} y
-	 * @returns
 	 */
-	this.getSpriteAt = function (x, y, group) {
-		let sprites = this.getSpritesAt(x, y, group);
-		sprites.sort((a, b) => (a.layer - b.layer) * -1);
-		return sprites[0];
+	this.getSpriteAt = function () {
+		return this.world.getSpriteAt(...arguments);
 	};
 
 	// TODO implement planck joints
@@ -5613,6 +5679,37 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	// 	return def;
 	// })();
 
+	this.p5play.palettes ??= [
+		{
+			a: 'aqua',
+			b: 'black',
+			c: 'crimson',
+			d: 'dark blue',
+			// e
+			f: 'fuchsia',
+			g: 'green',
+			h: 'hot pink',
+			i: 'blue', // indigo
+			// j
+			k: 'black',
+			l: 'lavender',
+			m: 'magenta',
+			n: 'brown',
+			o: 'orange',
+			p: 'pink',
+			// q
+			r: 'red',
+			s: 'sky blue',
+			t: 'turquoise',
+			u: 'blue',
+			v: 'violet',
+			w: 'white',
+			// x
+			y: 'yellow'
+			// z
+		}
+	];
+
 	/**
 	 * Gets a color from a color palette
 	 *
@@ -5625,9 +5722,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.colorPal = (c, palette) => {
 		if (c instanceof p5.Color) return c;
 		if (typeof palette == 'number') {
-			palette = pInst.world.palettes[palette];
+			palette = pInst.p5play.palettes[palette];
 		}
-		palette ??= pInst.world.palettes[0];
+		palette ??= pInst.p5play.palettes[0];
 		let clr;
 		if (palette) clr = palette[c];
 		// if transparent
@@ -5662,9 +5759,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.spriteArt = (txt, scale, palette) => {
 		scale ??= 1;
 		if (typeof palette == 'number') {
-			palette = pInst.world.palettes[palette];
+			palette = pInst.p5play.palettes[palette];
 		}
-		palette ??= pInst.world.palettes[0];
+		palette ??= pInst.p5play.palettes[0];
 		let lines = txt; // accepts 2D arrays of characters
 		if (typeof txt == 'string') {
 			txt = txt.trim();
@@ -5708,7 +5805,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @method drawSprites
 	 */
 	this.drawSprite = function (sprite) {
-		if (pInst.frameCount == 1) console.warn('drawSprite() is deprecated, use sprite.draw() instead.');
+		if (this.frameCount == 1) console.warn('drawSprite() is deprecated, use sprite.draw() instead.');
 		sprite.draw();
 	};
 
@@ -5723,7 +5820,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @method drawSprites
 	 */
 	this.drawSprites = function (group) {
-		if (pInst.frameCount == 1) console.warn('drawSprites() is deprecated, use group.draw() instead.');
+		if (this.frameCount == 1) console.warn('drawSprites() is deprecated, use group.draw() instead.');
 		group ??= pInst.allSprites;
 		group.draw();
 	};
@@ -5781,7 +5878,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	/**
 	 * Delay code execution in an async function for the specified time
-	 * or if no input arg given, it waits for the next possible
+	 * or if no input parameter is given, it waits for the next possible
 	 * animation frame.
 	 *
 	 * @method delay
@@ -5805,16 +5902,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Sleep for the specified time. Equivalent to the delay function.
-	 *
-	 * @method sleep
-	 * @param {Number} millisecond
-	 * @returns {Promise} A Promise that fulfills after the specified time.
-	 *
-	 * @example
-	 * async function startGame() {
-	 *   await sleep(3000);
-	 * }
+	 * @deprecated Use delay instead.
 	 */
 	this.sleep = (millisecond) => {
 		return this.delay(millisecond);
@@ -5826,6 +5914,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @method play
 	 * @param {p5.Sound} sound
 	 * @returns {Promise}
+	 * @example
+	 * await play(sound);
 	 */
 	this.play = (sound) => {
 		if (!sound.play) throw new Error('Tried to play a sound but the sound is not a sound object: ' + sound);
@@ -6223,8 +6313,6 @@ canvas {
 	 * @property allSprites
 	 */
 	this.allSprites = new this.Group();
-	this.allSprites.autoCull = true;
-	this.allSprites.tileSize = 1;
 
 	/**
 	 * The planck physics world. Use this to change gravity and offset the
@@ -6522,18 +6610,18 @@ canvas {
 		this.mouse.active = true;
 
 		let ms;
-		if (this.p5play.mouseSprites.length) {
-			ms = this.p5play.mouseSprites[0];
+		if (this.world.mouseSprites.length) {
+			ms = this.world.mouseSprites[0];
 			ms.mouse[btn] = 1;
 			// old mouse sprite didn't have the mouse released on it
 			// so it just gets set to 0 (not pressed)
-			if (this.p5play.mouseSprite) {
-				this.p5play.mouseSprite.mouse[btn] = 0;
+			if (this.world.mouseSprite) {
+				this.world.mouseSprite.mouse[btn] = 0;
 				if (btn == 'left') {
-					this.p5play.mouseSprite.mouse.draggable = false;
+					this.world.mouseSprite.mouse.draggable = false;
 				}
 			}
-			this.p5play.mouseSprite = ms;
+			this.world.mouseSprite = ms;
 		}
 	};
 
@@ -6562,18 +6650,18 @@ canvas {
 		} else if (this.mouse[btn] > 1) this.mouse[btn] = -1;
 		else this.mouse[btn] = -2;
 
-		if (this.p5play.mouseSprite) {
-			if (this.p5play.mouseSprite.mouse.hover > 1) {
-				if (this.p5play.mouseSprite.mouse[btn] >= this.mouse.holdThreshold) {
-					this.p5play.mouseSprite.mouse[btn] = -3;
-				} else if (this.p5play.mouseSprite.mouse[btn] > 1) {
-					this.p5play.mouseSprite.mouse[btn] = -1;
+		if (this.world.mouseSprite) {
+			if (this.world.mouseSprite.mouse.hover > 1) {
+				if (this.world.mouseSprite.mouse[btn] >= this.mouse.holdThreshold) {
+					this.world.mouseSprite.mouse[btn] = -3;
+				} else if (this.world.mouseSprite.mouse[btn] > 1) {
+					this.world.mouseSprite.mouse[btn] = -1;
 				} else {
-					this.p5play.mouseSprite.mouse[btn] = -2;
+					this.world.mouseSprite.mouse[btn] = -2;
 				}
 			} else {
-				this.p5play.mouseSprite.mouse[btn] = 0;
-				this.p5play.mouseSprite.mouse.draggable = false;
+				this.world.mouseSprite.mouse[btn] = 0;
+				this.world.mouseSprite.mouse.draggable = false;
 			}
 		}
 	};
@@ -6963,31 +7051,48 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 
 // called after each p5.js draw function call
 p5.prototype.registerMethod('post', function p5playPostDraw() {
+	this.p5play._inPostDraw = true;
 	this.frame = this.frameCount;
-
-	if (this.p5play.autoDrawSprites) {
-		this.camera.on();
-		this.allSprites.draw();
-		this.camera.off();
-		this.p5play.autoDrawSprites = true;
-	}
-
-	if (this.p5play.autoUpdateSprites) {
-		this.updateSprites();
-		this.p5play.autoUpdateSprites = true;
-	}
 
 	if (this.allSprites.autoCull) {
 		this.allSprites.cull(10000);
+	}
+
+	if (this.allSprites._autoDraw) {
+		this.camera.on();
+		this.allSprites.draw();
+		this.camera.off();
+	}
+	if (this.allSprites._autoDraw === null) {
+		this.allSprites._autoDraw = true;
+	}
+
+	if (this.world.autoStep) {
+		this.world.step();
+	}
+	if (this.world.autoStep === null) {
+		this.world.autoStep = true;
+	}
+
+	if (this.allSprites._autoUpdate) {
+		this.allSprites.update();
+	}
+	if (this.allSprites._autoUpdate === null) {
+		this.allSprites._autoUpdate = true;
+	}
+
+	for (let s of this.allSprites) {
+		s.autoDraw ??= true;
+		s.autoUpdate ??= true;
 	}
 
 	for (let btn of ['left', 'center', 'right']) {
 		if (this.mouse[btn] < 0) this.mouse[btn] = 0;
 		else if (this.mouse[btn] > 0) this.mouse[btn]++;
 
-		if (this.p5play.mouseSprite) {
-			if (this.p5play.mouseSprite.mouse[btn] < 0) {
-				this.p5play.mouseSprite.mouse[btn] = 0;
+		if (this.world.mouseSprite) {
+			if (this.world.mouseSprite.mouse[btn] < 0) {
+				this.world.mouseSprite.mouse[btn] = 0;
 			}
 		}
 	}
@@ -6998,19 +7103,19 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		else if (this.kb[k] > 0) this.kb[k]++;
 	}
 
-	if (this.p5play.mouseTracking) {
-		if (this.p5play.mouseSprite) {
+	if (this.world.mouseTracking) {
+		if (this.world.mouseSprite) {
 			let val = 0;
 			for (let btn of ['left', 'center', 'right']) {
-				val += this.p5play.mouseSprite.mouse[btn];
+				val += this.world.mouseSprite.mouse[btn];
 			}
-			if (val == 0) this.p5play.mouseSprite = null;
+			if (val == 0) this.world.mouseSprite = null;
 		}
 
-		let sprites = this.getSpritesAt(this.mouse.x, this.mouse.y);
+		let sprites = this.world.getSpritesAt(this.mouse.x, this.mouse.y);
 		sprites.sort((a, b) => (a.layer - b.layer) * -1);
 
-		let uiSprites = this.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
+		let uiSprites = this.world.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
 		uiSprites.sort((a, b) => (a.layer - b.layer) * -1);
 
 		sprites = sprites.concat(uiSprites);
@@ -7018,17 +7123,17 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		let ms;
 		if (this.mouse.pressing('left') || this.mouse.pressing('center') || this.mouse.pressing('right')) {
 			// mouse sprite is not draggable
-			if (!this.p5play.mouseSprite?.mouse.draggable) {
+			if (!this.world.mouseSprite?.mouse.draggable) {
 				// if sprite is being dragged,
 				// it should be dragged behind sprites on higher layers
 				for (let s of sprites) {
-					if (s == this.p5play.mouseSprite) {
+					if (s == this.world.mouseSprite) {
 						ms = s;
 						break;
 					}
 				}
 			} else {
-				ms = this.p5play.mouseSprite;
+				ms = this.world.mouseSprite;
 			}
 			// if mouse is pressing the sprite
 			if (ms) {
@@ -7037,11 +7142,11 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 				ms.mouse.right = this.mouse.right;
 				ms.mouse.x = ms.x - this.mouse.x;
 				ms.mouse.y = ms.y - this.mouse.y;
-			} else if (this.p5play.mouseSprite) {
-				this.p5play.mouseSprite.mouse.left = 0;
-				this.p5play.mouseSprite.mouse.center = 0;
-				this.p5play.mouseSprite.mouse.right = 0;
-				this.p5play.mouseSprite.mouse.draggable = false;
+			} else if (this.world.mouseSprite) {
+				this.world.mouseSprite.mouse.left = 0;
+				this.world.mouseSprite.mouse.center = 0;
+				this.world.mouseSprite.mouse.right = 0;
+				this.world.mouseSprite.mouse.draggable = false;
 			}
 		}
 
@@ -7049,8 +7154,8 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 			s.mouse.hover++;
 		}
 
-		for (let s of this.p5play.mouseSprites) {
-			if ((!this.p5play.mouseSprite?.mouse.draggable || s != ms) && !sprites.includes(s)) {
+		for (let s of this.world.mouseSprites) {
+			if ((!this.world.mouseSprite?.mouse.draggable || s != ms) && !sprites.includes(s)) {
 				s.mouse.hover = -1;
 				s.mouse.left = 0;
 				s.mouse.center = 0;
@@ -7058,7 +7163,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 				s.mouse.draggable = false;
 			}
 		}
-		this.p5play.mouseSprites = sprites;
+		this.world.mouseSprites = sprites;
 	}
 
 	this.camera.off();
@@ -7067,4 +7172,5 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.p5play._postDrawFrameTime = performance.now();
 		this.p5play._fps = Math.round(1000 / (this.p5play._postDrawFrameTime - this.p5play._preDrawFrameTime));
 	}
+	this.p5play._inPostDraw = false;
 });
