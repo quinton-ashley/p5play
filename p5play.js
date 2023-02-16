@@ -1561,9 +1561,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			console.warn('sprite.immovable is deprecated, use sprite.static instead');
 			if (val) this.body.setStatic();
 		}
-		// set impulse(val) {
-		// 	this.body.applyLinearImpulse(val, this.body.getWorldCenter(), true);
-		// }
 		// get inertia() {
 		// 	return this.body.getInertia();
 		// }
@@ -2406,30 +2403,72 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		_args2Vec(x, y) {
+			if (Array.isArray(x)) {
+				return { x: x[0], y: x[1] };
+			} else if (typeof x == 'object') {
+				y = x.y;
+				x = x.x;
+			}
+			return { x: x || 0, y: y || 0 };
+		}
+
 		/**
 		 * Apply a force that is scaled to the sprite's mass.
 		 *
 		 * @method applyForce
-		 * @param {p5.Vector|Array} forceVector force vector
-		 * @param {p5.Vector|Array} [forceOrigin] force origin
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @param {Number} [originX]
+		 * @param {Number} [originY]
+		 * @example
+		 * sprite.applyForce(x, y);
+		 * sprite.applyForce(x, y, originX, originY);
+		 * sprite.applyForce(x, y, {x: originX, y: originY});
+		 * sprite.applyForce({x, y}, {x: originX, y: originY});
 		 */
-		applyForce(forceVector, forceOrigin) {
+		applyForce(x, y, originX, originY) {
+			if (!this.body || (!x && !y)) return;
+			if (arguments.length == 2 && typeof y != 'number') {
+				originX = y;
+			}
+			let forceVector = new pl.Vec2(this._args2Vec(x, y));
+			forceVector = forceVector.mul(this.body.m_mass);
+			if (originX || originY) {
+				let forceOrigin = scaleTo(this._args2Vec(originX, originY), this.tileSize);
+				this.body.applyForce(forceVector, forceOrigin, false);
+			} else {
+				this.body.applyForceToCenter(forceVector, false);
+			}
+		}
+
+		/**
+		 * Apply an impulse to the sprite's physics collider.
+		 *
+		 * @method applyImpulse
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @param {Number} [originX]
+		 * @param {Number} [originY]
+		 * @example
+		 * sprite.applyImpulse(x, y);
+		 * sprite.applyImpulse(x, y, originX, originY);
+		 * sprite.applyImpulse(x, y, {x: originX, y: originY});
+		 * sprite.applyImpulse({x, y}, {x: originX, y: originY});
+		 */
+		applyImpulse(x, y, originX, originY) {
 			if (!this.body) return;
-			if (Array.isArray(forceVector)) {
-				forceVector = new pl.Vec2(forceVector[0], forceVector[1]);
-			} else {
-				forceVector = new pl.Vec2(forceVector.x || 0, forceVector.y || 0);
+			if (arguments.length == 2 && typeof y != 'number') {
+				originX = y;
 			}
-			if (forceOrigin) {
-				if (Array.isArray(forceOrigin)) {
-					forceOrigin = new pl.Vec2(forceOrigin[0], forceOrigin[1]);
-				} else {
-					forceOrigin = new pl.Vec2(forceOrigin.x || 0, forceOrigin.y || 0);
-				}
-				this.body.applyForce(forceVector.mul(this.body.m_mass), forceOrigin, false);
+			let impulseVector = new pl.Vec2(this._args2Vec(x, y));
+			let impulseOrigin;
+			if (originX === undefined) {
+				impulseOrigin = this.body.getPosition();
 			} else {
-				this.body.applyForceToCenter(forceVector.mul(this.body.m_mass), false);
+				impulseOrigin = scaleTo(this._args2Vec(originX, originY), this.tileSize);
 			}
+			this.body.applyLinearImpulse(impulseVector, impulseOrigin, true);
 		}
 
 		/**
@@ -4538,7 +4577,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} amount Amount of rotation
 		 */
 		orbit(amount) {
-			if (this.frame == 0) console.warn('group.orbit is experimental and is subject to change in the future!');
+			if (this.p.frameCount == 0) console.warn('group.orbit is experimental and is subject to change in the future!');
 			if (!this.centroid) this.resetCentroid();
 			this._orbitAngle += amount;
 			let angle = this._orbitAngle;
@@ -4938,11 +4977,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.on('end-contact', this._endContact);
 
 			/**
-			 * Gravity vector (x, y)
+			 * Gravity force that affects all dynamic physics colliders.
 			 *
-			 * All sprites getting
+			 * @property gravity.x
+			 */
+			/**
+			 * Gravity force that affects all dynamic physics colliders.
 			 *
-			 * @property gravity
+			 * @property gravity.y
 			 */
 			this.gravity = {
 				get x() {
@@ -5444,10 +5486,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 */
 
 	/**
-	 * Equivalent to `new Tiles`
+	 * Use of `new Tiles()` is preferred.
 	 *
+	 * @deprecated
 	 * @method createTiles
-	 * @param {String|Array} tiles String or array of strings
 	 */
 	this.createTiles = function (tiles, x, y, w, h) {
 		return new this.Tiles(tiles, x, y, w, h);
@@ -5486,7 +5528,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Deprecated. Use world.step and allSprites.update instead.
 	 *
-	 * @deprected updateSprites
+	 * @deprecated
+	 * @method updateSprites
 	 */
 	this.updateSprites = function () {
 		if (this.frameCount == 1) console.warn('updateSprites() is deprecated, use world.step() instead.');
@@ -5821,13 +5864,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 */
 	this.drawSprites = function (group) {
 		if (this.frameCount == 1) console.warn('drawSprites() is deprecated, use group.draw() instead.');
-		group ??= pInst.allSprites;
+		group ??= this.allSprites;
 		group.draw();
 	};
 
 	/**
-	 * Creates a new sprite. Equivalent to `new Sprite()`
+	 * Use of `new Sprite()` is preferred.
 	 *
+	 * Creates a new sprite.
+	 *
+	 * @deprecated
+	 * @method createSprite
 	 * @returns {Sprite}
 	 */
 	this.createSprite = function () {
@@ -5835,8 +5882,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Creates a new group of sprites. Equivalent to `new Group()`
+	 * Use of `new Group()` is preferred.
 	 *
+	 * Creates a new group of sprites.
+	 *
+	 * @deprecated
+	 * @method createGroup
 	 * @returns {Group}
 	 */
 	this.createGroup = function () {
@@ -5932,16 +5983,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	const _createCanvas = this.createCanvas;
 
 	/**
-	 * Equivalent to p5.js createCanvas function and `new Canvas()`
+	 * Use of `new Canvas()` is preferred.
 	 *
-	 * In p5play a canvas can be created with an aspect ratio in the
+	 * p5play adds some extra functionality to the p5.js createCanvas
+	 * function.
+	 *
+	 * In p5play, a canvas can be created with an aspect ratio in the
 	 * format `width:height`. For example `new Canvas('16:9')` will create
 	 * the largest possible canvas with a 16:9 aspect ratio.
 	 *
 	 * This function also disables the default keydown responses for
 	 * the arrow keys, slash, and spacebar. This is to prevent the
-	 * browser from scrolling the page when the user is playing a game using
-	 * common keyboard commands.
+	 * browser from scrolling the page when the user is playing a game
+	 * using common keyboard commands.
 	 *
 	 * @method createCanvas
 	 * @param {Number} width|ratio
@@ -6323,9 +6377,11 @@ canvas {
 	this.world = new this.World();
 
 	/**
-	 * Equal to the p5.js frameCount, the amount of times the draw() function has
-	 * been called.
+	 * Deprecated, use the p5.js frameCount instead.
 	 *
+	 * This property will be removed in v3.7.0
+	 *
+	 * @deprecated
 	 * @property frame
 	 */
 	this.frame = 0;
@@ -6357,6 +6413,16 @@ canvas {
 	 * Get user input from game controllers.
 	 *
 	 * @property contro
+	 */
+	/**
+	 * Use this function to performance test your game code. FPS, amongst
+	 * the gaming community, refers to how many frames a game could render
+	 * per second, not including the delay between when frames are shown
+	 * on the screen. The higher the FPS, the better the game is
+	 * performing.
+	 *
+	 * @method getFPS
+	 * @returns {Number} The current FPS
 	 */
 
 	/**

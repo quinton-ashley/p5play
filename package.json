@@ -28,10 +28,11 @@
 		"url": "git+https://github.com/quinton-ashley/p5play.git"
 	},
 	"scripts": {
+		"min": "minify p5play.js > p5play.min.js",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "3.6.1"
+	"version": "3.6.2"
 }
