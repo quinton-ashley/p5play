@@ -6007,12 +6007,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		let pixelated = false;
 		let w, h, ratio;
 		if (typeof args[0] == 'string') {
-			ratio = args[0].split(':');
-			if (args[1] == 'fullscreen') {
-				isFullScreen = true;
+			if (args[0].includes(':')) ratio = args[0].split(':');
+			else {
+				args[2] = args[0];
+				args[0] = undefined;
 			}
+			if (args[1] == 'fullscreen') isFullScreen = true;
 		}
-		if (!args.length) {
+		if (!args[0]) {
 			args[0] = window.innerWidth;
 			args[1] = window.innerHeight;
 			isFullScreen = true;
@@ -6020,21 +6022,32 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			args[2] = args[1];
 			args[1] = args[0];
 		}
-
-		if (args[2] == 'pixelated') {
-			pixelated = true;
-			isFullScreen = true;
-			ratio = [args[0], args[1]];
+		let scale;
+		if (typeof args[2] == 'string') {
+			args[2] = args[2].toLowerCase();
+			if (args[2] != 'p2d' && args[2] != 'webgl') {
+				args[2] = args[2].split(' ');
+			}
+			if (args[2][0] == 'pixelated') {
+				pixelated = true;
+				if (!args[2][1]) isFullScreen = true;
+				else scale = Number(args[2][1].slice(1));
+				ratio = [args[0], args[1]];
+			}
 		}
 		if (ratio) {
 			let rW = Number(ratio[0]);
 			let rH = Number(ratio[1]);
-
-			w = window.innerWidth;
-			h = window.innerWidth * (rH / rW);
-			if (h > window.innerHeight) {
-				w = window.innerHeight * (rW / rH);
-				h = window.innerHeight;
+			if (!scale) {
+				w = window.innerWidth;
+				h = window.innerWidth * (rH / rW);
+				if (h > window.innerHeight) {
+					w = window.innerHeight * (rW / rH);
+					h = window.innerHeight;
+				}
+			} else {
+				w = rW * scale;
+				h = rH * scale;
 			}
 			w = Math.round(w);
 			h = Math.round(h);
@@ -6761,6 +6774,7 @@ canvas {
 				if (inp == 40) return 'ArrowDown';
 				if (inp == 37) return 'ArrowLeft';
 				if (inp == 39) return 'ArrowRight';
+				if (inp < 10) return inp + '';
 				throw new Error(
 					'Use key names with the keyboard input functions, not key codes! If you are trying to detect if the user pressed a number key make it a string. For example: "5"'
 				);

@@ -22,6 +22,7 @@
 		"generative"
 	],
 	"license": "GPL-3.0-only",
+	"main": "p5play.js",
 	"homepage": "https://github.com/quinton-ashley/p5play#readme",
 	"repository": {
 		"type": "git",
@@ -34,5 +35,5 @@
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "3.6.2"
+	"version": "3.6.3"
 }
