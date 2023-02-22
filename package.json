@@ -1,6 +1,6 @@
 {
 	"name": "p5.play",
-	"author": "quinton-ashley <qashto@gmail.com> (https://quintos.org)",
+	"author": "quinton-ashley <info@p5play.org>",
 	"bugs": {
 		"url": "https://github.com/quinton-ashley/p5play/issues"
 	},
@@ -13,17 +13,20 @@
 		"p5.js",
 		"p5js",
 		"p5",
-		"game",
+		"box2d",
+		"physics",
+		"physics engine",
+		"physics simulation",
+		"game engine",
 		"games",
 		"animation",
-		"art",
-		"interactive",
-		"creative",
-		"generative"
+		"user input",
+		"controller",
+		"gamepad"
 	],
 	"license": "GPL-3.0-only",
 	"main": "p5play.js",
-	"homepage": "https://github.com/quinton-ashley/p5play#readme",
+	"homepage": "https://p5play.org",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/quinton-ashley/p5play.git"
@@ -35,5 +38,5 @@
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "3.6.4"
+	"version": "3.6.5"
 }

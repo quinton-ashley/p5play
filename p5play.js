@@ -382,36 +382,37 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			// this._vel extends p5.Vector
 			this._vel = pInst.createVector.call(pInst);
 
-			Object.defineProperty(this._vel, 'x', {
-				get() {
-					let val;
-					if (!_this.body) val = _this._velocity.x;
-					else val = _this.body.getLinearVelocity().x;
-					return fixRound(val / _this.tileSize);
-				},
-				set(val) {
-					val *= _this.tileSize;
-					if (_this.body) {
-						_this.body.setLinearVelocity(new pl.Vec2(val, _this.body.getLinearVelocity().y));
-					} else {
-						_this._velocity.x = val;
+			Object.defineProperties(this._vel, {
+				x: {
+					get() {
+						let val;
+						if (_this.body) val = _this.body.getLinearVelocity().x;
+						else val = _this._velocity.x;
+						return fixRound(val / _this.tileSize);
+					},
+					set(val) {
+						val *= _this.tileSize;
+						if (_this.body) {
+							_this.body.setLinearVelocity(new pl.Vec2(val, _this.body.getLinearVelocity().y));
+						} else {
+							_this._velocity.x = val;
+						}
 					}
-				}
-			});
-
-			Object.defineProperty(this._vel, 'y', {
-				get() {
-					let val;
-					if (!_this.body) val = _this._velocity.y;
-					else val = _this.body.getLinearVelocity().y;
-					return fixRound(val / _this.tileSize);
 				},
-				set(val) {
-					val *= _this.tileSize;
-					if (_this.body) {
-						_this.body.setLinearVelocity(new pl.Vec2(_this.body.getLinearVelocity().x, val));
-					} else {
-						_this._velocity.y = val;
+				y: {
+					get() {
+						let val;
+						if (_this.body) val = _this.body.getLinearVelocity().y;
+						else val = _this._velocity.y;
+						return fixRound(val / _this.tileSize);
+					},
+					set(val) {
+						val *= _this.tileSize;
+						if (_this.body) {
+							_this.body.setLinearVelocity(new pl.Vec2(_this.body.getLinearVelocity().x, val));
+						} else {
+							_this._velocity.y = val;
+						}
 					}
 				}
 			});
@@ -1087,28 +1088,29 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		_cloneBodyProps() {
 			let body = {};
-			let props = [...spriteProps];
-			let deletes = [
-				'w',
-				'h',
-				'width',
-				'height',
-				'shape',
-				'd',
-				'diameter',
-				'dynamic',
-				'static',
-				'kinematic',
-				'collider',
+			let props = [
+				'bounciness',
+				'density',
+				'drag',
+				'friction',
 				'heading',
-				'direction'
+				'isSuperFast',
+				'mass',
+				'rotation',
+				'rotationDrag',
+				'rotationLock',
+				'rotationSpeed',
+				'scale',
+				'vel',
+				'x',
+				'y'
 			];
-			for (let del of deletes) {
-				let i = props.indexOf(del);
-				if (i >= 0) props.splice(i, 1);
-			}
 			for (let prop of props) {
-				body[prop] = this[prop];
+				if (typeof this[prop] == 'object') {
+					body[prop] = Object.assign({}, this[prop]);
+				} else {
+					body[prop] = this[prop];
+				}
 			}
 			return body;
 		}
@@ -1228,10 +1230,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		_reset() {
-			let bodyProps;
-			if (this._collider != 'none') {
-				bodyProps = this._cloneBodyProps();
-			}
+			let bodyProps = this._cloneBodyProps();
 
 			let v;
 			if (this._shape == 'chain' || this._shape == 'polygon') {
@@ -1255,10 +1254,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (this._hasOverlaps) {
 					this._createSensors();
 				}
-				for (let prop in bodyProps) {
-					if (bodyProps[prop] !== undefined) {
-						this[prop] = bodyProps[prop];
-					}
+			}
+			for (let prop in bodyProps) {
+				if (bodyProps[prop] !== undefined) {
+					this[prop] = bodyProps[prop];
 				}
 			}
 		}
@@ -1457,7 +1456,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		get drag() {
 			if (this.body) return this.body.getLinearDamping();
-			else return Infinity;
+			else return undefined;
 		}
 		set drag(val) {
 			if (this.body) this.body.setLinearDamping(val);
@@ -1505,6 +1504,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set dynamic(val) {
 			if (val) this.collider = 'dynamic';
+			else this.collider = 'kinematic';
 		}
 
 		/**
@@ -1664,6 +1664,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set kinematic(val) {
 			if (val) this.collider = 'kinematic';
+			else this.collider = 'dynamic';
 		}
 		/**
 		 * The mass of the sprite's physics body.
@@ -1864,6 +1865,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set static(val) {
 			if (val) this.collider = 'static';
+			else this.collider = 'dynamic';
 		}
 
 		/**
@@ -2071,7 +2073,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._diameter = val;
 			} else {
 				let bodyProps;
-				if (this._collider == 'none') {
+				if (this._collider != 'none') {
 					bodyProps = this._cloneBodyProps();
 				}
 				this._removeSensors();
@@ -5641,31 +5643,49 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	class Scale {
 		constructor() {
-			this._x = 1;
-			this._y = 1;
-			this._avg = 1;
+			let _this = this;
+			Object.defineProperties(this, {
+				x: {
+					get x() {
+						return _this._x;
+					},
+					set x(val) {
+						if (val == _this._x) return;
+						_this._x = val;
+						_this._avg = (_this._x + _this._y) * 0.5;
+					},
+					configurable: true,
+					enumerable: true
+				},
+				y: {
+					get y() {
+						return _this._y;
+					},
+					set y(val) {
+						if (val == _this._y) return;
+						_this._y = val;
+						_this._avg = (_this._x + _this._y) * 0.5;
+					},
+					configurable: true,
+					enumerable: true
+				},
+				_x: {
+					value: 1,
+					enumerable: false
+				},
+				_y: {
+					value: 1,
+					enumerable: false
+				},
+				_avg: {
+					value: 1,
+					enumerable: false
+				}
+			});
 		}
 
 		valueOf() {
 			return this._avg;
-		}
-
-		get x() {
-			return this._x;
-		}
-		set x(val) {
-			if (val == this._x) return;
-			this._x = val;
-			this._avg = (this._x + this._y) * 0.5;
-		}
-
-		get y() {
-			return this._y;
-		}
-		set y(val) {
-			if (val == this._y) return;
-			this._y = val;
-			this._avg = (this._x + this._y) * 0.5;
 		}
 	}
 
