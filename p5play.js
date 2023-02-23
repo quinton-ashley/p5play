@@ -2314,7 +2314,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_draw() {
 			if (this.strokeWeight !== undefined) this.p.strokeWeight(this.strokeWeight);
 			if (this.animation && this.debug != 'colliders') {
-				this.animation.draw(0, 0, 0, this._scale.x, this._scale.y);
+				this.animation.draw(0, 0, 0, this._scale._x, this._scale._y);
 			}
 			if (!this.animation || this.debug) {
 				if (this.debug && this.debug != 'colliders') {
@@ -3749,7 +3749,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p.imageMode('center');
 			this.p.translate(this.x, this.y);
 			this.p.rotate(r || this.rotation);
-			this.p.scale(sx * this._scale.x, sy * this._scale.y);
+			this.p.scale(sx * this._scale._x, sy * this._scale._y);
 			let img = this[this.frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
@@ -5646,10 +5646,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let _this = this;
 			Object.defineProperties(this, {
 				x: {
-					get x() {
+					get() {
 						return _this._x;
 					},
-					set x(val) {
+					set(val) {
 						if (val == _this._x) return;
 						_this._x = val;
 						_this._avg = (_this._x + _this._y) * 0.5;
@@ -5658,10 +5658,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					enumerable: true
 				},
 				y: {
-					get y() {
+					get() {
 						return _this._y;
 					},
-					set y(val) {
+					set(val) {
 						if (val == _this._y) return;
 						_this._y = val;
 						_this._avg = (_this._x + _this._y) * 0.5;
@@ -5671,15 +5671,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				},
 				_x: {
 					value: 1,
-					enumerable: false
+					enumerable: false,
+					writable: true
 				},
 				_y: {
 					value: 1,
-					enumerable: false
+					enumerable: false,
+					writable: true
 				},
 				_avg: {
 					value: 1,
-					enumerable: false
+					enumerable: false,
+					writable: true
 				}
 			});
 		}
