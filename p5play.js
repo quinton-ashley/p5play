@@ -2892,7 +2892,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (typeof x != 'number') {
 				facing = speed;
 				speed = y;
-				y = facing;
+				y = x.y;
+				x = x.x;
 			}
 
 			let angle = this.angleToFace(x, y, facing);
@@ -2919,7 +2920,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let cw = angle > 0;
 			this.rotationSpeed = speed * (cw ? 1 : -1);
 
-			let frames = Math.ceil(absA / speed);
+			let frames = Math.floor(absA / speed) - 1;
 			this._rotateIdx ??= 0;
 			this._rotateIdx++;
 			let _rotateIdx = this._rotateIdx;
@@ -2931,8 +2932,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						await pInst.delay();
 						frames--;
 					}
-
-					while (Math.abs(this.rotationSpeed) < Math.abs(ang - this.rotation)) {
+					let limit = Math.abs(this.rotationSpeed) + 0.01;
+					while (
+						((cw && ang > this.rotation) || (!cw && ang < this.rotation)) &&
+						limit < Math.abs(ang - this.rotation)
+					) {
 						await pInst.delay();
 					}
 					if (Math.abs(ang - this.rotation) > 0.01) {
@@ -7418,7 +7422,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 
 	if (this.p5play._fps) {
 		this.p5play._postDrawFrameTime = performance.now();
-		this.p5play._fps = Math.round(1000 / (this.p5play._postDrawFrameTime - this.p5play._preDrawFrameTime));
+		this.p5play._fps = Math.round(1000 / (this.p5play._postDrawFrameTime - this.p5play._preDrawFrameTime)) || 1;
 	}
 	this.p5play._inPostDraw = false;
 });
