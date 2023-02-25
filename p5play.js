@@ -25,6 +25,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		emulated: false
 	};
 	this.p5play.standardizeKeyboard ??= false;
+	this.p5play.groups = [];
+	this.p5play.groupsCreated = 0;
+	this.p5play.spritesCreated = 0;
 
 	// change the angle mode to degrees
 	this.angleMode('degrees');
@@ -167,8 +170,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.Sprite = class {
 		constructor(x, y, w, h, collider) {
 			this.p = pInst;
-			this.idNum = this.p.world.spritesCreated;
-			this.p.world.spritesCreated++;
+
+			/**
+			 * Each sprite has a unique id number. Don't change it!
+			 * Its useful for debugging.
+			 *
+			 * @property idNum
+			 * @type {Number}
+			 */
+			this.idNum = this.p.p5play.spritesCreated;
+			this.p.p5play.spritesCreated++;
 
 			let args = [...arguments];
 
@@ -606,48 +617,43 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 
-			// custom group properties "sprite group traits"
-			// that are non-default sprite properties
+			// ignore these properties
+			let ignoreProps = [
+				'collider',
+				'idNum',
+				'p',
+				'parent',
+				'length',
+				'_collides',
+				'_colliding',
+				'_collided',
+				'_collisions',
+				'_overlap',
+				'_overlaps',
+				'_overlapping',
+				'_overlapped',
+				'_overlappers',
+				'animation',
+				'animations',
+				'autoCull',
+				'Sprite',
+				'GroupSprite',
+				'Group',
+				'Subgroup',
+				'subgroups',
+				'vel',
+				'mirror',
+				'mouse'
+			];
+
+			// the sprite should also inherit
+			// custom group properties, "group traits"
 			for (let g of this.groups) {
-				let traits = {};
 				let props = Object.keys(g);
 				for (let prop of props) {
-					if (!isNaN(prop) || prop[0] == '_') continue;
-					traits[prop] = null;
-				}
-
-				// delete these traits
-				let deletes = [
-					'collider',
-					'idNum',
-					'p',
-					'parent',
-					'length',
-					'_collides',
-					'_colliding',
-					'_collided',
-					'_collisions',
-					'_overlap',
-					'_overlaps',
-					'_overlapping',
-					'_overlapped',
-					'_overlappers',
-					'animation',
-					'animations',
-					'autoCull',
-					'Sprite',
-					'GroupSprite',
-					'Group',
-					'SubGroup',
-					'vel',
-					'mirror',
-					'mouse'
-				];
-				for (let d of deletes) {
-					delete traits[d];
-				}
-
-				for (let prop in traits) {
+					if (!isNaN(prop) || prop[0] == '_' || ignoreProps.includes(prop)) {
+						continue;
+					}
 					let val = g[prop];
 					if (val === undefined) continue;
 					if (typeof val == 'function') {
@@ -2288,8 +2294,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					let b = entry[0];
 					let f = entry[1] + 1;
 					this[event].set(b, f);
+					if (b instanceof this.p.Group) b[event].set(this, f);
 					if (f == 0) {
 						this[event].delete(b);
+						if (b instanceof this.p.Group) b[event].delete(this);
 						continue;
 					} else if (f == -1) {
 						contactType = eventTypes[event][2];
@@ -4191,7 +4199,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args = args.slice(1);
 			}
 			super(...args);
-			this.idNum = 0;
 			this.p = pInst;
 
 			if (typeof args[0] == 'number') return;
@@ -4201,12 +4208,50 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 
-			// if all sprites doesn't exist yet,
-			// this group is the allSprites group
+			/**
+			 * Each group has a unique id number. Don't change it!
+			 * Its useful for debugging.
+			 *
+			 * @property idNum
+			 * @type {Number}
+			 */
+			this.idNum = this.p.p5play.groupsCreated;
+			this.p.p5play.groups[this.idNum] = this;
+			this.p.p5play.groupsCreated++;
+
+			// if the allSprites group doesn't exist yet,
+			// this group must be the allSprites group!
 			if (!this.p.allSprites) this._isAllSpritesGroup = true;
 
-			if (!this._isAllSpritesGroup) this.parent = 0;
-			if (parent) this.parent = parent.idNum;
+			/**
+			 * Groups can have subgroups, which inherit the properties
+			 * of their parent groups.
+			 *
+			 * @property subgroups
+			 * @type {Array}
+			 * @default []
+			 */
+			this.subgroups = [];
+
+			/**
+			 * The parent group's id number.
+			 *
+			 * @property parent
+			 * @type {Number}
+			 * @default undefined
+			 */
+			if (parent instanceof this.p.Group) {
+				parent.subgroups.push(this);
+				let p = parent;
+				do {
+					p = this.p.p5play.groups[p.parent];
+					p.subgroups.push(this);
+				} while (!p._isAllSpritesGroup);
+				this.parent = parent.idNum;
+			} else if (!this._isAllSpritesGroup) {
+				this.p.allSprites.subgroups.push(this);
+				this.parent = 0;
+			}
 
 			/**
 			 * Keys are the animation label, values are SpriteAnimation objects.
@@ -4236,29 +4281,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._collisions = new Map();
 			this._overlappers = new Map();
 
-			if (this.p.world) {
-				this.idNum = this.p.world.groupsCreated;
-				this.p.world.groups[this.idNum] = this;
-				this.p.world.groupsCreated++;
-			}
-
 			let _this = this;
 
-			class GroupSprite extends this.p.Sprite {
+			this.Sprite = class extends this.p.Sprite {
 				constructor() {
 					super(_this, ...arguments);
 				}
-			}
-			this.GroupSprite = GroupSprite;
-			this.Sprite = GroupSprite;
+			};
+			this.GroupSprite = this.Sprite;
 
-			class SubGroup extends this.p.Group {
+			this.Group = class extends this.p.Group {
 				constructor() {
 					super(_this, ...arguments);
 				}
-			}
-			this.SubGroup = SubGroup;
-			this.Group = SubGroup;
+			};
+			this.Subgroup = this.Group;
 
 			this.mouse = {
 				presses: null,
@@ -4287,8 +4324,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					get() {
 						let val = _this['_' + prop];
 						let i = _this.length - 1;
-						if (val === undefined && this.p.world && !_this._isAllSpritesGroup) {
-							let parent = this.p.world.groups[_this.parent];
+						if (val === undefined && !_this._isAllSpritesGroup) {
+							let parent = this.p.p5play.groups[_this.parent];
 							if (parent) {
 								val = parent[prop];
 								i = parent.length - 1;
@@ -4320,8 +4357,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						get() {
 							let val = _this[objProp]['_' + prop];
 							let i = _this.length - 1;
-							if (val === undefined && _this.p.world && !_this._isAllSpritesGroup) {
-								let parent = _this.p.world.groups[_this.parent];
+							if (val === undefined && !_this._isAllSpritesGroup) {
+								let parent = _this.p.p5play.groups[_this.parent];
 								if (parent) {
 									val = parent[objProp][prop];
 									i = parent.length - 1;
@@ -4364,6 +4401,30 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this.autoDraw = true;
 			this.autoUpdate = true;
+
+			/**
+			 * Alias for group.push
+			 *
+			 * Its better to use the group Sprite constructor instead.
+			 * `new group.Sprite()` which both creates a group sprite using
+			 * soft inheritance and adds it to the group.
+			 *
+			 * @method add
+			 */
+			this.add = this.push;
+			/**
+			 * Check if a sprite is in the group.
+			 *
+			 * @method includes
+			 * @param {Sprite} sprite
+			 * @return {Number} index of the sprite or -1 if not found
+			 */
+			/**
+			 * Alias for group.includes
+			 *
+			 * @method contains
+			 */
+			this.contains = this.includes;
 		}
 
 		/**
@@ -4747,53 +4808,29 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Check if a sprite is in the group.
+		 * Its better to use the group Sprite constructor instead.
+		 * `new group.Sprite()` which both creates a group sprite using
+		 * soft inheritance and adds it to the group.
 		 *
-		 * @method includes
-		 * @param {Sprite} sprite
-		 * @return {Number} index of the sprite or -1 if not found
-		 */
-
-		/**
-		 * Use group.includes(sprite) instead.
-		 *
-		 * @deprecated contains
-		 * @param {Sprite} sprite The sprite to search
-		 * @return {Number} Index or -1 if not found
-		 */
-		contains(sprite) {
-			console.warn('Deprecated: use group.includes(sprite) instead of group.contains(sprite)');
-			return this.indexOf(sprite) > -1;
-		}
-
-		/**
-		 * Adds a sprite to the group. Returns true if the sprite was added
-		 * because it was not already in the group.
+		 * Adds a sprite or multiple sprites to the group, whether they were
+		 * already in the group or not, just like with the Array.push()
+		 * method. Only sprites can be added to a group.
 		 *
 		 * @method push
-		 * @param {Sprite} s The sprite to be added
+		 * @param {Sprite} sprites The sprite or sprites to be added
+		 * @returns {Number} the new length of the group
 		 */
-		push(s) {
-			if (!(s instanceof this.p.Sprite)) {
-				throw new Error('you can only add sprites to a group');
-			}
+		push(...sprites) {
+			for (let s of sprites) {
+				if (!(s instanceof this.p.Sprite)) {
+					throw new Error('you can only add sprites to a group, no ' + typeof s + 's');
+				}
 
-			if (this.indexOf(s) == -1) {
 				super.push(s);
-				if (this.parent) this.p.world.groups[this.parent].push(s);
+				if (this.parent) this.p.p5play.groups[this.parent].push(s);
 				s.groups.push(this);
-				return true;
 			}
-		}
-
-		/**
-		 * Alias for push.
-		 *
-		 * @method add
-		 * @param {Sprite} s The sprite to be added
-		 */
-		add(s) {
-			this.push(s);
+			return this.length;
 		}
 
 		/**
@@ -4986,6 +5023,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this._autoUpdate) this._autoUpdate = null;
 		}
 
+		/**
+		 * Should only be called by the p5.play library on the allSprites
+		 * group during world.step()
+		 *
+		 * @private _step
+		 */
 		_step() {
 			for (let s of this) {
 				s._step();
@@ -5114,10 +5157,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			};
 			this.resize();
-
-			this.groups = [this.p.allSprites];
-			this.groupsCreated = 1;
-			this.spritesCreated = 0;
 			this.contacts = [];
 
 			this.on('begin-contact', this._beginContact);
@@ -5589,7 +5628,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					let t = tiles[row][col];
 					if (t == ' ' || t == '.') continue;
 					let ani, g;
-					for (g of pInst.world.groups) {
+					for (g of pInst.p5play.groups) {
 						ani = g.animations[t];
 						if (ani) break;
 					}
@@ -5598,7 +5637,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						continue;
 					}
 					let wasFound = false;
-					for (g of pInst.world.groups) {
+					for (g of pInst.p5play.groups) {
 						if (g.tile == t) {
 							wasFound = true;
 							break;
