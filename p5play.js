@@ -4891,11 +4891,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let maxY = this.p.height + bottom + cy;
 
 			let culled = 0;
-			for (let s of this) {
+			for (let i = 0; i < this.length; i++) {
+				let s = this[i];
 				if (s.x < minX || s.y < minY || s.x > maxX || s.y > maxY) {
 					culled++;
 					if (cb) cb(s, culled);
 					else s.remove();
+					if (s.removed) i--;
 				}
 			}
 			return culled;
