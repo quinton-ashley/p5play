@@ -18,6 +18,10 @@ p5play is an open source project and will always be available for free, but your
 
 Take a look at the [p5play-web][] GitHub repository for information about how to contribute to the development of p5play.
 
+## Licensing
+
+See the [LICENSING.md][] file in the p5play-web repository for information about the licensing of p5play and p5play.org.
+
 [p5play]: https://p5play.org
 [issue report]: https://github.com/quinton-ashley/p5play/issues
 [@quinton-ashley]: https://github.com/quinton-ashley
@@ -25,3 +29,4 @@ Take a look at the [p5play-web][] GitHub repository for information about how to
 [p5play-web]: https://github.com/quinton-ashley/p5play-web
 [p5play community discord server]: https://discord.gg/3UTbqUgmPF
 [discord]: https://discord.gg/3UTbqUgmPF
+[licensing.md]: https://p5play.org/LICENSING.md
