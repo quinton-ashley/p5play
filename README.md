@@ -29,4 +29,4 @@ See the [LICENSING.md][] file in the p5play-web repository for information about
 [p5play-web]: https://github.com/quinton-ashley/p5play-web
 [p5play community discord server]: https://discord.gg/3UTbqUgmPF
 [discord]: https://discord.gg/3UTbqUgmPF
-[licensing.md]: https://p5play.org/LICENSING.md
+[licensing.md]: https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md

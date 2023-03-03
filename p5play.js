@@ -25,6 +25,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		emulated: false
 	};
 	this.p5play.standardizeKeyboard ??= false;
+	this.p5play.sprites = [];
 	this.p5play.groups = [];
 	this.p5play.groupsCreated = 0;
 	this.p5play.spritesCreated = 0;
@@ -173,12 +174,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			/**
 			 * Each sprite has a unique id number. Don't change it!
-			 * Its useful for debugging.
+			 * Its useful for debugging. Sprite id numbers start at 1000.
 			 *
 			 * @property idNum
 			 * @type {Number}
 			 */
 			this.idNum = this.p.p5play.spritesCreated;
+			this._uid = 1000 + this.idNum;
+			this.p.p5play.sprites[this._uid] = this;
 			this.p.p5play.spritesCreated++;
 
 			let args = [...arguments];
@@ -327,8 +330,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._overlapping = {};
 			this._overlapped = {};
 
-			this._collisions = new Map();
-			this._overlappers = new Map();
+			this._collisions = {};
+			this._overlappers = {};
 
 			/**
 			 * The tile size is used to change the size of one unit of
@@ -2293,7 +2296,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		_step() {
-			if (!this.body) {
+			if (!this.body && !this.removed) {
 				this.rotation += this._rotationSpeed;
 				this.x += this.vel.x;
 				this.y += this.vel.y;
@@ -2302,19 +2305,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			// for each type of collision and overlap event
 			let a = this;
 			for (let event in eventTypes) {
-				for (let entry of this[event]) {
-					let contactType;
-					let b = entry[0];
-					let f = entry[1] + 1;
-					this[event].set(b, f);
-					if (b instanceof this.p.Group) b[event].set(this, f);
-					if (f == 0) {
-						this[event].delete(b);
-						if (b instanceof this.p.Group) b[event].delete(this);
+				for (let k in this[event]) {
+					let contactType, b;
+					if (k >= 1000) b = this.p.p5play.sprites[k];
+					else b = this.p.p5play.groups[k];
+					let v = a[event][k] + 1;
+					this[event][k] = v;
+					if (b instanceof this.p.Group) b[event][a._uid] = v;
+					if (v == 0) {
+						delete a[event][k];
+						if (b instanceof this.p.Group) delete b[event][a._uid];
 						continue;
-					} else if (f == -1) {
+					} else if (v == -1) {
 						contactType = eventTypes[event][2];
-					} else if (f == 1) {
+					} else if (v == 1) {
 						contactType = eventTypes[event][0];
 					} else {
 						contactType = eventTypes[event][1];
@@ -2322,7 +2326,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					if (b instanceof this.p.Group) continue;
 
 					let cb = this.p.world._findContactCB(contactType, a, b);
-					if (typeof cb == 'function') cb(a, b, f);
+					if (typeof cb == 'function') cb(a, b, v);
+				}
+			}
+			if (this.removed) {
+				if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
+					delete this.p.p5play.sprites[this._uid];
 				}
 			}
 		}
@@ -3100,13 +3109,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.body = null;
 			this.removed = true;
 
-			//when removed from the "scene" also remove all the references in all the groups
-			while (this.groups.length > 0) {
-				this.groups[0].remove(this);
+			// when removed from the "scene" also remove all the references
+			// to the sprite from all its groups
+			for (let g of this.groups) {
+				g.remove(this);
+			}
+
+			// all of p5play's references to the sprite can be removed
+			// only if the sprite is not colliding or overlapping with anything
+			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
+				delete this.p.p5play.sprites[this._uid];
 			}
 		}
 
 		/**
+		 * Warning: This function might be changed in a future release.
+		 *
 		 * Returns the sprite's unique identifier
 		 *
 		 * @method toString
@@ -3145,8 +3163,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		collides(target, callback) {
 			this._ensureCollide(target, callback);
-			this._collides[target] = callback || true;
-			return this._collisions.get(target) == 1;
+			this._collides[target._uid] = callback || true;
+			return this._collisions[target._uid] == 1;
 		}
 
 		/**
@@ -3161,8 +3179,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		colliding(target, callback) {
 			this._ensureCollide(target, callback);
-			this._colliding[target] = callback || true;
-			let val = this._collisions.get(target);
+			this._colliding[target._uid] = callback || true;
+			let val = this._collisions[target._uid];
 			return val > 0 ? val : 0;
 		}
 
@@ -3177,8 +3195,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		collided(target, callback) {
 			this._ensureCollide(target, callback);
-			this._collided[target] = callback || true;
-			return this._collisions.get(target) == -1;
+			this._collided[target._uid] = callback || true;
+			return this._collisions[target._uid] == -1;
 		}
 
 		_ensureOverlap(target, callback) {
@@ -3202,7 +3220,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					target._hasOverlaps = true;
 				}
 			}
-			this._overlap[target] = true;
+			this._overlap[target._uid] = true;
 		}
 
 		overlap(target, callback) {
@@ -3222,8 +3240,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		overlaps(target, callback) {
 			this._ensureOverlap(target, callback);
-			this._overlaps[target] = callback || true;
-			return this._overlappers.get(target) == 1;
+			this._overlaps[target._uid] = callback || true;
+			return this._overlappers[target._uid] == 1;
 		}
 
 		/**
@@ -3238,8 +3256,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		overlapping(target, callback) {
 			this._ensureOverlap(target, callback);
-			this._overlapping[target] = callback || true;
-			let val = this._overlappers.get(target);
+			this._overlapping[target._uid] = callback || true;
+			let val = this._overlappers[target._uid];
 			return val > 0 ? val : 0;
 		}
 
@@ -3254,8 +3272,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		overlapped(target, callback) {
 			this._ensureOverlap(target, callback);
-			this._overlapped[target] = callback || true;
-			return this._overlappers.get(target) == -1;
+			this._overlapped[target._uid] = callback || true;
+			return this._overlappers[target._uid] == -1;
 		}
 
 		_createSensors() {
@@ -4229,7 +4247,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @type {Number}
 			 */
 			this.idNum = this.p.p5play.groupsCreated;
-			this.p.p5play.groups[this.idNum] = this;
+			this._uid = this.idNum;
+			this.p.p5play.groups[this._uid] = this;
 			this.p.p5play.groupsCreated++;
 
 			// if the allSprites group doesn't exist yet,
@@ -4247,7 +4266,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.subgroups = [];
 
 			/**
-			 * The parent group's id number.
+			 * The parent group's uid number.
 			 *
 			 * @property parent
 			 * @type {Number}
@@ -4260,7 +4279,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					p = this.p.p5play.groups[p.parent];
 					p.subgroups.push(this);
 				} while (!p._isAllSpritesGroup);
-				this.parent = parent.idNum;
+				this.parent = parent._uid;
 			} else if (!this._isAllSpritesGroup) {
 				this.p.allSprites.subgroups.push(this);
 				this.parent = 0;
@@ -4291,8 +4310,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._overlapping = {};
 			this._overlapped = {};
 
-			this._collisions = new Map();
-			this._overlappers = new Map();
+			this._collisions = {};
+			this._overlappers = {};
 
 			let _this = this;
 
@@ -4511,7 +4530,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let shouldAdd = diff > 0;
 			diff = Math.abs(diff);
 			for (let i = 0; i < diff; i++) {
-				if (shouldAdd) this.add(new this.Sprite());
+				if (shouldAdd) new this.Sprite();
 				else this[this.length - 1].remove();
 			}
 		}
@@ -4572,8 +4591,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		collides(target, callback) {
 			this._ensureCollide(target, callback);
-			this._collides[target] = callback || true;
-			return this._collisions.get(target) == 1;
+			this._collides[target._uid] = callback || true;
+			return this._collisions[target._uid] == 1;
 		}
 
 		/**
@@ -4588,8 +4607,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		colliding(target, callback) {
 			this._ensureCollide(target, callback);
-			this._colliding[target] = callback || true;
-			let val = this._collisions.get(target);
+			this._colliding[target._uid] = callback || true;
+			let val = this._collisions[target._uid];
 			return val > 0 ? val : 0;
 		}
 
@@ -4604,8 +4623,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		collided(target, callback) {
 			this._ensureCollide(target, callback);
-			this._collided[target] = callback || true;
-			return this._collisions.get(target) == -1;
+			this._collided[target._uid] = callback || true;
+			return this._collisions[target._uid] == -1;
 		}
 
 		_ensureOverlap(target, callback) {
@@ -4634,7 +4653,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					target._hasOverlaps = true;
 				}
 			}
-			this._overlap[target] = true;
+			this._overlap[target._uid] = true;
 		}
 
 		overlap(target, callback) {
@@ -4654,8 +4673,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		overlaps(target, callback) {
 			this._ensureOverlap(target, callback);
-			this._overlaps[target] = callback || true;
-			return this._overlappers.get(target) == 1;
+			this._overlaps[target._uid] = callback || true;
+			return this._overlappers[target._uid] == 1;
 		}
 
 		/**
@@ -4670,8 +4689,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		overlapping(target, callback) {
 			this._ensureOverlap(target, callback);
-			this._overlapping[target] = callback || true;
-			let val = this._overlappers.get(target);
+			this._overlapping[target._uid] = callback || true;
+			let val = this._overlappers[target._uid];
 			return val > 0 ? val : 0;
 		}
 
@@ -4686,8 +4705,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		overlapped(target, callback) {
 			this._ensureOverlap(target, callback);
-			this._overlapped[target] = callback || true;
-			return this._overlappers.get(target) == -1;
+			this._overlapped[target._uid] = callback || true;
+			return this._overlappers[target._uid] == -1;
 		}
 
 		/**
@@ -4924,7 +4943,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @method remove
 		 * @param {Sprite} item The sprite to be removed
-		 * @return {Boolean} true if sprite was found and removed
+		 * @return {Sprite} the removed sprite
 		 */
 		remove(item) {
 			if (item === undefined) {
@@ -4936,23 +4955,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			let idx;
 			if (typeof item == 'number') {
-				idx = item;
+				if (item >= 0) idx = item;
+				else idx = this.length + item;
 			} else {
-				for (let i = this.length - 1; i >= 0; i--) {
-					if (this[i] === item) {
-						idx = i;
-						break;
-					}
-				}
+				idx = this.indexOf(item);
 			}
 
-			if (idx !== undefined) {
-				let removed = this[idx];
-				let gIdx = this[idx].groups.findIndex((g) => g.idNum == this.idNum);
-				this[idx].groups.splice(gIdx, 1);
+			if (idx != -1) {
+				let s = this[idx];
+				if (!s.removed) {
+					let gIdx = s.groups.findIndex((g) => g._uid == this._uid);
+					s.groups.splice(gIdx, 1);
+				}
 				this.splice(idx, 1);
-
-				return removed;
+				return s;
 			}
 			throw new Error('Sprite not found in group');
 		}
@@ -5036,18 +5052,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 			if (this._autoUpdate) this._autoUpdate = null;
-		}
-
-		/**
-		 * Should only be called by the p5.play library on the allSprites
-		 * group during world.step()
-		 *
-		 * @private _step
-		 */
-		_step() {
-			for (let s of this) {
-				s._step();
-			}
 		}
 	};
 
@@ -5254,7 +5258,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				s.prevPos.y = s.y;
 			}
 			super.step(timeStep || 1 / (this.p._targetFrameRate || 60), velocityIterations || 8, positionIterations || 3);
-			this.p.allSprites._step();
+			let sprites = Object.values(this.p.p5play.sprites);
+			for (let s of sprites) {
+				s._step();
+			}
 			if (this.autoStep) this.autoStep = null;
 		}
 
@@ -5320,20 +5327,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
 
-			a[t].set(b, 0);
-			b[t].set(a, 0);
+			a[t][b._uid] = 0;
+			b[t][a._uid] = 0;
 
 			for (let g of b.groups) {
-				g[t].set(a, g[t].get(a) || 0);
-				a[t].set(g, a[t].get(g) || 0);
+				g[t][a._uid] = g[t][a._uid] || 0;
+				a[t][g._uid] = a[t][g._uid] || 0;
 			}
 
 			for (let g of a.groups) {
-				g[t].set(b, g[t].get(b) || 0);
-				b[t].set(g, b[t].get(g) || 0);
+				g[t][b._uid] = g[t][b._uid] || 0;
+				b[t][g._uid] = b[t][g._uid] || 0;
 				for (let g2 of b.groups) {
-					g[t].set(g2, g[t].get(g2) || 0);
-					g2[t].set(g, g2[t].get(g) || 0);
+					g[t][g2._uid] = g[t][g2._uid] || 0;
+					g2[t][g._uid] = g2[t][g._uid] || 0;
 				}
 			}
 		}
@@ -5346,37 +5353,37 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
 
-			a[contactType].set(b, -2);
-			b[contactType].set(a, -2);
+			a[contactType][b._uid] = -2;
+			b[contactType][a._uid] = -2;
 
 			for (let g of b.groups) {
 				let inContact = false;
 				for (let s of g) {
-					if (s[contactType].get(a) >= 0) {
+					if (s[contactType][a._uid] >= 0) {
 						inContact = true;
 						break;
 					}
 				}
 				if (!inContact) {
-					g[contactType].set(a, -2);
-					a[contactType].set(g, -2);
+					g[contactType][a._uid] = -2;
+					a[contactType][g._uid] = -2;
 				}
 			}
 
 			for (let g of a.groups) {
 				let inContact = false;
 				for (let s of g) {
-					if (s[contactType].get(b) >= 0) {
+					if (s[contactType][b._uid] >= 0) {
 						inContact = true;
 						break;
 					}
 				}
 				if (!inContact) {
-					g[contactType].set(b, -2);
-					b[contactType].set(g, -2);
+					g[contactType][b._uid] = -2;
+					b[contactType][g._uid] = -2;
 					for (let g2 of b.groups) {
-						g[contactType].set(g2, -2);
-						g2[contactType].set(g, -2);
+						g[contactType][g2._uid] = -2;
+						g2[contactType][g._uid] = -2;
 					}
 				}
 			}
@@ -5392,25 +5399,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @returns contact cb if one can be found between the two sprites
 		 */
 		_findContactCB(type, s0, s1) {
-			let cb = s0[type][s1];
+			let cb = s0[type][s1._uid];
 			if (cb) return cb;
 
 			let s1IsSprite = s1 instanceof this.p.Sprite;
 
 			if (s1IsSprite) {
 				for (let g1 of s1.groups) {
-					cb = s0[type][g1];
+					cb = s0[type][g1._uid];
 					if (cb) return cb;
 				}
 			}
 
 			if (s0 instanceof this.p.Sprite) {
 				for (let g0 of s0.groups) {
-					cb = g0[type][s1];
+					cb = g0[type][s1._uid];
 					if (cb) return cb;
 					if (s1IsSprite) {
 						for (let g1 of s1.groups) {
-							cb = g0[type][g1];
+							cb = g0[type][g1._uid];
 							if (cb) return cb;
 						}
 					}
@@ -5661,7 +5668,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					let t = tiles[row][col];
 					if (t == ' ' || t == '.') continue;
 					let ani, g;
-					for (g of pInst.p5play.groups) {
+					let groups = Object.values(pInst.p5play.groups);
+					for (g of groups) {
 						ani = g.animations[t];
 						if (ani) break;
 					}
@@ -5670,7 +5678,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						continue;
 					}
 					let wasFound = false;
-					for (g of pInst.p5play.groups) {
+					for (g of groups) {
 						if (g.tile == t) {
 							wasFound = true;
 							break;
