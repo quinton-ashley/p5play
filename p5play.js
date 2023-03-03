@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.6
+ * @version 3.7
  * @author quinton-ashley
  * @license gpl-v3-only
  */
