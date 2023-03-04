@@ -467,7 +467,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			y ??= group.y;
 			if (y === undefined) y = this.p.height / this.p.allSprites.tileSize / 2;
-			w ??= group.w || group.width || group.diameter;
+			w ??= group.w || group.width || group.d || group.diameter;
 			h ??= group.h || group.height;
 
 			if (typeof x == 'function') x = x(group.length - 1);
@@ -691,8 +691,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			if (shouldCreateSensor && !this._hasOverlaps) this._createSensors();
 
+			this._massUndefinedByUser = true;
 			if (w === undefined && h === undefined) {
-				this._dimensionsUndefined = true;
+				this._dimensionsUndefinedByUser = true;
 			}
 		}
 
@@ -1104,7 +1105,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				'friction',
 				'heading',
 				'isSuperFast',
-				'mass',
 				'rotation',
 				'rotationDrag',
 				'rotationLock',
@@ -1114,6 +1114,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				'x',
 				'y'
 			];
+			if (!this._massUndefinedByUser || !this._dimensionsUndefinedByUser) {
+				props.push('mass');
+			}
 			for (let prop of props) {
 				if (typeof this[prop] == 'object') {
 					body[prop] = Object.assign({}, this[prop]);
@@ -1703,6 +1706,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let t = this.massData;
 			t.mass = val;
 			this.body.setMassData(t);
+			delete this._massUndefinedByUser;
 		}
 
 		get massData() {
@@ -1711,14 +1715,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			t.center = scaleFrom(t.center, this.tileSize);
 			return t;
 		}
-		// set massData(val) {
-		// 	val.center = scaleTo(val.center);
-		// 	this.body.setMassData(val);
-		// }
-
-		// get next() {
-		// 	return this.body.getNext();
-		// }
 
 		/**
 		 * Verbose alias for sprite.prevPos
@@ -1981,7 +1977,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		set w(val) {
 			if (val < 0) val = 0.01;
 			if (val == this._w) return;
-			delete this._dimensionsUndefined;
+			delete this._dimensionsUndefinedByUser;
 			let scalarX = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
@@ -2036,7 +2032,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 			if (val == this._h) return;
-			delete this._dimensionsUndefined;
+			delete this._dimensionsUndefinedByUser;
 			let scalarY = val / this._h;
 			this._h = val;
 			this._hh = val * 0.5;
