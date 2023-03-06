@@ -486,10 +486,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					else this._ani = ani.clone();
 				}
 				let ts = this.tileSize;
-				if (!w && (this.ani.w != 1 || this.ani.h != 1)) {
-					w = this.ani.w / ts;
+				if (!w && (this._ani.w != 1 || this._ani.h != 1)) {
+					w = this._ani.w / ts;
 					if (this.shape != 'circle') {
-						h = this.ani.h / ts;
+						h = this._ani.h / ts;
 					}
 				}
 			}
@@ -1625,7 +1625,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get img() {
-			return this._ani.frameImage;
+			return this._ani?.frameImage;
 		}
 		set img(val) {
 			this.changeAni(val);
@@ -1638,7 +1638,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get image() {
-			return this._ani.frameImage;
+			return this._ani?.frameImage;
 		}
 		set image(val) {
 			this.changeAni(val);
@@ -3096,8 +3096,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {String} label SpriteAnimation identifier
 		 */
 		_changeAni(label) {
-			if (this._ani._onChange) this._ani._onChange();
-			if (this._ani.onChange) this._ani.onChange();
+			if (this._ani?._onChange) this._ani._onChange();
+			if (this._ani?.onChange) this._ani.onChange();
 			let ani = this.animations[label];
 			if (!ani) {
 				for (let i = this.groups.length - 1; i >= 0; i--) {
