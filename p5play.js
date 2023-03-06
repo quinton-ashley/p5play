@@ -313,6 +313,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.visible = true;
 
+			this._aniChangeCount = 0;
+
 			/**
 			 * Contains all the collision callback functions for this sprite
 			 * when it comes in contact with other sprites or groups.
@@ -481,7 +483,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this.addAni(ani);
 				} else {
 					if (typeof ani == 'string') this._changeAni(ani);
-					else this._animation = ani.clone();
+					else this._ani = ani.clone();
 				}
 				let ts = this.tileSize;
 				if (!w && (this.ani.w != 1 || this.ani.h != 1)) {
@@ -1164,14 +1166,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get animation() {
-			return this._animation;
+			return this._ani;
 		}
 		set animation(val) {
 			this.changeAni(val);
 		}
 
 		get ani() {
-			return this._animation;
+			return this._ani;
 		}
 		set ani(val) {
 			this.changeAni(val);
@@ -1623,7 +1625,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get img() {
-			return this._animation.frameImage;
+			return this._ani.frameImage;
 		}
 		set img(val) {
 			this.changeAni(val);
@@ -1636,7 +1638,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get image() {
-			return this._animation.frameImage;
+			return this._ani.frameImage;
 		}
 		set image(val) {
 			this.changeAni(val);
@@ -2280,7 +2282,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		_update() {
-			if (this.animation) this.animation.update();
+			if (this._ani) this._ani.update();
 
 			for (let prop in this.mouse) {
 				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
@@ -2339,10 +2341,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		_draw() {
 			if (this.strokeWeight !== undefined) this.p.strokeWeight(this.strokeWeight);
-			if (this.animation && this.debug != 'colliders') {
-				this.animation.draw(0, 0, 0, this._scale._x, this._scale._y);
+			if (this._ani && this.debug != 'colliders') {
+				this._ani.draw(0, 0, 0, this._scale._x, this._scale._y);
 			}
-			if (!this.animation || this.debug) {
+			if (!this._ani || this.debug) {
 				if (this.debug && this.debug != 'colliders') {
 					this.p.noFill();
 					this.p.stroke(0, 255, 0);
@@ -2988,23 +2990,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * completes
 		 */
 		async changeAni(anis) {
+			this._aniChangeCount++;
 			if (anis instanceof this.p.SpriteAnimation) anis = [anis];
-			else anis = [...arguments];
+			else if (!Array.isArray(anis)) anis = [anis];
 
-			let _ani = (name, start, end) => {
-				return new Promise((resolve) => {
-					this._changeAni(name);
-					if (start < 0) start = this._animation.length + start;
-					if (start) this._animation.frame = start;
-
-					if (end !== undefined) this._animation.goToFrame(end);
-					else if (this.frame == this.lastFrame) resolve();
-
-					this._animation.onComplete = () => {
-						resolve();
-					};
-				});
-			};
+			let loop, repeatLastAni;
 
 			for (let i = 0; i < anis.length; i++) {
 				let ani = anis[i];
@@ -3020,24 +3010,64 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					ani = { name: ani };
 					anis[i] = ani;
 				}
-				if (ani.name[0] == '!') {
-					ani.name = ani.name.slice(1);
-					ani.start = -1;
-					ani.end = 0;
+				if (ani.name.length > 1) {
+					if (ani.name[0] == '!') {
+						ani.name = ani.name.slice(1);
+						ani.start = -1;
+						ani.end = 0;
+					}
+					if (ani.name[0] == '<' || ani.name[0] == '>') {
+						ani.name = ani.name.slice(1);
+						ani.flipX = true;
+					}
+					if (ani.name[0] == '^') {
+						ani.name = ani.name.slice(1);
+						ani.flipY = true;
+					}
+					if (ani.name == '**') {
+						loop = true;
+						anis = anis.slice(0, -1);
+					}
+					if (ani.name == '++') {
+						repeatLastAni = true;
+						anis = anis.slice(0, -1);
+					}
 				}
 			}
+			let count = this._aniChangeCount;
 
-			// let count = ++this._aniChanged;
+			do {
+				for (let i = 0; i < anis.length; i++) {
+					let ani = anis[i];
+					if (!ani.start && anis.length > 1) ani.start = 0;
+					await this._playSequencedAni(ani);
+					if (repeatLastAni && i == anis.length - 1 && count == this._aniChangeCount) i--;
+				}
+			} while (loop && count == this._aniChangeCount);
+			if (anis.length != 1 && !repeatLastAni) this._ani.stop();
+		}
 
-			for (let i = 0; i < anis.length; i++) {
-				let ani = anis[i];
-				// if () { // TODO repeat
-				// 	if (count == this._aniChanged) i = 0;
-				// 	continue;
-				// }
-				let { name, start, end } = ani;
-				await _ani(name, start, end);
-			}
+		_playSequencedAni(ani) {
+			return new Promise((resolve) => {
+				let { name, start, end, flipX, flipY } = ani;
+				this._changeAni(name);
+
+				if (flipX) this._ani.scale.x = -this._ani.scale.x;
+				if (flipY) this._ani.scale.y = -this._ani.scale.y;
+
+				if (start < 0) start = this._ani.length + start;
+				if (start !== undefined) this._ani.frame = start;
+
+				if (end !== undefined) this._ani.goToFrame(end);
+				else if (this._ani.frame == this._ani.lastFrame) resolve();
+
+				this._ani._onComplete = this._ani._onChange = () => {
+					if (flipX) this._ani.scale.x = -this._ani.scale.x;
+					if (flipY) this._ani.scale.y = -this._ani.scale.y;
+					this._ani._onComplete = this._ani._onChange = null;
+					resolve();
+				};
+			});
 		}
 
 		/**
@@ -3066,6 +3096,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {String} label SpriteAnimation identifier
 		 */
 		_changeAni(label) {
+			if (this._ani._onChange) this._ani._onChange();
+			if (this._ani.onChange) this._ani.onChange();
 			let ani = this.animations[label];
 			if (!ani) {
 				for (let i = this.groups.length - 1; i >= 0; i--) {
@@ -3081,10 +3113,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.p.noLoop();
 				throw new FriendlyError('Sprite.changeAnimation', [label]);
 			}
-			this._animation = ani;
-			this.animation.name = label;
+			this._ani = ani;
+			this._ani.name = label;
 			// reset to frame 0 of that animation
-			if (this.resetAnimationsOnChange) this.animation.frame = 0;
+			if (this.resetAnimationsOnChange) this._ani.frame = 0;
 		}
 
 		/**
@@ -3292,7 +3324,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		getAnimationLabel() {
 			console.warn('sprite.getAnimationLabel is deprecated. Use sprite.animation.name instead.');
-			return this.animation.name;
+			return this._ani.name;
 		}
 	};
 
@@ -3359,13 +3391,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.name = 'default';
 
-			let parent;
+			let owner;
 
 			if (args[0] instanceof this.p.Sprite || args[0] instanceof this.p.Group) {
-				parent = args[0];
+				owner = args[0];
 				args = args.slice(1);
 			}
-			parent ??= this.p.allSprites;
+			owner ??= this.p.allSprites;
 
 			if (typeof args[0] == 'string' && (args[0].length == 1 || !args[0].includes('.'))) {
 				this.name = args[0];
@@ -3394,9 +3426,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @example
 			 * offset.x = 16;
 			 */
-			this.offset = { x: parent.anis.offset.x || 0, y: parent.anis.offset.y || 0 };
+			this.offset = { x: owner.anis.offset.x || 0, y: owner.anis.offset.y || 0 };
 
-			this._frameDelay = parent.anis.frameDelay || 4;
+			this._frameDelay = owner.anis.frameDelay || 4;
 
 			/**
 			 * True if the animation is currently playing.
@@ -3423,7 +3455,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @type {Boolean}
 			 * @default true
 			 */
-			this.looping = parent.anis.looping;
+			this.looping = owner.anis.looping;
 			this.looping ??= true;
 
 			/**
@@ -3446,12 +3478,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.frameChanged = false;
 
-			this.rotation = parent.anis.rotation || 0;
+			this.onComplete = this.onChange = null;
+			this._onComplete = this._onChange = null;
+
+			this.rotation = owner.anis.rotation || 0;
 			this._scale = new Scale();
 
 			if (args.length == 0 || typeof args[0] == 'number') return;
 
-			parent.addAni(this);
+			owner.addAni(this);
 
 			// list mode images can be added as a list of arguments or an array
 			if (Array.isArray(args[0]) && typeof args[0][0] == 'string') {
@@ -3539,7 +3574,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			// SpriteSheet mode
 			else if (typeof args[args.length - 1] != 'string' && !(args[args.length - 1] instanceof p5.Image)) {
-				let sheet = parent.spriteSheet;
+				let sheet = owner.spriteSheet;
 				let atlas;
 				if (args[0] instanceof p5.Image || typeof args[0] == 'string') {
 					if (args.length >= 3) {
@@ -3610,7 +3645,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						delay,
 						rotation
 					} = atlas;
-					frameSize ??= size || parent.anis.frameSize;
+					frameSize ??= size || owner.anis.frameSize;
 					if (delay) _this.frameDelay = delay;
 					if (frameDelay) _this.frameDelay = frameDelay;
 					if (rotation) _this.rotation = rotation;
@@ -3620,19 +3655,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					x ??= 0;
 					y ??= 0;
 					pos ??= line;
-					// if pos is a number or only y is defined but not x
-					// the animation's first frame is at x = 0
-					// the line number is the location of the animation line
-					// given as a distance from the top of the image
-					if (typeof pos == 'number') {
-						y = pos;
-					} else if (pos) {
-						// pos is the location of the animation line
-						// given as a [row,column] coordinate pair of distances in tiles
-						// from the top left corner of the image
-						x = pos[0]; // column
-						y = pos[1]; // row
-					}
 
 					if (typeof frameSize == 'number') {
 						w = h = frameSize;
@@ -3641,18 +3663,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						h = frameSize[1];
 					}
 
-					let tileSize;
-					if (parent) tileSize = parent.tileSize;
-
-					// get the real dimensions and position of the frame
-					// in the sheet
-					x *= tileSize;
-					y *= tileSize;
+					let tileSize = owner.tileSize;
 
 					if (!w || !h) {
-						if (!parent._dimensionsUndefined) {
-							w = parent.w;
-							h = parent.h;
+						if (!owner._dimensionsUndefinedByUser) {
+							w = owner.w;
+							h = owner.h;
 						} else if (tileSize) {
 							w = h = tileSize;
 						} else if (frameCount) {
@@ -3668,6 +3684,30 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					} else {
 						w *= tileSize;
 						h *= tileSize;
+					}
+
+					// if pos is a number or only y is defined but not x
+					// the animation's first frame is at x = 0
+					// the line number is the location of the animation line
+					// given as a distance from the top of the image
+					if (typeof pos == 'number') {
+						y = pos;
+					} else if (pos) {
+						// pos is the location of the animation line
+						// given as a [row,column] coordinate pair of distances in tiles
+						// from the top left corner of the image
+						x = pos[0]; // column
+						y = pos[1]; // row
+					}
+
+					// get the real dimensions and position of the frame
+					// in the sheet
+					if (tileSize != 1) {
+						x *= tileSize;
+						y *= tileSize;
+					} else if (pos) {
+						x *= w;
+						y *= h;
 					}
 
 					// add all the frames in the animation to the frames array
@@ -3828,7 +3868,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					if (this.endOnFirstFrame) this.frame = 0;
 					if (this.looping) this.targetFrame = -1;
 					else this.playing = false;
-					this.onComplete(); //fire when on last frame
+					if (this._onComplete) this._onComplete();
+					if (this.onComplete) this.onComplete(); //fire when on last frame
 					if (!this.looping) return;
 				}
 
@@ -3865,7 +3906,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (frame !== undefined) this.frame = frame;
 			this.targetFrame = -1;
 			return new Promise((resolve) => {
-				this.onComplete = () => {
+				this._onComplete = () => {
+					this._onComplete = null;
 					resolve();
 				};
 			});
@@ -3921,16 +3963,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		noLoop() {
 			this.looping = false;
-		}
-
-		/**
-		 * fire when animation ends
-		 *
-		 * @method onComplete
-		 * @return {SpriteAnimation}
-		 */
-		onComplete() {
-			return undefined;
 		}
 
 		/**
@@ -3996,7 +4028,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.playing = true;
 			}
 			return new Promise((resolve) => {
-				this.onComplete = () => {
+				this._onComplete = () => {
+					this._onComplete = null;
 					resolve();
 				};
 			});
@@ -4462,7 +4495,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get ani() {
-			return this._animation;
+			return this._ani;
 		}
 		set ani(val) {
 			this.addAni(val);
@@ -4475,7 +4508,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get animation() {
-			return this._animation;
+			return this._ani;
 		}
 		set animation(val) {
 			this.ani = val;
@@ -4497,7 +4530,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get img() {
-			return this._animation.frameImage;
+			return this._ani.frameImage;
 		}
 		set img(val) {
 			this.ani = val;
@@ -4509,7 +4542,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {SpriteAnimation}
 		 */
 		get image() {
-			return this._animation.frameImage;
+			return this._ani.frameImage;
 		}
 		set image(val) {
 			this.ani = val;
@@ -5089,10 +5122,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					name = ani.name;
 				}
 				this.animations[name] = ani;
-				this._animation = ani;
+				this._ani = ani;
 
 				// only works if the animation was loaded in preload
-				if (this._dimensionsUndefined && (ani.w != 1 || ani.h != 1)) {
+				if (this._dimensionsUndefinedByUser && (ani.w != 1 || ani.h != 1)) {
 					this.w = ani.w;
 					this.h = ani.h;
 				}
@@ -6142,7 +6175,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Loads an animation. Equivalent to `new SpriteAnimation()`
+	 * Alias for `new SpriteAnimation()`
 	 *
 	 * Load animations in the preload p5.js function if you need to use
 	 * them when your program starts.
@@ -6151,7 +6184,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @returns {SpriteAnimation}
 	 */
 	/**
-	 * Alias for loadAni
+	 * Alias for `new SpriteAnimation()`
 	 *
 	 * @method loadAnimation
 	 * @returns {SpriteAnimation}
@@ -6165,9 +6198,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 *
 	 * @method animation
 	 * @param {SpriteAnimation} ani Animation to be displayed
-	 * @param {Number} x X coordinate
-	 * @param {Number} y Y coordinate
-	 *
+	 * @param {Number} x position of the animation on the canvas
+	 * @param {Number} y position of the animation on the canvas
+	 * @param {Number} r rotation of the animation
+	 * @param {Number} sX scale of the animation in the x direction
+	 * @param {Number} sY scale of the animation in the y direction
 	 */
 	this.animation = function (ani, x, y, r, sX, sY) {
 		if (ani.visible) ani.update();
