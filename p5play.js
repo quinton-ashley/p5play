@@ -3634,10 +3634,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						width,
 						height,
 						size,
-						pos,
+						row,
+						col,
 						line,
 						x,
 						y,
+						pos,
 						frames,
 						frameCount,
 						frameDelay,
@@ -3652,9 +3654,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					frameCount ??= frames || 1;
 					w ??= width;
 					h ??= height;
-					x ??= 0;
-					y ??= 0;
-					pos ??= line;
+					x ??= col || 0;
+					y ??= line || row || 0;
+					if (pos) {
+						x = pos[0];
+						y = pos[1];
+					}
 
 					if (typeof frameSize == 'number') {
 						w = h = frameSize;
@@ -3686,26 +3691,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						h *= tileSize;
 					}
 
-					// if pos is a number or only y is defined but not x
-					// the animation's first frame is at x = 0
-					// the line number is the location of the animation line
-					// given as a distance from the top of the image
-					if (typeof pos == 'number') {
-						y = pos;
-					} else if (pos) {
-						// pos is the location of the animation line
-						// given as a [row,column] coordinate pair of distances in tiles
-						// from the top left corner of the image
-						x = pos[0]; // column
-						y = pos[1]; // row
-					}
-
 					// get the real dimensions and position of the frame
 					// in the sheet
 					if (tileSize != 1) {
 						x *= tileSize;
 						y *= tileSize;
-					} else if (pos) {
+					} else if (line !== undefined || row !== undefined || col !== undefined) {
 						x *= w;
 						y *= h;
 					}
