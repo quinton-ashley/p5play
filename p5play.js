@@ -111,6 +111,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'layer',
 		'life',
 		'mass',
+		'pixelPerfect',
 		'resetAnimationsOnChange',
 		'rotation',
 		'rotationDrag',
@@ -2397,9 +2398,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 			x = fixRound(x);
-			x -= (this.w * this.tileSize) % 2 ? 0.5 : 0;
 			y = fixRound(y);
-			y -= (this.h * this.tileSize) % 2 ? 0.5 : 0;
+
+			if (this.pixelPerfect) {
+				if (this._w % 2 == 0 || Math.abs((x % 1) - 0.5) > pl.Settings.linearSlop) x = Math.round(x);
+				if (this._h % 2 == 0 || Math.abs((y % 1) - 0.5) > pl.Settings.linearSlop) y = Math.round(y);
+			}
 
 			// x += this.tileSize * 0.015;
 			// y += this.tileSize * 0.015;
@@ -2990,12 +2994,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * completes
 		 */
 		async changeAni(anis) {
+			if (arguments.length > 1) anis = [...arguments];
+			else if (anis instanceof this.p.SpriteAnimation) {
+				if (anis == this._ani) return;
+				anis = [anis];
+			} else if (!Array.isArray(anis)) {
+				if (anis == this._ani?.name) return;
+				anis = [anis];
+			}
+
 			this._aniChangeCount++;
-			if (anis instanceof this.p.SpriteAnimation) anis = [anis];
-			else if (!Array.isArray(anis)) anis = [anis];
-
-			let loop, repeatLastAni;
-
+			let loop, stopOnLastAni;
 			for (let i = 0; i < anis.length; i++) {
 				let ani = anis[i];
 				if (
@@ -3028,8 +3037,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						loop = true;
 						anis = anis.slice(0, -1);
 					}
-					if (ani.name == '++') {
-						repeatLastAni = true;
+					if (ani.name == ';;') {
+						stopOnLastAni = true;
 						anis = anis.slice(0, -1);
 					}
 				}
@@ -3041,10 +3050,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					let ani = anis[i];
 					if (!ani.start && anis.length > 1) ani.start = 0;
 					await this._playSequencedAni(ani);
-					if (repeatLastAni && i == anis.length - 1 && count == this._aniChangeCount) i--;
 				}
 			} while (loop && count == this._aniChangeCount);
-			if (anis.length != 1 && !repeatLastAni) this._ani.stop();
+			if (anis.length != 1 && stopOnLastAni) this._ani.stop();
 		}
 
 		_playSequencedAni(ani) {
@@ -3350,7 +3358,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		return t;
 	};
 
-	let animationProps = ['frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale'];
+	let animationProps = ['frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale', 'demoMode'];
 
 	/**
 	 * Look at the Animation reference pages before reading these docs.
@@ -3429,6 +3437,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.offset = { x: owner.anis.offset.x || 0, y: owner.anis.offset.y || 0 };
 
 			this._frameDelay = owner.anis.frameDelay || 4;
+
+			this.demoMode = owner.anis.demoMode || false;
 
 			/**
 			 * True if the animation is currently playing.
@@ -3824,7 +3834,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (img !== undefined) {
 				if (this.spriteSheet) {
 					let { x, y, w, h } = img; // image info
-					this.p.image(this.spriteSheet, this.offset.x, this.offset.y, w, h, x, y, w, h);
+					if (!this.demoMode) {
+						this.p.image(this.spriteSheet, this.offset.x, this.offset.y, w, h, x, y, w, h);
+					} else {
+						this.p.image(
+							this.spriteSheet,
+							this.offset.x,
+							this.offset.y,
+							this.spriteSheet.w,
+							this.spriteSheet.h,
+							x - this.spriteSheet.w / 2 + w / 2,
+							y - this.spriteSheet.h / 2 + h / 2
+						);
+					}
 				} else {
 					this.p.image(img, this.offset.x, this.offset.y);
 				}
