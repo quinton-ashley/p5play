@@ -6272,6 +6272,52 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		});
 	};
 
+	this.p5play.playIntro = async function () {
+		if (document.getElementById('p5play-intro')) return;
+		pInst._incrementPreload();
+		let p = document.createElement('div');
+		p.id = 'p5play-intro';
+		p.style = 'position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1000; background-color: black;';
+		let logo = document.createElement('img');
+		logo.src = 'https://p5play.org/v3/made_with_p5play.png';
+		logo.style =
+			'position: absolute; top: 50%; left: 50%; width: 512px; height: 256px; margin-left: -256px; margin-top: -128px; z-index: 1000; opacity: 0; transition: opacity 0.1s ease-in-out;';
+		document.body.append(p);
+		p.append(logo);
+		await pInst.delay(100);
+		logo.style.opacity = '1';
+		logo.style.transition = 'scale 2s, opacity 0.4s ease-in-out';
+		logo.style.scale = '1.1';
+		await pInst.delay(1200);
+		logo.style.opacity = '0';
+		await pInst.delay(400);
+		p.remove();
+		pInst._decrementPreload();
+	};
+
+	{
+		let lh = location.hostname;
+		switch (lh) {
+			case 'localhost':
+			case '127.0.0.1':
+			case 'p5play.org':
+			case 'openprocessing.org':
+			case 'editor.p5js.org':
+			case 'codepen.io':
+			case 'cdpn.io':
+			case 'glitch.com':
+			case 'replit.com':
+			case 'stackblitz.com':
+			case 'jsfiddle.net':
+				break;
+			default:
+				if (lh.endsWith('stackblitz.io') || lh.endsWith('glitch.me') || lh.endsWith('repl.co')) {
+					break;
+				}
+				this.p5play.playIntro();
+		}
+	}
+
 	let userDisabledP5Errors = p5.disableFriendlyErrors;
 	p5.disableFriendlyErrors = true;
 
@@ -6557,7 +6603,7 @@ canvas {
 			_img.w = _img.width;
 			_img.h = _img.height;
 			for (let cb of _img.cbs) {
-				cb();
+				cb(_img);
 			}
 			for (let i = 1; i < _img.calls; i++) {
 				pInst._decrementPreload();
