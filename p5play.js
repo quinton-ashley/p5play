@@ -2311,7 +2311,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					let v = a[event][k] + 1;
 					this[event][k] = v;
 					if (b instanceof this.p.Group) b[event][a._uid] = v;
-					if (v == 0) {
+					if (!b || v == 0) {
 						delete a[event][k];
 						if (b instanceof this.p.Group) delete b[event][a._uid];
 						continue;
@@ -3180,6 +3180,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (callback && typeof callback != 'function') {
 				throw new FriendlyError('Sprite.collide', 1, [callback]);
 			}
+
+			if (this._overlap[target._uid] !== false) {
+				this._overlap[target._uid] = false;
+			}
+			if (target._overlap[this._uid] !== false) {
+				target._overlap[this._uid] = false;
+				if (target instanceof this.p.Group) {
+					for (let s of target) {
+						s._overlap[this._uid] = false;
+					}
+				}
+			}
 		}
 
 		collide(target, callback) {
@@ -3235,6 +3247,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._collisions[target._uid] == -1;
 		}
 
+		_removeContactsWith(target) {
+			if (target instanceof this.p.Group) {
+				for (let s of target) {
+					this._removeContactsWith(s);
+				}
+			} else {
+				this.__removeContactsWith(target);
+			}
+		}
+
+		__removeContactsWith(o) {
+			for (let ce = this.body.getContactList(); ce; ce = ce.next) {
+				let c = ce.contact;
+				if (c.m_fixtureA.m_body.sprite._uid == o._uid || c.m_fixtureB.m_body.sprite._uid == o._uid) {
+					this.p.world.destroyContact(c);
+				}
+			}
+		}
+
 		_ensureOverlap(target, callback) {
 			if (!target) {
 				throw new FriendlyError('Sprite.overlap', 2);
@@ -3246,17 +3277,29 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				throw new FriendlyError('Sprite.overlap', 1, [callback]);
 			}
 			if (!this._hasOverlaps) this._createSensors();
-			if (target instanceof this.p.Sprite) {
-				if (!target._hasOverlaps) target._createSensors();
-			} else if (target instanceof this.p.Group) {
-				if (!target._hasOverlaps) {
+			if (!target._hasOverlaps) {
+				if (target instanceof this.p.Sprite) {
+					target._createSensors();
+				} else {
 					for (let s of target) {
 						if (!s._hasOverlaps) s._createSensors();
 					}
 					target._hasOverlaps = true;
 				}
 			}
-			this._overlap[target._uid] = true;
+			if (this._overlap[target._uid] != true) {
+				this._removeContactsWith(target);
+				this._overlap[target._uid] = true;
+			}
+			if (target._overlap[this._uid] != true) {
+				target._removeContactsWith(this);
+				target._overlap[this._uid] = true;
+				if (target instanceof this.p.Group) {
+					for (let s of target) {
+						s._overlap[this._uid] = true;
+					}
+				}
+			}
 		}
 
 		overlap(target, callback) {
@@ -4614,6 +4657,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (callback && typeof callback != 'function') {
 				throw new FriendlyError('Group.collide', 1, [callback]);
 			}
+
+			if (this._overlap[target._uid] !== false) {
+				this._overlap[target._uid] = false;
+				for (let s of this) {
+					s._overlap[target._uid] = false;
+				}
+			}
+			if (target._overlap[this._uid] !== false) {
+				target._overlap[this._uid] = false;
+				if (target instanceof this.p.Group) {
+					for (let s of target) {
+						s._overlap[this._uid] = false;
+					}
+				}
+			}
 		}
 
 		collide(target, callback) {
@@ -4669,6 +4727,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._collisions[target._uid] == -1;
 		}
 
+		_removeContactsWith(o) {
+			for (let s of this) {
+				s._removeContactsWith(o);
+			}
+		}
+
 		_ensureOverlap(target, callback) {
 			if (!target) {
 				throw new FriendlyError('Group.overlap', 2);
@@ -4685,17 +4749,32 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 				this._hasOverlaps = true;
 			}
-			if (target instanceof this.p.Sprite) {
-				if (!target._hasOverlaps) target._createSensors();
-			} else if (target instanceof this.p.Group) {
-				if (!target._hasOverlaps) {
+			if (!target._hasOverlaps) {
+				if (target instanceof this.p.Sprite) {
+					target._createSensors();
+				} else {
 					for (let s of target) {
 						if (!s._hasOverlaps) s._createSensors();
 					}
 					target._hasOverlaps = true;
 				}
 			}
-			this._overlap[target._uid] = true;
+			if (this._overlap[target._uid] != true) {
+				this._removeContactsWith(target);
+				this._overlap[target._uid] = true;
+				for (let s of this) {
+					s._overlap[target._uid] = true;
+				}
+			}
+			if (target._overlap[this._uid] != true) {
+				target._removeContactsWith(this);
+				target._overlap[this._uid] = true;
+				if (target instanceof this.p.Group) {
+					for (let s of target) {
+						s._overlap[this._uid] = true;
+					}
+				}
+			}
 		}
 
 		overlap(target, callback) {
@@ -6281,7 +6360,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		let logo = document.createElement('img');
 		logo.src = 'https://p5play.org/v3/made_with_p5play.png';
 		logo.style =
-			'position: absolute; top: 50%; left: 50%; width: 512px; height: 256px; margin-left: -256px; margin-top: -128px; z-index: 1000; opacity: 0; transition: opacity 0.1s ease-in-out;';
+			'position: absolute; top: 50%; left: 50%; width: 40vh; height: 20vh; margin-left: -20vh; margin-top: -10vh; z-index: 1000; opacity: 0; transition: opacity 0.1s ease-in-out;';
 		document.body.append(p);
 		p.append(logo);
 		await pInst.delay(100);
@@ -6298,8 +6377,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	{
 		let lh = location.hostname;
 		switch (lh) {
-			case 'localhost':
 			case '127.0.0.1':
+			case 'localhost':
 			case 'p5play.org':
 			case 'openprocessing.org':
 			case 'editor.p5js.org':
