@@ -6381,6 +6381,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			case 'localhost':
 			case 'p5play.org':
 			case 'openprocessing.org':
+			case 'preview.openprocessing.org':
 			case 'editor.p5js.org':
 			case 'codepen.io':
 			case 'cdpn.io':
