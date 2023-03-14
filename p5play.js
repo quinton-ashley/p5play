@@ -98,7 +98,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'debug',
 		'diameter',
 		'direction',
-		// 'directionLock',
 		'drag',
 		'dynamic',
 		'friction',
@@ -3258,6 +3257,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		__removeContactsWith(o) {
+			if (!this.body) return;
 			for (let ce = this.body.getContactList(); ce; ce = ce.next) {
 				let c = ce.contact;
 				if (c.m_fixtureA.m_body.sprite._uid == o._uid || c.m_fixtureB.m_body.sprite._uid == o._uid) {
@@ -7540,8 +7540,8 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 	}
 
 	if (this.frameCount == 1) {
-		this.camera.x = this.world.hw;
-		this.camera.y = this.world.hh;
+		if (!this.camera.x) this.camera.x = this.world.hw;
+		if (!this.camera.y) this.camera.y = this.world.hh;
 		this.camera.init = true;
 
 		// this stops the right click menu from appearing
