@@ -6481,7 +6481,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			case 'openprocessing.org':
 			case 'preview.openprocessing.org':
 			case 'editor.p5js.org':
-			case 'preview.p5js.org':
 			case 'codepen.io':
 			case 'cdpn.io':
 			case 'glitch.com':
@@ -6490,7 +6489,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			case 'jsfiddle.net':
 				break;
 			default:
-				if (lh.endsWith('stackblitz.io') || lh.endsWith('glitch.me') || lh.endsWith('repl.co')) {
+				if (
+					lh.endsWith('stackblitz.io') ||
+					lh.endsWith('glitch.me') ||
+					lh.endsWith('repl.co') ||
+					location.origin.endsWith('preview.p5js.org')
+				) {
 					break;
 				}
 				this.p5play.playIntro();
