@@ -16,8 +16,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.log = console.log;
 
 	const pl = planck;
-	// adjust the velocity threshold to allow for slow moving objects
-	pl.Settings.velocityThreshold = 0.19;
 	let plScale = 60;
 
 	this.p5play ??= {};
@@ -1231,11 +1229,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (c == 'k') val = 'kinematic';
 			if (c == 'n') val = 'none';
 
+			if (val == this._collider) return;
+
 			if (this._collider === undefined) {
 				this._collider = val;
 				return;
 			}
-			if (val == this._collider) return;
 
 			let oldCollider = this._collider;
 
@@ -1562,7 +1561,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		get fixtureList() {
 			if (!this.body) return null;
-			return this.body.getFixtureList();
+			return this.body.m_fixtureList;
 		}
 
 		/**
@@ -3705,8 +3704,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					if (frameDelay) _this.frameDelay = frameDelay;
 					if (rotation) _this.rotation = rotation;
 					frameCount ??= frames || 1;
-					w ??= width;
-					h ??= height;
+					w ??= width || owner.anis.w;
+					h ??= height || owner.anis.h;
 					x ??= col || 0;
 					y ??= line || row || 0;
 					if (pos) {
@@ -5333,11 +5332,33 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			};
 
+			this.velocityThreshold = 0.19;
+
 			this.mouseTracking ??= true;
 			this.mouseSprite = null;
 			this.mouseSprites = [];
 
 			this.autoStep = true;
+		}
+
+		/**
+		 * The lowest velocity an object can have before it is considered
+		 * to be at rest.
+		 *
+		 * Adjust the velocity threshold to allow for slow moving objects
+		 * but don't have it be too low, or else objects will never sleep.
+		 *
+		 * @property velocityThreshold
+		 * @type {number}
+		 * @default 0.19
+		 */
+		get velocityThreshold() {
+			return this._velocityThreshold;
+		}
+
+		set velocityThreshold(val) {
+			pl.Settings.velocityThreshold = val;
+			this._velocityThreshold = val;
 		}
 
 		/**
@@ -5452,16 +5473,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			b[t][a._uid] = 0;
 
 			for (let g of b.groups) {
-				g[t][a._uid] = g[t][a._uid] || 0;
-				a[t][g._uid] = a[t][g._uid] || 0;
+				if (!a[t][g._uid] || a[t][g._uid] < 0) {
+					g[t][a._uid] = 0;
+					a[t][g._uid] = 0;
+				}
 			}
 
 			for (let g of a.groups) {
-				g[t][b._uid] = g[t][b._uid] || 0;
-				b[t][g._uid] = b[t][g._uid] || 0;
+				if (!b[t][g._uid] || b[t][g._uid] < 0) {
+					g[t][b._uid] = 0;
+					b[t][g._uid] = 0;
+				}
 				for (let g2 of b.groups) {
-					g[t][g2._uid] = g[t][g2._uid] || 0;
-					g2[t][g._uid] = g2[t][g._uid] || 0;
+					if (!g[t][g2._uid] || g[t][g2._uid] < 0) {
+						g[t][g2._uid] = 0;
+						g2[t][g._uid] = 0;
+					}
 				}
 			}
 		}
@@ -6383,6 +6410,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			case 'openprocessing.org':
 			case 'preview.openprocessing.org':
 			case 'editor.p5js.org':
+			case 'preview.p5js.org':
 			case 'codepen.io':
 			case 'cdpn.io':
 			case 'glitch.com':
