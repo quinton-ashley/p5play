@@ -32,11 +32,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.angleMode('degrees');
 
 	// scale to planck coordinates from p5 coordinates
-	const scaleTo = ({ x, y }, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
+	const scaleTo = (x, y, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
 	const scaleXTo = (x, tileSize) => (x * tileSize) / plScale;
 
 	// scale from planck coordinates to p5 coordinates
-	const scaleFrom = ({ x, y }, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
+	const scaleFrom = (x, y, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
 	const scaleXFrom = (x, tileSize) => (x / tileSize) * plScale;
 
 	const fixRound = (val) => (Math.abs(val - Math.round(val)) <= pl.Settings.linearSlop ? Math.round(val) : val);
@@ -684,12 +684,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			let shouldCreateSensor = false;
 			for (let g of this.groups) {
-				if (g._hasOverlaps) {
+				if (g._hasSensors) {
 					shouldCreateSensor = true;
 					break;
 				}
 			}
-			if (shouldCreateSensor && !this._hasOverlaps) this._createSensors();
+			if (shouldCreateSensor && !this._hasSensors) this.addDefaultSensors();
 
 			this._massUndefinedByUser = true;
 			if (w === undefined && h === undefined) {
@@ -717,6 +717,60 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} h height of the collider
 		 */
 		addCollider(offsetX, offsetY, w, h) {
+			let props = {};
+			props.shape = this._parseShape(...arguments);
+			if (props.shape.m_type == 'chain') {
+				props.density = 0;
+				props.restitution = 0;
+			}
+			props.density ??= this.density || 5;
+			props.friction ??= this.friction || 0.5;
+			props.restitution ??= this.bounciness || 0.2;
+
+			if (!this.body) {
+				this.body = this.p.world.createBody({
+					position: scaleTo(this.x, this.y, this.tileSize),
+					type: this.collider
+				});
+				this.body.sprite = this;
+			}
+			this.body.createFixture(props);
+		}
+
+		/**
+		 * EXPERIMENTAL method! Subject to change!
+		 *
+		 * Adds a sensor to the sprite's physics body that's used to detect
+		 * overlaps with other sprites.
+		 *
+		 * It accepts parameters in a similar format to the Sprite
+		 * constructor except the first two parameters are x and y offsets,
+		 * the relative distance the new sensor should be from the center of
+		 * the sprite.
+		 *
+		 * @method addSensor
+		 * @param {Number} offsetX distance from the center of the sprite
+		 * @param {Number} offsetY distance from the center of the sprite
+		 * @param {Number} w width of the collider
+		 * @param {Number} h height of the collider
+		 */
+		addSensor(offsetX, offsetY, w, h) {
+			let s = this._parseShape(...arguments);
+			if (!this.body) {
+				this.body = this.p.world.createBody({
+					position: scaleTo(this.x, this.y, this.tileSize),
+					type: 'dynamic'
+				});
+				this.body.sprite = this;
+			}
+			this.body.createFixture({
+				shape: s,
+				isSensor: true
+			});
+			this._hasSensors = true;
+		}
+
+		_parseShape(offsetX, offsetY, w, h) {
 			let args = [...arguments];
 			let path, shape;
 
@@ -758,22 +812,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				h ??= w;
 			}
 
-			let props = {};
-
 			let dimensions;
 
 			// the actual dimensions of the collider for a box or circle are a
 			// little bit smaller so that they can slid past each other
 			// when in a tile grid
 			if (shape == 'box' || shape == 'circle') {
-				dimensions = scaleTo({ x: w - 0.08, y: h - 0.08 }, this.tileSize);
+				dimensions = scaleTo(w - 0.08, h - 0.08, this.tileSize);
 			}
 
 			let s;
 			if (shape == 'box') {
-				s = pl.Box(dimensions.x / 2, dimensions.y / 2, scaleTo({ x: offsetX, y: offsetY }, this.tileSize), 0);
+				s = pl.Box(dimensions.x / 2, dimensions.y / 2, scaleTo(offsetX, offsetY, this.tileSize), 0);
 			} else if (shape == 'circle') {
-				s = pl.Circle(scaleTo({ x: offsetX, y: offsetY }, this.tileSize), dimensions.x / 2);
+				s = pl.Circle(scaleTo(offsetX, offsetY, this.tileSize), dimensions.x / 2);
 			} else if (path) {
 				let vecs = [{ x: 0, y: 0 }];
 				let vert = { x: 0, y: 0 };
@@ -861,7 +913,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 				if (this._originMode == 'start') {
 					for (let i = 0; i < vecs.length; i++) {
-						vecs[i] = scaleTo(vecs[i], this.tileSize);
+						vecs[i] = scaleTo(vecs[i].x, vecs[i].y, this.tileSize);
 					}
 				} else {
 					// the center relative to the first vertex
@@ -905,7 +957,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 					for (let i = 0; i < vecs.length; i++) {
 						let vec = vecs[i];
-						vecs[i] = scaleTo({ x: vec.x + offsetX - centerX, y: vec.y + offsetY - centerY }, this.tileSize);
+						vecs[i] = scaleTo(vec.x + offsetX - centerX, vec.y + offsetY - centerY, this.tileSize);
 					}
 				}
 
@@ -917,45 +969,35 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					s = pl.Polygon(vecs);
 				} else if (shape == 'chain') {
 					s = pl.Chain(vecs, false);
-					props.density = 0;
-					props.restitution = 0;
 				}
-			}
-			props.shape = s;
-			props.density ??= this.density || 5;
-			props.friction ??= this.friction || 0.5;
-			props.restitution ??= this.bounciness || 0.2;
-
-			if (!this.body) {
-				this.body = this.p.world.createBody({
-					position: scaleTo({ x: this.x, y: this.y }, this.tileSize),
-					type: this.collider
-				});
-				this.body.sprite = this;
 			}
 			if (!this._shape) {
 				this._shape = shape;
 			}
-			this.body.createFixture(props);
-
 			this._w = w;
 			this._hw = w * 0.5;
 
-			if (shape == 'circle') {
+			if (this._shape == 'circle') {
 				this._diameter = w;
 			} else {
 				this._h = h;
 				this._hh = h * 0.5;
 			}
+			return s;
 		}
 
 		/**
 		 * Removes the physics body colliders from the sprite but not
 		 * overlap sensors.
 		 *
-		 * @private _removeColliders
+		 * Only use this method if you never want to use the sprite's
+		 * colliders again. If you want to disable colliders without
+		 * removing them, use the overlaps, overlapping, or overlapped
+		 * functions instead.
+		 *
+		 * @method removeColliders
 		 */
-		_removeColliders() {
+		removeColliders() {
 			this._collides = {};
 			this._colliding = {};
 			this._collided = {};
@@ -1064,9 +1106,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Removes overlap sensors from the sprite.
 		 *
-		 * @private _removeSensors
+		 * Only use this method if you never want to use the sprite's
+		 * overlap sensors again. To disable overlap sensors without
+		 * removing them, use the collides, colliding, or collided functions
+		 * instead.
+		 *
+		 * @method removeSensors
 		 */
-		_removeSensors() {
+		removeSensors() {
 			this._overlap = {};
 			this._overlaps = {};
 			this._overlapping = {};
@@ -1074,11 +1121,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._removeFixtures(true);
 		}
 
-		// removes sensors or colliders
-		_removeFixtures(isSensor) {
+		// removes sensors or colliders or both
+		_removeFixtures(removeSensors) {
 			let prevFxt;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
-				if (fxt.m_isSensor == isSensor) {
+				if (removeSensors === undefined || fxt.m_isSensor == removeSensors) {
 					let _fxt = fxt.m_next;
 					fxt.destroyProxies(this.p.world.m_broadPhase);
 					if (!prevFxt) {
@@ -1205,7 +1252,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Number}
 		 */
 		get centerOfMass() {
-			return scaleFrom(this.body.getWorldCenter(), this.tileSize);
+			let center = this.body.getWorldCenter();
+			return scaleFrom(center.x, center.y, this.tileSize);
 		}
 
 		/**
@@ -1230,6 +1278,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (c == 'n') val = 'none';
 
 			if (val == this._collider) return;
+
+			this.__collider = ['d', 's', 'k', 'n'].indexOf(c);
 
 			if (this._collider === undefined) {
 				this._collider = val;
@@ -1264,8 +1314,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				} else {
 					this.addCollider();
 				}
-				if (this._hasOverlaps) {
-					this._createSensors();
+				if (this._hasSensors) {
+					this.addDefaultSensors();
 				}
 			}
 			for (let prop in bodyProps) {
@@ -1713,7 +1763,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get massData() {
 			const t = { I: 0, center: new pl.Vec2(0, 0), mass: 0 };
 			this.body.getMassData(t);
-			t.center = scaleFrom(t.center, this.tileSize);
+			t.center = scaleFrom(t.center.x, t.center.y, this.tileSize);
 			return t;
 		}
 
@@ -2095,8 +2145,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (this._collider != 'none') {
 					bodyProps = this._cloneBodyProps();
 				}
-				this._removeSensors();
-				this._removeColliders();
+				this._removeFixtures();
 				this._h = undefined;
 				this._shape = undefined;
 				if (this._collider != 'none') {
@@ -2492,7 +2541,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let forceVector = new pl.Vec2(this._args2Vec(x, y));
 			forceVector = forceVector.mul(this.body.m_mass);
 			if (originX || originY) {
-				let forceOrigin = scaleTo(this._args2Vec(originX, originY), this.tileSize);
+				let o = this._args2Vec(originX, originY);
+				let forceOrigin = scaleTo(o.x, o.y, this.tileSize);
 				this.body.applyForce(forceVector, forceOrigin, false);
 			} else {
 				this.body.applyForceToCenter(forceVector, false);
@@ -2523,7 +2573,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (originX === undefined) {
 				impulseOrigin = this.body.getPosition();
 			} else {
-				impulseOrigin = scaleTo(this._args2Vec(originX, originY), this.tileSize);
+				let o = this._args2Vec(originX, originY);
+				impulseOrigin = scaleTo(o.x, o.y, this.tileSize);
 			}
 			this.body.applyLinearImpulse(impulseVector, impulseOrigin, true);
 		}
@@ -2834,6 +2885,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {*} facing rotation angle the sprite should be at when "facing" the position, default is 0
 		 */
 		rotateTowards(x, y, tracking, facing) {
+			if (this.__collider == 1) throw new FriendlyError(0);
 			if (typeof x != 'number') {
 				facing = tracking;
 				tracking = y;
@@ -2919,6 +2971,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @returns {Promise} a promise that resolves when the rotation is complete
 		 */
 		rotateTo(x, y, speed, facing) {
+			if (this.__collider == 1) throw new FriendlyError(0);
 			if (typeof x != 'number') {
 				facing = speed;
 				speed = y;
@@ -2940,7 +2993,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @returns {Promise} a promise that resolves when the rotation is complete
 		 */
 		rotate(angle, speed) {
-			if (isNaN(angle)) throw new FriendlyError();
+			if (this.__collider == 1) throw new FriendlyError(0);
+			if (isNaN(angle)) throw new FriendlyError(1, [angle]);
 			if (angle == 0) return;
 			let absA = Math.abs(angle);
 			speed ??= 1;
@@ -3275,15 +3329,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (callback && typeof callback != 'function') {
 				throw new FriendlyError('Sprite.overlap', 1, [callback]);
 			}
-			if (!this._hasOverlaps) this._createSensors();
-			if (!target._hasOverlaps) {
+			if (!this._hasSensors) this.addDefaultSensors();
+			if (!target._hasSensors) {
 				if (target instanceof this.p.Sprite) {
-					target._createSensors();
+					target.addDefaultSensors();
 				} else {
 					for (let s of target) {
-						if (!s._hasOverlaps) s._createSensors();
+						if (!s._hasSensors) s.addDefaultSensors();
 					}
-					target._hasOverlaps = true;
+					target._hasSensors = true;
 				}
 			}
 			if (this._overlap[target._uid] != true) {
@@ -3354,16 +3408,31 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._overlappers[target._uid] == -1;
 		}
 
-		_createSensors() {
+		/**
+		 * This function is used automatically if a sprite overlap detection
+		 * function is called but the sprite has no overlap sensors.
+		 *
+		 * It creates sensor fixtures that are the same size as the sprite's
+		 * colliders. If you'd like to add more sensors to a sprite, use the
+		 * addSensor function.
+		 *
+		 * @method addDefaultSensors
+		 */
+		addDefaultSensors() {
 			let shape;
-			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
-				shape = fxt.m_shape;
-				this.body.createFixture({
-					shape: shape,
-					isSensor: true
-				});
+			if (this.body) {
+				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
+					if (fxt.m_isSensor) continue;
+					shape = fxt.m_shape;
+					this.body.createFixture({
+						shape: shape,
+						isSensor: true
+					});
+				}
+			} else {
+				this.addSensor();
 			}
-			this._hasOverlaps = true;
+			this._hasSensors = true;
 		}
 
 		/**
@@ -4742,20 +4811,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (callback && typeof callback != 'function') {
 				throw new FriendlyError('Group.overlap', 1, [callback]);
 			}
-			if (!this._hasOverlaps) {
+			if (!this._hasSensors) {
 				for (let s of this) {
-					if (!s._hasOverlaps) s._createSensors();
+					if (!s._hasSensors) s.addDefaultSensors();
 				}
-				this._hasOverlaps = true;
+				this._hasSensors = true;
 			}
-			if (!target._hasOverlaps) {
+			if (!target._hasSensors) {
 				if (target instanceof this.p.Sprite) {
-					target._createSensors();
+					target.addDefaultSensors();
 				} else {
 					for (let s of target) {
-						if (!s._hasOverlaps) s._createSensors();
+						if (!s._hasSensors) s.addDefaultSensors();
 					}
-					target._hasOverlaps = true;
+					target._hasSensors = true;
 				}
 			}
 			if (this._overlap[target._uid] != true) {
@@ -5465,7 +5534,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let a = contact.m_fixtureA;
 			let b = contact.m_fixtureB;
 			let t = '_collisions';
-			if (a.isSensor()) t = '_overlappers';
+			if (a.m_isSensor) t = '_overlappers';
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
 
@@ -5497,7 +5566,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let a = contact.m_fixtureA;
 			let b = contact.m_fixtureB;
 			let contactType = '_collisions';
-			if (a.isSensor()) contactType = '_overlappers';
+			if (a.m_isSensor) contactType = '_overlappers';
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
 
@@ -5709,6 +5778,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._pos.x;
 		}
 		set x(val) {
+			if (this.p.allSprites.pixelPerfect) val = Math.round(val);
 			this._pos.x = val;
 			this.bound.min.x = this.x - this.p.world.hw / this.zoom - 100;
 			this.bound.max.x = this.x + this.p.world.hw / this.zoom + 100;
@@ -5724,6 +5794,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._pos.y;
 		}
 		set y(val) {
+			if (this.p.allSprites.pixelPerfect) val = Math.round(val);
 			this._pos.y = val;
 			this.bound.min.y = this.y - this.p.world.hh / this.zoom - 100;
 			this.bound.max.y = this.y + this.p.world.hh / this.zoom + 100;
@@ -5773,9 +5844,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		// sensors overlap (returning true doesn't mean they will collide it means
 		// they're included in begin contact and end contact events)
-		if (a.isSensor() && b.isSensor()) return true;
+		if (a.m_isSensor && b.m_isSensor) return true;
 		// ignore contact events between a sensor and a non-sensor
-		if (a.isSensor() || b.isSensor()) return false;
+		if (a.m_isSensor || b.m_isSensor) return false;
 		// else test if the two non-sensor colliders should overlap
 
 		a = a.m_body.sprite;
@@ -6735,7 +6806,7 @@ canvas {
 		return img;
 	};
 
-	let errorMessages = {
+	let errMsgs = {
 		generic: [
 			'Ah! I found an error',
 			'Oh no! Something went wrong',
@@ -6747,11 +6818,20 @@ canvas {
 			constructor: {
 				base: "Sorry I'm unable to make a new Sprite",
 				0: "What is $0 for? If you're trying to specify the x position of the sprite, please specify the y position as well.",
-				1: "If you're trying to specify points for a chain Sprite, please use an array of position arrays:\n$0"
+				1: "If you're trying to specify points for a chain Sprite, please use an array of position arrays.\n$0"
 			},
-			hw: "I can't change the halfWidth of a Sprite directly, change the sprite's width instead.",
-			hh: "I can't change the halfHeight of a Sprite directly, change the sprite's height instead.",
-			rotate: 'The angle of rotation must be a number.',
+			hw: {
+				0: "I can't change the halfWidth of a Sprite directly, change the sprite's width instead."
+			},
+			hh: {
+				1: "I can't change the halfHeight of a Sprite directly, change the sprite's height instead."
+			},
+			rotate: {
+				0: "Can't use this function on a sprite with a static collider, try changing the sprite's collider type to kinematic.",
+				1: 'Can\'t use "$0" for the angle of rotation, it must be a number.'
+			},
+			rotateTo: {},
+			rotateTowards: {},
 			changeAnimation: `I can't find any animation named "$0".`,
 			collide: {
 				0: "I can't make that sprite collide with $0. Sprites can only collide with another sprite or a group.",
@@ -6777,8 +6857,9 @@ canvas {
 			}
 		}
 	};
-	errorMessages.Group.collide = errorMessages.Sprite.collide;
-	errorMessages.Group.overlap = errorMessages.Sprite.overlap;
+	errMsgs.Group.collide = errMsgs.Sprite.collide;
+	errMsgs.Group.overlap = errMsgs.Sprite.overlap;
+	errMsgs.Sprite.rotateTo[0] = errMsgs.Sprite.rotateTowards[0] = errMsgs.Sprite.rotate[0];
 
 	/**
 	 * A FriendlyError is a custom error class that extends the native JS Error class.
@@ -6810,15 +6891,16 @@ canvas {
 			let ln = this.stack.match(/\/([^p\/][^5][^\/:]*:[^\/:]+):/);
 			if (ln) {
 				ln = ln[1].split(':');
-				ln = ' in ' + ln[0] + ' at line ' + ln[1] + '. ';
-			} else ln = '.';
+				ln = ' in ' + ln[0] + ' at line ' + ln[1];
+			}
+			ln = ' with using ' + className + '.' + func + '. ';
 
 			e = e || [];
 
-			let m = errorMessages[className][func];
+			let m = errMsgs[className][func];
 			let msg;
 			if (m.base) msg = m.base + ln;
-			else msg = errorMessages.generic[Math.floor(Math.random() * errorMessages.generic.length)] + ln;
+			else msg = errMsgs.generic[Math.floor(Math.random() * errMsgs.generic.length)] + ln;
 			if (errorNum !== undefined) m = m[errorNum];
 			m = m.replace(/\$([0-9]+)/g, (m, n) => {
 				return e[n];
