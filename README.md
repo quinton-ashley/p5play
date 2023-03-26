@@ -6,7 +6,7 @@
 
 ### Join the [p5play community Discord server][] to ask questions and meet other people making games with p5play!
 
-p5play is currently led by Quinton Ashley [@quinton-ashley][] and was initiated by Paolo Pedercini [@molleindustria][]. If you have any questions or problems use the help channels on [discord][] or make an [issue report][] on this GitHub repository or email <info@p5play.org>
+p5play was created by Quinton Ashley [@quinton-ashley][]. p5.play v1 was created by Paolo Pedercini [@molleindustria][] and collaborators. If you have any questions or problems use the help channels on [discord][] or make an [issue report][] on this GitHub repository or email <info@p5play.org>
 
 ## Support p5play
 

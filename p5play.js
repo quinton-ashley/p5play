@@ -66,7 +66,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Returns an array with the line length, angle, and number of sides of a regular polygon
 	 *
-	 * @private getRegularPolygon
+	 * @private
+	 * @func getRegularPolygon
 	 * @param {Number} l side length
 	 * @param {String} n name of the regular polygon
 	 * @returns {Boolean} an array [line, angle, sides]
@@ -135,38 +136,36 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
 	};
 
-	/**
-	 * Look at the Sprite reference pages before reading these docs. The
-	 * Sprite constructor can be used in many different ways.
-	 *
-	 * https://p5play.org/learn/sprite.html
-	 *
-	 * Every sprite you create is added to the `allSprites`
-	 * group and put on the top layer, in front of all
-	 * previously created sprites.
-	 *
-	 * @class Sprite
-	 * @constructor
-	 * @param {Number} [x] - horizontal position of the sprite
-	 * @param {Number} [y] - vertical position of the sprite
-	 * @param {Number} [width] - width of the placeholder rectangle and of
-	 * the collider until an image or new collider are set. *OR* If height is not
-	 * set then this parameter becomes the diameter of the placeholder circle.
-	 * @param {Number} [height] - height of the placeholder rectangle and of the collider
-	 * until an image or new collider are set
-	 * @param {String} [colliderType] - collider type is 'dynamic' by default, can be
-	 * 'static', 'kinematic', or 'none'
-	 * @example
-	 *
-	 * let sprite = new Sprite();
-	 *
-	 * let rectangle = new Sprite(x, y, width, height);
-	 *
-	 * let circle = new Sprite(x, y, diameter);
-	 *
-	 * let line = new Sprite(x, y, [length, angle]);
-	 */
 	this.Sprite = class {
+		/**
+		 * <a href="https://p5play.org/learn/sprite.html">
+		 * Look at the Sprite reference pages before reading these docs.
+		 * </a>
+		 *
+		 * The Sprite constructor can be used in many different ways.
+		 * Every sprite you create is added to the `allSprites`
+		 * group and put on the top layer, in front of all
+		 * previously created sprites.
+		 *
+		 * @param {Number} [x] - horizontal position of the sprite
+		 * @param {Number} [y] - vertical position of the sprite
+		 * @param {Number} [width] - width of the placeholder rectangle and of
+		 * the collider until an image or new collider are set. *OR* If height is not
+		 * set then this parameter becomes the diameter of the placeholder circle.
+		 * @param {Number} [height] - height of the placeholder rectangle and of the collider
+		 * until an image or new collider are set
+		 * @param {String} [colliderType] - collider type is 'dynamic' by default, can be
+		 * 'static', 'kinematic', or 'none'
+		 * @example
+		 *
+		 * let sprite = new Sprite();
+		 *
+		 * let rectangle = new Sprite(x, y, width, height);
+		 *
+		 * let circle = new Sprite(x, y, diameter);
+		 *
+		 * let line = new Sprite(x, y, [length, angle]);
+		 */
 		constructor(x, y, w, h, collider) {
 			this.p = pInst;
 
@@ -174,7 +173,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * Each sprite has a unique id number. Don't change it!
 			 * Its useful for debugging. Sprite id numbers start at 1000.
 			 *
-			 * @property idNum
 			 * @type {Number}
 			 */
 			this.idNum = this.p.p5play.spritesCreated;
@@ -248,7 +246,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * Groups the sprite belongs to, including allSprites
 			 *
-			 * @property groups
 			 * @type {Array}
 			 * @default [allSprites]
 			 */
@@ -258,7 +255,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * Keys are the animation label, values are SpriteAnimation objects.
 			 *
-			 * @property animations
 			 * @type {SpriteAnimations}
 			 */
 			this.animations = new this.p.SpriteAnimations();
@@ -266,7 +262,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * True if the sprite was removed from the world
 			 *
-			 * @property removed
 			 * @type {Boolean}
 			 * @default false
 			 */
@@ -296,7 +291,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * Set it to initiate a countdown, every draw cycle the property is
 			 * reduced by 1 unit. If less than or equal to 0, this sprite will be removed.
 			 *
-			 * @property life
 			 * @type {Number}
 			 * @default 100000000
 			 */
@@ -305,7 +299,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * The sprite's visibility.
 			 *
-			 * @property visible
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -340,7 +333,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * For example, if the tile size is 16, then a sprite with
 			 * x=1 and y=1 will be drawn at position (16, 16) on the canvas.
 			 *
-			 * @property tileSize
 			 * @type {Number}
 			 * @default 1
 			 */
@@ -452,7 +444,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			};
 
 			this.layer = group.layer;
-			this.layer ??= this.p.allSprites.maxDepth() + 1;
+			this.layer ??= this.p.allSprites._getTopLayer() + 1;
 			collider ??= group.collider;
 
 			if (!collider || typeof collider != 'string') {
@@ -541,7 +533,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * The sprite's position on the previous frame.
 			 *
-			 * @property prevPos
 			 * @type {object}
 			 */
 			this.prevPos = { x, y };
@@ -558,7 +549,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * When the sprite.debug property is set to 'colliders', only the
 			 * collider shapes will be drawn.
 			 *
-			 * @property debug
 			 * @type {boolean|string}
 			 * @default false
 			 */
@@ -581,7 +571,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * It only needs to be set to false once and then it will
 			 * remain false for the rest of the sketch, unless changed.
 			 *
-			 * @property autoDraw
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -593,7 +582,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * It only needs to be set to false once and then it will
 			 * remain false for the rest of the sketch, unless changed.
 			 *
-			 * @property autoUpdate
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -603,7 +591,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * animation its currently displaying, it will start playing
 			 * from frame 0.
 			 *
-			 * @property resetAnimationsOnChange
 			 * @type {SpriteAnimation}
 			 * @default false
 			 */
@@ -671,7 +658,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			/**
-			 * @property strokeWeight
 			 * @type {Number}
 			 * @default undefined
 			 */
@@ -698,8 +684,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * EXPERIMENTAL method! Subject to change!
-		 *
 		 * Adds a collider (fixture) to the sprite's physics body.
 		 *
 		 * It accepts parameters in a similar format to the Sprite
@@ -710,7 +694,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * type can't be changed without losing every collider added to the
 		 * sprite besides the first. This will be fixed in a future release.
 		 *
-		 * @method addCollider
 		 * @param {Number} offsetX distance from the center of the sprite
 		 * @param {Number} offsetY distance from the center of the sprite
 		 * @param {Number} w width of the collider
@@ -738,8 +721,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * EXPERIMENTAL method! Subject to change!
-		 *
 		 * Adds a sensor to the sprite's physics body that's used to detect
 		 * overlaps with other sprites.
 		 *
@@ -748,7 +729,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * the relative distance the new sensor should be from the center of
 		 * the sprite.
 		 *
-		 * @method addSensor
 		 * @param {Number} offsetX distance from the center of the sprite
 		 * @param {Number} offsetY distance from the center of the sprite
 		 * @param {Number} w width of the collider
@@ -995,7 +975,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * removing them, use the overlaps, overlapping, or overlapped
 		 * functions instead.
 		 *
-		 * @method removeColliders
 		 */
 		removeColliders() {
 			this._collides = {};
@@ -1004,15 +983,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._removeFixtures(false);
 		}
 
-		/**
-		 * EXPERIMENTAL! This function doesn't work yet and will be changed.
-		 *
-		 * Adds a joint between this sprite and another sprite.
-		 *
-		 * @param {Sprite} spriteB the sprite to add a joint to
-		 * @param {String} [type] the type of joint
-		 * @param {Object} [props] the joint options
-		 */
 		addJoint(spriteB, type, props) {
 			let spriteA = this;
 			props ??= {};
@@ -1111,7 +1081,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * removing them, use the collides, colliding, or collided functions
 		 * instead.
 		 *
-		 * @method removeSensors
 		 */
 		removeSensors() {
 			this._overlap = {};
@@ -1192,7 +1161,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
 		 * with anything that it wasn't already _touching.
 		 *
-		 * @property allowSleeping
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1207,7 +1175,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Reference to the sprite's current animation.
 		 *
-		 * @property animation
 		 * @type {SpriteAnimation}
 		 */
 		get animation() {
@@ -1231,7 +1198,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The bounciness of the sprite's physics body.
 		 *
-		 * @property bounciness
 		 * @type {Number}
 		 * @default 0.2
 		 */
@@ -1248,7 +1214,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The center of mass of the sprite's physics body.
 		 *
-		 * @property centerOfMass
 		 * @type {Number}
 		 */
 		get centerOfMass() {
@@ -1262,7 +1227,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * The collider type can be one of the following strings:
 		 * 'dynamic', 'static', 'kinematic', 'none'.
 		 *
-		 * @property collider
 		 * @type {String}
 		 * @default 'dynamic'
 		 */
@@ -1346,7 +1310,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The sprite's current color. By default sprites get a random color.
 		 *
-		 * @property color
 		 * @type {p5.Color}
 		 * @default random color
 		 */
@@ -1359,7 +1322,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Alias for color. colour is the British English spelling.
 		 *
-		 * @property colour
 		 * @type {p5.Color}
 		 * @default random color
 		 */
@@ -1370,19 +1332,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._color = this._parseColor(val);
 		}
 		/**
-		 * @deprecated shapeColor
+		 * @deprecated
 		 */
 		get shapeColor() {
+			console.warn('sprite.shapeColor is deprecated, use sprite.color instead');
 			return this._color;
 		}
 		set shapeColor(val) {
+			console.warn('sprite.shapeColor is deprecated, use sprite.color instead');
 			this.color = val;
 		}
 
 		/**
 		 * Alias for sprite.fillColor
 		 *
-		 * @property fill
 		 * @type {p5.Color}
 		 * @default random color
 		 */
@@ -1396,7 +1359,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Alias for sprite.color
 		 *
-		 * @property fillColor
 		 * @type {p5.Color}
 		 * @default random color
 		 */
@@ -1410,7 +1372,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Alias for sprite.strokeColor
 		 *
-		 * @property stroke
 		 * @type {p5.Color}
 		 */
 		get stroke() {
@@ -1424,7 +1385,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * The sprite's stroke current color. By default the stroke of a sprite
 		 * indicates its collider type.
 		 *
-		 * @property strokeColor
 		 * @type {p5.Color}
 		 */
 		get strokeColor() {
@@ -1437,7 +1397,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The sprite's current text color. Black by default.
 		 *
-		 * @property textColor
 		 * @type {p5.Color}
 		 * @default black (#000000)
 		 */
@@ -1451,7 +1410,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The density of the sprite's physics body.
 		 *
-		 * @property density
 		 * @type {Number}
 		 */
 		get density() {
@@ -1482,7 +1440,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * The angle of the sprite's movement or it's rotation angle if the
 		 * sprite is not moving.
 		 *
-		 * @property direction
 		 * @type {Number}
 		 * @default 0 ("right")
 		 */
@@ -1526,7 +1483,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The amount of resistance a sprite has to being moved.
 		 *
-		 * @property drag
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1557,7 +1513,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *   ellipse(0,0,20,10);
 		 * }
 		 *
-		 * @method draw
 		 */
 		get draw() {
 			return this._display;
@@ -1570,7 +1525,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * True if the sprite's physics body is dynamic.
 		 *
-		 * @property dynamic
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1586,7 +1540,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * If true the sprite can not rotate.
 		 *
-		 * @property rotationLock
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -1618,7 +1571,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * The amount the sprite's physics body resists moving
 		 * when rubbing against another physics body.
 		 *
-		 * @property friction
 		 * @type {Number}
 		 * @default 0.5
 		 */
@@ -1639,7 +1591,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * It ignores cardinal direction word order, capitalization, spaces,
 		 * underscores, and dashes.
 		 *
-		 * @property heading
 		 * @type {String}
 		 * @default undefined
 		 */
@@ -1670,7 +1621,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * A reference to the sprite's current image.
 		 *
-		 * @property img
 		 * @type {SpriteAnimation}
 		 */
 		get img() {
@@ -1683,7 +1633,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * A reference to the sprite's current image.
 		 *
-		 * @property image
 		 * @type {SpriteAnimation}
 		 */
 		get image() {
@@ -1696,7 +1645,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * True if the sprite is moving.
 		 *
-		 * @property isMoving
 		 * @type {Boolean}
 		 * @readonly
 		 */
@@ -1708,7 +1656,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Set this to true if the sprite goes really fast to prevent
 		 * inaccurate physics simulation.
 		 *
-		 * @property isSuperFast
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -1730,7 +1677,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * True if the sprite's physics body is kinematic.
 		 *
-		 * @property kinematic
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -1745,7 +1691,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The mass of the sprite's physics body.
 		 *
-		 * @property mass
 		 * @type {Number}
 		 */
 		get mass() {
@@ -1770,7 +1715,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Verbose alias for sprite.prevPos
 		 *
-		 * @property previousPosition
 		 * @type {object}
 		 */
 		get previousPosition() {
@@ -1783,7 +1727,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The angle of the sprite's rotation, not the direction it is moving.
 		 *
-		 * @property rotation
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1808,7 +1751,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The amount the sprite resists rotating.
 		 *
-		 * @property rotationDrag
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1822,7 +1764,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The speed of the sprite's rotation.
 		 *
-		 * @property rotationSpeed
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1845,7 +1786,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * number. This enables users to do things like `sprite.scale *= 2`
 		 * to double the sprite's scale.
 		 *
-		 * @property scale
 		 * @type {Number|Object}
 		 * @default 1
 		 */
@@ -1884,7 +1824,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
 		 * with anything that it wasn't already _touching.
 		 *
-		 * @property sleeping
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1898,17 +1837,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @deprecated
-		 */
-		getSpeed() {
-			console.warn('getSpeed() is deprecated, use sprite.speed instead');
-			return this.speed;
-		}
-
-		/**
 		 * The sprite's speed.
 		 *
-		 * @property speed
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1924,7 +1854,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Is the sprite's physics collider static?
 		 *
-		 * @property static
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -1940,8 +1869,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The sprite's vertices.
 		 *
-		 * @property vertices
-		 * @type {Array} An array of p5.Vector objects.
+		 * @type {Array}
+		 * @return an array of p5.Vector objects
 		 * @readonly
 		 */
 		get vertices() {
@@ -1968,7 +1897,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		/**
 		 * The horizontal position of the sprite.
-		 * @property x
 		 * @type {Number}
 		 */
 		get x() {
@@ -1979,7 +1907,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * The vertical position of the sprite.
-		 * @property y
 		 * @type {Number}
 		 */
 		get y() {
@@ -1991,7 +1918,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The position vector {x, y}
 		 *
-		 * @property pos
 		 * @type {p5.Vector}
 		 */
 		get pos() {
@@ -2008,7 +1934,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The position vector {x, y}
 		 *
-		 * @property position
 		 * @type {p5.Vector}
 		 */
 		get position() {
@@ -2019,7 +1944,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * The width of the sprite.
-		 * @property w
 		 * @type {Number}
 		 */
 		get w() {
@@ -2036,7 +1960,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * Half the width of the sprite.
-		 * @property hw
 		 * @type {Number}
 		 */
 		get hw() {
@@ -2047,7 +1970,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * The width of the sprite.
-		 * @property width
 		 * @type {Number}
 		 */
 		get width() {
@@ -2058,7 +1980,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * Half the width of the sprite.
-		 * @property halfWidth
 		 * @type {Number}
 		 */
 		get halfWidth() {
@@ -2069,7 +1990,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * The height of the sprite.
-		 * @property h
 		 * @type {Number}
 		 */
 		get h() {
@@ -2091,7 +2011,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * Half the height of the sprite.
-		 * @property hh
 		 * @type {Number}
 		 */
 		get hh() {
@@ -2102,7 +2021,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * The height of the sprite.
-		 * @property height
 		 * @type {Number}
 		 */
 		get height() {
@@ -2113,7 +2031,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * Half the height of the sprite.
-		 * @property halfHeight
 		 * @type {Number}
 		 */
 		get halfHeight() {
@@ -2124,7 +2041,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * The diameter of a circular sprite.
-		 * @property d
 		 * @type {Number}
 		 */
 		get d() {
@@ -2168,7 +2084,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		/**
 		 * The diameter of a circular sprite.
-		 * @property diameter
 		 * @type {Number}
 		 */
 		get diameter() {
@@ -2180,7 +2095,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		/**
 		 * The radius of a circular sprite.
-		 * @property r
 		 * @type {Number}
 		 */
 		get r() {
@@ -2192,7 +2106,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		/**
 		 * The radius of a circular sprite.
-		 * @property radius
 		 * @type {Number}
 		 */
 		get radius() {
@@ -2205,7 +2118,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Resizes the collider of the sprite.
 		 *
-		 * @private _resizeCollider
+		 * @private
 		 * @param {*} scalars The x and y scalars to resize the collider by.
 		 */
 		_resizeCollider(scalars) {
@@ -2231,7 +2144,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Validate convexity.
 		 *
-		 * @private _isConvexPoly
+		 * @private
 		 * @param vecs {Array} an array of planck.Vec2 vertices
 		 * @returns true if the polygon is convex
 		 */
@@ -2266,7 +2179,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
 		 *
-		 * @property shape
 		 * @type {String}
 		 * @default box
 		 */
@@ -2302,7 +2214,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * There's no way to individually update a sprite or group
 		 * of sprites in the physics simulation though.
 		 *
-		 * @method update
 		 */
 		get update() {
 			return this._update;
@@ -2385,7 +2296,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Default draw
 		 *
-		 * @private _draw
+		 * @private
 		 */
 		_draw() {
 			if (this.strokeWeight !== undefined) this.p.strokeWeight(this.strokeWeight);
@@ -2426,7 +2337,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Displays the Sprite with rotation and scaling applied before
 		 * the sprite's draw function is called.
 		 *
-		 * @private _display
+		 * @private
 		 */
 		_display() {
 			let x = this.p.width * 0.5 - this.p.world.origin.x + this.x * this.tileSize;
@@ -2477,7 +2388,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Draws a fixture. Used to draw the sprite's physics body.
 		 *
-		 * @private _drawFixture
+		 * @private
 		 */
 		_drawFixture(fxt) {
 			const sh = fxt.m_shape;
@@ -2522,7 +2433,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Apply a force that is scaled to the sprite's mass.
 		 *
-		 * @method applyForce
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} [originX]
@@ -2552,7 +2462,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Apply an impulse to the sprite's physics collider.
 		 *
-		 * @method applyImpulse
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} [originX]
@@ -2585,7 +2494,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * A positive torque will rotate the sprite clockwise.
 		 * A negative torque will rotate the sprite counter-clockwise.
 		 *
-		 * @method applyTorque
 		 * @param {Number} torque The amount of torque to apply.
 		 */
 		applyTorque(val) {
@@ -2640,7 +2548,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * If direction is not supplied, the current direction is maintained.
 		 * If direction is not supplied and there is no current velocity, the * current rotation angle used for the direction.
 		 *
-		 * @method addSpeed
 		 * @param {Number} speed Scalar speed
 		 * @param {Number} [angle] Direction in degrees
 		 */
@@ -2654,7 +2561,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Move a sprite towards a position.
 		 *
-		 * @method moveTowards
 		 * @param {Number|Object} x|position destination x or any object with x and y properties
 		 * @param {Number} y destination y
 		 * @param {Number} tracking [optional] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
@@ -2691,7 +2597,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Move a sprite away from a position.
 		 *
-		 * @method moveAway
 		 * @param {Number|Object} x|position x or any object with x and y properties
 		 * @param {Number} y
 		 * @param {Number} repel [optional] the higher the value, the faster the sprite moves away. Default is 0.1 (10% repel).
@@ -2705,7 +2610,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Move the sprite a certain distance from its current position.
 		 *
-		 * @method move
 		 * @param {Number} distance [optional]
 		 * @param {Number|String} direction [optional]
 		 * @param {Number} speed [optional]
@@ -2751,7 +2655,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Move the sprite to a position.
 		 *
-		 * @method moveTo
 		 * @param {Number|Object} x|position destination x or any object with x and y properties
 		 * @param {Number} y destination y
 		 * @param {Number} speed [optional]
@@ -2847,24 +2750,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			})();
 		}
 
-		/**
-		 * Pushes the sprite toward a point.
-		 * The force is added to the current velocity.
-		 *
-		 * Legacy method, use moveTo or moveTowards instead.
-		 *
-		 * @deprecated
-		 * @param {Number}  magnitude Scalar speed to add
-		 * @param {Number}  x Direction x coordinate
-		 * @param {Number}  y Direction y coordinate
-		 */
-		attractionPoint(magnitude, x, y) {
-			console.warn('sprite.attractionPoint is deprecated, use sprite.moveTowards instead');
-			let angle = this.p.atan2(y - this.y, x - this.x);
-			this.vel.x += this.p.cos(angle) * magnitude;
-			this.vel.y += this.p.sin(angle) * magnitude;
-		}
-
 		snap(o, dist) {
 			if (o.isMoving || o.x != o._dest.x || o.y != o._dest.y || !this.isMoving) return;
 			dist ??= 1 || this.tileSize * 0.1;
@@ -2878,7 +2763,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @method rotateTowards
 		 * @param {*} x position to rotate towards
 		 * @param {*} y position to rotate towards
 		 * @param {*} tracking percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
@@ -2905,7 +2789,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * Used internally by `moveTo` and `moveTowards`.
 		 *
-		 * @method angleTo
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @returns {Number} angle
@@ -2935,7 +2818,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * Used internally by `rotateTo` and `rotateTowards`.
 		 *
-		 * @method angleToFace
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} facing - rotation angle the sprite should be at when "facing" the position, default is 0
@@ -2963,7 +2845,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Rotates the sprite to a position at a rotation.
 		 *
-		 * @method rotateTo
 		 * @param {Number|Object} x|position
 		 * @param {Number} y
 		 * @param {Number} speed the amount of rotation per frame, default is 1
@@ -2987,7 +2868,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Rotates the sprite by an amount at a specified angles per frame speed.
 		 *
-		 * @method rotate
 		 * @param {Number} angle the amount to rotate the sprite
 		 * @param {Number} speed the amount of rotation per frame, default is 1
 		 * @returns {Promise} a promise that resolves when the rotation is complete
@@ -3039,7 +2919,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Changes the sprite's animation. Use `addAni` to define the
 		 * animation(s) first.
 		 *
-		 * @method changeAni
 		 * @param {...String} anis the names of one or many animations to be played in
 		 * sequence
 		 * @returns A promise that fulfills when the animation or sequence of animations
@@ -3134,7 +3013,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Changes the sprite's animation. Use `addAni` to define the
 		 * animation(s) first. Alt for `changeAni`.
 		 *
-		 * @method changeAnimation
 		 * @param {...String} anis the names of one or many animations to be played in
 		 * sequence
 		 * @returns A promise that fulfills when the animation or sequence of animations
@@ -3152,7 +3030,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * See SpriteAnimation for more control over the sequence.
 		 *
-		 * @method changeAnimation
+		 * @private
 		 * @param {String} label SpriteAnimation identifier
 		 */
 		_changeAni(label) {
@@ -3190,7 +3068,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * There's no way to undo this operation. If you want to hide a
 		 * sprite use `sprite.visible = false` instead.
 		 *
-		 * @method remove
 		 */
 		remove() {
 			if (this.body) this.p.world.destroyBody(this.body);
@@ -3215,7 +3092,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * Returns the sprite's unique identifier
 		 *
-		 * @method toString
 		 * @returns the sprite's id
 		 */
 		toString() {
@@ -3257,7 +3133,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Custom collision event handling can be done by using this function
 		 * in an if statement or adding a callback as the second parameter.
 		 *
-		 * @method collides
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 */
@@ -3272,7 +3147,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * target sprite or group. The value is the number of frames that
 		 * the sprite has been colliding with the target.
 		 *
-		 * @method colliding
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 * @return {Number} frames
@@ -3288,7 +3162,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Returns true on the first frame that the sprite no longer overlaps
 		 * with the target sprite or group.
 		 *
-		 * @method collided
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 * @return {Boolean}
@@ -3366,7 +3239,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Custom overlap event handling can be done by using this function
 		 * in an if statement or adding a callback as the second parameter.
 		 *
-		 * @method overlaps
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 */
@@ -3381,7 +3253,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * target sprite or group. The value returned is the number of
 		 * frames the sprite has been overlapping with the target.
 		 *
-		 * @method overlapping
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 * @return {Number} frames
@@ -3397,7 +3268,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Returns true on the first frame that the sprite no longer overlaps
 		 * with the target sprite or group.
 		 *
-		 * @method overlapped
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 * @return {Boolean}
@@ -3416,7 +3286,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * colliders. If you'd like to add more sensors to a sprite, use the
 		 * addSensor function.
 		 *
-		 * @method addDefaultSensors
 		 */
 		addDefaultSensors() {
 			let shape;
@@ -3433,17 +3302,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.addSensor();
 			}
 			this._hasSensors = true;
-		}
-
-		/**
-		 * Use sprite.animation.name instead.
-		 *
-		 * @deprecated getAnimationLabel
-		 * @returns the name of the sprite's current animation
-		 */
-		getAnimationLabel() {
-			console.warn('sprite.getAnimationLabel is deprecated. Use sprite.animation.name instead.');
-			return this._ani.name;
 		}
 	};
 
@@ -3471,32 +3329,30 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	let animationProps = ['frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale', 'demoMode'];
 
-	/**
-	 * Look at the Animation reference pages before reading these docs.
-	 * The SpriteAnimation constructor can be used in multiple ways.
-	 *
-	 * https://p5play.org/learn/sprite_animation.html
-	 *
-	 * A SpriteAnimation object contains a series of images (p5.Image objects)
-	 * that can be displayed sequentially.
-	 *
-	 * A sprite can have multiple labeled animations, see Sprite.addAnimation
-	 * and Sprite.changeAnimation, but you can also create animations that
-	 * can be used without being added to a sprite first.
-	 *
-	 * An animation can be created either from a list of images or sequentially
-	 * numbered images. p5play will try to detect the sequence pattern.
-	 *
-	 * For example if the image file path is "image1.png" and the last frame
-	 * index is 3 then "image2.png" and "image3.png" will be loaded as well.
-	 *
-	 * @class SpriteAnimation
-	 * @constructor
-	 * @param {...p5.Image} ...images - p5.Image objects to be used as frames
-	 * @example
-	 * let shapeShifter = new SpriteAnimation("dog.png", "cat.png", "snake.png");
-	 */
 	this.SpriteAnimation = class extends Array {
+		/**
+		 * <a href="https://p5play.org/learn/sprite_animation.html">
+		 * Look at the Animation reference pages before reading these docs.
+		 * </a>
+		 *
+		 * A SpriteAnimation object contains a series of images (p5.Image objects)
+		 * that can be displayed sequentially.
+		 *
+		 * A sprite can have multiple labeled animations, see Sprite.addAnimation
+		 * and Sprite.changeAnimation, but you can also create animations that
+		 * can be used without being added to a sprite first.
+		 *
+		 * The SpriteAnimation constructor can be used in multiple ways.
+		 * An animation can be created either from a list of images or sequentially
+		 * numbered images. p5play will try to detect the sequence pattern.
+		 *
+		 * For example if the image file path is "image1.png" and the last frame
+		 * index is 3 then "image2.png" and "image3.png" will be loaded as well.
+		 *
+		 * @param {...p5.Image} ...images - p5.Image objects to be used as frames
+		 * @example
+		 * let shapeShifter = new SpriteAnimation("dog.png", "cat.png", "snake.png");
+		 */
 		constructor() {
 			super();
 			this.p = pInst;
@@ -3505,7 +3361,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * The name of the animation
 			 *
-			 * @property name
 			 * @type {String}
 			 */
 			this.name = 'default';
@@ -3526,7 +3381,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * The index of the current frame that the animation is on.
 			 *
-			 * @property frame
 			 * @type {Number}
 			 */
 			this.frame = 0;
@@ -3539,9 +3393,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * The offset is how far the animation should be placed from
 			 * the location it is played at.
 			 *
-			 * @property offset
-			 * @type {Object} x and y keys
-			 *
+			 * @type {Object}
 			 * @example
 			 * offset.x = 16;
 			 */
@@ -3554,7 +3406,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * True if the animation is currently playing.
 			 *
-			 * @property playing
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -3563,7 +3414,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * Animation visibility.
 			 *
-			 * @property visible
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -3572,7 +3422,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * If set to false the animation will stop after reaching the last frame
 			 *
-			 * @property looping
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -3585,7 +3434,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * For example a walking cycle where the first frame is the
 			 * same as the last frame.
 			 *
-			 * @property endOnFirstFrame
 			 * @type {Boolean}
 			 * @default false
 			 */
@@ -3594,7 +3442,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * True if frame changed during the last draw cycle
 			 *
-			 * @property frameChanged
 			 * @type {Boolean}
 			 */
 			this.frameChanged = false;
@@ -3848,7 +3695,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * If set to 4 the framerate of the animation would be the
 		 * sketch framerate divided by 4 (60fps = 15fps)
 		 *
-		 * @property frameDelay
 		 * @type {Number}
 		 * @default 4
 		 */
@@ -3876,7 +3722,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Can be set to a number to scale both x and y
 		 * or an object with x and/or y properties.
 		 *
-		 * @property scale
 		 * @type {Number|Object}
 		 * @default 1
 		 */
@@ -3895,7 +3740,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Make a copy of the animation.
 		 *
-		 * @method clone
 		 * @return {SpriteAnimation} A copy of the animation.
 		 */
 		clone() {
@@ -3920,7 +3764,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Optional parameters effect the current draw cycle only and
 		 * are not saved between draw cycles.
 		 *
-		 * @method draw
 		 * @param {Number} x horizontal position
 		 * @param {Number} y vertical position
 		 * @param {Number} [r] rotation
@@ -4022,7 +3865,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Plays the animation, starting from the specified frame.
 		 *
-		 * @method play
 		 * @returns [Promise] a promise that resolves when the animation completes
 		 */
 		play(frame) {
@@ -4040,7 +3882,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Pauses the animation.
 		 *
-		 * @method pause
 		 */
 		pause(frame) {
 			this.playing = false;
@@ -4050,7 +3891,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Stops the animation. Alt for pause.
 		 *
-		 * @method stop
 		 */
 		stop(frame) {
 			this.playing = false;
@@ -4061,7 +3901,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Plays the animation backwards.
 		 * Equivalent to ani.goToFrame(0)
 		 *
-		 * @method rewind
 		 * @returns [Promise] a promise that resolves when the animation completes
 		 * rewinding
 		 */
@@ -4073,7 +3912,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Plays the animation forwards and loops it.
 		 *
-		 * @method loop
 		 */
 		loop() {
 			this.looping = true;
@@ -4083,33 +3921,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Prevents the animation from looping
 		 *
-		 * @method noLoop
 		 */
 		noLoop() {
 			this.looping = false;
 		}
 
 		/**
-		 * Deprecated, change the frame property directly.
-		 *
-		 * Changes the current frame.
-		 *
-		 * @deprecated
-		 * @param {Number} frame Frame number (starts from 0).
-		 */
-		changeFrame(f) {
-			console.warn('Deprecated, change the ani.frame property directly.');
-			if (f < this.length) this.frame = f;
-			else this.frame = this.length - 1;
-
-			this.targetFrame = -1;
-			//this.playing = false;
-		}
-
-		/**
 		 * Goes to the next frame and stops.
 		 *
-		 * @method nextFrame
 		 */
 		nextFrame() {
 			if (this.frame < this.length - 1) this.frame = this.frame + 1;
@@ -4122,7 +3941,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Goes to the previous frame and stops.
 		 *
-		 * @method previousFrame
 		 */
 		previousFrame() {
 			if (this.frame > 0) this.frame = this.frame - 1;
@@ -4135,7 +3953,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Plays the animation forward or backward toward a target frame.
 		 *
-		 * @method goToFrame
 		 * @param {Number} toFrame Frame number destination (starts from 0)
 		 * @returns [Promise] a promise that resolves when the animation completes
 		 */
@@ -4160,35 +3977,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Use .frame instead.
-		 *
-		 * Returns the current frame number.
-		 *
-		 * @deprecated
-		 * @return {Number} Current frame (starts from 0)
-		 */
-		getFrame() {
-			console.warn('Deprecated, use ani.frame instead.');
-			return this.frame;
-		}
-
-		/**
-		 * Use .lastFrame instead.
-		 *
-		 * Returns the last frame number.
-		 *
-		 * @deprecated
-		 * @return {Number} Last frame number (starts from 0)
-		 */
-		getLastFrame() {
-			console.warn('Deprecated, use ani.lastFrame instead.');
-			return this.lastFrame;
-		}
-
-		/**
 		 * Returns the index of the last frame.
 		 *
-		 * @property lastFrame
 		 * @type {Number}
 		 * @readonly
 		 */
@@ -4199,8 +3989,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Returns the current frame as p5.Image.
 		 *
-		 * @method frameImage
-		 * @return {p5.Image} Current frame image
+		 * @type {p5.Image}
 		 * @readonly
 		 */
 		get frameImage() {
@@ -4217,7 +4006,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Width of the animation.
 		 *
-		 * @property w
 		 * @type {Number}
 		 */
 		get w() {
@@ -4226,7 +4014,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Width of the animation.
 		 *
-		 * @property width
 		 * @type {Number}
 		 */
 		get width() {
@@ -4241,7 +4028,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Height of the animation.
 		 *
-		 * @property h
 		 * @type {Number}
 		 */
 		get h() {
@@ -4250,7 +4036,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Height of the animation.
 		 *
-		 * @property height
 		 * @type {Number}
 		 */
 		get height() {
@@ -4265,7 +4050,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The frames of the animation.
 		 *
-		 * @property frames
 		 * @type {Array}
 		 */
 		get frames() {
@@ -4279,7 +4063,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The frames of the animation. Alt for ani.frames
 		 *
-		 * @property images
 		 * @type {Array}
 		 */
 		get images() {
@@ -4300,7 +4083,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * #_ to store animation properties. Getters and setters are used to
 	 * access the private properties, enabling dynamic inheritance.
 	 *
-	 * @private SpriteAnimations
+	 * @private
 	 */
 	this.SpriteAnimations = class {
 		#_ = {};
@@ -4349,33 +4132,31 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 	};
 
-	/**
-	 * Look at the Group reference pages before reading these docs.
-	 *
-	 * https://p5play.org/learn/group.html
-	 *
-	 * In p5play groups are collections of sprites with similar behavior.
-	 * For example a group may contain all the coin sprites that the
-	 * player can collect.
-	 *
-	 * Group extends Array. You can use them in for loops just like arrays
-	 * since they inherit all the functions and properties of standard
-	 * arrays such as group.length
-	 *
-	 * Since groups just contain references to sprites, a sprite can be in
-	 * multiple groups.
-	 *
-	 * `sprite.remove()` removes the sprite from all the groups
-	 * it belongs to. `group.removeAll()` removes all the sprites from
-	 * a group.
-	 *
-	 * The top level group is a p5 instance level variable named
-	 * `allSprites` that contains all the sprites added to the sketch.
-	 *
-	 * @class Group
-	 * @constructor
-	 */
 	this.Group = class extends Array {
+		/**
+		 * <a href="https://p5play.org/learn/group.html">
+		 * Look at the Group reference pages before reading these docs.
+		 * </a>
+		 *
+		 * A Group is a collection of sprites with similar traits and behaviors.
+		 *
+		 * For example a group may contain all the coin sprites that the
+		 * player can collect.
+		 *
+		 * Group extends Array. You can use them in for loops just like arrays
+		 * since they inherit all the functions and properties of standard
+		 * arrays such as group.length and function like group.includes().
+		 *
+		 * Since groups just contain references to sprites, a sprite can be in
+		 * multiple groups.
+		 *
+		 * `sprite.remove()` removes the sprite from all the groups
+		 * it belongs to. `group.removeAll()` removes all the sprites from
+		 * a group.
+		 *
+		 * The top level group is a p5 instance level variable named
+		 * `allSprites` that contains all the sprites added to the sketch.
+		 */
 		constructor(...args) {
 			let parent;
 			if (args[0] instanceof pInst.Group) {
@@ -4396,7 +4177,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * Each group has a unique id number. Don't change it!
 			 * Its useful for debugging.
 			 *
-			 * @property idNum
 			 * @type {Number}
 			 */
 			this.idNum = this.p.p5play.groupsCreated;
@@ -4412,7 +4192,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * Groups can have subgroups, which inherit the properties
 			 * of their parent groups.
 			 *
-			 * @property subgroups
 			 * @type {Array}
 			 * @default []
 			 */
@@ -4421,7 +4200,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * The parent group's uid number.
 			 *
-			 * @property parent
 			 * @type {Number}
 			 * @default undefined
 			 */
@@ -4441,7 +4219,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * Keys are the animation label, values are SpriteAnimation objects.
 			 *
-			 * @property animations
 			 * @type {SpriteAnimations}
 			 */
 			this.animations = new this.p.SpriteAnimations();
@@ -4577,7 +4354,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				 * It only needs to be set to false once and then it will
 				 * remain false for the rest of the sketch, unless changed.
 				 *
-				 * @property autoCull
 				 * @type {Boolean}
 				 */
 				this.autoCull = true;
@@ -4594,28 +4370,47 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * `new group.Sprite()` which both creates a group sprite using
 			 * soft inheritance and adds it to the group.
 			 *
-			 * @method add
+			 * @memberof Group
+			 * @instance
+			 * @func add
 			 */
 			this.add = this.push;
+
 			/**
 			 * Check if a sprite is in the group.
 			 *
-			 * @method includes
+			 * @memberof Group
+			 * @instance
+			 * @func includes
 			 * @param {Sprite} sprite
 			 * @return {Number} index of the sprite or -1 if not found
 			 */
+
 			/**
 			 * Alias for group.includes
-			 *
-			 * @method contains
 			 */
 			this.contains = this.includes;
 		}
 
 		/**
+		 * Returns the highest layer in a group
+		 *
+		 * @private
+		 * @return {Number} The layer of the sprite drawn on the top
+		 */
+		_getTopLayer() {
+			if (this.length == 0) return 0;
+			if (this.length == 1 && this[0].layer === undefined) return 0;
+			let max = this[0].layer;
+			for (let s of this) {
+				if (s.layer > max) max = s.layer;
+			}
+			return max;
+		}
+
+		/**
 		 * Reference to the group's current animation.
 		 *
-		 * @property ani
 		 * @type {SpriteAnimation}
 		 */
 		get ani() {
@@ -4628,7 +4423,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Reference to the group's current animation.
 		 *
-		 * @property animation
 		 * @type {SpriteAnimation}
 		 */
 		get animation() {
@@ -4641,7 +4435,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The group's animations.
 		 *
-		 * @property anis
 		 * @type {SpriteAnimations}
 		 */
 		get anis() {
@@ -4650,7 +4443,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Reference to the group's current image.
 		 *
-		 * @property img
 		 * @type {SpriteAnimation}
 		 */
 		get img() {
@@ -4662,7 +4454,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Reference to the group's current image.
 		 *
-		 * @property image
 		 * @type {SpriteAnimation}
 		 */
 		get image() {
@@ -4675,7 +4466,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Depending on the value that the amount property is set to, the group will
 		 * either add or remove sprites.
 		 *
-		 * @property amount
 		 * @type {Number}
 		 */
 		set amount(val) {
@@ -4753,7 +4543,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Custom collision event handling can be done by using this function
 		 * in an if statement or adding a callback as the second parameter.
 		 *
-		 * @method collides
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 */
@@ -4768,7 +4557,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * target sprite or group. The value is the number of frames that
 		 * the group has been colliding with the target.
 		 *
-		 * @method colliding
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 * @return {Number} frames
@@ -4784,7 +4572,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Returns true on the first frame that the group no longer overlaps
 		 * with the target sprite or group.
 		 *
-		 * @method collided
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 * @return {Boolean}
@@ -4856,7 +4643,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Custom overlap event handling can be done by using this function
 		 * in an if statement or adding a callback as the second parameter.
 		 *
-		 * @method overlaps
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 */
@@ -4871,7 +4657,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * target sprite or group. The value returned is the number of
 		 * frames the group has been overlapping with the target.
 		 *
-		 * @method overlapping
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 * @return {Number} frames
@@ -4887,7 +4672,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Returns true on the first frame that the group no longer overlaps
 		 * with the target sprite or group.
 		 *
-		 * @method overlapped
 		 * @param {Sprite|Group} target
 		 * @param {Function} [callback]
 		 * @return {Boolean}
@@ -4901,7 +4685,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Apply a force that is scaled to the sprite's mass.
 		 *
-		 * @method applyForce
 		 * @param {p5.Vector|Array} forceVector force vector
 		 * @param {p5.Vector|Array} [forceOrigin] force origin
 		 */
@@ -4912,7 +4695,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @method move
 		 */
 		move(distance, direction, speed) {
 			let movements = [];
@@ -4923,7 +4705,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @method moveTo
 		 */
 		moveTo(x, y, speed) {
 			if (typeof x != 'number') {
@@ -4946,7 +4727,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @method moveTowards
 		 */
 		moveTowards(x, y, tracking) {
 			if (typeof x != 'number') {
@@ -4969,7 +4749,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @method moveAway
 		 */
 		moveAway(x, y, tracking) {
 			if (typeof x != 'number') {
@@ -4996,7 +4775,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * Rotates the group around its centroid.
 		 *
-		 * @method orbit
 		 * @param {Number} amount Amount of rotation
 		 */
 		orbit(amount) {
@@ -5037,7 +4815,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * already in the group or not, just like with the Array.push()
 		 * method. Only sprites can be added to a group.
 		 *
-		 * @method push
 		 * @param {Sprite} sprites The sprite or sprites to be added
 		 * @returns {Number} the new length of the group
 		 */
@@ -5055,13 +4832,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @property length
-		 * @return {Number} The amount of sprites in the group
-		 */
-
-		/**
 		 * Alias for group.length
-		 * @deprecated size
+		 * @deprecated
 		 */
 		size() {
 			return this.length;
@@ -5080,7 +4852,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Remove sprites that go outside the given culling boundary
 		 * relative to the camera.
 		 *
-		 * @method cull
 		 * @param {Number} top|size The distance that sprites can move below the p5.js canvas before they are removed. *OR* The distance sprites can travel outside the screen on all sides before they get removed.
 		 * @param {Number} bottom|cb The distance that sprites can move below the p5.js canvas before they are removed.
 		 * @param {Number} [left] The distance that sprites can move beyond the left side of the p5.js canvas before they are removed.
@@ -5130,7 +4901,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * If a sprite or index is given, that sprite is removed from the
 		 * group, but not from the sketch or any other groups it may be in.
 		 *
-		 * @method remove
 		 * @param {Sprite} item The sprite to be removed
 		 * @return {Sprite} the removed sprite
 		 */
@@ -5165,48 +4935,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Removes all sprites from the group and destroys the group.
 		 *
-		 * @method removeAll
 		 */
 		removeAll() {
 			this.remove();
 		}
 
 		/**
-		 * Returns the highest depth in a group
-		 *
-		 * @deprecated maxDepth
-		 * @return {Number} The depth of the sprite drawn on the top
-		 */
-		maxDepth() {
-			if (this.length == 0) return 0;
-			if (this.length == 1 && this[0].layer === undefined) return 0;
-			let max = this[0].layer;
-			for (let s of this) {
-				if (s.layer > max) max = s.layer;
-			}
-			return max;
-		}
-
-		/**
-		 * Returns the lowest depth in a group
-		 *
-		 * @deprecated minDepth
-		 * @return {Number} The depth of the sprite drawn on the bottom
-		 */
-		minDepth() {
-			if (this.length === 0) {
-				return 99999;
-			}
-
-			return this.reduce(function (minDepth, sprite) {
-				return Math.min(minDepth, sprite.depth);
-			}, Infinity);
-		}
-
-		/**
 		 * Draws all the sprites in the group.
 		 *
-		 * @method draw
 		 */
 		draw() {
 			let g = [...this];
@@ -5232,7 +4968,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * By default, allSprites.update is called after every draw call.
 		 *
-		 * @method update
 		 */
 		update() {
 			for (let s of this) {
@@ -5249,14 +4984,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * function. You don't need to name the animation if the sprite will only
 	 * use one animation. See SpriteAnimation for more information.
 	 *
+	 * @memberof Sprite
+	 * @instance
+	 * @func addAnimation
+	 * @param {String} name SpriteAnimation identifier
+	 * @param {SpriteAnimation} animation The preloaded animation
 	 * @example
 	 * sprite.addAni(name, animation);
 	 * sprite.addAni(name, frame1, frame2, frame3...);
 	 * sprite.addAni(name, atlas);
-	 *
-	 * @method addAni
-	 * @param {String} name SpriteAnimation identifier
-	 * @param {SpriteAnimation} animation The preloaded animation
 	 */
 	this.Sprite.prototype.addAnimation =
 		this.Group.prototype.addAnimation =
@@ -5295,7 +5031,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Add multiple animations
 	 *
-	 * @method addAnis
+	 * @memberof Sprite
+	 * @instance
 	 */
 	this.Sprite.prototype.addAnis =
 		this.Group.prototype.addAnis =
@@ -5320,21 +5057,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			};
 
-	/**
-	 * Look at the World reference pages before reading these docs.
-	 *
-	 * https://p5play.org/learn/world.html
-	 *
-	 * A `world` object is created automatically by p5play. There can only
-	 * be one world per p5.js instance.
-	 *
-	 * This class extends `planck.World` and adds some p5play specific
-	 * features.
-	 *
-	 * @class World
-	 * @constructor
-	 */
 	this.World = class extends pl.World {
+		/**
+		 * <a href="https://p5play.org/learn/world.html">
+		 * Look at the World reference pages before reading these docs.
+		 * </a>
+		 *
+		 * A `world` object is created automatically by p5play. There can only
+		 * be one world per p5.js instance.
+		 *
+		 * This class extends `planck.World` and adds some p5play specific
+		 * features.
+		 */
 		constructor() {
 			super(new pl.Vec2(0, 0), true);
 			this.p = pInst;
@@ -5347,7 +5081,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					return -_this._offset.x;
 				},
 				/**
-				 * @property offset.x
+				 * @type.x
 				 */
 				set x(val) {
 					_this._offset.x = val;
@@ -5357,7 +5091,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					return -_this._offset.y;
 				},
 				/**
-				 * @property offset.y
+				 * @type.y
 				 */
 				set y(val) {
 					_this._offset.y = val;
@@ -5373,12 +5107,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * Gravity force that affects all dynamic physics colliders.
 			 *
-			 * @property gravity.x
+			 * @type.x
 			 */
 			/**
 			 * Gravity force that affects all dynamic physics colliders.
 			 *
-			 * @property gravity.y
+			 * @type.y
 			 */
 			this.gravity = {
 				get x() {
@@ -5417,7 +5151,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Adjust the velocity threshold to allow for slow moving objects
 		 * but don't have it be too low, or else objects will never sleep.
 		 *
-		 * @property velocityThreshold
 		 * @type {number}
 		 * @default 0.19
 		 */
@@ -5434,7 +5167,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Resizes the world to the given width and height. Used when
 		 * the canvas is created or resized.
 		 *
-		 * @private resize
+		 * @private
 		 */
 		resize(w, h) {
 			w ??= this.p.width;
@@ -5458,7 +5191,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * This function is automatically called at the end of the p5.js draw
 		 * loop, unless it was already called inside the draw loop.
 		 *
-		 * @method step
 		 * @param {Number} timeStep - time step in seconds
 		 * @param {Number} velocityIterations
 		 * @param {Number} positionIterations
@@ -5479,7 +5211,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Returns the sprites at a position.
 		 *
-		 * @method getSpritesAt
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @returns {Array} an array of sprites
@@ -5518,7 +5249,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Returns the sprite at the top most layer position where
 		 * the mouse click occurs
 		 *
-		 * @method getSpriteAt
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @returns {Sprite} a sprite
@@ -5609,7 +5339,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Used internally to find a contact callback between two sprites.
 		 *
-		 * @private _findContactCB
+		 * @private
 		 * @param {String} type "collide" or "overlap"
 		 * @param {Sprite} s0
 		 * @param {Sprite} s1
@@ -5651,7 +5381,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * This is a performance optimization that can be disabled for
 		 * every sprite in the world.
 		 *
-		 * @property allowSleeping
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -5664,30 +5393,28 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 	};
 
-	/**
-	 * Look at the Camera reference pages before reading these docs.
-	 *
-	 * https://p5play.org/learn/camera.html
-	 *
-	 * A `camera` object is created automatically when p5play loads.
-	 * Currently, there can only be one camera per p5.js instance.
-	 *
-	 * A camera facilitates scrolling and zooming for scenes extending beyond
-	 * the canvas. A camera has a position, a zoom factor, and the mouse
-	 * coordinates relative to the view.
-	 * The camera is automatically created on the first draw cycle.
-	 *
-	 * In p5.js terms the camera wraps the whole drawing cycle in a
-	 * transformation matrix but it can be disable anytime during the draw
-	 * cycle for example to draw interface elements in an absolute position.
-	 *
-	 * @class Camera
-	 * @constructor
-	 * @param {Number} x Initial x coordinate
-	 * @param {Number} y Initial y coordinate
-	 * @param {Number} zoom magnification
-	 **/
 	this.Camera = class {
+		/**
+		 * <a href="https://p5play.org/learn/camera.html">
+		 * Look at the Camera reference pages before reading these docs.
+		 * </a>
+		 *
+		 * A `camera` object is created automatically when p5play loads.
+		 * Currently, there can only be one camera per p5.js instance.
+		 *
+		 * A camera facilitates scrolling and zooming for scenes extending beyond
+		 * the canvas. A camera has a position, a zoom factor, and the mouse
+		 * coordinates relative to the view.
+		 * The camera is automatically created on the first draw cycle.
+		 *
+		 * In p5.js terms the camera wraps the whole drawing cycle in a
+		 * transformation matrix but it can be disable anytime during the draw
+		 * cycle for example to draw interface elements in an absolute position.
+		 *
+		 * @param {Number} x Initial x coordinate
+		 * @param {Number} y Initial y coordinate
+		 * @param {Number} zoom magnification
+		 */
 		constructor(x, y, zoom) {
 			this.p = pInst;
 			let _this = this;
@@ -5701,7 +5428,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * make everything twice the size. .5 will make everything half
 			 * size.
 			 *
-			 * @property zoom
 			 * @type {Number}
 			 * @default 1
 			 */
@@ -5713,7 +5439,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * nor the mouseX and mouseY variables. Use this property to read the mouse
 			 * position if the camera moved or zoomed.
 			 *
-			 * @property mouse
 			 * @type {Object}
 			 */
 			this.mouse = {
@@ -5721,12 +5446,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				y: this.p.mouseY
 			};
 			/**
-			 * @property mouse.x
-			 * @type {Number}
+			 * @type.x {Number}
 			 */
 			/**
-			 * @property mouse.y
-			 * @type {Number}
+			 * @type.y {Number}
 			 */
 
 			/**
@@ -5734,7 +5457,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * Read only property. Use the methods Camera.on() and Camera.off()
 			 * to enable or disable the camera.
 			 *
-			 * @property active
 			 * @type {Boolean}
 			 * @default false
 			 */
@@ -5752,7 +5474,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The camera's position. {x, y}
 		 *
-		 * @property pos
 		 * @type {Object}
 		 */
 		get pos() {
@@ -5761,7 +5482,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The camera's position. Alias for pos.
 		 *
-		 * @property position
 		 * @type {Object}
 		 */
 		get position() {
@@ -5771,7 +5491,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The camera x position.
 		 *
-		 * @property x
 		 * @type {Number}
 		 */
 		get x() {
@@ -5787,7 +5506,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The camera y position.
 		 *
-		 * @property y
 		 * @type {Number}
 		 */
 		get y() {
@@ -5805,7 +5523,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * The canvas will be drawn according to the camera position and scale until
 		 * camera.off() is called
 		 *
-		 * @method on
 		 */
 		on() {
 			if (!this.active) {
@@ -5821,7 +5538,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * The canvas will be drawn normally, ignoring the camera's position
 		 * and scale until camera.on() is called
 		 *
-		 * @method off
 		 */
 		off() {
 			if (this.active) {
@@ -5860,20 +5576,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		return true;
 	};
 
-	/**
-	 * Look at the Tiles reference pages before reading these docs.
-	 *
-	 * https://p5play.org/learn/tiles.html
-	 *
-	 * @class Tiles
-	 * @constructor
-	 * @param {String} tiles
-	 * @param {Number} x
-	 * @param {Number} y
-	 * @param {Number} w
-	 * @param {Number} h
-	 */
 	class Tiles {
+		/**
+		 * <a href="https://p5play.org/learn/tiles.html">
+		 * Look at the Tiles reference pages before reading these docs.
+		 * </a>
+		 *
+		 * @param {String} tiles
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @param {Number} w
+		 * @param {Number} h
+		 */
 		constructor(tiles, x, y, w, h) {
 			if (typeof tiles == 'string') tiles = tiles.split('\n');
 
@@ -5927,18 +5641,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.Tiles = Tiles;
 
 	/**
-	 * Look at the p5play reference pages before reading these docs.
-	 *
-	 * https://p5play.org/learn
-	 *
-	 * @class p5play
-	 */
-
-	/**
 	 * Use of `new Tiles()` is preferred.
 	 *
 	 * @deprecated
-	 * @method createTiles
+	 * @func createTiles
 	 */
 	this.createTiles = function (tiles, x, y, w, h) {
 		return new this.Tiles(tiles, x, y, w, h);
@@ -5999,32 +5705,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Deprecated. Use world.step and allSprites.update instead.
 	 *
 	 * @deprecated
-	 * @method updateSprites
+	 * @func updateSprites
 	 */
 	this.updateSprites = function () {
 		if (this.frameCount == 1) console.warn('updateSprites() is deprecated, use world.step() instead.');
 		this.world.step(...arguments);
 		this.allSprites.update();
-	};
-
-	/**
-	 * Use world.getSpritesAt instead
-	 *
-	 * @deprecated
-	 * @method getSpritesAt
-	 */
-	this.getSpritesAt = function () {
-		return this.world.getSpritesAt(...arguments);
-	};
-
-	/**
-	 * Use world.getSpriteAt instead
-	 *
-	 * @deprecated
-	 * @method getSpriteAt
-	 */
-	this.getSpriteAt = function () {
-		return this.world.getSpriteAt(...arguments);
 	};
 
 	// TODO implement planck joints
@@ -6226,7 +5912,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Gets a color from a color palette
 	 *
-	 * @method colorPal
+	 * @func colorPal
 	 * @param {String} c A single character, a key found in the color palette object.
 	 * @param {Number|Object} palette Can be a palette object or number index
 	 * in the system's palettes array.
@@ -6252,7 +5938,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * input string represents a color value defined in the palette
 	 * object.
 	 *
-	 * @method spriteArt
+	 * @func spriteArt
 	 * @param {String} txt Each character represents a pixel color value
 	 * @param {Number} scale The scale of the image
 	 * @param {Number|Object} palette Color palette
@@ -6315,7 +6001,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * draw loop.
 	 *
 	 * @deprecated
-	 * @method drawSprites
+	 * @func drawSprites
 	 */
 	this.drawSprite = function (sprite) {
 		if (this.frameCount == 1) console.warn('drawSprite() is deprecated, use sprite.draw() instead.');
@@ -6330,7 +6016,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * draw loop.
 	 *
 	 * @deprecated
-	 * @method drawSprites
+	 * @func drawSprites
 	 */
 	this.drawSprites = function (group) {
 		if (this.frameCount == 1) console.warn('drawSprites() is deprecated, use group.draw() instead.');
@@ -6344,7 +6030,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Creates a new sprite.
 	 *
 	 * @deprecated
-	 * @method createSprite
+	 * @func createSprite
 	 * @returns {Sprite}
 	 */
 	this.createSprite = function () {
@@ -6357,7 +6043,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Creates a new group of sprites.
 	 *
 	 * @deprecated
-	 * @method createGroup
+	 * @func createGroup
 	 * @returns {Group}
 	 */
 	this.createGroup = function () {
@@ -6370,13 +6056,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Load animations in the preload p5.js function if you need to use
 	 * them when your program starts.
 	 *
-	 * @method loadAni
+	 * @func loadAni
 	 * @returns {SpriteAnimation}
 	 */
 	/**
 	 * Alias for `new SpriteAnimation()`
 	 *
-	 * @method loadAnimation
+	 * @func loadAnimation
 	 * @returns {SpriteAnimation}
 	 */
 	this.loadAni = this.loadAnimation = function () {
@@ -6386,7 +6072,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Displays an animation. Similar to the p5.js image function.
 	 *
-	 * @method animation
+	 * @func animation
 	 * @param {SpriteAnimation} ani Animation to be displayed
 	 * @param {Number} x position of the animation on the canvas
 	 * @param {Number} y position of the animation on the canvas
@@ -6404,7 +6090,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * or if no input parameter is given, it waits for the next possible
 	 * animation frame.
 	 *
-	 * @method delay
+	 * @func delay
 	 * @param {Number} millisecond
 	 * @returns {Promise} A Promise that fulfills after the specified time.
 	 *
@@ -6425,7 +6111,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * @deprecated Use delay instead.
+	 * Use of delay is preferred.
+	 *
+	 * @deprecated
 	 */
 	this.sleep = (millisecond) => {
 		return this.delay(millisecond);
@@ -6434,7 +6122,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Awaitable function for playing sounds.
 	 *
-	 * @method play
+	 * @func play
 	 * @param {p5.Sound} sound
 	 * @returns {Promise}
 	 * @example
@@ -6521,7 +6209,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * browser from scrolling the page when the user is playing a game
 	 * using common keyboard commands.
 	 *
-	 * @method createCanvas
+	 * @func createCanvas
 	 * @param {Number} width|ratio
 	 * @param {Number} height
 	 */
@@ -6687,7 +6375,7 @@ canvas {
 	 * Just like the p5.js background function except it also accepts
 	 * a color pallette code.
 	 *
-	 * @method background
+	 * @func background
 	 */
 	this.background = function () {
 		let args = arguments;
@@ -6705,7 +6393,7 @@ canvas {
 	 * Just like the p5.js fill function except it also accepts
 	 * a color pallette code.
 	 *
-	 * @method fill
+	 * @func fill
 	 */
 	this.fill = function () {
 		let args = arguments;
@@ -6723,7 +6411,7 @@ canvas {
 	 * Just like the p5.js stroke function except it also accepts
 	 * a color pallette code.
 	 *
-	 * @method stroke
+	 * @func stroke
 	 */
 	this.stroke = function () {
 		let args = arguments;
@@ -6749,7 +6437,7 @@ canvas {
 	 * the same path will return the same image object. It also adds the
 	 * image's url as a property of the image object.
 	 *
-	 * @method loadImage
+	 * @func loadImage
 	 * @param {string} url
 	 * @param {number} [width]
 	 * @param {number} [height]
@@ -6868,7 +6556,7 @@ canvas {
 	/**
 	 * A FriendlyError is a custom error class that extends the native JS Error class.
 	 *
-	 * @private FriendlyError
+	 * @private
 	 * @param {String} func is the name of the function the error was thrown in
 	 * @param {Number} errorNum is the error's code number
 	 * @param {Array} e is an array with references to the cause of the error
@@ -6918,7 +6606,7 @@ canvas {
 	/**
 	 * A group of all the sprites.
 	 *
-	 * @property allSprites
+	 * @type {Group}
 	 */
 	this.allSprites = new this.Group();
 
@@ -6926,85 +6614,40 @@ canvas {
 	 * The planck physics world. Use this to change gravity and offset the
 	 * sprite's coordinate system.
 	 *
-	 * @property world
+	 * @type {World}
 	 */
 	this.world = new this.World();
 
 	/**
-	 * Deprecated, use the p5.js frameCount instead.
-	 *
-	 * This property will be removed in v3.7.0
-	 *
-	 * @deprecated
-	 * @property frame
-	 */
-	this.frame = 0;
-
-	/**
 	 * The default camera. Use this to pan and zoom the camera.
 	 *
-	 * @property camera
+	 * @type {Camera}
 	 */
 	this.camera = new this.Camera();
 
-	/**
-	 * Get user input from the mouse.
-	 * Stores the state of the left, center, or right mouse buttons.
-	 *
-	 * @property mouse
-	 */
-	/**
-	 * Get user input from the keyboard.
-	 *
-	 * @property kb
-	 */
-	/**
-	 * Alias for kb.
-	 *
-	 * @property keyboard
-	 */
-	/**
-	 * Get user input from game controllers.
-	 *
-	 * @property contro
-	 */
-	/**
-	 * Use this function to performance test your game code. FPS, amongst
-	 * the gaming community, refers to how many frames a game could render
-	 * per second, not including the delay between when frames are shown
-	 * on the screen. The higher the FPS, the better the game is
-	 * performing.
-	 *
-	 * @method getFPS
-	 * @returns {Number} The current FPS
-	 */
-
-	/**
-	 * Look at the Input reference pages before reading these docs.
-	 *
-	 * https://p5play.org/learn/input_devices.html
-	 *
-	 * Root class for storing the state of inputs (mouse, keyboard,
-	 * gamepads).
-	 *
-	 * -3 means input was released after being held, pressed for 12 frames
-	 * -2 means input was pressed and released on the same frame
-	 * -1 means input was released
-	 * 0 means input is not pressed
-	 * 1 means input was pressed
-	 * >1 means input is still being pressed
-	 * 12 means input was held
-	 * >12 means input is being held
-	 *
-	 * @class InputDevice
-	 */
 	class InputDevice {
+		/**
+		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * Look at the Input reference pages before reading these docs.
+		 * </a>
+		 *
+		 * Root class for storing the state of inputs (mouse, keyboard,
+		 * gamepads).
+		 *
+		 * -3 means input was released after being held, pressed for 12 frames
+		 * -2 means input was pressed and released on the same frame
+		 * -1 means input was released
+		 * 0 means input is not pressed
+		 * 1 means input was pressed
+		 * >1 means input is still being pressed
+		 * 12 means input was held
+		 * >12 means input is being held
+		 */
 		constructor() {
 			/**
 			 * The amount of frames an input must be pressed to be considered held.
 			 * Default is 12.
 			 *
-			 * @property holdThreshold
 			 * @type {number}
 			 */
 			this.holdThreshold = 12;
@@ -7013,7 +6656,7 @@ canvas {
 		/**
 		 * Initializes the input's values to zero.
 		 *
-		 * @private init
+		 * @private
 		 */
 		init(inputs) {
 			for (let inp of inputs) {
@@ -7025,14 +6668,13 @@ canvas {
 		 * Attempt to auto-correct the user's input. Inheriting classes
 		 * override this method.
 		 *
-		 * @private ac
+		 * @private
 		 */
 		ac(inp) {
 			return inp;
 		}
 
 		/**
-		 * @method presses
 		 * @param {string} inp
 		 * @returns {boolean} true on the first frame that the user presses the input
 		 */
@@ -7043,7 +6685,6 @@ canvas {
 		}
 
 		/**
-		 * @method pressing
 		 * @param {string} inp
 		 * @returns {number} the amount of frames the user has been pressing the input
 		 */
@@ -7055,7 +6696,6 @@ canvas {
 		}
 
 		/**
-		 * @method pressed
 		 * @param {string} inp
 		 * @returns {boolean} true on the first frame that the user released the input
 		 */
@@ -7064,7 +6704,6 @@ canvas {
 		}
 
 		/**
-		 * @method holds
 		 * @param {string} inp
 		 * @returns {boolean} true on the first frame that the user holds the input
 		 */
@@ -7075,7 +6714,6 @@ canvas {
 		}
 
 		/**
-		 * @method holding
 		 * @param {string} inp
 		 * @returns {number} the amount of frames the user has been holding the input
 		 */
@@ -7086,7 +6724,6 @@ canvas {
 		}
 
 		/**
-		 * @method held
 		 * @param {string} inp
 		 * @returns {boolean} true on the first frame that the user released a held input
 		 */
@@ -7097,7 +6734,6 @@ canvas {
 		}
 
 		/**
-		 * @method released
 		 * @param {string} inp
 		 * @returns {boolean} true on the first frame that the user released the input
 		 */
@@ -7113,6 +6749,11 @@ canvas {
 	}
 
 	class Mouse extends InputDevice {
+		/**
+		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * Look at the Input reference pages before reading these docs.
+		 * </a>
+		 */
 		constructor() {
 			super();
 			let _this = this;
@@ -7142,14 +6783,12 @@ canvas {
 
 			/**
 			 * The mouse's x position.
-			 * @property x
 			 * @type {number}
 			 */
 			this.x;
 
 			/**
 			 * The mouse's y position.
-			 * @property y
 			 * @type {number}
 			 */
 			this.y;
@@ -7157,14 +6796,14 @@ canvas {
 
 		/**
 		 * The mouse's position.
-		 * @property pos
+		 * @type {object}
 		 */
 		get pos() {
 			return this._position;
 		}
 		/**
 		 * The mouse's position. Alias for pos.
-		 * @property position
+		 * @type {object}
 		 */
 		get position() {
 			return this._position;
@@ -7179,7 +6818,6 @@ canvas {
 		}
 
 		/**
-		 * @method dragging
 		 * @param {string} inp
 		 * @returns {number} the amount of frames the user has been dragging the input
 		 */
@@ -7190,6 +6828,12 @@ canvas {
 		}
 	}
 
+	/**
+	 * Get user input from the mouse.
+	 * Stores the state of the left, center, or right mouse buttons.
+	 *
+	 * @type {Mouse}
+	 */
 	this.mouse = new Mouse();
 
 	class SpriteMouse extends Mouse {
@@ -7199,7 +6843,6 @@ canvas {
 		}
 
 		/**
-		 * @method hovers
 		 * @returns {boolean} true on the first frame that the mouse is over the sprite
 		 */
 		hovers() {
@@ -7207,7 +6850,6 @@ canvas {
 		}
 
 		/**
-		 * @method hovering
 		 * @returns {number} the amount of frames the mouse has been over the sprite
 		 */
 		hovering() {
@@ -7215,7 +6857,6 @@ canvas {
 		}
 
 		/**
-		 * @method hovered
 		 * @returns {boolean} true on the first frame that the mouse is no longer over the sprite
 		 */
 		hovered() {
@@ -7332,7 +6973,18 @@ canvas {
 		}
 	}
 
+	/**
+	 * Get user input from the keyboard.
+	 *
+	 * @type {KeyBoard}
+	 */
 	this.kb = new KeyBoard();
+
+	/**
+	 * Alias for kb.
+	 *
+	 * @type {KeyBoard}
+	 */
 	this.keyboard = this.kb;
 
 	if (navigator.keyboard) {
@@ -7355,7 +7007,7 @@ canvas {
 	 * Obsolete: Use kb.pressing(key) instead.
 	 *
 	 * @deprecated
-	 * @obsolete keyIsDown
+	 * @obsolete
 	 * @param {String} key
 	 */
 	this.keyIsDown = function (keyCode) {
@@ -7365,7 +7017,7 @@ canvas {
 	};
 
 	/**
-	 * @private _getKeyFromCode
+	 * @private
 	 * @param {*} e keyboard event
 	 * @returns key name
 	 */
@@ -7632,6 +7284,8 @@ canvas {
 
 		/**
 		 * Updates the state of all controllers.
+		 *
+		 * @private
 		 */
 		_update() {
 			for (let c of this) {
@@ -7640,10 +7294,32 @@ canvas {
 		}
 	}
 
+	/**
+	 * Get user input from game controllers.
+	 *
+	 * @type {Contros}
+	 */
 	this.contro = new Contros();
+
+	/**
+	 * Alias for contro
+	 *
+	 * @type {Contros}
+	 */
 	this.controllers = this.contro;
 
 	if (!this.getFPS) this.p5play._fps = 60;
+
+	/**
+	 * Use this function to performance test your game code. FPS, amongst
+	 * the gaming community, refers to how many frames a game could render
+	 * per second, not including the delay between when frames are shown
+	 * on the screen. The higher the FPS, the better the game is
+	 * performing.
+	 *
+	 * @func getFPS
+	 * @returns {Number} The current FPS
+	 */
 	this.getFPS ??= () => this.p5play._fps;
 });
 
@@ -7674,7 +7350,6 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 // called after each p5.js draw function call
 p5.prototype.registerMethod('post', function p5playPostDraw() {
 	this.p5play._inPostDraw = true;
-	this.frame = this.frameCount;
 
 	if (this.allSprites.autoCull) {
 		this.allSprites.cull(10000);
