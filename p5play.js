@@ -484,7 +484,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 
-			this.mouse = new SpriteMouse();
+			this.mouse = new this.p._SpriteMouse();
 
 			if (this.collider != 'none') {
 				if (this._vertexMode) this.addCollider(w, h);
@@ -5419,19 +5419,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p = pInst;
 			let _this = this;
 
+			// camera position
 			this._pos = { x: 0, y: 0 };
 
-			/**
-			 * Camera zoom.
-			 *
-			 * A scale of 1 will be the normal size. Setting it to 2 will
-			 * make everything twice the size. .5 will make everything half
-			 * size.
-			 *
-			 * @type {Number}
-			 * @default 1
-			 */
-			this.zoom = zoom || 1;
+			// camera translation
+			this.__pos = { x: 0, y: 0 };
 
 			/**
 			 * Get the translated mouse position relative to the camera view.
@@ -5467,8 +5459,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				max: { x: 0, y: 0 }
 			};
 
-			if (x) this.x = x;
-			if (y) this.y = y;
+			this._moveIdx = -1;
+			this._zoomIdx = -1;
+
+			this._zoom = zoom || 1;
+			this.x = x || 0;
+			this.y = y || 0;
 		}
 
 		/**
@@ -5497,10 +5493,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._pos.x;
 		}
 		set x(val) {
-			if (this.p.allSprites.pixelPerfect) val = Math.round(val);
 			this._pos.x = val;
-			this.bound.min.x = this.x - this.p.world.hw / this.zoom - 100;
-			this.bound.max.x = this.x + this.p.world.hw / this.zoom + 100;
+			let x = -val + this.p.world.hw / this._zoom;
+			if (this.p.allSprites.pixelPerfect) x = Math.round(x);
+			this.__pos.x = x;
+
+			this.bound.min.x = val - this.p.world.hw / this._zoom - 100;
+			this.bound.max.x = val + this.p.world.hw / this._zoom + 100;
 		}
 
 		/**
@@ -5512,10 +5511,93 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._pos.y;
 		}
 		set y(val) {
-			if (this.p.allSprites.pixelPerfect) val = Math.round(val);
 			this._pos.y = val;
-			this.bound.min.y = this.y - this.p.world.hh / this.zoom - 100;
-			this.bound.max.y = this.y + this.p.world.hh / this.zoom + 100;
+			let y = -val + this.p.world.hh / this._zoom;
+			if (this.p.allSprites.pixelPerfect) y = Math.round(y);
+			this.__pos.y = y;
+
+			this.bound.min.y = val - this.p.world.hh / this._zoom - 100;
+			this.bound.max.y = val + this.p.world.hh / this._zoom + 100;
+		}
+
+		/**
+		 * Camera zoom.
+		 *
+		 * A scale of 1 will be the normal size. Setting it to 2 will
+		 * make everything twice the size. .5 will make everything half
+		 * size.
+		 *
+		 * @type {Number}
+		 * @default 1
+		 */
+		get zoom() {
+			return this._zoom;
+		}
+		set zoom(val) {
+			this._zoom = val;
+			let x = -this._pos.x + this.p.world.hw / val;
+			let y = -this._pos.y + this.p.world.hh / val;
+			if (this.p.allSprites.pixelPerfect) {
+				x = Math.round(x);
+				y = Math.round(y);
+			}
+			this.__pos.x = x;
+			this.__pos.y = y;
+		}
+
+		/**
+		 * Move the camera to a position at a given speed.
+		 *
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @param {Number} speed The amount of movement per frame.
+		 * @returns {Promise} A promise that resolves when the camera reaches the destination.
+		 */
+		moveTo(x, y, speed) {
+			let dx = x - this._pos.x;
+			let dy = y - this._pos.y;
+			let dist = Math.sqrt(dx * dx + dy * dy);
+			if (dist == 0) return Promise.resolve();
+			let frames = Math.round(dist / speed);
+			speed /= dist;
+			let speedX = dx * speed;
+			let speedY = dy * speed;
+
+			this._moveIdx++;
+			let moveIdx = this._moveIdx;
+			return (async () => {
+				for (let i = 0; i < frames; i++) {
+					if (moveIdx != this._moveIdx) return;
+					this.x += speedX;
+					this.y += speedY;
+					await this.p.delay();
+				}
+				this.x = x;
+				this.y = y;
+			})();
+		}
+
+		/**
+		 * Zoom the camera to a scale at a given speed.
+		 * @param {Number} target The target zoom.
+		 * @param {Number} speed The amount of zoom per frame.
+		 * @returns {Promise} A promise that resolves when the camera reaches the target zoom.
+		 */
+		zoomTo(target, speed) {
+			let delta = Math.abs(target - this._zoom);
+			let frames = Math.round(delta / speed);
+			if (target < this.zoom) speed = -speed;
+
+			this._zoomIdx++;
+			let zoomIdx = this._zoomIdx;
+			return (async () => {
+				for (let i = 0; i < frames; i++) {
+					if (zoomIdx != this._zoomIdx) return;
+					this.zoom += speed;
+					await this.p.delay();
+				}
+				this.zoom = target;
+			})();
 		}
 
 		/**
@@ -5527,8 +5609,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		on() {
 			if (!this.active) {
 				this.p.push();
-				this.p.scale(this.zoom);
-				this.p.translate(-this.x + this.p.world.hw / this.zoom, -this.y + this.p.world.hh / this.zoom);
+				this.p.scale(this._zoom);
+				this.p.translate(this.__pos.x, this.__pos.y);
 				this.active = true;
 			}
 		}
@@ -5576,7 +5658,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		return true;
 	};
 
-	class Tiles {
+	this.Tiles = class {
 		/**
 		 * <a href="https://p5play.org/learn/tiles.html">
 		 * Look at the Tiles reference pages before reading these docs.
@@ -5637,8 +5719,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 		}
-	}
-	this.Tiles = Tiles;
+	};
 
 	/**
 	 * Use of `new Tiles()` is preferred.
@@ -6625,7 +6706,7 @@ canvas {
 	 */
 	this.camera = new this.Camera();
 
-	class InputDevice {
+	this.InputDevice = class {
 		/**
 		 * <a href="https://p5play.org/learn/input_devices.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -6746,9 +6827,9 @@ canvas {
 		releases(inp) {
 			return this.released(inp);
 		}
-	}
+	};
 
-	class Mouse extends InputDevice {
+	this._Mouse = class extends this.InputDevice {
 		/**
 		 * <a href="https://p5play.org/learn/input_devices.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -6826,7 +6907,7 @@ canvas {
 			this.draggable = true;
 			return this[inp] >= this.holdThreshold ? this[inp] : 0;
 		}
-	}
+	};
 
 	/**
 	 * Get user input from the mouse.
@@ -6834,9 +6915,9 @@ canvas {
 	 *
 	 * @type {Mouse}
 	 */
-	this.mouse = new Mouse();
+	this.mouse = new this._Mouse();
 
-	class SpriteMouse extends Mouse {
+	this._SpriteMouse = class extends this._Mouse {
 		constructor() {
 			super();
 			this.hover = 0;
@@ -6862,7 +6943,7 @@ canvas {
 		hovered() {
 			return this.hover == -1;
 		}
-	}
+	};
 
 	const _onmousedown = this._onmousedown;
 
@@ -6943,7 +7024,7 @@ canvas {
 		_ontouchend.call(this, e);
 	};
 
-	class KeyBoard extends InputDevice {
+	this._KeyBoard = class extends this.InputDevice {
 		constructor() {
 			super();
 			this.default = ' ';
@@ -6971,14 +7052,15 @@ canvas {
 		get spacebar() {
 			return this[' '];
 		}
-	}
+	};
 
 	/**
 	 * Get user input from the keyboard.
 	 *
 	 * @type {KeyBoard}
 	 */
-	this.kb = new KeyBoard();
+	this.kb = new this._KeyBoard();
+	delete this._KeyBoard;
 
 	/**
 	 * Alias for kb.
@@ -7082,7 +7164,7 @@ canvas {
 		_onkeyup.call(this, e);
 	};
 
-	class Contro extends InputDevice {
+	this._Contro = class extends this.InputDevice {
 		constructor(gp) {
 			super();
 			let inputs = [
@@ -7199,9 +7281,9 @@ canvas {
 
 			return true; // update completed
 		}
-	}
+	};
 
-	class Contros extends Array {
+	this._Contros = class extends Array {
 		constructor() {
 			super();
 			let _this = this;
@@ -7279,7 +7361,7 @@ canvas {
 		_addContro(gp) {
 			if (!gp) return;
 			log('controller ' + this.length + ' connected: ' + gp.id);
-			this.push(new Contro(gp));
+			this.push(new pInst._Contro(gp));
 		}
 
 		/**
@@ -7292,14 +7374,15 @@ canvas {
 				c._update();
 			}
 		}
-	}
+	};
 
 	/**
 	 * Get user input from game controllers.
 	 *
 	 * @type {Contros}
 	 */
-	this.contro = new Contros();
+	this.contro = new this._Contros();
+	delete this._Contros;
 
 	/**
 	 * Alias for contro
