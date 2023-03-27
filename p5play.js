@@ -2695,7 +2695,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			this._destIdx++;
-			if (!x && !y) return true;
+			if (!x && !y) return Promise.resolve(true);
 
 			if (this.speed) speed ??= this.speed;
 			if (this.tileSize > 1) speed ??= 0.1;
@@ -5459,7 +5459,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				max: { x: 0, y: 0 }
 			};
 
-			this._moveIdx = -1;
 			this._zoomIdx = -1;
 
 			this._zoom = zoom || 1;
@@ -5546,44 +5545,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Move the camera to a position at a given speed.
+		 * Zoom the camera at a given speed.
 		 *
-		 * @param {Number} x
-		 * @param {Number} y
-		 * @param {Number} speed The amount of movement per frame.
-		 * @returns {Promise} A promise that resolves when the camera reaches the destination.
-		 */
-		moveTo(x, y, speed) {
-			let dx = x - this._pos.x;
-			let dy = y - this._pos.y;
-			let dist = Math.sqrt(dx * dx + dy * dy);
-			if (dist == 0) return Promise.resolve();
-			let frames = Math.round(dist / speed);
-			speed /= dist;
-			let speedX = dx * speed;
-			let speedY = dy * speed;
-
-			this._moveIdx++;
-			let moveIdx = this._moveIdx;
-			return (async () => {
-				for (let i = 0; i < frames; i++) {
-					if (moveIdx != this._moveIdx) return;
-					this.x += speedX;
-					this.y += speedY;
-					await this.p.delay();
-				}
-				this.x = x;
-				this.y = y;
-			})();
-		}
-
-		/**
-		 * Zoom the camera to a scale at a given speed.
 		 * @param {Number} target The target zoom.
 		 * @param {Number} speed The amount of zoom per frame.
 		 * @returns {Promise} A promise that resolves when the camera reaches the target zoom.
 		 */
 		zoomTo(target, speed) {
+			if (target == this._zoom) return Promise.resolve(true);
+			speed ??= 0.1;
 			let delta = Math.abs(target - this._zoom);
 			let frames = Math.round(delta / speed);
 			if (target < this.zoom) speed = -speed;
@@ -5592,11 +5562,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let zoomIdx = this._zoomIdx;
 			return (async () => {
 				for (let i = 0; i < frames; i++) {
-					if (zoomIdx != this._zoomIdx) return;
+					if (zoomIdx != this._zoomIdx) return false;
 					this.zoom += speed;
 					await this.p.delay();
 				}
 				this.zoom = target;
+				return true;
 			})();
 		}
 
