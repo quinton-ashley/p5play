@@ -6,7 +6,7 @@
  */
 p5.prototype.registerMethod('init', function p5PlayInit() {
 	if (typeof window.planck == 'undefined') {
-		throw new Error('planck.js must be loaded before p5play');
+		throw 'planck.js must be loaded before p5play';
 	}
 
 	// store a reference to the p5 instance that p5play is being added to
@@ -23,8 +23,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		emulated: false
 	};
 	this.p5play.standardizeKeyboard ??= false;
-	this.p5play.sprites = [];
-	this.p5play.groups = [];
+	this.p5play.sprites = {};
+	this.p5play.groups = {};
 	this.p5play.groupsCreated = 0;
 	this.p5play.spritesCreated = 0;
 
@@ -175,10 +175,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 *
 			 * @type {Number}
 			 */
-			this.idNum = this.p.p5play.spritesCreated;
-			this._uid = 1000 + this.idNum;
-			this.p.p5play.sprites[this._uid] = this;
-			this.p.p5play.spritesCreated++;
+			this.idNum;
 
 			let args = [...arguments];
 
@@ -242,6 +239,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				collider = w;
 				w = undefined;
 			}
+
+			this.idNum = this.p.p5play.spritesCreated;
+			this._uid = 1000 + this.idNum;
+			this.p.p5play.sprites[this._uid] = this;
+			this.p.p5play.spritesCreated++;
 
 			/**
 			 * Groups the sprite belongs to, including allSprites
@@ -3385,7 +3387,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.frame = 0;
 
-			this.cycles = 0;
+			this._cycles = 0;
 
 			this.targetFrame = -1;
 
@@ -3818,7 +3820,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		update() {
-			this.cycles++;
+			this._cycles++;
 			var previousFrame = this.frame;
 			this.frameChanged = false;
 
@@ -3828,7 +3830,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.frame = 0;
 			}
 
-			if (this.playing && this.cycles % this.frameDelay === 0) {
+			if (this.playing && this._cycles % this.frameDelay === 0) {
 				this.frameChanged = true;
 
 				if ((this.targetFrame == -1 && this.frame == this.lastFrame) || this.frame == this.targetFrame) {
@@ -5074,7 +5076,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.p = pInst;
 			this.width = this.p.width;
 			this.height = this.p.height;
-			this._offset = { x: 0, y: 0 };
+			this._offset = { x: -0, y: -0 };
 			let _this = this;
 			this.offset = {
 				get x() {
@@ -5084,7 +5086,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				 * @type.x
 				 */
 				set x(val) {
-					_this._offset.x = val;
+					_this._offset.x = val || -0;
 					_this.resize();
 				},
 				get y() {
@@ -5094,7 +5096,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				 * @type.y
 				 */
 				set y(val) {
-					_this._offset.y = val;
+					_this._offset.y = val || -0;
 					_this.resize();
 				}
 			};
@@ -6637,7 +6639,7 @@ canvas {
 				ln = ln[1].split(':');
 				ln = ' in ' + ln[0] + ' at line ' + ln[1];
 			}
-			ln = ' with using ' + className + '.' + func + '. ';
+			ln = ' using ' + className + '.' + func + '. ';
 
 			e = e || [];
 
