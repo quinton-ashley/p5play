@@ -430,6 +430,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				y: 1
 			};
 
+			/**
+			 * The sprite's mirror states.
+			 *
+			 * @type {Object}
+			 * @property {Boolean} x - The sprite's horizontal mirror state.
+			 * @property {Boolean} y - The sprite's vertical mirror state.
+			 * @default {x: false, y: false}
+			 */
 			this.mirror = {
 				get x() {
 					return _this._mirror.x < 0;
@@ -445,6 +453,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			};
 
+			/**
+			 * By default sprites are drawn in the order they were created in.
+			 * You can change the draw order by editing sprite's layer
+			 * property. Sprites with the highest layer value get drawn first.
+			 *
+			 * @type {Number}
+			 */
 			this.layer = group.layer;
 			this.layer ??= this.p.allSprites._getTopLayer() + 1;
 			collider ??= group.collider;
@@ -5074,8 +5089,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		constructor() {
 			super(new pl.Vec2(0, 0), true);
 			this.p = pInst;
-			this.width = this.p.width;
-			this.height = this.p.height;
 			this._offset = { x: -0, y: -0 };
 			let _this = this;
 			this.offset = {
