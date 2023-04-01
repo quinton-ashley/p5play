@@ -5701,7 +5701,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						s.y = y + row * h;
 						continue;
 					}
-					console.error('Tile not found: ' + t);
+					throw 'Tile not found: ' + t;
 				}
 			}
 		}
