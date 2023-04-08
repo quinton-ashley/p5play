@@ -19,9 +19,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	let plScale = 60;
 
 	this.p5play ??= {};
-	this.p5play.os ??= {
-		emulated: false
-	};
+	this.p5play.os ??= {};
+	this.p5play.context ??= 'web';
 	this.p5play.standardizeKeyboard ??= false;
 	this.p5play.sprites = {};
 	this.p5play.groups = {};
@@ -2780,19 +2779,35 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * @param {*} x position to rotate towards
-		 * @param {*} y position to rotate towards
-		 * @param {*} tracking percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
-		 * @param {*} facing rotation angle the sprite should be at when "facing" the position, default is 0
+		 * Rotates the sprite towards an angle or position
+		 * with x and y properties.
+		 *
+		 * @param {Number|Object} angle|position angle in degrees or an object with x and y properties
+		 * @param {Number} tracking percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
+		 * @param {Number} facing (only if position is given) rotation angle the sprite should be at when "facing" the position, default is 0
 		 */
-		rotateTowards(x, y, tracking, facing) {
+		rotateTowards(angle, tracking) {
 			if (this.__collider == 1) throw new FriendlyError(0);
-			if (typeof x != 'number') {
-				facing = tracking;
-				tracking = y;
-				y = facing;
+
+			let args = arguments;
+			let x, y, facing;
+			if (typeof args[0] != 'number') {
+				x = args[0].x;
+				y = args[0].y;
+				tracking = args[1];
+				facing = args[2];
+			} else if (arguments.length > 2) {
+				x = args[0];
+				y = args[1];
+				tracking = args[2];
+				facing = args[3];
 			}
-			let angle = this.angleToFace(x, y, facing);
+
+			if (x !== undefined) angle = this.angleToFace(x, y, facing);
+			else {
+				angle -= this.rotation;
+			}
+
 			tracking ??= 0.1;
 			this.rotationSpeed = angle * tracking;
 		}
@@ -2860,24 +2875,35 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Rotates the sprite to a position at a rotation.
+		 * Rotates the sprite to an angle or to face a position.
 		 *
-		 * @param {Number|Object} x|position
-		 * @param {Number} y
+		 * @param {Number|Object} angle|position
 		 * @param {Number} speed the amount of rotation per frame, default is 1
-		 * @param {Number} facing rotation angle the sprite should be at when "facing" the position, default is 0
+		 * @param {Number} facing (only if position is given) the rotation angle the sprite should be at when "facing" the position, default is 0
 		 * @returns {Promise} a promise that resolves when the rotation is complete
 		 */
-		rotateTo(x, y, speed, facing) {
+		rotateTo(angle, speed) {
 			if (this.__collider == 1) throw new FriendlyError(0);
-			if (typeof x != 'number') {
-				facing = speed;
-				speed = y;
-				y = x.y;
-				x = x.x;
+
+			let args = arguments;
+			let x, y, facing;
+			if (typeof args[0] != 'number') {
+				x = args[0].x;
+				y = args[0].y;
+				speed = args[1];
+				facing = args[2];
+			} else if (arguments.length > 2) {
+				x = args[0];
+				y = args[1];
+				speed = args[2];
+				facing = args[3];
 			}
 
-			let angle = this.angleToFace(x, y, facing);
+			if (x !== undefined) angle = this.angleToFace(x, y, facing);
+			else {
+				if (angle == this.rotation) return;
+				angle -= this.rotation;
+			}
 
 			return this.rotate(angle, speed);
 		}
@@ -7390,6 +7416,22 @@ canvas {
 	 * @returns {Number} The current FPS
 	 */
 	this.getFPS ??= () => this.p5play._fps;
+
+	this.loadAds = (provider, opt) => {
+		opt ??= {};
+		if (window.webkit !== undefined) {
+			// iOS
+			window.webkit.messageHandlers.p5play.postMessage(JSON.stringify(opt));
+		}
+	};
+
+	this.showAd = (type) => {
+		if (type) type = type.toLowerCase();
+		type ??= 'interstitial';
+		if (window.webkit !== undefined) {
+			confirm('p5play:' + type);
+		}
+	};
 });
 
 // called before each p5.js draw function call
