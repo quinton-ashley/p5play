@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.7
+ * @version 3.8
  * @author quinton-ashley
  * @license gpl-v3-only
  */
@@ -1120,6 +1120,25 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 				} else {
 					prevFxt = fxt;
+				}
+			}
+		}
+
+		/**
+		 * Offsets the sprite's center by the given amount.
+		 *
+		 * @param {Number} x amount to offset the sprite horizontally
+		 * @param {Number} y amount to offset the sprite vertically
+		 */
+		offsetCenter(x, y) {
+			if (!this.body) return;
+
+			let off = scaleTo(x, y, this.tileSize);
+			for (let fxt = this.body.m_fixtureList; fxt; fxt = fxt.m_next) {
+				let vertices = fxt.m_shape.m_vertices;
+				for (let v of vertices) {
+					v.x += off.x;
+					v.y += off.y;
 				}
 			}
 		}
