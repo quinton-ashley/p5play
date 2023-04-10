@@ -108,6 +108,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'layer',
 		'life',
 		'mass',
+		'mirror',
+		'offset',
 		'pixelPerfect',
 		'resetAnimationsOnChange',
 		'rotation',
@@ -425,30 +427,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			});
 
 			this._mirror = {
-				x: 1,
-				y: 1
-			};
-
-			/**
-			 * The sprite's mirror states.
-			 *
-			 * @type {Object}
-			 * @property {Boolean} x - The sprite's horizontal mirror state.
-			 * @property {Boolean} y - The sprite's vertical mirror state.
-			 * @default {x: false, y: false}
-			 */
-			this.mirror = {
+				_x: 1,
+				_y: 1,
 				get x() {
-					return _this._mirror.x < 0;
+					return this._x < 0;
 				},
 				set x(val) {
-					_this._mirror.x = val ? -1 : 1;
+					this._x = val ? -1 : 1;
 				},
 				get y() {
-					return _this._mirror.y < 0;
+					return this._y < 0;
 				},
 				set y(val) {
-					_this._mirror.y = val ? -1 : 1;
+					this._y = val ? -1 : 1;
 				}
 			};
 
@@ -665,7 +656,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				'Subgroup',
 				'subgroups',
 				'vel',
-				'mirror',
 				'mouse'
 			];
 
@@ -1762,6 +1752,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * The sprite's mirror states.
+		 *
+		 * @type {Object}
+		 * @property {Boolean} x - The sprite's horizontal mirror state.
+		 * @property {Boolean} y - The sprite's vertical mirror state.
+		 * @default {x: false, y: false}
+		 */
+		get mirror() {
+			return this._mirror;
+		}
+		set mirror(val) {
+			if (val.x !== undefined) this._mirror.x = val.x;
+			if (val.y !== undefined) this._mirror.y = val.y;
+		}
+
+		/**
 		 * Offset the sprite, relative to the origin of its physics body.
 		 *
 		 * The sprite's x and y properties represent its center in world
@@ -1774,6 +1780,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._offset;
 		}
 		set offset(val) {
+			val.x ??= this._offset._x;
+			val.y ??= this._offset._y;
+			if (!val.x && !val.y) return;
 			this._offsetCenterBy(val.x - this._offset._x, val.y - this._offset._y);
 		}
 
@@ -1861,6 +1870,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (val <= 0) val = 0.01;
 			if (typeof val === 'number') {
 				val = { x: val, y: val };
+			} else {
+				val.x ??= this._scale._x;
+				val.y ??= this._scale._y;
 			}
 			if (val.x == this._scale._x && val.y == this._scale._y) return;
 
@@ -2438,7 +2450,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this.p.translate(x, y);
 			if (this.rotation) this.p.rotate(this.rotation);
-			this.p.scale(this._mirror.x, this._mirror.y);
+			this.p.scale(this._mirror._x, this._mirror._y);
 
 			this.p.fill(this.color);
 
@@ -4403,8 +4415,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this.vel = pInst.createVector.call(pInst);
 			this.mirror = {};
+			this.offset = {};
+			this.scale = {};
 
-			let objProps = { vel: ['x', 'y'], mirror: ['x', 'y'] };
+			let objProps = { vel: ['x', 'y'], mirror: ['x', 'y'], offset: ['x', 'y'], scale: ['x', 'y'] };
 			for (let objProp in objProps) {
 				for (let prop of objProps[objProp]) {
 					Object.defineProperty(this[objProp], prop, {
