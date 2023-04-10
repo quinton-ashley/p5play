@@ -546,6 +546,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			});
 
+			this._offset = {
+				_x: 0,
+				_y: 0,
+				get x() {
+					return this._x;
+				},
+				set x(val) {
+					_this._offsetCenterBy(val - this._x, 0);
+				},
+				get y() {
+					return this._y;
+				},
+				set y(val) {
+					_this._offsetCenterBy(0, val - this._y);
+				}
+			};
+
 			/**
 			 * The sprite's position on the previous frame.
 			 *
@@ -1124,13 +1141,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
-		/**
-		 * Offsets the sprite's center by the given amount.
-		 *
-		 * @param {Number} x amount to offset the sprite horizontally
-		 * @param {Number} y amount to offset the sprite vertically
-		 */
-		offsetCenter(x, y) {
+		_offsetCenterBy(x, y) {
+			this._offset._x += x;
+			this._offset._y += y;
+
 			if (!this.body) return;
 
 			let off = scaleTo(x, y, this.tileSize);
@@ -1748,6 +1762,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Offset the sprite, relative to the origin of its physics body.
+		 *
+		 * The sprite's x and y properties represent its center in world
+		 * coordinates. This point is also the sprite's center of rotation
+		 * and where its images and animations are drawn.
+		 *
+		 * @type {object}
+		 */
+		get offset() {
+			return this._offset;
+		}
+		set offset(val) {
+			this._offsetCenterBy(val.x - this._offset._x, val.y - this._offset._y);
+		}
+
+		/**
 		 * Verbose alias for sprite.prevPos
 		 *
 		 * @type {object}
@@ -2336,7 +2366,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_draw() {
 			if (this.strokeWeight !== undefined) this.p.strokeWeight(this.strokeWeight);
 			if (this._ani && this.debug != 'colliders') {
-				this._ani.draw(0, 0, 0, this._scale._x, this._scale._y);
+				this._ani.draw(this._offset.x, this._offset.y, 0, this._scale._x, this._scale._y);
 			}
 			if (!this._ani || this.debug) {
 				if (this.debug && this.debug != 'colliders') {
@@ -3457,7 +3487,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 *
 			 * @type {Object}
 			 * @example
-			 * offset.x = 16;
+			 * ani.offset.x = 16;
 			 */
 			this.offset = { x: owner.anis.offset.x || 0, y: owner.anis.offset.y || 0 };
 
@@ -5134,27 +5164,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		constructor() {
 			super(new pl.Vec2(0, 0), true);
 			this.p = pInst;
-			this._offset = { x: -0, y: -0 };
+			this._offset = { x: 0, y: 0 };
 			let _this = this;
 			this.offset = {
 				get x() {
-					return -_this._offset.x;
+					return _this._offset.x;
 				},
-				/**
-				 * @type.x
-				 */
 				set x(val) {
-					_this._offset.x = val || -0;
+					_this._offset.x = val || 0;
 					_this.resize();
 				},
 				get y() {
-					return -_this._offset.y;
+					return _this._offset.y;
 				},
-				/**
-				 * @type.y
-				 */
 				set y(val) {
-					_this._offset.y = val || -0;
+					_this._offset.y = val || 0;
 					_this.resize();
 				}
 			};
@@ -5233,8 +5257,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			w ??= this.p.width;
 			h ??= this.p.height;
 			this.origin = {
-				x: w * 0.5 + this.offset.x,
-				y: h * 0.5 + this.offset.y
+				x: w * 0.5 - this.offset.x,
+				y: h * 0.5 - this.offset.y
 			};
 			if (this.p.allSprites.tileSize != 1) {
 				this.origin.x -= this.p.allSprites.tileSize * 0.5;
