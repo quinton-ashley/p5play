@@ -544,12 +544,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					return this._x;
 				},
 				set x(val) {
+					if (val == this._x) return;
 					_this._offsetCenterBy(val - this._x, 0);
 				},
 				get y() {
 					return this._y;
 				},
 				set y(val) {
+					if (val == this._y) return;
 					_this._offsetCenterBy(0, val - this._y);
 				}
 			};
@@ -1139,10 +1141,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			let off = scaleTo(x, y, this.tileSize);
 			for (let fxt = this.body.m_fixtureList; fxt; fxt = fxt.m_next) {
-				let vertices = fxt.m_shape.m_vertices;
-				for (let v of vertices) {
-					v.x += off.x;
-					v.y += off.y;
+				let shape = fxt.m_shape;
+				if (shape.m_type != 'circle') {
+					let vertices = shape.m_vertices;
+					for (let v of vertices) {
+						v.x += off.x;
+						v.y += off.y;
+					}
+				} else {
+					shape.m_p.x += off.x;
+					shape.m_p.y += off.y;
 				}
 			}
 		}
@@ -1768,11 +1776,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Offset the sprite, relative to the origin of its physics body.
+		 * Offsetting the sprite moves the sprite's physics body relative
+		 * to its center.
 		 *
 		 * The sprite's x and y properties represent its center in world
-		 * coordinates. This point is also the sprite's center of rotation
-		 * and where its images and animations are drawn.
+		 * coordinates. This point is also the sprite's center of rotation.
 		 *
 		 * @type {object}
 		 */
@@ -1782,7 +1790,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		set offset(val) {
 			val.x ??= this._offset._x;
 			val.y ??= this._offset._y;
-			if (!val.x && !val.y) return;
+			if (val.x == this._offset._x && val.y == this._offset._y) return;
 			this._offsetCenterBy(val.x - this._offset._x, val.y - this._offset._y);
 		}
 
@@ -3029,6 +3037,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * completes
 		 */
 		async changeAni(anis) {
+			if (this.p.p5play.disableImages) return;
 			if (arguments.length > 1) anis = [...arguments];
 			else if (anis instanceof this.p.SpriteAnimation) {
 				if (anis == this._ani) return;
@@ -6579,6 +6588,8 @@ canvas {
 		onLoad: (img) => {} // called anytime an image is fully loaded
 	};
 
+	this.p5play.disableImages = false;
+
 	const _loadImage = this.loadImage;
 
 	/**
@@ -6594,6 +6605,7 @@ canvas {
 	 * @param {function} [callback]
 	 */
 	this.loadImg = this.loadImage = function () {
+		if (this.p5play.disableImages) return;
 		let args = arguments;
 		let url = args[0];
 		let img = pInst.p5play.images[url];
