@@ -150,12 +150,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * @param {Number} [x] - horizontal position of the sprite
 		 * @param {Number} [y] - vertical position of the sprite
-		 * @param {Number} [width] - width of the placeholder rectangle and of
+		 * @param {Number} [w] - width of the placeholder rectangle and of
 		 * the collider until an image or new collider are set. *OR* If height is not
 		 * set then this parameter becomes the diameter of the placeholder circle.
-		 * @param {Number} [height] - height of the placeholder rectangle and of the collider
+		 * @param {Number} [h] - height of the placeholder rectangle and of the collider
 		 * until an image or new collider are set
-		 * @param {String} [colliderType] - collider type is 'dynamic' by default, can be
+		 * @param {String} [collider] - collider type is 'dynamic' by default, can be
 		 * 'static', 'kinematic', or 'none'
 		 * @example
 		 *
