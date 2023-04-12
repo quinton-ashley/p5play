@@ -66,7 +66,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Returns an array with the line length, angle, and number of sides of a regular polygon
 	 *
 	 * @private
-	 * @func getRegularPolygon
 	 * @param {Number} l side length
 	 * @param {String} n name of the regular polygon
 	 * @returns {Boolean} an array [line, angle, sides]
@@ -1668,7 +1667,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * A reference to the sprite's current image.
 		 *
-		 * @type {SpriteAnimation}
+		 * @type {p5.Image}
 		 */
 		get img() {
 			return this._ani?.frameImage;
@@ -1680,7 +1679,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * A reference to the sprite's current image.
 		 *
-		 * @type {SpriteAnimation}
+		 * @type {p5.Image}
 		 */
 		get image() {
 			return this._ani?.frameImage;
@@ -4558,7 +4557,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Reference to the group's current image.
 		 *
-		 * @type {SpriteAnimation}
+		 * @type {p5.Image}
 		 */
 		get img() {
 			return this._ani.frameImage;
@@ -4569,7 +4568,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Reference to the group's current image.
 		 *
-		 * @type {SpriteAnimation}
+		 * @type {p5.Image}
 		 */
 		get image() {
 			return this._ani.frameImage;
@@ -6160,7 +6159,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * draw loop.
 	 *
 	 * @deprecated
-	 * @func drawSprites
 	 */
 	this.drawSprite = function (sprite) {
 		if (this.frameCount == 1) console.warn('drawSprite() is deprecated, use sprite.draw() instead.');
@@ -6175,7 +6173,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * draw loop.
 	 *
 	 * @deprecated
-	 * @func drawSprites
 	 */
 	this.drawSprites = function (group) {
 		if (this.frameCount == 1) console.warn('drawSprites() is deprecated, use group.draw() instead.');
@@ -6189,7 +6186,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Creates a new sprite.
 	 *
 	 * @deprecated
-	 * @func createSprite
 	 * @returns {Sprite}
 	 */
 	this.createSprite = function () {
@@ -6202,7 +6198,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Creates a new group of sprites.
 	 *
 	 * @deprecated
-	 * @func createGroup
 	 * @returns {Group}
 	 */
 	this.createGroup = function () {
@@ -6215,13 +6210,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * Load animations in the preload p5.js function if you need to use
 	 * them when your program starts.
 	 *
-	 * @func loadAni
 	 * @returns {SpriteAnimation}
 	 */
 	/**
 	 * Alias for `new SpriteAnimation()`
 	 *
-	 * @func loadAnimation
 	 * @returns {SpriteAnimation}
 	 */
 	this.loadAni = this.loadAnimation = function () {
@@ -6231,7 +6224,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Displays an animation. Similar to the p5.js image function.
 	 *
-	 * @func animation
 	 * @param {SpriteAnimation} ani Animation to be displayed
 	 * @param {Number} x position of the animation on the canvas
 	 * @param {Number} y position of the animation on the canvas
@@ -6249,7 +6241,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * or if no input parameter is given, it waits for the next possible
 	 * animation frame.
 	 *
-	 * @func delay
 	 * @param {Number} millisecond
 	 * @returns {Promise} A Promise that fulfills after the specified time.
 	 *
@@ -6281,7 +6272,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	/**
 	 * Awaitable function for playing sounds.
 	 *
-	 * @func play
 	 * @param {p5.Sound} sound
 	 * @returns {Promise}
 	 * @example
@@ -6351,6 +6341,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	let userDisabledP5Errors = p5.disableFriendlyErrors;
 	p5.disableFriendlyErrors = true;
 
+	/**
+	 * p5.js canvas element. Use this property to get the canvas'
+	 * width and height
+	 * @property {p5.Canvas} canvas
+	 * @property {Number} canvas.w the width of the canvas
+	 * @property {Number} canvas.h the height of the canvas
+	 */
+	this.canvas = this.canvas;
+
 	const _createCanvas = this.createCanvas;
 
 	/**
@@ -6368,7 +6367,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * browser from scrolling the page when the user is playing a game
 	 * using common keyboard commands.
 	 *
-	 * @func createCanvas
 	 * @param {Number} width|ratio
 	 * @param {Number} height
 	 */
@@ -6434,6 +6432,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		if (args.length < 3) args[2] = 'p2d';
 		let can = _createCanvas.call(pInst, ...args);
 		this.canvas.tabIndex = 0;
+		this.canvas.w = w;
+		this.canvas.h = h;
 		this.canvas.addEventListener('keydown', function (e) {
 			if (
 				e.key == ' ' ||
@@ -6524,6 +6524,11 @@ canvas {
 		return can;
 	};
 
+	/**
+	 * Creates a p5.js canvas element. Includes some extra features such as
+	 * a pixelated mode. See the Canvas learn page for more information.
+	 *
+	 */
 	this.Canvas = function () {
 		return pInst.createCanvas(...arguments);
 	};
@@ -6533,8 +6538,6 @@ canvas {
 	/**
 	 * Just like the p5.js background function except it also accepts
 	 * a color pallette code.
-	 *
-	 * @func background
 	 */
 	this.background = function () {
 		let args = arguments;
@@ -6551,8 +6554,6 @@ canvas {
 	/**
 	 * Just like the p5.js fill function except it also accepts
 	 * a color pallette code.
-	 *
-	 * @func fill
 	 */
 	this.fill = function () {
 		let args = arguments;
@@ -6569,8 +6570,6 @@ canvas {
 	/**
 	 * Just like the p5.js stroke function except it also accepts
 	 * a color pallette code.
-	 *
-	 * @func stroke
 	 */
 	this.stroke = function () {
 		let args = arguments;
@@ -6598,7 +6597,6 @@ canvas {
 	 * the same path will return the same image object. It also adds the
 	 * image's url as a property of the image object.
 	 *
-	 * @func loadImage
 	 * @param {string} url
 	 * @param {number} [width]
 	 * @param {number} [height]
@@ -7481,7 +7479,6 @@ canvas {
 	 * on the screen. The higher the FPS, the better the game is
 	 * performing.
 	 *
-	 * @func getFPS
 	 * @returns {Number} The current FPS
 	 */
 	this.getFPS ??= () => this.p5play._fps;
