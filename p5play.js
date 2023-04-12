@@ -6432,8 +6432,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		if (args.length < 3) args[2] = 'p2d';
 		let can = _createCanvas.call(pInst, ...args);
 		this.canvas.tabIndex = 0;
-		this.canvas.w = w;
-		this.canvas.h = h;
+		this.canvas.w = args[0];
+		this.canvas.h = args[1];
 		this.canvas.addEventListener('keydown', function (e) {
 			if (
 				e.key == ' ' ||
