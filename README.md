@@ -1,4 +1,4 @@
-# <img src="https://p5play.org/logo.svg" width="64"> p5play ![](https://img.shields.io/github/package-json/v/quinton-ashley/p5play) ![](https://img.shields.io/github/license/quinton-ashley/p5play)
+# <img src="https://p5play.org/main/logo.svg" width="64"> p5play ![](https://img.shields.io/github/package-json/v/quinton-ashley/p5play) ![](https://img.shields.io/github/license/quinton-ashley/p5play)
 
 [p5play][] is a 2D game engine made by Computer Science teachers to help you turn your game ideas into JavaScript code!
 
