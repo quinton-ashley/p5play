@@ -14,9 +14,9 @@ p5play is an open source project and will always be available for free, but your
 
 [![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto) [![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley) [![Patreon](https://img.shields.io/badge/Patreon-@p5play-orange.svg)](https://www.patreon.com/p5play)
 
-## Development of p5play
+## Contributing to p5play
 
-Take a look at the [p5play-web][] GitHub repository for information about how to contribute to the development of p5play.
+First, take a look at the [p5play project planning page][]. Let me know what you'd like to help with!
 
 ## Licensing
 

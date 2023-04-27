@@ -38,6 +38,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	const scaleFrom = (x, y, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
 	const scaleXFrom = (x, tileSize) => (x / tileSize) * plScale;
 
+	const isSlop = (val) => Math.abs(val) <= pl.Settings.linearSlop;
 	const fixRound = (val) => (Math.abs(val - Math.round(val)) <= pl.Settings.linearSlop ? Math.round(val) : val);
 	const isArrowFunction = (fn) =>
 		!/^(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*(?:(?:(?:async\s(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*)?function|class)(?:\s|(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*)|(?:[_$\w][\w0-9_$]*\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\()|(?:\[\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*(?:(?:['][^']+['])|(?:["][^"]+["]))\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\]\())/.test(
@@ -896,8 +897,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 
 				if (
-					Math.abs(Math.abs(vecs[0].x) - Math.abs(vecs[vecs.length - 1].x)) <= pl.Settings.linearSlop &&
-					Math.abs(Math.abs(vecs[0].y) - Math.abs(vecs[vecs.length - 1].y)) <= pl.Settings.linearSlop
+					isSlop(Math.abs(vecs[0].x) - Math.abs(vecs[vecs.length - 1].x)) &&
+					isSlop(Math.abs(vecs[0].y) - Math.abs(vecs[vecs.length - 1].y))
 				) {
 					shape = 'polygon';
 					this._originMode = 'center';
@@ -2443,8 +2444,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			y = fixRound(y);
 
 			if (this.pixelPerfect) {
-				if (this._w % 2 == 0 || Math.abs((x % 1) - 0.5) > pl.Settings.linearSlop) x = Math.round(x);
-				if (this._h % 2 == 0 || Math.abs((y % 1) - 0.5) > pl.Settings.linearSlop) y = Math.round(y);
+				if (this._w % 2 == 0 || !isSlop((x % 1) - 0.5)) x = Math.round(x);
+				if (this._h % 2 == 0 || !isSlop((y % 1) - 0.5)) y = Math.round(y);
 			}
 
 			// x += this.tileSize * 0.015;
@@ -2668,12 +2669,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			// let vec = new pl.Vec2(0, 0);
 			if (x !== undefined && x !== null) {
-				// vec.x = (destX - this.x) * tracking * this.tileSize * this.mass;
-				this.vel.x = (x - this.x) * tracking * this.tileSize;
+				let diffX = x - this.x;
+				if (!isSlop(diffX)) {
+					this.vel.x = diffX * tracking * this.tileSize;
+				}
 			}
 			if (y !== undefined && y !== null) {
-				// vec.y = (destY - this.y) * tracking * this.tileSize * this.mass;
-				this.vel.y = (y - this.y) * tracking * this.tileSize;
+				let diffY = y - this.y;
+				if (!isSlop(diffY)) {
+					this.vel.y = diffY * tracking * this.tileSize;
+				}
 			}
 			// this.body.applyForce(vec, new pl.Vec2(0, 0));
 		}
@@ -2742,7 +2747,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number|Object} x|position destination x or any object with x and y properties
 		 * @param {Number} y destination y
 		 * @param {Number} speed [optional]
-		 * @returns {Promise} resolves when the movement is complete or cancelled
+		 * @returns {Promise} resolves to true when the movement is complete
+		 * or to false if the sprite will not reach its destination
 		 */
 		moveTo(x, y, speed) {
 			if (typeof x == 'undefined') {
@@ -2765,8 +2771,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._dest.x = this.x;
 			this._dest.y = this.y;
 
-			let direction = true;
-
 			if (x == this.x) x = false;
 			else {
 				this._dest.x = x;
@@ -2786,7 +2790,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			speed ??= 1;
 			if (speed <= 0) {
 				console.warn('sprite.move: speed should be a positive number');
-				return;
+				return Promise.resolve(false);
 			}
 
 			let a = this._dest.y - this.y;
@@ -2798,27 +2802,37 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.vel.x = b * percent;
 			this.vel.y = a * percent;
 
-			// estimate how many frames it will take for the sprite
-			// to reach its destination
-			let frames = Math.floor(c / speed) - 5;
+			// direction destination
+			let destD = this.direction;
+			// direction margin of error
+			let destDMin = destD - 0.1;
+			let destDMax = destD + 0.1;
 
-			// margin of error
+			// proximity margin of error
 			let margin = speed + 0.01;
 
 			let destIdx = this._destIdx;
+
+			let velThresh = Math.max(this.p.world.velocityThreshold, margin * 0.25);
 
 			return (async () => {
 				let distX = margin + margin;
 				let distY = margin + margin;
 				do {
 					if (destIdx != this._destIdx) return false;
-
 					await pInst.delay();
 
-					// skip calculations if not close enough to destination yet
-					if (frames > 0) {
-						frames--;
-						continue;
+					// check if the sprite's movement has been impeded such that
+					// its speed has become slower than the world velocityThreshold
+					// or if its direction has changed significantly enough so that
+					// it will not reach its destination
+					let dir = this.direction;
+					if (
+						dir <= destDMin ||
+						dir >= destDMax ||
+						(Math.abs(this.vel.x) <= velThresh && Math.abs(this.vel.y) <= velThresh)
+					) {
+						return false;
 					}
 
 					// check if the sprite has reached its destination
@@ -2992,7 +3006,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (speed > absA) speed = absA;
 
 			let ang = this.rotation + angle;
-			let cw = angle > 0;
+			let cw = angle > 0; // rotation is clockwise
 			this.rotationSpeed = speed * (cw ? 1 : -1);
 
 			let frames = Math.floor(absA / speed) - 1;
@@ -3002,18 +3016,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			return (async () => {
 				if (frames > 1) {
-					while (frames > 0) {
-						if (this._rotateIdx != _rotateIdx) return;
-						await pInst.delay();
-						frames--;
-					}
 					let limit = Math.abs(this.rotationSpeed) + 0.01;
-					while (
+					do {
+						if (this._rotateIdx != _rotateIdx) return false;
+						await pInst.delay();
+
+						if ((cw && this.rotationSpeed < 0.01) || (!cw && this.rotationSpeed > -0.01)) {
+							return false;
+						}
+					} while (
 						((cw && ang > this.rotation) || (!cw && ang < this.rotation)) &&
 						limit < Math.abs(ang - this.rotation)
-					) {
-						await pInst.delay();
-					}
+					);
+
 					if (Math.abs(ang - this.rotation) > 0.01) {
 						this.rotationSpeed = ang - this.rotation;
 						await pInst.delay();
@@ -3021,8 +3036,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				} else {
 					await pInst.delay();
 				}
+				if (this._rotateIdx != _rotateIdx) return false;
 				this.rotationSpeed = 0;
 				this.rotation = ang;
+				return true;
 			})();
 		}
 
