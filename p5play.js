@@ -499,6 +499,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else {
 				this.w = w || (this.tileSize > 1 ? 1 : 50);
 				this.h = h || this.w;
+				if (Array.isArray(w)) {
+					throw new Error(
+						'Cannot set the collider type of a sprite with a polygon or chain shape to "none". Try having the sprite overlap with other sprites instead.'
+					);
+				}
 				if (w !== undefined && h === undefined) this._shape = 'circle';
 				else this._shape = 'box';
 			}
@@ -725,6 +730,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} h height of the collider
 		 */
 		addCollider(offsetX, offsetY, w, h) {
+			if (this.collider == 'none') {
+				throw new Error('Cannot add a collider to a sprite that has none.');
+			}
 			let props = {};
 			props.shape = this._parseShape(...arguments);
 			if (props.shape.m_type == 'chain') {
@@ -1008,96 +1016,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._removeFixtures(false);
 		}
 
-		addJoint(spriteB, type, props) {
-			let spriteA = this;
-			props ??= {};
-			/*
-			 * frequencyHz, dampingRatio, collideConnected, userData, ratio,
-			 * enableLimit, enableMotor, lowerAngle, maxMotorTorque
-			 * maxMotorForce, motorSpeed, referenceAngle, upperAngle, maxForce
-			 * maxTorque, localAxisA, angularOffset, joint1, joint2,
-			 * correctionFactor
-			 */
-			if (props.motorSpeed) props.enableMotor = true;
-
-			// function genProps(a, b) {
-			props = Object.assign(props, {
-				bodyA: spriteA.body,
-				bodyB: spriteB.body,
-				length: props.length != undefined ? scaleXTo(props.length) : null,
-				maxLength: props.maxLength != undefined ? scaleXTo(props.maxLength) : null,
-				lengthA: props.lengthA != undefined ? scaleXTo(props.lengthA) : null,
-				lengthB: props.lengthB != undefined ? scaleXTo(props.lengthB) : null,
-				groundAnchorA: props.groundAnchorA ? scaleXTo(props.groundAnchorA) : new pl.Vec2(0, 0),
-				groundAnchorB: props.groundAnchorB ? scaleXTo(props.groundAnchorB) : new pl.Vec2(0, 0),
-				upperTranslation: props.upperTranslation ? scaleXTo(props.upperTranslation) : 1,
-				lowerTranslation: props.lowerTranslation ? scaleXTo(props.lowerTranslation) : 1,
-				linearOffset: props.linearOffset ? scaleTo(props.linearOffset) : new pl.Vec2(0, 0)
-			});
-			if (props.anchorA) {
-				props.localAnchorA = scaleTo(props.anchorA);
-			} else if (props.localAnchorA) {
-				props.localAnchorA = scaleTo(props.localAnchorA);
-			} else {
-				props.localAnchorA = new pl.Vec2(0, 0);
-			}
-			if (props.anchorB) {
-				props.localAnchorB = scaleTo(props.anchorB);
-			} else if (props.localAnchorB) {
-				props.localAnchorB = scaleTo(props.localAnchorB);
-			} else {
-				props.localAnchorB = new pl.Vec2(0, 0);
-			}
-			// 	return props;
-			// }
-
-			type ??= 'distance';
-			let j;
-			if (type == 'distance') {
-				j = pl.DistanceJoint(props);
-			} else if (type == 'orbit') {
-				// let s = new Sprite([
-				// 	[spriteA.x, spriteA.y],
-				// 	[spriteB.x, spriteB.y]
-				// ]);
-				// s.overlaps(allSprites);
-				// j = pl.DistanceJoint(genProps(spriteA, s));
-				// this.p.world.createJoint(j);
-				// genProps(s, spriteB);
-				// j = pl.RevoluteJoint(props, s.body, spriteB.body, spriteB.body.getWorldCenter());
-			} else if (type == 'pulley') {
-				j = pl.PulleyJoint(props);
-			} else if (type == 'wheel') {
-				j = pl.WheelJoint(props);
-			} else if (type == 'rope') {
-				j = pl.RopeJoint(props);
-			} else if (type == 'weld') {
-				j = pl.WeldJoint(props);
-			} else if (type == 'revolute') {
-				j = pl.RevoluteJoint(props, spriteA.body, spriteB.body, spriteA.body.getWorldCenter());
-			} else if (type == 'gear') {
-				j = pl.GearJoint(props);
-			} else if (type == 'friction') {
-				j = pl.FrictionJoint(props);
-			} else if (type == 'motor') {
-				j = pl.MotorJoint(props);
-			} else if (type == 'prismatic') {
-				j = pl.PrismaticJoint(props);
-			} else if (type == 'mouse') {
-				/*j = new box2d.b2MouseJointDef();
-        j.bodyA = bodyA!=null?bodyA.body:b2world.CreateBody(new box2d.b2BodyDef());
-        j.bodyB = bodyB.body;
-        j.target = b2scaleTo(props.xy);
-        j.collideConnected = true;
-        j.maxForce = props.maxForce||(1000.0 * bodyB.body.GetMass());
-        j.frequencyHz = props.frequency||5;  // Try a value less than 5 (0 for no elasticity)
-        j.dampingRatio = props.damping||0.9; // Ranges between 0 and 1 (1 for no springiness)
-        bodyB.body.SetAwake(true);
-        bodyA=bodyB;*/
-			}
-			return this.p.world.createJoint(j);
-		}
-
 		/**
 		 * Removes overlap sensors from the sprite.
 		 *
@@ -1134,6 +1052,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		_offsetCenterBy(x, y) {
+			if (!x && !y) return;
+
 			this._offset._x += x;
 			this._offset._y += y;
 
@@ -1297,6 +1217,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 
+			if (val == 'none' && (this._shape == 'chain' || this._shape == 'polygon')) {
+				throw new Error(
+					'Cannot set the collider type of a polygon or chain collider to "none". Try having the sprite overlap with other sprites instead.'
+				);
+			}
+
 			let oldCollider = this._collider;
 
 			this._collider = val;
@@ -1334,6 +1260,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this[prop] = bodyProps[prop];
 				}
 			}
+			let ox = this._offset._x;
+			let oy = this._offset._y;
+			this._offset._x = 0;
+			this._offset._y = 0;
+			this._offsetCenterBy(ox, oy);
 		}
 
 		_parseColor(val) {
@@ -2386,7 +2317,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_draw() {
 			if (this.strokeWeight !== undefined) this.p.strokeWeight(this.strokeWeight);
 			if (this._ani && this.debug != 'colliders') {
-				this._ani.draw(this._offset.x, this._offset.y, 0, this._scale._x, this._scale._y);
+				this._ani.draw(this._offset._x, this._offset._y, 0, this._scale._x, this._scale._y);
 			}
 			if (!this._ani || this.debug) {
 				if (this.debug && this.debug != 'colliders') {
@@ -2404,9 +2335,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				} else {
 					this.p.stroke(this._stroke || 120);
 					if (this._shape == 'box') {
-						this.p.rect(0, 0, this.w * this.tileSize, this.h * this.tileSize);
+						this.p.rect(this._offset._x, this._offset._y, this.w * this.tileSize, this.h * this.tileSize);
 					} else if (this._shape == 'circle') {
-						this.p.circle(0, 0, this.d * this.tileSize);
+						this.p.circle(this._offset._x, this._offset._y, this.d * this.tileSize);
 					}
 				}
 			}
