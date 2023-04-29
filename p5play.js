@@ -10,13 +10,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	}
 
 	// store a reference to the p5 instance that p5play is being added to
-	let pInst = this;
+	const pInst = this;
 
 	const log = console.log; // shortcut
 	this.log = console.log;
 
 	const pl = planck;
-	let plScale = 60;
+	const plScale = 60;
 
 	this.p5play ??= {};
 	this.p5play.os ??= {};
@@ -27,7 +27,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.p5play.groupsCreated = 0;
 	this.p5play.spritesCreated = 0;
 
-	// change the angle mode to degrees
+	// change the angle mode so that the p5play default is degrees
 	this.angleMode('degrees');
 
 	// scale to planck coordinates from p5 coordinates
@@ -40,52 +40,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	const isSlop = (val) => Math.abs(val) <= pl.Settings.linearSlop;
 	const fixRound = (val) => (Math.abs(val - Math.round(val)) <= pl.Settings.linearSlop ? Math.round(val) : val);
-	const isArrowFunction = (fn) =>
-		!/^(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*(?:(?:(?:async\s(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*)?function|class)(?:\s|(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*)|(?:[_$\w][\w0-9_$]*\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\()|(?:\[\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*(?:(?:['][^']+['])|(?:["][^"]+["]))\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\]\())/.test(
-			fn.toString()
-		);
 
-	/**
-	 * Checks if the given string contains a valid collider type
-	 * or collider type code letter:
-	 *
-	 * 'd' or 'dynamic'
-	 * 's' or 'static'
-	 * 'k' or 'kinematic'
-	 * 'n' or 'none'
-	 *
-	 * @private
-	 * @param {String} t type name
-	 * @returns {Boolean} true if the given string contains a valid collider type
-	 */
-	function isColliderType(t) {
-		let abr = t.slice(0, 2);
-		return t == 'd' || t == 's' || t == 'k' || t == 'n' || abr == 'dy' || abr == 'st' || abr == 'ki' || abr == 'no';
-	}
-
-	/**
-	 * Returns an array with the line length, angle, and number of sides of a regular polygon
-	 *
-	 * @private
-	 * @param {Number} l side length
-	 * @param {String} n name of the regular polygon
-	 * @returns {Boolean} an array [line, angle, sides]
-	 */
-	function getRegularPolygon(l, n) {
-		if (n == 'triangle') l = [l, -120, 3];
-		else if (n == 'square') l = [l, -90, 4];
-		else if (n == 'pentagon') l = [l, -72, 5];
-		else if (n == 'hexagon') l = [l, -60, 6];
-		else if (n == 'septagon') l = [l, -51.4285714286, 7];
-		else if (n == 'octagon') l = [l, -45, 8];
-		else if (n == 'enneagon') l = [l, -40, 9];
-		else if (n == 'decagon') l = [l, -36, 10];
-		else if (n == 'hendecagon') l = [l, -32.7272727273, 11];
-		else if (n == 'dodecagon') l = [l, -30, 12];
-		return l;
-	}
-
-	let spriteProps = [
+	const spriteProps = [
 		'autoDraw',
 		'autoUpdate',
 		'bounciness',
@@ -132,7 +88,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		'y'
 	];
 
-	let eventTypes = {
+	const eventTypes = {
 		_collisions: ['_collides', '_colliding', '_collided'],
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
 	};
@@ -317,7 +273,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._colliding = {};
 			this._collided = {};
 
-			this._overlap = {};
+			this._hasOverlap = {};
 			/**
 			 * Contains all the overlap callback functions for this sprite
 			 * when it comes in contact with other sprites or groups.
@@ -649,7 +605,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				'_colliding',
 				'_collided',
 				'_collisions',
-				'_overlap',
+				'_hasOverlap',
 				'_overlaps',
 				'_overlapping',
 				'_overlapped',
@@ -1026,7 +982,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 */
 		removeSensors() {
-			this._overlap = {};
+			this._hasOverlap = {};
 			this._overlaps = {};
 			this._overlapping = {};
 			this._overlapped = {};
@@ -2744,7 +2700,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			let destIdx = this._destIdx;
 
-			let velThresh = Math.max(this.p.world.velocityThreshold, margin * 0.25);
+			let velThresh = Math.max(this.p.world.velocityThreshold, margin * 0.25) / this.tileSize;
 
 			return (async () => {
 				let distX = margin + margin;
@@ -2777,18 +2733,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.vel.y = 0;
 				return true;
 			})();
-		}
-
-		snap(o, dist) {
-			if (o.isMoving || o.x != o._dest.x || o.y != o._dest.y || !this.isMoving) return;
-			dist ??= 1 || this.tileSize * 0.1;
-			if (Math.abs(this.x) % 1 >= dist || Math.abs(this.y) % 1 >= dist) {
-				return;
-			}
-			this.vel.x = 0;
-			this.vel.y = 0;
-			this.x = Math.round(this.x);
-			this.y = Math.round(this.y);
 		}
 
 		/**
@@ -3169,14 +3113,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				throw new FriendlyError('Sprite.collide', 1, [callback]);
 			}
 
-			if (this._overlap[target._uid] !== false) {
-				this._overlap[target._uid] = false;
+			if (this._hasOverlap[target._uid] !== false) {
+				this._hasOverlap[target._uid] = false;
 			}
-			if (target._overlap[this._uid] !== false) {
-				target._overlap[this._uid] = false;
+			if (target._hasOverlap[this._uid] !== false) {
+				target._hasOverlap[this._uid] = false;
 				if (target instanceof this.p.Group) {
 					for (let s of target) {
-						s._overlap[this._uid] = false;
+						s._hasOverlap[this._uid] = false;
 					}
 				}
 			}
@@ -3273,16 +3217,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					target._hasSensors = true;
 				}
 			}
-			if (this._overlap[target._uid] != true) {
+			if (this._hasOverlap[target._uid] != true) {
 				this._removeContactsWith(target);
-				this._overlap[target._uid] = true;
+				this._hasOverlap[target._uid] = true;
 			}
-			if (target._overlap[this._uid] != true) {
+			if (target._hasOverlap[this._uid] != true) {
 				target._removeContactsWith(this);
-				target._overlap[this._uid] = true;
+				target._hasOverlap[this._uid] = true;
 				if (target instanceof this.p.Group) {
 					for (let s of target) {
-						s._overlap[this._uid] = true;
+						s._hasOverlap[this._uid] = true;
 					}
 				}
 			}
@@ -3699,7 +3643,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					let tileSize = owner.tileSize;
 
 					if (!w || !h) {
-						if (!owner._dimensionsUndefinedByUser) {
+						// sprites will be given default dimensions, but groups
+						// are not, so _dimensionsUndefinedByUser is only for sprites
+						if (!owner._dimensionsUndefinedByUser && owner.w && owner.h) {
 							w = owner.w;
 							h = owner.h;
 						} else if (tileSize) {
@@ -4291,7 +4237,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._colliding = {};
 			this._collided = {};
 
-			this._overlap = {};
+			this._hasOverlap = {};
 			/**
 			 * Contains all the overlap callback functions for this group
 			 * when it comes in contact with other sprites or groups.
@@ -4540,7 +4486,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
-		resetCentroid() {
+		_resetCentroid() {
 			let x = 0;
 			let y = 0;
 			for (let s of this) {
@@ -4551,19 +4497,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.centroid;
 		}
 
-		resetDistancesFromCentroid() {
+		_resetDistancesFromCentroid() {
 			for (let s of this) {
 				s.distCentroid = {
 					x: s.x - this.centroid.x,
 					y: s.y - this.centroid.y
 				};
-			}
-		}
-
-		snap(o, dist) {
-			dist ??= 1 || this.tileSize * 0.1;
-			for (let s of this) {
-				s.snap(o, dist);
 			}
 		}
 
@@ -4578,17 +4517,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				throw new FriendlyError('Group.collide', 1, [callback]);
 			}
 
-			if (this._overlap[target._uid] !== false) {
-				this._overlap[target._uid] = false;
+			if (this._hasOverlap[target._uid] !== false) {
+				this._hasOverlap[target._uid] = false;
 				for (let s of this) {
-					s._overlap[target._uid] = false;
+					s._hasOverlap[target._uid] = false;
 				}
 			}
-			if (target._overlap[this._uid] !== false) {
-				target._overlap[this._uid] = false;
+			if (target._hasOverlap[this._uid] !== false) {
+				target._hasOverlap[this._uid] = false;
 				if (target instanceof this.p.Group) {
 					for (let s of target) {
-						s._overlap[this._uid] = false;
+						s._hasOverlap[this._uid] = false;
 					}
 				}
 			}
@@ -4676,19 +4615,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					target._hasSensors = true;
 				}
 			}
-			if (this._overlap[target._uid] != true) {
+			if (this._hasOverlap[target._uid] != true) {
 				this._removeContactsWith(target);
-				this._overlap[target._uid] = true;
+				this._hasOverlap[target._uid] = true;
 				for (let s of this) {
-					s._overlap[target._uid] = true;
+					s._hasOverlap[target._uid] = true;
 				}
 			}
-			if (target._overlap[this._uid] != true) {
+			if (target._hasOverlap[this._uid] != true) {
 				target._removeContactsWith(this);
-				target._overlap[this._uid] = true;
+				target._hasOverlap[this._uid] = true;
 				if (target instanceof this.p.Group) {
 					for (let s of target) {
-						s._overlap[this._uid] = true;
+						s._hasOverlap[this._uid] = true;
 					}
 				}
 			}
@@ -4776,7 +4715,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				y = obj.y;
 				x = obj.x;
 			}
-			let centroid = this.resetCentroid();
+			let centroid = this._resetCentroid();
 			let movements = [];
 			for (let s of this) {
 				let dest = {
@@ -4799,9 +4738,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				x = obj.x;
 			}
 			if (x === undefined && y === undefined) return;
-			this.resetCentroid();
+			this._resetCentroid();
 			for (let s of this) {
-				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
+				if (s.distCentroid === undefined) this._resetDistancesFromCentroid();
 				let dest = {
 					x: s.distCentroid.x + x,
 					y: s.distCentroid.y + y
@@ -4821,9 +4760,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				x = obj.x;
 			}
 			if (x === undefined && y === undefined) return;
-			this.resetCentroid();
+			this._resetCentroid();
 			for (let s of this) {
-				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
+				if (s.distCentroid === undefined) this._resetDistancesFromCentroid();
 				let dest = {
 					x: s.distCentroid.x + x,
 					y: s.distCentroid.y + y
@@ -4841,11 +4780,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		orbit(amount) {
 			if (this.p.frameCount == 0) console.warn('group.orbit is experimental and is subject to change in the future!');
-			if (!this.centroid) this.resetCentroid();
+			if (!this.centroid) this._resetCentroid();
 			this._orbitAngle += amount;
 			let angle = this._orbitAngle;
 			for (let s of this) {
-				if (s.distCentroid === undefined) this.resetDistancesFromCentroid();
+				if (s.distCentroid === undefined) this._resetDistancesFromCentroid();
 				let x = s.distCentroid.x;
 				let y = s.distCentroid.y;
 				let x2 = x * this.p.cos(angle) - y * this.p.sin(angle);
@@ -5394,7 +5333,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Used internally to find a contact callback between two sprites.
 		 *
 		 * @private
-		 * @param {String} type "collide" or "overlap"
+		 * @param {String} type the eventType of contact callback to find
 		 * @param {Sprite} s0
 		 * @param {Sprite} s1
 		 * @returns contact cb if one can be found between the two sprites
@@ -5677,8 +5616,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		// if `a` has an overlap enabled with `b` their colliders should not produce a
 		// contact event, the overlap contact event is between their sensors
-		let shouldOverlap = a.p.world._findContactCB('_overlap', a, b);
-		if (!shouldOverlap) shouldOverlap = a.p.world._findContactCB('_overlap', b, a);
+		let shouldOverlap = a.p.world._findContactCB('_hasOverlap', a, b);
+		if (!shouldOverlap) shouldOverlap = a.p.world._findContactCB('_hasOverlap', b, a);
 		if (shouldOverlap) return false;
 		return true;
 	};
@@ -5807,6 +5746,52 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 	}
 
+	function isArrowFunction(fn) {
+		return !/^(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*(?:(?:(?:async\s(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*)?function|class)(?:\s|(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*)|(?:[_$\w][\w0-9_$]*\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\()|(?:\[\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*(?:(?:['][^']+['])|(?:["][^"]+["]))\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\]\())/.test(
+			fn.toString()
+		);
+	}
+
+	/**
+	 * Checks if the given string contains a valid collider type
+	 * or collider type code letter:
+	 *
+	 * 'd' or 'dynamic'
+	 * 's' or 'static'
+	 * 'k' or 'kinematic'
+	 * 'n' or 'none'
+	 *
+	 * @private
+	 * @param {String} t type name
+	 * @returns {Boolean} true if the given string contains a valid collider type
+	 */
+	function isColliderType(t) {
+		let abr = t.slice(0, 2);
+		return t == 'd' || t == 's' || t == 'k' || t == 'n' || abr == 'dy' || abr == 'st' || abr == 'ki' || abr == 'no';
+	}
+
+	/**
+	 * Returns an array with the line length, angle, and number of sides of a regular polygon
+	 *
+	 * @private
+	 * @param {Number} l side length
+	 * @param {String} n name of the regular polygon
+	 * @returns {Boolean} an array [line, angle, sides]
+	 */
+	function getRegularPolygon(l, n) {
+		if (n == 'triangle') l = [l, -120, 3];
+		else if (n == 'square') l = [l, -90, 4];
+		else if (n == 'pentagon') l = [l, -72, 5];
+		else if (n == 'hexagon') l = [l, -60, 6];
+		else if (n == 'septagon') l = [l, -51.4285714286, 7];
+		else if (n == 'octagon') l = [l, -45, 8];
+		else if (n == 'enneagon') l = [l, -40, 9];
+		else if (n == 'decagon') l = [l, -36, 10];
+		else if (n == 'hendecagon') l = [l, -32.7272727273, 11];
+		else if (n == 'dodecagon') l = [l, -30, 12];
+		return l;
+	}
+
 	/**
 	 * Deprecated. Use world.step and allSprites.update instead.
 	 *
@@ -5818,171 +5803,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		this.world.step(...arguments);
 		this.allSprites.update();
 	};
-
-	// TODO implement planck joints
-	// the following code is from https://github.com/bobcgausa/cook-js
-
-	// const debugDraw = (canvas, scale, world) => {
-	// 	const context = canvas.getContext('2d');
-	// 	//context.fillStyle = '#DDD';
-	// 	//context.fillRect(0, 0, canvas.width, canvas.height);
-
-	// 	// Draw joints
-	// 	for (let j = world.m_jointList; j; j = j.m_next) {
-	// 		context.lineWidth = 0.25;
-	// 		context.strokeStyle = '#00F';
-	// 		drawJoint(context, scale, world, j);
-	// 	}
-	// };
-
-	// const drawJoint = (context, scale, world, joint) => {
-	// 	context.save();
-	// 	context.scale(scale, scale);
-	// 	context.lineWidth /= scale;
-
-	// 	const b1 = joint.m_bodyA;
-	// 	const b2 = joint.m_bodyB;
-	// 	const x1 = b1.getPosition();
-	// 	const x2 = b2.getPosition();
-	// 	let p1;
-	// 	let p2;
-	// 	context.beginPath();
-	// 	switch (joint.m_type) {
-	// 		case 'distance-joint':
-	// 		case 'rope-joint':
-	// 			context.moveTo(x1.x, x1.y);
-	// 			context.lineTo(x2.x, x2.y);
-	// 			break;
-	// 		case 'wheel-joint':
-	// 		case 'revolute-joint':
-	// 			p1 = joint.m_localAnchorA;
-	// 			p2 = joint.m_localAnchorB;
-	// 			const a = b2.getAngle();
-	// 			const v = new pl.Vec2(cos(a), sin(a));
-	// 			context.moveTo(x2.x, x2.y);
-	// 			context.lineTo(x2.x + v.x, x2.y + v.y);
-	// 			break;
-	// 		case 'mouse-joint':
-	// 		case 'weld-joint':
-	// 			p1 = joint.getAnchorA();
-	// 			p2 = joint.getAnchorB();
-	// 			context.moveTo(p1.x, p1.y);
-	// 			context.lineTo(p2.x, p2.y);
-	// 			break;
-	// 		case 'pulley-joint':
-	// 			p1 = joint.m_groundAnchorA;
-	// 			p2 = joint.m_groundAnchorB;
-	// 			context.moveTo(p1.x, p1.y);
-	// 			context.lineTo(x1.x, x1.y);
-	// 			context.moveTo(p2.x, p2.y);
-	// 			context.lineTo(x2.x, x2.y);
-	// 			context.moveTo(p1.x, p1.y);
-	// 			context.lineTo(p2.x, p2.y);
-	// 			break;
-	// 		default:
-	// 			break;
-	// 	}
-	// 	context.closePath();
-	// 	context.stroke();
-	// 	context.restore();
-	// };
-
-	// function getAABB(body) {
-	// 	const aabb = new pl.AABB();
-	// 	const t = new pl.Transform();
-	// 	t.setIdentity();
-	// 	const shapeAABB = new pl.AABB();
-	// 	aabb.lowerBound = new pl.Vec2(1000000, 1000000);
-	// 	aabb.upperBound = new pl.Vec2(-1000000, -1000000);
-	// 	let fixture = body.body.getFixtureList();
-	// 	while (fixture) {
-	// 		const shape = fixture.getShape();
-	// 		const childCount = shape.getChildCount(); //only for chains
-	// 		for (let child = 0; child < childCount; ++child) {
-	// 			shape.computeAABB(shapeAABB, body.body.m_xf, child);
-	// 			unionTo(aabb, shapeAABB);
-	// 		}
-	// 		fixture = fixture.getNext();
-	// 	}
-	// 	aabb.lowerBound.mul(plScale); //upper left, offset from center
-	// 	aabb.upperBound.mul(plScale); //lower right
-	// 	return aabb;
-	// }
-
-	// function unionTo(a, b) {
-	// 	a.lowerBound.x = min(a.lowerBound.x, b.lowerBound.x);
-	// 	a.lowerBound.y = min(a.lowerBound.y, b.lowerBound.y);
-	// 	a.upperBound.x = max(a.upperBound.x, b.upperBound.x);
-	// 	a.upperBound.y = max(a.upperBound.y, b.upperBound.y);
-	// }
-
-	// The ray cast collects multiple hits along the ray in ALL mode.
-	// The fixtures are not necessary reported in order.
-	// We might not capture the closest fixture in ANY.
-	// const rayCast = (() => {
-	// 	let def = {
-	// 		ANY: 0,
-	// 		NEAREST: 2,
-	// 		ALL: 1
-	// 	};
-
-	// 	const reset = (mode, ignore) => {
-	// 		def.points = [];
-	// 		def.normals = [];
-	// 		def.fixtures = [];
-	// 		def.fractions = [];
-	// 		def.ignore = ignore || [];
-	// 		def.mode = mode == undefined ? def.NEAREST : mode;
-	// 	};
-
-	// 	def.rayCast = (point1, point2, mode, ignore) => {
-	// 		reset(mode, ignore);
-	// 		world.rayCast(scaleTo(point1), scaleTo(point2), def.callback);
-	// 	};
-
-	// 	def.callback = (fixture, point, normal, fraction) => {
-	// 		if (def.ignore.length > 0) for (let i = 0; i < def.ignore.length; i++) if (def.ignore[i] === fixture) return -1;
-	// 		if (def.mode == def.NEAREST && def.points.length == 1) {
-	// 			def.fixtures[0] = fixture;
-	// 			def.points[0] = scaleFrom(point);
-	// 			def.normals[0] = normal;
-	// 			def.fractions[0] = fraction;
-	// 		} else {
-	// 			def.fixtures.push(fixture);
-	// 			def.points.push(scaleFrom(point));
-	// 			def.normals.push(normal);
-	// 			def.fractions.push(fraction);
-	// 		}
-	// 		// -1 to ignore a fixture and continue
-	// 		//  0 to terminate on first hit, or for searching
-	// 		//  fraction seems to return nearest fixture as last entry in array
-	// 		// +1 returns multiple but mix of low high or high low
-	// 		return def.mode == def.NEAREST ? fraction : def.mode;
-	// 	};
-
-	// 	return def;
-	// })();
-
-	// const queryAABB = (() => {
-	// 	let def = {};
-	// 	function reset(search) {
-	// 		def.fixtures = [];
-	// 		def.search = search || [];
-	// 	}
-
-	// 	def.query = ({ lowerBound, upperBound }, search) => {
-	// 		reset(search);
-	// 		aabbc = new pl.AABB(lowerBound.mul(1 / plScale), upperBound.mul(1 / plScale));
-	// 		world.queryAABB(aabbc, def.callback);
-	// 	};
-
-	// 	def.callback = (fixture) => {
-	// 		def.fixtures.push(fixture);
-	// 		return true;
-	// 	};
-
-	// 	return def;
-	// })();
 
 	this.p5play.palettes ??= [
 		{
