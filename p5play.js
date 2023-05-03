@@ -41,53 +41,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	const isSlop = (val) => Math.abs(val) <= pl.Settings.linearSlop;
 	const fixRound = (val) => (Math.abs(val - Math.round(val)) <= pl.Settings.linearSlop ? Math.round(val) : val);
 
-	const spriteProps = [
-		'autoDraw',
-		'autoUpdate',
-		'bounciness',
-		'collider',
-		'color',
-		'density',
-		'd',
-		'debug',
-		'diameter',
-		'direction',
-		'drag',
-		'dynamic',
-		'friction',
-		'fill',
-		'h',
-		'height',
-		'heading',
-		'isSuperFast',
-		'kinematic',
-		'layer',
-		'life',
-		'mass',
-		'mirror',
-		'offset',
-		'pixelPerfect',
-		'resetAnimationsOnChange',
-		'rotation',
-		'rotationDrag',
-		'rotationLock',
-		'rotationSpeed',
-		'scale',
-		'shape',
-		'speed',
-		'static',
-		'stroke',
-		'strokeWeight',
-		'text',
-		'textColor',
-		'tileSize',
-		'visible',
-		'w',
-		'width',
-		'x',
-		'y'
-	];
-
 	const eventTypes = {
 		_collisions: ['_collides', '_colliding', '_collided'],
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
@@ -133,6 +86,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @type {Number}
 			 */
 			this.idNum;
+
+			/**
+			 * An array of properties that were changed since the last
+			 * frame. Used internally for netcode.
+			 *
+			 * @type {Array}
+			 */
+			this.mod = [];
 
 			let args = [...arguments];
 
@@ -244,25 +205,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			collider ??= group.collider;
 
 			this._shape = group.shape;
-
-			/**
-			 * Cycles before self removal.
-			 * Set it to initiate a countdown, every draw cycle the property is
-			 * reduced by 1 unit. If less than or equal to 0, this sprite will be removed.
-			 *
-			 * @type {Number}
-			 * @default 100000000
-			 */
-			this.life = 100000000;
-
-			/**
-			 * The sprite's visibility.
-			 *
-			 * @type {Boolean}
-			 * @default true
-			 */
-			this.visible = true;
-
+			this._life = 2147483647;
+			this._visible = true;
 			this._aniChangeCount = 0;
 
 			/**
@@ -389,25 +333,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					return this._x < 0;
 				},
 				set x(val) {
+					if (_this.watch) _this.mod[16] = true;
 					this._x = val ? -1 : 1;
 				},
 				get y() {
 					return this._y < 0;
 				},
 				set y(val) {
+					if (_this.watch) _this.mod[16] = true;
 					this._y = val ? -1 : 1;
 				}
 			};
 
-			/**
-			 * By default sprites are drawn in the order they were created in.
-			 * You can change the draw order by editing sprite's layer
-			 * property. Sprites with the highest layer value get drawn first.
-			 *
-			 * @type {Number}
-			 */
-			this.layer = group.layer;
-			this.layer ??= this.p.allSprites._getTopLayer() + 1;
+			this._heading = 'right';
+
+			this._layer = group._layer;
+			this._layer ??= this.p.allSprites._getTopLayer() + 1;
 			collider ??= group.collider;
 
 			if (!collider || typeof collider != 'string') {
@@ -506,6 +447,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				},
 				set x(val) {
 					if (val == this._x) return;
+					if (_this.watch) _this.mod[17] = true;
 					_this._offsetCenterBy(val - this._x, 0);
 				},
 				get y() {
@@ -513,6 +455,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				},
 				set y(val) {
 					if (val == this._y) return;
+					if (_this.watch) _this.mod[17] = true;
 					_this._offsetCenterBy(0, val - this._y);
 				}
 			};
@@ -551,28 +494,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.vel.y = gvy;
 
 			/**
-			 * autoDraw is a property of all groups that controls whether
-			 * a group is automatically drawn to the screen after the end
-			 * of each draw cycle.
-			 *
-			 * It only needs to be set to false once and then it will
-			 * remain false for the rest of the sketch, unless changed.
-			 *
-			 * @type {Boolean}
-			 * @default true
-			 */
-			/**
-			 * autoUpdate is a property of all groups that controls whether
-			 * a group is automatically updated after the end of each draw
-			 * cycle.
-			 *
-			 * It only needs to be set to false once and then it will
-			 * remain false for the rest of the sketch, unless changed.
-			 *
-			 * @type {Boolean}
-			 * @default true
-			 */
-			/**
 			 * If false, animations will always start playing from the frame
 			 * they were stopped at. If true, when the sprite changes the
 			 * animation its currently displaying, it will start playing
@@ -582,8 +503,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @default false
 			 */
 
-			for (let prop of spriteProps) {
-				if (prop == 'collider' || prop == 'x' || prop == 'y') continue;
+			// copy properties from group
+			for (let prop of this.p.Sprite.propsAll) {
+				if (prop == 'collider' || prop == 'x' || prop == 'y' || prop == 'vel') continue;
 				let val = group[prop];
 				if (val === undefined) continue;
 				if (typeof val == 'function') val = val(group.length - 1);
@@ -596,11 +518,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			// ignore these properties
 			let ignoreProps = [
-				'collider',
-				'idNum',
-				'p',
-				'parent',
-				'length',
 				'_collides',
 				'_colliding',
 				'_collided',
@@ -610,16 +527,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				'_overlapping',
 				'_overlapped',
 				'_overlappers',
+				'add',
 				'animation',
 				'animations',
 				'autoCull',
-				'Sprite',
+				'collider',
+				'contains',
 				'GroupSprite',
 				'Group',
+				'idNum',
+				'length',
+				'mouse',
+				'p',
+				'parent',
+				'Sprite',
 				'Subgroup',
 				'subgroups',
-				'vel',
-				'mouse'
+				'vel'
 			];
 
 			// the sprite should also inherit
@@ -643,13 +567,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 
-			/**
-			 * @type {Number}
-			 * @default undefined
-			 */
-			this.strokeWeight;
+			this._validateShape(this._shape);
 
-			this.color ??= this.p.color(this.p.random(30, 245), this.p.random(30, 245), this.p.random(30, 245));
+			// "random" color that's not too dark or too light
+			this.color ??= this.p.color(
+				Math.round(this.p.random(30, 245)),
+				Math.round(this.p.random(30, 245)),
+				Math.round(this.p.random(30, 245))
+			);
 
 			this.textColor ??= this.p.color(0);
 			this.textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
@@ -1078,24 +1003,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// }
 
 		/**
-		 * This property disables the ability for a sprite to "sleep".
-		 *
-		 * "Sleeping" sprites are not included in the physics simulation, a
-		 * sprite starts "sleeping" when it stops moving and doesn't collide
-		 * with anything that it wasn't already _touching.
-		 *
-		 * @type {Boolean}
-		 * @default true
-		 */
-		get allowSleeping() {
-			return this.body.getSleepingAllowed();
-		}
-
-		set allowSleeping(val) {
-			this.body.setSleepingAllowed(val);
-		}
-
-		/**
 		 * Reference to the sprite's current animation.
 		 *
 		 * @type {SpriteAnimation}
@@ -1119,6 +1026,63 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * autoDraw is a property of all groups that controls whether
+		 * a group is automatically drawn to the screen after the end
+		 * of each draw cycle.
+		 *
+		 * It only needs to be set to false once and then it will
+		 * remain false for the rest of the sketch, unless changed.
+		 *
+		 * @type {Boolean}
+		 * @default true
+		 */
+		get autoDraw() {
+			return this._autoDraw;
+		}
+		set autoDraw(val) {
+			if (this.watch) this.mod[0] = true;
+			this._autoDraw = val;
+		}
+
+		/**
+		 * This property disables the ability for a sprite to "sleep".
+		 *
+		 * "Sleeping" sprites are not included in the physics simulation, a
+		 * sprite starts "sleeping" when it stops moving and doesn't collide
+		 * with anything that it wasn't already _touching.
+		 *
+		 * @type {Boolean}
+		 * @default true
+		 */
+		get allowSleeping() {
+			return this.body?.isSleepingAllowed();
+		}
+
+		set allowSleeping(val) {
+			if (this.watch) this.mod[1] = true;
+			if (this.body) this.body.setSleepingAllowed(val);
+		}
+
+		/**
+		 * autoUpdate is a property of all groups that controls whether
+		 * a group is automatically updated after the end of each draw
+		 * cycle.
+		 *
+		 * It only needs to be set to false once and then it will
+		 * remain false for the rest of the sketch, unless changed.
+		 *
+		 * @type {Boolean}
+		 * @default true
+		 */
+		get autoUpdate() {
+			return this._autoUpdate;
+		}
+		set autoUpdate(val) {
+			if (this.watch) this.mod[2] = true;
+			this._autoUpdate = val;
+		}
+
+		/**
 		 * The bounciness of the sprite's physics body.
 		 *
 		 * @type {Number}
@@ -1129,6 +1093,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.fixture.getRestitution();
 		}
 		set bounciness(val) {
+			if (this.watch) this.mod[3] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setRestitution(val);
 			}
@@ -1178,6 +1143,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					'Cannot set the collider type of a polygon or chain collider to "none". Try having the sprite overlap with other sprites instead.'
 				);
 			}
+			if (this.watch) this.mod[4] = true;
 
 			let oldCollider = this._collider;
 
@@ -1251,6 +1217,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._color;
 		}
 		set color(val) {
+			// TODO: check if the color is the same as the current color
+			if (this.watch) this.mod[5] = true;
 			this._color = this._parseColor(val);
 		}
 		/**
@@ -1263,7 +1231,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._color;
 		}
 		set colour(val) {
-			this._color = this._parseColor(val);
+			this.color = val;
 		}
 		/**
 		 * @deprecated
@@ -1287,7 +1255,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._color;
 		}
 		set fill(val) {
-			this._color = this._parseColor(val);
+			this.color = val;
 		}
 
 		/**
@@ -1300,7 +1268,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._color;
 		}
 		set fillColor(val) {
-			this._color = this._parseColor(val);
+			this.color = val;
 		}
 
 		/**
@@ -1312,12 +1280,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._stroke;
 		}
 		set stroke(val) {
+			if (this.watch) this.mod[24] = true;
 			this._stroke = this._parseColor(val);
 		}
 
 		/**
-		 * The sprite's stroke current color. By default the stroke of a sprite
-		 * indicates its collider type.
+		 * The sprite's stroke color. By default the stroke of a sprite
+		 * is determined by its collider type.
 		 *
 		 * @type {p5.Color}
 		 */
@@ -1325,7 +1294,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._stroke;
 		}
 		set strokeColor(val) {
-			this._stroke = this._parseColor(val);
+			this.stroke = val;
+		}
+
+		/**
+		 * The sprite's stroke weight.
+		 *
+		 * @type {Number}
+		 * @default undefined
+		 */
+		get strokeWeight() {
+			return this._strokeWeight;
+		}
+		set strokeWeight(val) {
+			if (this.watch) this.mod[25] = true;
+			this._strokeWeight = val;
 		}
 
 		/**
@@ -1338,7 +1321,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._textColor;
 		}
 		set textColor(val) {
+			if (this.watch) this.mod[27] = true;
 			this._textColor = this._parseColor(val);
+		}
+
+		get debug() {
+			return this._debug;
+		}
+		set debug(val) {
+			if (this.watch) this.mod[6] = true;
+			this._debug = val;
 		}
 
 		/**
@@ -1351,6 +1343,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.fixture.getDensity();
 		}
 		set density(val) {
+			if (this.watch) this.mod[7] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setDensity(val);
 			}
@@ -1363,7 +1356,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		get depth() {
 			console.warn('sprite.depth is deprecated, use sprite.layer instead');
-			return this.layer;
+			return this._layer;
 		}
 		set depth(val) {
 			console.warn('sprite.depth is deprecated, use sprite.layer instead');
@@ -1378,13 +1371,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default 0 ("right")
 		 */
 		get direction() {
-			if (this.body && (this.vel.x !== 0 || this.vel.y !== 0)) {
+			if (this.vel.x !== 0 || this.vel.y !== 0) {
 				return this.p.atan2(this.vel.y, this.vel.x);
 			}
 			if (!this._direction) return this.rotation;
 			return this._direction;
 		}
 		set direction(val) {
+			if (this.watch) this.mod[8] = true;
 			if (typeof val == 'string') {
 				this._heading = val;
 
@@ -1421,10 +1415,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default 0
 		 */
 		get drag() {
-			if (this.body) return this.body.getLinearDamping();
-			else return undefined;
+			return this.body?.getLinearDamping();
 		}
 		set drag(val) {
+			if (this.watch) this.mod[9] = true;
 			if (this.body) this.body.setLinearDamping(val);
 		}
 
@@ -1463,26 +1457,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default true
 		 */
 		get dynamic() {
-			if (!this.body) return undefined;
-			return this.body.isDynamic();
+			return this.body?.isDynamic();
 		}
 		set dynamic(val) {
 			if (val) this.collider = 'dynamic';
 			else this.collider = 'kinematic';
-		}
-
-		/**
-		 * If true the sprite can not rotate.
-		 *
-		 * @type {Boolean}
-		 * @default false
-		 */
-		get rotationLock() {
-			if (!this.body) return undefined;
-			return this.body.isFixedRotation();
-		}
-		set rotationLock(val) {
-			if (this.body) this.body.setFixedRotation(val);
 		}
 
 		/**
@@ -1513,6 +1492,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.fixture.getFriction();
 		}
 		set friction(val) {
+			if (this.watch) this.mod[10] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setFriction(val);
 			}
@@ -1594,10 +1574,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default false
 		 */
 		get isSuperFast() {
-			if (!this.body) return undefined;
-			return this.body.isBullet();
+			return this.body?.isBullet();
 		}
 		set isSuperFast(val) {
+			if (this.watch) this.mod[12] = true;
 			if (this.body) this.body.setBullet(val);
 		}
 
@@ -1615,12 +1595,40 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default false
 		 */
 		get kinematic() {
-			if (!this.body) return undefined;
-			return this.body.isKinematic();
+			return this.body?.isKinematic();
 		}
 		set kinematic(val) {
 			if (val) this.collider = 'kinematic';
 			else this.collider = 'dynamic';
+		}
+		/**
+		 * By default sprites are drawn in the order they were created in.
+		 * You can change the draw order by editing sprite's layer
+		 * property. Sprites with the highest layer value get drawn first.
+		 *
+		 * @type {Number}
+		 */
+		get layer() {
+			return this._layer;
+		}
+		set layer(val) {
+			if (this.watch) this.mod[13] = true;
+			this._layer = val;
+		}
+		/**
+		 * Cycles before self removal.
+		 * Set it to initiate a countdown, every draw cycle the property is
+		 * reduced by 1 unit. If less than or equal to 0, this sprite will be removed.
+		 *
+		 * @type {Number}
+		 * @default 100000000
+		 */
+		get life() {
+			return this._life;
+		}
+		set life(val) {
+			if (this.watch) this.mod[14] = true;
+			this._life = val;
 		}
 		/**
 		 * The mass of the sprite's physics body.
@@ -1628,11 +1636,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Number}
 		 */
 		get mass() {
-			if (!this.body) return undefined;
-			return this.body.getMass();
+			return this.body?.getMass();
 		}
 		set mass(val) {
 			if (!this.body) return;
+			if (this.watch) this.mod[15] = true;
 			let t = this.massData;
 			t.mass = val;
 			this.body.setMassData(t);
@@ -1658,6 +1666,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._mirror;
 		}
 		set mirror(val) {
+			if (this.watch) this.mod[16] = true;
 			if (val.x !== undefined) this._mirror.x = val.x;
 			if (val.y !== undefined) this._mirror.y = val.y;
 		}
@@ -1678,6 +1687,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			val.x ??= this._offset._x;
 			val.y ??= this._offset._y;
 			if (val.x == this._offset._x && val.y == this._offset._y) return;
+			if (this.watch) this.mod[17] = true;
 			this._offsetCenterBy(val.x - this._offset._x, val.y - this._offset._y);
 		}
 
@@ -1691,6 +1701,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set previousPosition(val) {
 			this.prevPos = val;
+		}
+
+		/**
+		 * Set to true to display the sprite pixel perfect.
+		 * This is useful when using pixel art.
+		 *
+		 * @type {Boolean}
+		 * @default false
+		 */
+		get pixelPerfect() {
+			return this._pixelPerfect;
+		}
+		set pixelPerfect(val) {
+			if (this.watch) this.mod[18] = true;
+			this._pixelPerfect = val;
 		}
 
 		/**
@@ -1724,11 +1749,26 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default 0
 		 */
 		get rotationDrag() {
-			if (!this.body) return undefined;
-			return this.body.getAngularDamping();
+			return this.body?.getAngularDamping();
 		}
 		set rotationDrag(val) {
-			if (this.body) this.body.setAngularDamping(val);
+			if (!this.body) return;
+			if (this.watch) this.mod[19] = true;
+			this.body.setAngularDamping(val);
+		}
+		/**
+		 * If true the sprite can not rotate.
+		 *
+		 * @type {Boolean}
+		 * @default false
+		 */
+		get rotationLock() {
+			return this.body?.isFixedRotation();
+		}
+		set rotationLock(val) {
+			if (!this.body) return;
+			if (this.watch) this.mod[20] = true;
+			this.body.setFixedRotation(val);
 		}
 		/**
 		 * The speed of the sprite's rotation.
@@ -1805,7 +1845,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		set sleeping(val) {
-			if (this.body) this.body.setAwake(!val);
+			if (!this.body) return;
+			if (this.watch) this.mod[23] = true;
+			this.body.setAwake(!val);
 		}
 
 		/**
@@ -1830,8 +1872,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @default false
 		 */
 		get static() {
-			if (!this.body) return undefined;
-			return this.body.isStatic();
+			return this.body?.isStatic();
 		}
 		set static(val) {
 			if (val) this.collider = 'static';
@@ -1866,6 +1907,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		// TODO set vertices
+
+		/**
+		 * If true the sprite is shown, if false the sprite is hidden.
+		 *
+		 * @type {Boolean}
+		 * @default true
+		 */
+		get visible() {
+			return this._visible;
+		}
+		set visible(val) {
+			if (this.watch) this.mod[29] = true;
+			this._visible = val;
+		}
 
 		/**
 		 * The horizontal position of the sprite.
@@ -1924,6 +1979,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		set w(val) {
 			if (val < 0) val = 0.01;
 			if (val == this._w) return;
+			if (this.watch) this.mod[30] = true;
 			delete this._dimensionsUndefinedByUser;
 			let scalarX = val / this._w;
 			this._w = val;
@@ -1945,7 +2001,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @type {Number}
 		 */
 		get width() {
-			return this.w;
+			return this._w;
 		}
 		set width(val) {
 			this.w = val;
@@ -1975,6 +2031,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 			if (val == this._h) return;
+			if (this.watch) this.mod[11] = true;
 			delete this._dimensionsUndefinedByUser;
 			let scalarY = val / this._h;
 			this._h = val;
@@ -2027,8 +2084,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let shapeChange = this.shape != 'circle';
 			if (!shapeChange) {
 				if (this._diameter == val) return;
+				if (this.watch) this.mod[30] = true;
 				this._diameter = val;
 			} else {
+				if (this.watch) {
+					this.mod[22] = true;
+					this.mod[30] = true;
+				}
 				let bodyProps;
 				if (this._collider != 'none') {
 					bodyProps = this._cloneBodyProps();
@@ -2161,19 +2223,29 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		set shape(val) {
 			if (val == this._shape) return;
 
-			let validShapes = ['box', 'circle', 'chain', 'polygon'];
-			if (validShapes.indexOf(val) == -1) {
-				throw new Error(
-					'Invalid shape type: "' + val + '"\nThe valid shape types are: "' + validShapes.join('", "') + '"'
-				);
-			}
+			this._validateShape(val);
 
+			if (this.watch) this.mod[22] = true;
 			if (val == 'circle') {
 				this.d = this.w;
 			} else {
 				this._shape = val;
 				this._reset();
 			}
+		}
+
+		_validateShape(val) {
+			let __shape = this.p.Sprite.shapeTypes.indexOf(val);
+			if (__shape == -1) {
+				throw new Error(
+					'Invalid shape type: "' +
+						val +
+						'"\nThe valid shape types are: "' +
+						this.p.Sprite.shapeTypes.join('", "') +
+						'"'
+				);
+			}
+			this.__shape = __shape;
 		}
 
 		/**
@@ -2330,7 +2402,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			x = fixRound(x);
 			y = fixRound(y);
 
-			if (this.pixelPerfect) {
+			if (this._pixelPerfect) {
 				if (this._w % 2 == 0 || !isSlop((x % 1) - 0.5)) x = Math.round(x);
 				if (this._h % 2 == 0 || !isSlop((y % 1) - 0.5)) y = Math.round(y);
 			}
@@ -3074,9 +3146,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 */
 		remove() {
+			this.removed = true;
+		}
+
+		_remove() {
 			if (this.body) this.p.world.destroyBody(this.body);
 			this.body = null;
-			this.removed = true;
 
 			// when removed from the "scene" also remove all the references
 			// to the sprite from all its groups
@@ -3089,6 +3164,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
 				delete this.p.p5play.sprites[this._uid];
 			}
+		}
+
+		get removed() {
+			return this._removed;
+		}
+		set removed(val) {
+			if (!val || this._removed) return;
+			if (this.watch) this.mod[32] = true;
+			this._removed = true;
+			this._remove();
 		}
 
 		/**
@@ -3309,6 +3394,71 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 	};
 
+	// only used by the Netcode class to convert sprite data to binary
+	this.Sprite.propTypes = {
+		autoDraw: 'boolean', // 0
+		allowSleeping: 'boolean', // 1
+		autoUpdate: 'boolean', // 2
+		bounciness: 'Float16', // 3
+		collider: 'Uint8', // 4
+		color: 'p5.Color', // 5
+		debug: 'boolean', // 6
+		density: 'Float16', // 7
+		direction: 'Float16', // 8
+		drag: 'Float16', // 9
+		friction: 'Float16', // 10
+		h: 'Float16', // 11 (height)
+		isSuperFast: 'boolean', // 12
+		layer: 'Float16', // 13
+		life: 'Int32', // 14
+		mass: 'Float16', // 15
+		mirror: 'Vec2_boolean', // 16
+		offset: 'Vec2', // 17
+		pixelPerfect: 'boolean', // 18
+		rotationDrag: 'Float16', // 19
+		rotationLock: 'boolean', // 20
+		scale: 'Vec2', // 21
+		shape: 'Uint8', // 22
+		sleeping: 'boolean', // 23
+		stroke: 'p5.Color', // 24
+		strokeWeight: 'Float16', // 25
+		text: 'string', // 26
+		textColor: 'p5.Color', // 27
+		tileSize: 'Float16', // 28
+		visible: 'boolean', // 29
+		w: 'Float16', // 30 (width)
+		watch: 'boolean', // 31
+
+		removed: 'boolean', // 32
+
+		x: 'Float64',
+		y: 'Float64',
+		vel: 'Vec2',
+		rotation: 'Float16',
+		rotationSpeed: 'Float16'
+	};
+
+	this.Sprite.props = Object.keys(this.Sprite.propTypes);
+
+	// includes duplicates of some properties
+	this.Sprite.propsAll = this.Sprite.props.concat([
+		'd',
+		'diameter',
+		'dynamic',
+		'fill',
+		'height',
+		'heading',
+		'kinematic',
+		'resetAnimationsOnChange',
+		'speed',
+		'static',
+		'width'
+	]);
+
+	this.Sprite.colliderTypes = ['d', 's', 'k', 'n'];
+	this.Sprite.shapeTypes = ['box', 'circle', 'chain', 'polygon'];
+
+	// TODO: draw lines when the Turtle moves
 	this.Turtle = function (size) {
 		if (pInst.allSprites.tileSize > 1) {
 			throw new Error(`Turtle can't be used when allSprites.tileSize is greater than 1.`);
@@ -3330,8 +3480,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		};
 		return t;
 	};
-
-	let animationProps = ['frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale', 'demoMode'];
 
 	this.SpriteAnimation = class extends Array {
 		/**
@@ -3825,7 +3973,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		update() {
 			this._cycles++;
-			var previousFrame = this.frame;
+			let previousFrame = this.frame;
 			this.frameChanged = false;
 
 			//go to frame
@@ -4076,6 +4224,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 	};
 
+	this.SpriteAnimation.props = ['frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale', 'demoMode'];
+
 	/**
 	 * This SpriteAnimations class serves the same role that Group does
 	 * for Sprites. Except it doesn't extend Array, its instances are
@@ -4096,7 +4246,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		constructor() {
 			let _this = this;
 
-			let props = [...animationProps];
+			let props = [...pInst.SpriteAnimation.props];
+			let vecProps = ['offset', 'scale'];
+
 			for (let prop of props) {
 				Object.defineProperty(this, prop, {
 					get() {
@@ -4115,21 +4267,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				});
 			}
 
-			let objProps = { offset: ['x', 'y'], scale: ['x', 'y'] };
-			for (let objProp in objProps) {
-				this.#_[objProp] = {};
-				for (let prop of objProps[objProp]) {
-					Object.defineProperty(this.#_[objProp], prop, {
+			for (let vecProp of vecProps) {
+				this.#_[vecProp] = {
+					_x: 0,
+					_y: 0
+				};
+				for (let prop of ['x', 'y']) {
+					Object.defineProperty(this.#_[vecProp], prop, {
 						get() {
-							return _this.#_[objProp]['_' + prop];
+							return _this.#_[vecProp]['_' + prop];
 						},
 						set(val) {
-							_this.#_[objProp]['_' + prop] = val;
+							_this.#_[vecProp]['_' + prop] = val;
 
 							for (let k in _this) {
 								let x = _this[k];
 								if (!(x instanceof SpriteAnimation)) continue;
-								x[objProp][prop] = val;
+								x[vecProp][prop] = val;
 							}
 						}
 					});
@@ -4286,8 +4440,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				};
 			}
 
-			let props = [...spriteProps, 'spriteSheet'];
+			let props = [...this.p.Sprite.propsAll, 'spriteSheet'];
+			let vecProps = ['mirror', 'offset', 'scale', 'vel'];
+
 			for (let prop of props) {
+				if (vecProps.includes(prop) || prop == 'velocity') continue;
+
 				Object.defineProperty(this, prop, {
 					get() {
 						let val = _this['_' + prop];
@@ -4315,36 +4473,37 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				});
 			}
 
-			this.vel = pInst.createVector.call(pInst);
 			this.mirror = {};
 			this.offset = {};
 			this.scale = {};
+			this.vel = pInst.createVector.call(pInst);
 
-			let objProps = { vel: ['x', 'y'], mirror: ['x', 'y'], offset: ['x', 'y'], scale: ['x', 'y'] };
-			for (let objProp in objProps) {
-				for (let prop of objProps[objProp]) {
-					Object.defineProperty(this[objProp], prop, {
+			for (let vecProp of vecProps) {
+				this[vecProp]._x = 0;
+				this[vecProp]._y = 0;
+				for (let prop of ['x', 'y']) {
+					Object.defineProperty(this[vecProp], prop, {
 						get() {
-							let val = _this[objProp]['_' + prop];
+							let val = _this[vecProp]['_' + prop];
 							let i = _this.length - 1;
 							if (val === undefined && !_this._isAllSpritesGroup) {
 								let parent = _this.p.p5play.groups[_this.parent];
 								if (parent) {
-									val = parent[objProp][prop];
+									val = parent[vecProp][prop];
 									i = parent.length - 1;
 								}
 							}
 							return val;
 						},
 						set(val) {
-							_this[objProp]['_' + prop] = val;
+							_this[vecProp]['_' + prop] = val;
 
 							// change the prop in all the sprite of this group
 							for (let i = 0; i < _this.length; i++) {
 								let s = _this[i];
 								let v = val;
 								if (typeof val == 'function') v = val(i);
-								s[objProp][prop] = v;
+								s[vecProp][prop] = v;
 							}
 						}
 					});
@@ -4366,10 +4525,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				 */
 				this.autoCull = true;
 				this.tileSize = 1;
+				this.autoDraw = true;
+				this.autoUpdate = true;
 			}
-
-			this.autoDraw = true;
-			this.autoUpdate = true;
 
 			/**
 			 * Alias for group.push
@@ -4408,10 +4566,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		_getTopLayer() {
 			if (this.length == 0) return 0;
-			if (this.length == 1 && this[0].layer === undefined) return 0;
-			let max = this[0].layer;
+			if (this.length == 1 && this[0]._layer === undefined) return 0;
+			let max = this[0]._layer;
 			for (let s of this) {
-				if (s.layer > max) max = s.layer;
+				if (s._layer > max) max = s._layer;
 			}
 			return max;
 		}
@@ -4947,10 +5105,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		draw() {
 			let g = [...this];
-			g.sort((a, b) => a.layer - b.layer);
+			g.sort((a, b) => a._layer - b._layer);
 			for (let i = 0; i < g.length; i++) {
 				let sprite = g[i];
-				if (sprite.life-- < 0) {
+				if (sprite._life-- < 0) {
 					sprite.remove();
 					g.splice(i, 1);
 					i--;
@@ -5248,7 +5406,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		getSpriteAt(x, y, group) {
 			let sprites = this.getSpritesAt(x, y, group);
-			sprites.sort((a, b) => (a.layer - b.layer) * -1);
+			sprites.sort((a, b) => (a._layer - b._layer) * -1);
 			return sprites[0];
 		}
 
@@ -5380,7 +5538,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get allowSleeping() {
 			return this.getAllowSleeping();
 		}
-
 		set allowSleeping(val) {
 			this.setAllowSleeping(val);
 		}
@@ -5745,6 +5902,277 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._avg;
 		}
 	}
+
+	// source: https://stackoverflow.com/a/8796597/3792062
+	function decodeFloat16(b) {
+		let e = (b & 0x7c00) >> 10,
+			f = b & 0x03ff;
+		return (
+			(b >> 15 ? -1 : 1) *
+			(e ? (e === 0x1f ? (f ? NaN : Infinity) : Math.pow(2, e - 15) * (1 + f / 0x400)) : 6.103515625e-5 * (f / 0x400))
+		);
+	}
+
+	// source: https://stackoverflow.com/a/32633586/3792062
+	const encodeFloat16 = (function () {
+		let fv = new Float32Array(1);
+		let iv = new Int32Array(fv.buffer);
+		return function toHalf(v) {
+			fv[0] = v;
+			let x = iv[0];
+			let b = (x >> 16) & 0x8000;
+			let m = (x >> 12) & 0x07ff;
+			let e = (x >> 23) & 0xff;
+			if (e < 103) return b;
+			if (e > 142) {
+				b |= 0x7c00;
+				b |= (e == 255 ? 0 : 1) && x & 0x007fffff;
+				return b;
+			}
+			if (e < 113) {
+				m |= 0x0800;
+				b |= (m >> (114 - e)) + ((m >> (113 - e)) & 1);
+				return b;
+			}
+			b |= ((e - 112) << 10) | (m >> 1);
+			b += m & 1;
+			return b;
+		};
+	})();
+
+	/**
+	 * Work in Progress! Not ready for public use yet.
+	 *
+	 * A `netcode` object is created automatically when p5play loads.
+	 *
+	 * "Netcode is a blanket term most commonly used by
+	 * gamers relating to networking in online games, often referring to
+	 * synchronization issues between clients and servers. Players often
+	 * infer "bad netcodes" when they experience lag or when their inputs
+	 * are dropped." - Wikipedia
+	 *
+	 * The methods of this class can help p5play developers create online
+	 * multiplayer games and servers.
+	 *
+	 * My next step for this is to have p5play watch for which properties
+	 * of a sprite have changed, and only send those properties over the
+	 * network. This will reduce the amount of data that needs to be sent
+	 * over the network, and will make the game run faster.
+	 */
+	this.Netcode = class {
+		constructor() {}
+
+		startServer() {
+			this.watch = true;
+		}
+
+		connect() {}
+
+		/**
+		 * Converts a sprite to a binary representation, which is smaller
+		 * than serializing the data with JSON.stringify.
+		 *
+		 * This function is intended to be used to send sprite data over
+		 * a network.
+		 *
+		 * @param {Sprite} sprite
+		 * @param {Array} props - sprite properties that should be converted
+		 * to binary. Defaults to all sprite properties.
+		 */
+		spriteToBinary(sprite, props) {
+			// calculate size of buffer first
+			let size = 26;
+
+			props ??= pInst.Sprite.props;
+
+			for (let i = 0; i < props.length; i++) {
+				const prop = props[i];
+				if (prop == 'x') break;
+
+				const type = pInst.Sprite.propTypes[prop];
+
+				const val = sprite[prop];
+				if (val === undefined || val === null) {
+					log(prop);
+					continue;
+				}
+
+				size += 1;
+
+				if (type == 'boolean' || type == 'Uint8') {
+					size += 1;
+				} else if (type == 'Float16' || type == 'Vec2_boolean') {
+					size += 2;
+				} else if (type == 'Float32' || type == 'Int32' || type == 'p5.Color' || type == 'Vec2') {
+					size += 4;
+				} else if (type == 'Float64') {
+					size += 8;
+				} else if (type == 'string') {
+					const encoded = new TextEncoder().encode(val);
+					size += encoded.length + 2;
+				}
+			}
+
+			const buffer = new ArrayBuffer(size);
+			const data = new DataView(buffer);
+			data.setFloat16 = (o, v) => data.setUint16(o, encodeFloat16(v));
+
+			data.setUint16(0, sprite._uid);
+			data.setFloat64(2, sprite.x);
+			data.setFloat64(10, sprite.y);
+			data.setFloat16(18, sprite.vel.x);
+			data.setFloat16(20, sprite.vel.y);
+			data.setFloat16(22, sprite.rotation);
+			data.setFloat16(24, sprite.rotationSpeed);
+
+			let o = 26; // byte offset
+			for (let i = 0; i < props.length; i++) {
+				const prop = pInst.Sprite.props[i];
+				if (prop == 'x') break;
+
+				const type = pInst.Sprite.propTypes[prop];
+
+				const val = sprite[prop];
+				if (val === undefined || val === null) continue;
+
+				data.setUint8(o, i);
+				o += 1;
+
+				if (type == 'boolean') {
+					data.setUint8(o, val ? 1 : 0);
+					o += 1;
+				} else if (type == 'Float16') {
+					data.setFloat16(o, val);
+					o += 2;
+				} else if (type == 'Float32') {
+					data.setFloat32(o, val);
+					o += 4;
+				} else if (type == 'Float64') {
+					data.setFloat64(o, val);
+					o += 8;
+				} else if (type == 'string') {
+					const encoded = new TextEncoder().encode(val);
+					data.setUint16(o, encoded.length);
+					o += 2;
+					for (let j = 0; j < encoded.length; j++) {
+						data.setUint8(o, encoded[j]);
+						o += 1;
+					}
+				} else if (type == 'p5.Color') {
+					data.setUint8(o, val.levels[0]); // r
+					data.setUint8(o + 1, val.levels[1]); // g
+					data.setUint8(o + 2, val.levels[2]); // b
+					data.setUint8(o + 3, val.levels[3]); // a
+					o += 4;
+				} else if (type == 'Vec2') {
+					data.setFloat16(o, val.x);
+					data.setFloat16(o + 2, val.y);
+					o += 4;
+				} else if (type == 'Vec2_boolean') {
+					data.setUint8(o, val.x ? 1 : 0);
+					data.setUint8(o + 1, val.y ? 1 : 0);
+					o += 2;
+				} else if (type == 'Uint8') {
+					if (prop == 'collider') {
+						data.getUint8(o, sprite.__collider);
+					} else if (prop == 'shape') {
+						data.getUint8(o, sprite.__shape);
+					} else {
+						data.getUint8(o, val);
+					}
+					o += 1;
+				} else if (type == 'Int32') {
+					data.setInt32(o, val);
+					o += 4;
+				}
+			}
+			return new Uint8Array(buffer);
+		}
+
+		/**
+		 * Converts binary data, assigning the values to a sprite.
+		 *
+		 * @param {Uint8Array} binary - binary data
+		 * @param {Array} props - sprite properties that should be converted
+		 * @returns {Sprite} the sprite
+		 */
+		binaryToSprite(binary, props) {
+			const data = new DataView(binary.buffer);
+			data.getFloat16 = (o) => decodeFloat16(data.getUint16(o));
+
+			let uid = data.getUint16(0);
+			let sprite = pInst.p5play.sprites[uid] || new pInst.Sprite();
+			sprite.x = data.getFloat64(2);
+			sprite.y = data.getFloat64(10);
+			sprite.vel.x = data.getFloat16(18);
+			sprite.vel.y = data.getFloat16(20);
+			sprite.rotation = data.getFloat16(22);
+			sprite.rotationSpeed = data.getFloat16(24);
+
+			let o = 26;
+			while (o !== data.byteLength) {
+				const propId = data.getUint8(o);
+				o += 1;
+
+				const prop = pInst.Sprite.props[propId];
+				const type = pInst.Sprite.propTypes[prop];
+
+				if (type === 'boolean') {
+					sprite[prop] = data.getUint8(o) !== 0;
+					o += 1;
+				} else if (type === 'Float16') {
+					sprite[prop] = data.getFloat16(o);
+					o += 2;
+				} else if (type === 'Float32') {
+					sprite[prop] = data.getFloat32(o);
+					o += 4;
+				} else if (type === 'Float64') {
+					sprite[prop] = data.getFloat64(o);
+					o += 8;
+				} else if (type === 'string') {
+					const strLength = data.getUint16(o);
+					o += 2;
+					const strBytes = new Uint8Array(data.buffer, o, strLength);
+					sprite[prop] = new TextDecoder().decode(strBytes);
+					o += strLength;
+				} else if (type === 'p5.Color') {
+					const r = data.getUint8(o);
+					const g = data.getUint8(o + 1);
+					const b = data.getUint8(o + 2);
+					const a = data.getUint8(o + 3);
+					sprite[prop] = color(r, g, b, a);
+					o += 4;
+				} else if (type === 'Vec2') {
+					const x = data.getFloat16(o);
+					const y = data.getFloat16(o + 2);
+					sprite[prop] = { x, y };
+					o += 4;
+				} else if (type === 'Vec2_boolean') {
+					const x = data.getUint8(o);
+					const y = data.getUint8(o + 1);
+					sprite[prop] = { x, y };
+					o += 2;
+				} else if (type === 'Uint8') {
+					let val = data.getUint8(o);
+					if (prop === 'collider') {
+						sprite.collider = pInst.Sprite.colliderTypes[val];
+					} else if (prop === 'shape') {
+						sprite.shape = pInst.Sprite.shapeTypes[val];
+					} else {
+						sprite[prop] = val;
+					}
+					o += 1;
+				} else if (type === 'Int32') {
+					sprite[prop] = data.getInt32(o);
+					o += 4;
+				}
+			}
+
+			return sprite;
+		}
+	};
+
+	this.netcode = new this.Netcode();
 
 	function isArrowFunction(fn) {
 		return !/^(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*(?:(?:(?:async\s(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*)?function|class)(?:\s|(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*)|(?:[_$\w][\w0-9_$]*\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\()|(?:\[\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*(?:(?:['][^']+['])|(?:["][^"]+["]))\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\]\())/.test(
@@ -7367,10 +7795,10 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		}
 
 		let sprites = this.world.getSpritesAt(this.mouse.x, this.mouse.y);
-		sprites.sort((a, b) => (a.layer - b.layer) * -1);
+		sprites.sort((a, b) => (a._layer - b._layer) * -1);
 
 		let uiSprites = this.world.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
-		uiSprites.sort((a, b) => (a.layer - b.layer) * -1);
+		uiSprites.sort((a, b) => (a._layer - b._layer) * -1);
 
 		sprites = sprites.concat(uiSprites);
 
