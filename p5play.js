@@ -333,14 +333,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					return this._x < 0;
 				},
 				set x(val) {
-					if (_this.watch) _this.mod[16] = true;
+					if (_this.watch) _this.mod[22] = true;
 					this._x = val ? -1 : 1;
 				},
 				get y() {
 					return this._y < 0;
 				},
 				set y(val) {
-					if (_this.watch) _this.mod[16] = true;
+					if (_this.watch) _this.mod[22] = true;
 					this._y = val ? -1 : 1;
 				}
 			};
@@ -413,6 +413,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				},
 				set(val) {
 					if (val == this._x) return;
+					if (_this.watch) _this.mod[28] = true;
 					let scalarX = val / this._x;
 					_this._w *= scalarX;
 					_this._hw *= scalarX;
@@ -428,6 +429,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				},
 				set(val) {
 					if (val == this._y) return;
+					if (_this.watch) _this.mod[28] = true;
 					let scalarY = val / this._y;
 					if (_this._h) {
 						this._h *= scalarY;
@@ -447,7 +449,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				},
 				set x(val) {
 					if (val == this._x) return;
-					if (_this.watch) _this.mod[17] = true;
+					if (_this.watch) _this.mod[23] = true;
 					_this._offsetCenterBy(val - this._x, 0);
 				},
 				get y() {
@@ -455,7 +457,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				},
 				set y(val) {
 					if (val == this._y) return;
-					if (_this.watch) _this.mod[17] = true;
+					if (_this.watch) _this.mod[23] = true;
 					_this._offsetCenterBy(0, val - this._y);
 				}
 			};
@@ -505,7 +507,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			// copy properties from group
 			for (let prop of this.p.Sprite.propsAll) {
-				if (prop == 'collider' || prop == 'x' || prop == 'y' || prop == 'vel') continue;
+				if (prop == 'ani' || prop == 'collider' || prop == 'x' || prop == 'y' || prop == 'vel') continue;
 				let val = group[prop];
 				if (val === undefined) continue;
 				if (typeof val == 'function') val = val(group.length - 1);
@@ -1040,7 +1042,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._autoDraw;
 		}
 		set autoDraw(val) {
-			if (this.watch) this.mod[0] = true;
+			if (this.watch) this.mod[6] = true;
 			this._autoDraw = val;
 		}
 
@@ -1059,7 +1061,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		set allowSleeping(val) {
-			if (this.watch) this.mod[1] = true;
+			if (this.watch) this.mod[7] = true;
 			if (this.body) this.body.setSleepingAllowed(val);
 		}
 
@@ -1078,7 +1080,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._autoUpdate;
 		}
 		set autoUpdate(val) {
-			if (this.watch) this.mod[2] = true;
+			if (this.watch) this.mod[8] = true;
 			this._autoUpdate = val;
 		}
 
@@ -1093,7 +1095,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.fixture.getRestitution();
 		}
 		set bounciness(val) {
-			if (this.watch) this.mod[3] = true;
+			if (this.watch) this.mod[9] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setRestitution(val);
 			}
@@ -1143,7 +1145,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					'Cannot set the collider type of a polygon or chain collider to "none". Try having the sprite overlap with other sprites instead.'
 				);
 			}
-			if (this.watch) this.mod[4] = true;
+			if (this.watch) this.mod[10] = true;
 
 			let oldCollider = this._collider;
 
@@ -1218,7 +1220,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set color(val) {
 			// TODO: check if the color is the same as the current color
-			if (this.watch) this.mod[5] = true;
+			if (this.watch) this.mod[11] = true;
 			this._color = this._parseColor(val);
 		}
 		/**
@@ -1280,7 +1282,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._stroke;
 		}
 		set stroke(val) {
-			if (this.watch) this.mod[24] = true;
+			if (this.watch) this.mod[31] = true;
 			this._stroke = this._parseColor(val);
 		}
 
@@ -1307,7 +1309,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._strokeWeight;
 		}
 		set strokeWeight(val) {
-			if (this.watch) this.mod[25] = true;
+			if (this.watch) this.mod[32] = true;
 			this._strokeWeight = val;
 		}
 
@@ -1321,7 +1323,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._textColor;
 		}
 		set textColor(val) {
-			if (this.watch) this.mod[27] = true;
+			if (this.watch) this.mod[34] = true;
 			this._textColor = this._parseColor(val);
 		}
 
@@ -1329,7 +1331,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._debug;
 		}
 		set debug(val) {
-			if (this.watch) this.mod[6] = true;
+			if (this.watch) this.mod[12] = true;
 			this._debug = val;
 		}
 
@@ -1343,7 +1345,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.fixture.getDensity();
 		}
 		set density(val) {
-			if (this.watch) this.mod[7] = true;
+			if (this.watch) this.mod[13] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setDensity(val);
 			}
@@ -1378,7 +1380,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._direction;
 		}
 		set direction(val) {
-			if (this.watch) this.mod[8] = true;
+			if (this.watch) this.mod[14] = true;
 			if (typeof val == 'string') {
 				this._heading = val;
 
@@ -1418,7 +1420,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.body?.getLinearDamping();
 		}
 		set drag(val) {
-			if (this.watch) this.mod[9] = true;
+			if (this.watch) this.mod[15] = true;
 			if (this.body) this.body.setLinearDamping(val);
 		}
 
@@ -1492,7 +1494,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.fixture.getFriction();
 		}
 		set friction(val) {
-			if (this.watch) this.mod[10] = true;
+			if (this.watch) this.mod[16] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setFriction(val);
 			}
@@ -1577,7 +1579,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this.body?.isBullet();
 		}
 		set isSuperFast(val) {
-			if (this.watch) this.mod[12] = true;
+			if (this.watch) this.mod[18] = true;
 			if (this.body) this.body.setBullet(val);
 		}
 
@@ -1612,7 +1614,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._layer;
 		}
 		set layer(val) {
-			if (this.watch) this.mod[13] = true;
+			if (this.watch) this.mod[19] = true;
 			this._layer = val;
 		}
 		/**
@@ -1627,7 +1629,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._life;
 		}
 		set life(val) {
-			if (this.watch) this.mod[14] = true;
+			if (this.watch) this.mod[20] = true;
 			this._life = val;
 		}
 		/**
@@ -1640,7 +1642,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set mass(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[15] = true;
+			if (this.watch) this.mod[21] = true;
 			let t = this.massData;
 			t.mass = val;
 			this.body.setMassData(t);
@@ -1666,7 +1668,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._mirror;
 		}
 		set mirror(val) {
-			if (this.watch) this.mod[16] = true;
+			if (this.watch) this.mod[22] = true;
 			if (val.x !== undefined) this._mirror.x = val.x;
 			if (val.y !== undefined) this._mirror.y = val.y;
 		}
@@ -1687,7 +1689,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			val.x ??= this._offset._x;
 			val.y ??= this._offset._y;
 			if (val.x == this._offset._x && val.y == this._offset._y) return;
-			if (this.watch) this.mod[17] = true;
+			if (this.watch) this.mod[23] = true;
 			this._offsetCenterBy(val.x - this._offset._x, val.y - this._offset._y);
 		}
 
@@ -1714,7 +1716,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._pixelPerfect;
 		}
 		set pixelPerfect(val) {
-			if (this.watch) this.mod[18] = true;
+			if (this.watch) this.mod[24] = true;
 			this._pixelPerfect = val;
 		}
 
@@ -1753,7 +1755,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set rotationDrag(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[19] = true;
+			if (this.watch) this.mod[26] = true;
 			this.body.setAngularDamping(val);
 		}
 		/**
@@ -1767,7 +1769,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set rotationLock(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[20] = true;
+			if (this.watch) this.mod[27] = true;
 			this.body.setFixedRotation(val);
 		}
 		/**
@@ -1811,6 +1813,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			if (val.x == this._scale._x && val.y == this._scale._y) return;
 
+			if (this.watch) this.mod[28] = true;
+
 			let scalars = {
 				x: val.x / this._scale._x,
 				y: val.y / this._scale._y
@@ -1846,7 +1850,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		set sleeping(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[23] = true;
+			if (this.watch) this.mod[30] = true;
 			this.body.setAwake(!val);
 		}
 
@@ -1918,7 +1922,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._visible;
 		}
 		set visible(val) {
-			if (this.watch) this.mod[29] = true;
+			if (this.watch) this.mod[37] = true;
 			this._visible = val;
 		}
 
@@ -1979,7 +1983,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		set w(val) {
 			if (val < 0) val = 0.01;
 			if (val == this._w) return;
-			if (this.watch) this.mod[30] = true;
+			if (this.watch) this.mod[38] = true;
 			delete this._dimensionsUndefinedByUser;
 			let scalarX = val / this._w;
 			this._w = val;
@@ -2031,7 +2035,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				return;
 			}
 			if (val == this._h) return;
-			if (this.watch) this.mod[11] = true;
+			if (this.watch) this.mod[17] = true;
 			delete this._dimensionsUndefinedByUser;
 			let scalarY = val / this._h;
 			this._h = val;
@@ -2084,12 +2088,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let shapeChange = this.shape != 'circle';
 			if (!shapeChange) {
 				if (this._diameter == val) return;
-				if (this.watch) this.mod[30] = true;
+				if (this.watch) this.mod[38] = true;
 				this._diameter = val;
 			} else {
 				if (this.watch) {
-					this.mod[22] = true;
-					this.mod[30] = true;
+					this.mod[29] = true;
+					this.mod[38] = true;
 				}
 				let bodyProps;
 				if (this._collider != 'none') {
@@ -2225,7 +2229,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this._validateShape(val);
 
-			if (this.watch) this.mod[22] = true;
+			if (this.watch) this.mod[29] = true;
 			if (val == 'circle') {
 				this.d = this.w;
 			} else {
@@ -3171,7 +3175,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set removed(val) {
 			if (!val || this._removed) return;
-			if (this.watch) this.mod[32] = true;
+			if (this.watch) this.mod[25] = true;
 			this._removed = true;
 			this._remove();
 		}
@@ -3396,46 +3400,46 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	// only used by the Netcode class to convert sprite data to binary
 	this.Sprite.propTypes = {
-		autoDraw: 'boolean', // 0
-		allowSleeping: 'boolean', // 1
-		autoUpdate: 'boolean', // 2
-		bounciness: 'Float16', // 3
-		collider: 'Uint8', // 4
-		color: 'p5.Color', // 5
-		debug: 'boolean', // 6
-		density: 'Float16', // 7
-		direction: 'Float16', // 8
-		drag: 'Float16', // 9
-		friction: 'Float16', // 10
-		h: 'Float16', // 11 (height)
-		isSuperFast: 'boolean', // 12
-		layer: 'Float16', // 13
-		life: 'Int32', // 14
-		mass: 'Float16', // 15
-		mirror: 'Vec2_boolean', // 16
-		offset: 'Vec2', // 17
-		pixelPerfect: 'boolean', // 18
-		rotationDrag: 'Float16', // 19
-		rotationLock: 'boolean', // 20
-		scale: 'Vec2', // 21
-		shape: 'Uint8', // 22
-		sleeping: 'boolean', // 23
-		stroke: 'p5.Color', // 24
-		strokeWeight: 'Float16', // 25
-		text: 'string', // 26
-		textColor: 'p5.Color', // 27
-		tileSize: 'Float16', // 28
-		visible: 'boolean', // 29
-		w: 'Float16', // 30 (width)
-		watch: 'boolean', // 31
+		x: 'Float64', // 0
+		y: 'Float64', // 1
+		vel: 'Vec2', // 2
+		rotation: 'number', // 3
+		rotationSpeed: 'number', // 4
 
-		removed: 'boolean', // 32
-
-		x: 'Float64',
-		y: 'Float64',
-		vel: 'Vec2',
-		rotation: 'Float16',
-		rotationSpeed: 'Float16'
+		ani: 'string', // 5
+		autoDraw: 'boolean', // 6
+		allowSleeping: 'boolean', // 7
+		autoUpdate: 'boolean', // 8
+		bounciness: 'number', // 9
+		collider: 'Uint8', // 10
+		color: 'color', // 11
+		debug: 'boolean', // 12
+		density: 'number', // 13
+		direction: 'number', // 14
+		drag: 'number', // 15
+		friction: 'number', // 16
+		h: 'number', // 17 (height)
+		isSuperFast: 'boolean', // 18
+		layer: 'number', // 19
+		life: 'Int32', // 20
+		mass: 'number', // 21
+		mirror: 'Vec2_boolean', // 22
+		offset: 'Vec2', // 23
+		pixelPerfect: 'boolean', // 24
+		removed: 'boolean', // 25 NEW
+		rotationDrag: 'number', // 26
+		rotationLock: 'boolean', // 27
+		scale: 'Vec2', // 28
+		shape: 'Uint8', // 29
+		sleeping: 'boolean', // 30
+		stroke: 'color', // 31
+		strokeWeight: 'number', // 32
+		text: 'string', // 33
+		textColor: 'color', // 34
+		tile: 'string', // 35
+		tileSize: 'number', // 36
+		visible: 'boolean', // 37
+		w: 'number' // 38 (width)
 	};
 
 	this.Sprite.props = Object.keys(this.Sprite.propTypes);
@@ -4444,7 +4448,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let vecProps = ['mirror', 'offset', 'scale', 'vel'];
 
 			for (let prop of props) {
-				if (vecProps.includes(prop) || prop == 'velocity') continue;
+				if (vecProps.includes(prop) || prop == 'ani' || prop == 'velocity') continue;
 
 				Object.defineProperty(this, prop, {
 					get() {
@@ -5960,7 +5964,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * over the network, and will make the game run faster.
 	 */
 	this.Netcode = class {
-		constructor() {}
+		constructor() {
+			this.typeSizes = {
+				boolean: 1,
+				Uint8: 1,
+				Vec2_boolean: 1,
+				Float16: 2,
+				number: 2,
+				color: 4,
+				Float32: 4,
+				Int32: 4,
+				Vec2: 4,
+				Float64: 8
+			};
+		}
 
 		startServer() {
 			this.watch = true;
@@ -5976,40 +5993,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * a network.
 		 *
 		 * @param {Sprite} sprite
-		 * @param {Array} props - sprite properties that should be converted
 		 * to binary. Defaults to all sprite properties.
 		 */
-		spriteToBinary(sprite, props) {
+		spriteToBinary(sprite) {
 			// calculate size of buffer first
-			let size = 26;
+			let size = 27;
 
-			props ??= pInst.Sprite.props;
+			const props = pInst.Sprite.props;
 
-			for (let i = 0; i < props.length; i++) {
+			for (let i = 5; i < props.length; i++) {
+				if (sprite.mod[i] === false) continue;
 				const prop = props[i];
-				if (prop == 'x') break;
-
 				const type = pInst.Sprite.propTypes[prop];
 
 				const val = sprite[prop];
-				if (val === undefined || val === null) {
-					log(prop);
-					continue;
-				}
+				if (val === undefined || val === null) continue;
 
-				size += 1;
-
-				if (type == 'boolean' || type == 'Uint8') {
-					size += 1;
-				} else if (type == 'Float16' || type == 'Vec2_boolean') {
-					size += 2;
-				} else if (type == 'Float32' || type == 'Int32' || type == 'p5.Color' || type == 'Vec2') {
-					size += 4;
-				} else if (type == 'Float64') {
-					size += 8;
-				} else if (type == 'string') {
+				if (type == 'string') {
 					const encoded = new TextEncoder().encode(val);
-					size += encoded.length + 2;
+					size += encoded.length + 3;
+				} else {
+					size += this.typeSizes[type] + 1;
 				}
 			}
 
@@ -6026,10 +6030,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			data.setFloat16(24, sprite.rotationSpeed);
 
 			let o = 26; // byte offset
-			for (let i = 0; i < props.length; i++) {
-				const prop = pInst.Sprite.props[i];
-				if (prop == 'x') break;
-
+			for (let i = 5; i < props.length; i++) {
+				if (sprite.mod[i] === false) continue;
+				const prop = props[i];
 				const type = pInst.Sprite.propTypes[prop];
 
 				const val = sprite[prop];
@@ -6040,16 +6043,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 				if (type == 'boolean') {
 					data.setUint8(o, val ? 1 : 0);
-					o += 1;
-				} else if (type == 'Float16') {
+				} else if (type == 'number' || type == 'Float16') {
 					data.setFloat16(o, val);
-					o += 2;
 				} else if (type == 'Float32') {
 					data.setFloat32(o, val);
-					o += 4;
 				} else if (type == 'Float64') {
 					data.setFloat64(o, val);
-					o += 8;
 				} else if (type == 'string') {
 					const encoded = new TextEncoder().encode(val);
 					data.setUint16(o, encoded.length);
@@ -6058,20 +6057,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						data.setUint8(o, encoded[j]);
 						o += 1;
 					}
-				} else if (type == 'p5.Color') {
+					continue;
+				} else if (type == 'color') {
 					data.setUint8(o, val.levels[0]); // r
 					data.setUint8(o + 1, val.levels[1]); // g
 					data.setUint8(o + 2, val.levels[2]); // b
 					data.setUint8(o + 3, val.levels[3]); // a
-					o += 4;
 				} else if (type == 'Vec2') {
 					data.setFloat16(o, val.x);
 					data.setFloat16(o + 2, val.y);
-					o += 4;
 				} else if (type == 'Vec2_boolean') {
-					data.setUint8(o, val.x ? 1 : 0);
-					data.setUint8(o + 1, val.y ? 1 : 0);
-					o += 2;
+					data.setUint8(o, (val.x ? 1 : 0) | (val.y ? 2 : 0));
 				} else if (type == 'Uint8') {
 					if (prop == 'collider') {
 						data.getUint8(o, sprite.__collider);
@@ -6080,12 +6076,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					} else {
 						data.getUint8(o, val);
 					}
-					o += 1;
 				} else if (type == 'Int32') {
 					data.setInt32(o, val);
-					o += 4;
 				}
+				o += this.typeSizes[type];
 			}
+
+			data.setUint8(o, 255);
+
+			sprite.watch = true;
+			for (let i = 5; i < props.length; i++) {
+				sprite.mod[i] = false;
+			}
+
 			return new Uint8Array(buffer);
 		}
 
@@ -6093,25 +6096,31 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Converts binary data, assigning the values to a sprite.
 		 *
 		 * @param {Uint8Array} binary - binary data
-		 * @param {Array} props - sprite properties that should be converted
+		 * @param {number} [offset] - byte offset
 		 * @returns {Sprite} the sprite
 		 */
-		binaryToSprite(binary, props) {
-			const data = new DataView(binary.buffer);
+		binaryToSprite(binary, offset) {
+			let data;
+			if (binary instanceof DataView) data = binary;
+			else data = new DataView(binary.buffer);
+
 			data.getFloat16 = (o) => decodeFloat16(data.getUint16(o));
 
-			let uid = data.getUint16(0);
-			let sprite = pInst.p5play.sprites[uid] || new pInst.Sprite();
-			sprite.x = data.getFloat64(2);
-			sprite.y = data.getFloat64(10);
-			sprite.vel.x = data.getFloat16(18);
-			sprite.vel.y = data.getFloat16(20);
-			sprite.rotation = data.getFloat16(22);
-			sprite.rotationSpeed = data.getFloat16(24);
+			let o = offset || 0;
 
-			let o = 26;
+			let uid = data.getUint16(o);
+			let sprite = pInst.p5play.sprites[uid] || new pInst.Sprite();
+			sprite.x = data.getFloat64(o + 2);
+			sprite.y = data.getFloat64(o + 10);
+			sprite.vel.x = data.getFloat16(o + 18);
+			sprite.vel.y = data.getFloat16(o + 20);
+			sprite.rotation = data.getFloat16(o + 22);
+			sprite.rotationSpeed = data.getFloat16(o + 24);
+			o += 26;
+
 			while (o !== data.byteLength) {
 				const propId = data.getUint8(o);
+				if (propId === 255) break;
 				o += 1;
 
 				const prop = pInst.Sprite.props[propId];
@@ -6119,39 +6128,32 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 				if (type === 'boolean') {
 					sprite[prop] = data.getUint8(o) !== 0;
-					o += 1;
-				} else if (type === 'Float16') {
+				} else if (type == 'number' || type === 'Float16') {
 					sprite[prop] = data.getFloat16(o);
-					o += 2;
 				} else if (type === 'Float32') {
 					sprite[prop] = data.getFloat32(o);
-					o += 4;
 				} else if (type === 'Float64') {
 					sprite[prop] = data.getFloat64(o);
-					o += 8;
 				} else if (type === 'string') {
 					const strLength = data.getUint16(o);
 					o += 2;
 					const strBytes = new Uint8Array(data.buffer, o, strLength);
 					sprite[prop] = new TextDecoder().decode(strBytes);
 					o += strLength;
-				} else if (type === 'p5.Color') {
+					continue;
+				} else if (type === 'color') {
 					const r = data.getUint8(o);
 					const g = data.getUint8(o + 1);
 					const b = data.getUint8(o + 2);
 					const a = data.getUint8(o + 3);
 					sprite[prop] = color(r, g, b, a);
-					o += 4;
 				} else if (type === 'Vec2') {
 					const x = data.getFloat16(o);
 					const y = data.getFloat16(o + 2);
 					sprite[prop] = { x, y };
-					o += 4;
 				} else if (type === 'Vec2_boolean') {
-					const x = data.getUint8(o);
-					const y = data.getUint8(o + 1);
-					sprite[prop] = { x, y };
-					o += 2;
+					const byte = data.getUint8(o);
+					sprite[prop] = { x: (byte & 1) === 1, y: (byte & 2) === 2 };
 				} else if (type === 'Uint8') {
 					let val = data.getUint8(o);
 					if (prop === 'collider') {
@@ -6161,11 +6163,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					} else {
 						sprite[prop] = val;
 					}
-					o += 1;
 				} else if (type === 'Int32') {
 					sprite[prop] = data.getInt32(o);
-					o += 4;
 				}
+				o += this.typeSizes[type];
 			}
 
 			return sprite;
