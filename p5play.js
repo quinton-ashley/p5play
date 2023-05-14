@@ -506,22 +506,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.vel.x = gvx;
 			this.vel.y = gvy;
 
-			/**
-			 * If false, animations will always start playing from the frame
-			 * they were stopped at. If true, when the sprite changes the
-			 * animation its currently displaying, it will start playing
-			 * from frame 0.
-			 *
-			 * @type {SpriteAnimation}
-			 * @default false
-			 */
+			// skip these properties
+			let skipProps = ['ani', 'collider', 'vel', 'x', 'y'];
 
-			// copy properties from group
+			// inherit properties from group in the order they were added
+			// skip props that were already set above
 			for (let prop of this.p.Sprite.propsAll) {
-				if (prop == 'ani' || prop == 'collider' || prop == 'x' || prop == 'y' || prop == 'vel') continue;
+				if (skipProps.includes(prop)) continue;
 				let val = group[prop];
 				if (val === undefined) continue;
-				if (typeof val == 'function') val = val(group.length - 1);
+				if (typeof val == 'function' && isArrowFunction(val)) {
+					val = val(group.length - 1);
+				}
 				if (typeof val == 'object') {
 					this[prop] = Object.assign({}, val);
 				} else {
@@ -529,48 +525,37 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 
-			// ignore these properties
-			let ignoreProps = [
-				'_collides',
-				'_colliding',
-				'_collided',
-				'_collisions',
-				'_hasOverlap',
-				'_overlaps',
-				'_overlapping',
-				'_overlapped',
-				'_overlappers',
+			skipProps = [
 				'add',
 				'animation',
 				'animations',
 				'autoCull',
-				'collider',
 				'contains',
 				'GroupSprite',
 				'Group',
 				'idNum',
 				'length',
+				'mod',
 				'mouse',
 				'p',
 				'parent',
 				'Sprite',
 				'Subgroup',
 				'subgroups',
-				'vel'
+				'velocity'
 			];
 
-			// the sprite should also inherit
-			// custom group properties, "group traits"
-			for (let g of this.groups) {
+			for (let i = 0; i < this.groups.length; i++) {
+				let g = this.groups[i];
 				let props = Object.keys(g);
 				for (let prop of props) {
-					if (!isNaN(prop) || prop[0] == '_' || ignoreProps.includes(prop)) {
+					if (!isNaN(prop) || prop[0] == '_' || skipProps.includes(prop) || this.p.Sprite.propsAll.includes(prop)) {
 						continue;
 					}
 					let val = g[prop];
 					if (val === undefined) continue;
-					if (typeof val == 'function') {
-						if (isArrowFunction(val)) val = val();
+					if (typeof val == 'function' && isArrowFunction(val)) {
+						val = val(g.length - 1);
 					}
 					if (typeof val == 'object') {
 						this[prop] = Object.assign({}, val);
@@ -2650,6 +2635,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} tracking [optional] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
 		 */
 		moveTowards(x, y, tracking) {
+			if (x === undefined || x === null) return;
 			if (typeof x != 'number') {
 				let obj = x;
 				if (obj == this.p.mouse && !this.p.mouse.active) return;
@@ -2726,8 +2712,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else {
 				dirNameMode = isNaN(direction);
 			}
+			if (!distance) return;
+
 			if (direction !== undefined) this.direction = direction;
-			distance ??= 1;
+
 			let x = this.x + this.p.cos(this.direction) * distance;
 			let y = this.y + this.p.sin(this.direction) * distance;
 			if (dirNameMode && this.tileSize > 1) {
@@ -2750,10 +2738,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * or to false if the sprite will not reach its destination
 		 */
 		moveTo(x, y, speed) {
-			if (typeof x == 'undefined') {
-				console.error('sprite.move ERROR: movement direction or destination not defined');
-				return;
-			}
+			if (x === undefined || x === null) return;
 			if (typeof x != 'number') {
 				let obj = x;
 				if (obj == this.p.mouse && !this.p.mouse.active) return;
@@ -4482,10 +4467,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			let props = [...this.p.Sprite.propsAll, 'spriteSheet'];
-			let vecProps = ['mirror', 'offset', 'scale', 'vel'];
-
 			for (let prop of props) {
-				if (vecProps.includes(prop) || prop == 'ani' || prop == 'velocity') continue;
+				if (prop == 'ani' || prop == 'velocity') continue;
 
 				Object.defineProperty(this, prop, {
 					get() {
@@ -4514,12 +4497,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				});
 			}
 
-			this.mirror = {};
-			this.offset = {};
-			this.scale = {};
-			this.vel = pInst.createVector.call(pInst);
-
+			let vecProps = ['mirror', 'offset', 'scale', 'vel'];
 			for (let vecProp of vecProps) {
+				vecProp = '_' + vecProp;
+				if (vecProp != 'vel') this[vecProp] = {};
+				else this[vecProp] = new this.p.Vector();
 				this[vecProp]._x = 0;
 				this[vecProp]._y = 0;
 				for (let prop of ['x', 'y']) {
@@ -5272,6 +5254,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		constructor() {
 			super(new pl.Vec2(0, 0), true);
 			this.p = pInst;
+
+			this.mod = [];
+
 			this._offset = { x: 0, y: 0 };
 			let _this = this;
 			this.offset = {
@@ -5306,24 +5291,30 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 *
 			 * @type.y
 			 */
-			this.gravity = {
+			this._gravity = {
 				get x() {
 					return _this.m_gravity.x;
 				},
 				set x(val) {
+					val = Math.round(val || 0);
+					if (val == _this.m_gravity.x) return;
+					_this.mod[0] = true;
 					for (let s of _this.p.allSprites) {
 						s.sleeping = false;
 					}
-					_this.m_gravity.x = _this.p.round(val || 0);
+					_this.m_gravity.x = val;
 				},
 				get y() {
 					return _this.m_gravity.y;
 				},
 				set y(val) {
+					val = Math.round(val || 0);
+					if (val == _this.m_gravity.y) return;
+					_this.mod[0] = true;
 					for (let s of _this.p.allSprites) {
 						s.sleeping = false;
 					}
-					_this.m_gravity.y = _this.p.round(val || 0);
+					_this.m_gravity.y = val;
 				}
 			};
 
@@ -5334,6 +5325,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.mouseSprites = [];
 
 			this.autoStep = true;
+		}
+
+		get gravity() {
+			return this._gravity;
+		}
+		set gravity(val) {
+			this._gravity.x = val.x;
+			this._gravity.y = val.y;
 		}
 
 		/**
@@ -6015,11 +6014,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				Vec2: 4,
 				Float64: 8
 			};
+			this.player = 0;
 		}
 
-		// connect() {}
+		connect() {}
 
-		// disconnect() {}
+		disconnect() {}
 
 		/**
 		 * Converts a sprite to a binary representation, which is smaller
@@ -6043,7 +6043,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				const type = pInst.Sprite.propTypes[prop];
 
 				let val = sprite[prop];
-				if (prop == 'ani') val = val.name;
+				if (prop == 'ani') val = val?.name;
 				if (val === undefined || val === null) continue;
 
 				if (type == 'string') {
@@ -6197,6 +6197,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			return sprite;
 		}
+
+		inputToJSON() {}
 	};
 
 	this.netcode = new this.Netcode();
@@ -7707,6 +7709,13 @@ canvas {
 	 */
 	this.controllers = this.contro;
 
+	this.inputs = [];
+	this.inputs[this.netcode.player] = {
+		mouse: this.mouse,
+		kb: this.kb,
+		contro: this.contro
+	};
+
 	if (!this.getFPS) this.p5play._fps = 60;
 
 	/**
@@ -7774,23 +7783,17 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.allSprites.draw();
 		this.camera.off();
 	}
-	if (this.allSprites._autoDraw === null) {
-		this.allSprites._autoDraw = true;
-	}
+	this.allSprites._autoDraw ??= true;
 
 	if (this.world.autoStep) {
 		this.world.step();
 	}
-	if (this.world.autoStep === null) {
-		this.world.autoStep = true;
-	}
+	this.world.autoStep ??= true;
 
 	if (this.allSprites._autoUpdate) {
 		this.allSprites.update();
 	}
-	if (this.allSprites._autoUpdate === null) {
-		this.allSprites._autoUpdate = true;
-	}
+	this.allSprites._autoUpdate ??= true;
 
 	for (let s of this.allSprites) {
 		s.autoDraw ??= true;
