@@ -1,5 +1,5 @@
 {
-	"name": "p5.play",
+	"name": "p5play",
 	"author": "quinton-ashley <info@p5play.org>",
 	"bugs": {
 		"url": "https://github.com/quinton-ashley/p5play/issues"
@@ -9,7 +9,7 @@
 	],
 	"description": "p5play is for creating interactive art and games with the Box2D physics engine.",
 	"keywords": [
-		"p5play",
+		"p5.play",
 		"p5.js",
 		"p5js",
 		"p5",
@@ -39,5 +39,5 @@
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "3.8.13"
+	"version": "3.8.14"
 }
