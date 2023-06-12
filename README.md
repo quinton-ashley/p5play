@@ -1,20 +1,22 @@
 # <img src="https://p5play.org/main/logo.svg" width="64"> p5play ![](https://img.shields.io/github/package-json/v/quinton-ashley/p5play) ![](https://img.shields.io/github/license/quinton-ashley/p5play)
 
-[p5play][] is a 2D game engine made by Computer Science teachers to help you turn your game ideas into JavaScript code!
+[p5play][] is a JavaScript game engine that uses p5.js for graphics and Box2D for physics.
 
-### Learn how to use p5play at https://p5play.org
+Looking to turn your ideas into online games or interactive art? Check out p5play! It was designed by Computer Science teachers to be intuitive for beginners, making it popular at schools and universities around the world. But, p5play v3 isn't just for classroom use. It's a powerful tool built on planck.js, a port of Box2D - the same physics simulator used by industry leaders in beloved games like Tiny Wings and Angry Birds.
 
-### Join the [p5play community Discord server][] to ask questions and meet other people making games with p5play!
+### Learn how to use p5play at https://p5play.org 📚
+
+### Join the [p5play community Discord server][] to ask questions and meet other people making games with p5play! 👾
 
 p5play was created by Quinton Ashley [@quinton-ashley][]. p5.play v1 was created by Paolo Pedercini [@molleindustria][] and collaborators. If you have any questions or problems use the help channels on [discord][] or make an [issue report][] on this GitHub repository or email <info@p5play.org>
 
-## Support p5play
+## Support p5play 🤝
 
 p5play is an open source project and will always be available for free, but your support would be greatly appreciated. If you use p5play professionally in your lessons or commercial games, please consider donating!
 
 [![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto) [![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley) [![Patreon](https://img.shields.io/badge/Patreon-@p5play-orange.svg)](https://www.patreon.com/p5play)
 
-## Contributing to p5play
+## Contributing to p5play ✍️
 
 First, take a look at the [p5play project planning page][]. Let me know what you'd like to help with!
 

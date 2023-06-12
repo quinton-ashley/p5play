@@ -1372,7 +1372,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.vel.x !== 0 || this.vel.y !== 0) {
 				return this.p.atan2(this.vel.y, this.vel.x);
 			}
-			if (!this._direction) return this.rotation;
+			if (this._direction === undefined) return this.rotation;
 			return this._direction;
 		}
 		set direction(val) {
@@ -5993,13 +5993,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * infer "bad netcodes" when they experience lag or when their inputs
 		 * are dropped." - Wikipedia
 		 *
-		 * The methods of this class can help p5play developers create online
+		 * The methods of this class will help p5play developers create online
 		 * multiplayer games and servers.
-		 *
-		 * My next step for this is to have p5play watch for which properties
-		 * of a sprite have changed, and only send those properties over the
-		 * network. This will reduce the amount of data that needs to be sent
-		 * over the network, and will make the game run faster.
 		 */
 		constructor() {
 			this.typeSizes = {
