@@ -1361,6 +1361,30 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.layer = val;
 		}
 
+		_getDirectionAngle(name) {
+			name = name.toLowerCase().replaceAll(/[ _-]/g, '');
+			let dirs = {
+				up: -90,
+				down: 90,
+				left: 180,
+				right: 0,
+				upright: -45,
+				rightup: -45,
+				upleft: -135,
+				leftup: -135,
+				downright: 45,
+				rightdown: 45,
+				downleft: 135,
+				leftdown: 135,
+				forward: this.rotation,
+				backward: this.rotation + 180
+			};
+			let val = dirs[name];
+			if (this.p._angleMode == 'radians') {
+				val = this.p.radians(val);
+			}
+			return val;
+		}
 		/**
 		 * The angle of the sprite's movement or it's rotation angle if the
 		 * sprite is not moving.
@@ -1379,27 +1403,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.watch) this.mod[14] = true;
 			if (typeof val == 'string') {
 				this._heading = val;
-
-				let dir = val.toLowerCase().replaceAll(/[ _-]/g, '');
-				let dirs = {
-					up: -90,
-					down: 90,
-					left: 180,
-					right: 0,
-					upright: -45,
-					rightup: -45,
-					upleft: -135,
-					leftup: -135,
-					downright: 45,
-					rightdown: 45,
-					downleft: 135,
-					leftdown: 135,
-					forward: this.rotation,
-					backward: this.rotation + 180
-				};
-				val = dirs[dir];
+				val = this._getDirectionAngle(val);
 			}
-
 			this._direction = val;
 			let speed = this.speed;
 			this.vel.x = this.p.cos(val) * speed;
@@ -1739,18 +1744,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		get rotation() {
 			if (!this.body) return this._angle || 0;
-			if (this.p._angleMode === 'degrees') {
-				return this.p.degrees(this.body.getAngle());
-			}
-			return this.body.getAngle();
+			let val = this.body.getAngle();
+			if (this.p._angleMode === 'degrees') return this.p.degrees(val);
+			return val;
 		}
 		set rotation(val) {
 			if (this.body) {
-				if (this.p._angleMode === 'degrees') {
-					this.body.setAngle(this.p.radians(val));
-				} else {
-					this.body.setAngle(val);
-				}
+				if (this.p._angleMode === 'degrees') val = this.p.radians(val);
+				this.body.setAngle(val);
 			} else {
 				this._angle = val;
 			}
@@ -2652,7 +2653,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (x === undefined && y === undefined) return;
 			tracking ??= 0.1;
 
-			// let vec = new pl.Vec2(0, 0);
 			if (x !== undefined && x !== null) {
 				let diffX = x - this.x;
 				if (!isSlop(diffX)) {
@@ -2665,7 +2665,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this.vel.y = diffY * tracking * this.tileSize;
 				}
 			}
-			// this.body.applyForce(vec, new pl.Vec2(0, 0));
 		}
 
 		/**
@@ -2714,14 +2713,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			if (!distance) return;
 
-			if (direction !== undefined) this.direction = direction;
+			if (typeof direction == 'string') {
+				direction = this._getDirectionAngle(direction);
+			}
+			direction ??= this.direction;
 
-			let x = this.x + this.p.cos(this.direction) * distance;
-			let y = this.y + this.p.sin(this.direction) * distance;
+			let x = this.x + this.p.cos(direction) * distance;
+			let y = this.y + this.p.sin(direction) * distance;
 			if (dirNameMode && this.tileSize > 1) {
 				x = Math.round(x);
 				y = Math.round(y);
-			} else if (this.direction % 90 == 0) {
+			} else if (direction % 90 == 0) {
 				x = fixRound(x);
 				y = fixRound(y);
 			}
@@ -4865,14 +4867,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Apply a force that is scaled to the sprite's mass.
-		 *
-		 * @param {p5.Vector|Array} forceVector force vector
-		 * @param {p5.Vector|Array} [forceOrigin] force origin
+		 * Apply a force on every sprite in a group that is scaled to
+		 * each sprite's mass.
 		 */
-		applyForce(forceVector, forceOrigin) {
+		applyForce(x, y, originX, originY) {
 			for (let s of this) {
-				s.applyForce(forceVector, forceOrigin);
+				s.applyForce(x, y, originX, originY);
 			}
 		}
 
