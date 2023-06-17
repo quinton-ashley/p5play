@@ -2711,9 +2711,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} else {
 				dirNameMode = isNaN(direction);
 			}
-			if (!distance) return;
+			distance ??= 1;
 
 			if (typeof direction == 'string') {
+				this._heading = direction;
 				direction = this._getDirectionAngle(direction);
 			}
 			direction ??= this.direction;
