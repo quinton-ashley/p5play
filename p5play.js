@@ -2657,13 +2657,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let diffX = x - this.x;
 				if (!isSlop(diffX)) {
 					this.vel.x = diffX * tracking * this.tileSize;
-				}
+				} else this.vel.x = 0;
 			}
 			if (y !== undefined && y !== null) {
 				let diffY = y - this.y;
 				if (!isSlop(diffY)) {
 					this.vel.y = diffY * tracking * this.tileSize;
-				}
+				} else this.vel.y = 0;
 			}
 		}
 
