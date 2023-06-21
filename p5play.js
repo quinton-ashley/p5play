@@ -5832,6 +5832,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Number} y
 		 * @param {Number} w
 		 * @param {Number} h
+		 * @returns {Group} A group containing all the tile sprites
 		 */
 		constructor(tiles, x, y, w, h) {
 			if (typeof tiles == 'string') tiles = tiles.split('\n');
@@ -5840,6 +5841,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			y ??= 0;
 			w ??= 1;
 			h ??= 1;
+
+			let sprites = new Group();
 
 			for (let row = 0; row < tiles.length; row++) {
 				for (let col = 0; col < tiles[row].length; col++) {
@@ -5852,7 +5855,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						if (ani) break;
 					}
 					if (ani) {
-						new g.Sprite(ani, x + col * w, y + row * h);
+						sprites.push(new g.Sprite(ani, x + col * w, y + row * h));
 						continue;
 					}
 					let wasFound = false;
@@ -5863,7 +5866,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						}
 					}
 					if (wasFound) {
-						new g.Sprite(x + col * w, y + row * h);
+						sprites.push(new g.Sprite(x + col * w, y + row * h));
 						continue;
 					}
 					let s;
@@ -5881,6 +5884,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					throw 'Tile not found: ' + t;
 				}
 			}
+
+			return sprites;
 		}
 	};
 
@@ -6587,7 +6592,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * the largest possible canvas with a 16:9 aspect ratio.
 	 *
 	 * This function also disables the default keydown responses for
-	 * the arrow keys, slash, and spacebar. This is to prevent the
+	 * the arrow keys, slash, and space. This is to prevent the
 	 * browser from scrolling the page when the user is playing a game
 	 * using common keyboard commands.
 	 *
@@ -7161,7 +7166,11 @@ canvas {
 			let inputs = ['x', 'y', 'left', 'center', 'right'];
 			this.init(inputs);
 			this.default = 'left';
-			this.draggable = false;
+			this.drag = {
+				left: 0,
+				center: 0,
+				right: 0
+			};
 			this.isOnCanvas = false;
 			this.active = false;
 
@@ -7203,12 +7212,29 @@ canvas {
 
 		/**
 		 * @param {string} inp
-		 * @returns {number} the amount of frames the user has been dragging the input
+		 * @returns {boolean} true on the first frame that the user reaches the holdThreshold for holding the input and could start to drag
+		 */
+		drags(inp) {
+			inp ??= this.default;
+			return this.drag[inp] == 1;
+		}
+
+		/**
+		 * @param {string} inp
+		 * @returns {number} the amount of frames the user has been dragging while pressing the input
 		 */
 		dragging(inp) {
 			inp ??= this.default;
-			this.draggable = true;
-			return this[inp] >= this.holdThreshold ? this[inp] : 0;
+			return this.drag[inp] > 0 ? this.drag[inp] : 0;
+		}
+
+		/**
+		 * @param {string} inp
+		 * @returns {boolean} true on the first frame that the user releases the input after dragging
+		 */
+		dragged(inp) {
+			inp ??= this.default;
+			return this.drag[inp] == -1;
 		}
 	};
 
@@ -7248,27 +7274,23 @@ canvas {
 		}
 	};
 
-	const _onmousedown = this._onmousedown;
-
 	const __onmousedown = function (btn) {
 		this.mouse[btn]++;
 		this.mouse.active = true;
-
-		let ms;
 		if (this.world.mouseSprites.length) {
+			let ms = this.world.mouseSprite;
+			// old mouse sprite didn't have the mouse released on it
+			if (ms) {
+				ms.mouse[btn] = 0;
+				ms.mouse.drag[btn] = 0;
+			}
 			ms = this.world.mouseSprites[0];
 			ms.mouse[btn] = 1;
-			// old mouse sprite didn't have the mouse released on it
-			// so it just gets set to 0 (not pressed)
-			if (this.world.mouseSprite) {
-				this.world.mouseSprite.mouse[btn] = 0;
-				if (btn == 'left') {
-					this.world.mouseSprite.mouse.draggable = false;
-				}
-			}
 			this.world.mouseSprite = ms;
 		}
 	};
+
+	const _onmousedown = this._onmousedown;
 
 	this._onmousedown = function (e) {
 		let btn = 'left';
@@ -7287,29 +7309,58 @@ canvas {
 		_ontouchstart.call(this, e);
 	};
 
-	const _onmouseup = this._onmouseup;
-
-	const __onmouseup = function (btn) {
-		if (this.mouse[btn] >= this.mouse.holdThreshold) {
-			this.mouse[btn] = -3;
-		} else if (this.mouse[btn] > 1) this.mouse[btn] = -1;
-		else this.mouse[btn] = -2;
-
-		if (this.world.mouseSprite) {
-			if (this.world.mouseSprite.mouse.hover > 1) {
-				if (this.world.mouseSprite.mouse[btn] >= this.mouse.holdThreshold) {
-					this.world.mouseSprite.mouse[btn] = -3;
-				} else if (this.world.mouseSprite.mouse[btn] > 1) {
-					this.world.mouseSprite.mouse[btn] = -1;
-				} else {
-					this.world.mouseSprite.mouse[btn] = -2;
-				}
-			} else {
-				this.world.mouseSprite.mouse[btn] = 0;
-				this.world.mouseSprite.mouse.draggable = false;
+	const __onmousemove = function (btn) {
+		let m = this.mouse;
+		if (m[btn] > 0 && m.drag[btn] <= 0) {
+			m.drag[btn] = 1;
+			m._isDragging = true;
+			let ms = this.world.mouseSprite?.mouse;
+			if (ms) {
+				ms.drag[btn] = 1;
+				ms._isDragging = true;
 			}
 		}
 	};
+
+	const _onmousemove = this._onmousemove;
+
+	this._onmousemove = function (e) {
+		let btn = 'left';
+		if (e.button === 1) btn = 'center';
+		else if (e.button === 2) btn = 'right';
+
+		__onmousemove.call(this, btn);
+		_onmousemove.call(this, e);
+	};
+
+	const __onmouseup = function (btn) {
+		let m = this.mouse;
+		if (m[btn] >= m.holdThreshold) {
+			m[btn] = -3;
+		} else if (m[btn] > 1) m[btn] = -1;
+		else m[btn] = -2;
+
+		let msm = this.world.mouseSprite?.mouse;
+		if (msm) {
+			if (msm.hover > 1) {
+				if (msm[btn] >= this.mouse.holdThreshold) {
+					msm[btn] = -3;
+				} else if (msm[btn] > 1) {
+					msm[btn] = -1;
+				} else {
+					msm[btn] = -2;
+				}
+				if (msm.drag[btn] > 0) {
+					msm.drag[btn] = msm[btn];
+				}
+			} else {
+				msm[btn] = 0;
+				msm.drag[btn] = 0;
+			}
+		}
+	};
+
+	const _onmouseup = this._onmouseup;
 
 	this._onmouseup = function (e) {
 		let btn = 'left';
@@ -7796,33 +7847,23 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		s.autoUpdate ??= true;
 	}
 
-	for (let btn of ['left', 'center', 'right']) {
-		if (this.mouse[btn] < 0) this.mouse[btn] = 0;
-		else if (this.mouse[btn] > 0) this.mouse[btn]++;
-
-		if (this.world.mouseSprite) {
-			if (this.world.mouseSprite.mouse[btn] < 0) {
-				this.world.mouseSprite.mouse[btn] = 0;
-			}
-		}
-	}
-
 	for (let k in this.kb) {
 		if (k == 'holdThreshold') continue;
 		if (this.kb[k] < 0) this.kb[k] = 0;
 		else if (this.kb[k] > 0) this.kb[k]++;
 	}
 
-	if (this.world.mouseTracking) {
-		if (this.world.mouseSprite) {
-			let val = 0;
-			for (let btn of ['left', 'center', 'right']) {
-				val += this.world.mouseSprite.mouse[btn];
-			}
-			if (val == 0) this.world.mouseSprite = null;
-		}
+	let m = this.mouse;
+	let msm = this.world.mouseSprite?.mouse;
 
-		let sprites = this.world.getSpritesAt(this.mouse.x, this.mouse.y);
+	for (let btn of ['left', 'center', 'right']) {
+		if (m[btn] < 0) m[btn] = 0;
+		else if (m[btn] > 0) m[btn]++;
+		if (msm) msm[btn] = m[btn];
+	}
+
+	if (this.world.mouseTracking) {
+		let sprites = this.world.getSpritesAt(m.x, m.y);
 		sprites.sort((a, b) => (a._layer - b._layer) * -1);
 
 		let uiSprites = this.world.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
@@ -7830,47 +7871,40 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 
 		sprites = sprites.concat(uiSprites);
 
-		let ms;
-		if (this.mouse.pressing('left') || this.mouse.pressing('center') || this.mouse.pressing('right')) {
-			// mouse sprite is not draggable
-			if (!this.world.mouseSprite?.mouse.draggable) {
-				// if sprite is being dragged,
-				// it should be dragged behind sprites on higher layers
-				for (let s of sprites) {
-					if (s == this.world.mouseSprite) {
-						ms = s;
-						break;
-					}
-				}
-			} else {
-				ms = this.world.mouseSprite;
+		for (let i = 0; i < sprites.length; i++) {
+			let s = sprites[i];
+			if (i == 0) {
+				s.mouse.hover++;
+				continue;
 			}
-			// if mouse is pressing the sprite
-			if (ms) {
-				ms.mouse.left = this.mouse.left;
-				ms.mouse.center = this.mouse.center;
-				ms.mouse.right = this.mouse.right;
-				ms.mouse.x = ms.x - this.mouse.x;
-				ms.mouse.y = ms.y - this.mouse.y;
-			} else if (this.world.mouseSprite) {
-				this.world.mouseSprite.mouse.left = 0;
-				this.world.mouseSprite.mouse.center = 0;
-				this.world.mouseSprite.mouse.right = 0;
-				this.world.mouseSprite.mouse.draggable = false;
-			}
+			if (s.mouse.hover > 0) s.mouse.hover = -1;
+			else if (s.mouse.hover < 0) s.mouse.hover = 0;
 		}
 
-		for (let s of sprites) {
-			s.mouse.hover++;
+		let ms = this.world.mouseSprite;
+
+		// if the user is not pressing any mouse buttons
+		if (m.left <= 0 && m.center <= 0 && m.right <= 0) {
+			ms = null;
+			this.world.mouseSprite = null;
+		} else {
+			for (let btn of ['left', 'center', 'right']) {
+				if (m.drag[btn] < 0) m.drag[btn] = 0;
+				else if (m.drag[btn] > 0) m.drag[btn]++;
+				if (msm) {
+					msm.drag[btn] = m.drag[btn];
+					msm.x = ms.x - m.x;
+					msm.y = ms.y - m.y;
+				}
+			}
 		}
 
 		for (let s of this.world.mouseSprites) {
-			if ((!this.world.mouseSprite?.mouse.draggable || s != ms) && !sprites.includes(s)) {
-				s.mouse.hover = -1;
-				s.mouse.left = 0;
-				s.mouse.center = 0;
-				s.mouse.right = 0;
-				s.mouse.draggable = false;
+			// mouse stopped hovering over the sprite and is not dragging it
+			if ((!msm?._isDragging || s != ms) && !sprites.includes(s)) {
+				let sm = s.mouse;
+				sm.hover = -1;
+				sm.left = sm.center = sm.right = 0;
 			}
 		}
 		this.world.mouseSprites = sprites;
