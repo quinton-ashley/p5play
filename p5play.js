@@ -5842,7 +5842,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			w ??= 1;
 			h ??= 1;
 
-			let sprites = new Group();
+			let sprites = new pInst.Group();
 
 			for (let row = 0; row < tiles.length; row++) {
 				for (let col = 0; col < tiles[row].length; col++) {
