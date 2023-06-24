@@ -190,6 +190,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.animations = new this.p.SpriteAnimations();
 
 			/**
+			 * Joints that the sprite is attached to
+			 * @type {Array}
+			 * @default []
+			 */
+			this.joints = [];
+
+			/**
 			 * True if the sprite was removed from the world
 			 *
 			 * @type {Boolean}
@@ -1448,7 +1455,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get draw() {
 			return this._display;
 		}
-
 		set draw(val) {
 			this._draw = val;
 		}
@@ -1925,7 +1931,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// TODO set vertices
 
 		/**
-		 * If true the sprite is shown, if false the sprite is hidden.
+		 * If true the sprite is shown, if set to false the sprite is hidden.
+		 *
+		 * Becomes null when the sprite is off screen but will be drawn and
+		 * set to true again if it goes back on screen.
 		 *
 		 * @type {Boolean}
 		 * @default true
@@ -2423,8 +2432,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					y + this.h < this.p.camera.bound.min.y ||
 					y - this.h > this.p.camera.bound.max.y)
 			) {
+				this._visible = null;
 				return;
 			}
+
+			this._visible = true;
+
 			x = fixRound(x);
 			y = fixRound(y);
 
@@ -2433,8 +2446,19 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (this._h % 2 == 0 || !isSlop((y % 1) - 0.5)) y = Math.round(y);
 			}
 
-			// x += this.tileSize * 0.015;
-			// y += this.tileSize * 0.015;
+			for (let j of this.joints) {
+				if (!j.visible) {
+					j.visible ??= true;
+					continue;
+				}
+				if (this._uid == j.spriteA._uid) {
+					if (!j.spriteB._visible || this.layer <= j.spriteB.layer) {
+						j._display();
+					}
+				} else if (!j.spriteA._visible || this.layer < j.spriteA.layer) {
+					j._display();
+				}
+			}
 
 			this.p.push();
 			this.p.imageMode('center');
@@ -4536,8 +4560,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 
-			this._orbitAngle = 0;
-
 			if (this._isAllSpritesGroup) {
 				/**
 				 * autoCull is a property of the allSprites group only,
@@ -4954,31 +4976,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * EXPERIMENTAL! Subject to change in the future!
-		 *
-		 * Rotates the group around its centroid.
-		 *
-		 * @param {Number} amount Amount of rotation
-		 */
-		orbit(amount) {
-			if (this.p.frameCount == 0) console.warn('group.orbit is experimental and is subject to change in the future!');
-			if (!this.centroid) this._resetCentroid();
-			this._orbitAngle += amount;
-			let angle = this._orbitAngle;
-			for (let s of this) {
-				if (s.distCentroid === undefined) this._resetDistancesFromCentroid();
-				let x = s.distCentroid.x;
-				let y = s.distCentroid.y;
-				let x2 = x * this.p.cos(angle) - y * this.p.sin(angle);
-				let y2 = x * this.p.sin(angle) + y * this.p.cos(angle);
-				x2 += this.centroid.x;
-				y2 += this.centroid.y;
-				s.vel.x = (x2 - s.x) * 0.1 * s.tileSize;
-				s.vel.y = (y2 - s.y) * 0.1 * s.tileSize;
-			}
-		}
-
-		/**
 		 * Gets the member at index i.
 		 *
 		 * @deprecated get
@@ -5035,6 +5032,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Remove sprites that go outside the given culling boundary
 		 * relative to the camera.
 		 *
+		 * Sprites with chain colliders can not be culled.
+		 *
 		 * @param {Number} top|size The distance that sprites can move below the p5.js canvas before they are removed. *OR* The distance sprites can travel outside the screen on all sides before they get removed.
 		 * @param {Number} bottom|cb The distance that sprites can move below the p5.js canvas before they are removed.
 		 * @param {Number} [left] The distance that sprites can move beyond the left side of the p5.js canvas before they are removed.
@@ -5068,6 +5067,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let culled = 0;
 			for (let i = 0; i < this.length; i++) {
 				let s = this[i];
+				if (s.shape == 'chain') continue;
 				if (s.x < minX || s.y < minY || s.x > maxX || s.y > maxY) {
 					culled++;
 					if (cb) cb(s, culled);
@@ -5138,7 +5138,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					i--;
 					continue;
 				}
-				if (sprite.visible && (!this.p.p5play._inPostDraw || sprite.autoDraw)) {
+				if (sprite._visible !== false && (!this.p.p5play._inPostDraw || sprite.autoDraw)) {
 					sprite.draw();
 				}
 			}
@@ -5666,6 +5666,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get pos() {
 			return this._pos;
 		}
+		set pos(val) {
+			this.x = val.x;
+			this.y = val.y;
+		}
 		/**
 		 * The camera's position. Alias for pos.
 		 *
@@ -5673,6 +5677,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		get position() {
 			return this._pos;
+		}
+		set position(val) {
+			this.x = val.x;
+			this.y = val.y;
 		}
 
 		/**
@@ -5827,12 +5835,14 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * Look at the Tiles reference pages before reading these docs.
 		 * </a>
 		 *
+		 * Returns a group containing all the tile sprites created by
+		 * the `Tiles` constructor.
+		 *
 		 * @param {String} tiles
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} w
 		 * @param {Number} h
-		 * @returns {Group} A group containing all the tile sprites
 		 */
 		constructor(tiles, x, y, w, h) {
 			if (typeof tiles == 'string') tiles = tiles.split('\n');
@@ -5897,6 +5907,523 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 */
 	this.createTiles = function (tiles, x, y, w, h) {
 		return new this.Tiles(tiles, x, y, w, h);
+	};
+
+	this.Joint = class {
+		/**
+		 * EXPERIMENTAL! Subject to change.
+		 *
+		 * Creates a joint between two sprites.
+		 *
+		 * @param {Sprite} spriteA
+		 * @param {Sprite} spriteB
+		 * @param {String} [type]
+		 */
+		constructor(spriteA, spriteB, type) {
+			this.p = pInst;
+
+			/**
+			 * The first sprite in the joint.
+			 *
+			 * @type {Sprite}
+			 */
+			this.spriteA = spriteA;
+
+			/**
+			 * The second sprite in the joint.
+			 *
+			 * @type {Sprite}
+			 */
+			this.spriteB = spriteB;
+
+			/**
+			 * The type of joint. Can be one of:
+			 *
+			 * `distance`, `wheel`, `revolute`, `prismatic`.
+			 *
+			 * Can't be changed after the joint is created.
+			 *
+			 * @type {String}
+			 * @readonly
+			 */
+			this.type = type;
+
+			let _this = this;
+
+			for (let l of ['A', 'B']) {
+				if ((type == 'revolute' || type == 'wheel') && l == 'B') break;
+
+				const prop = '_offset' + l;
+				this[prop] = pInst.createVector.call(pInst);
+
+				for (let axis of ['x', 'y']) {
+					Object.defineProperty(this[prop], axis, {
+						get() {
+							let val = (_this._j['m_localAnchor' + l][axis] / _this['sprite' + l].tileSize) * plScale;
+							return fixRound(val);
+						},
+						set(val) {
+							_this._j['m_localAnchor' + l][axis] = (val / plScale) * _this['sprite' + l].tileSize;
+						}
+					});
+				}
+			}
+
+			let removeProps = [];
+			if (type == 'distance' || type == 'rope') {
+				removeProps.push('motorSpeed', 'maxTorque', 'enableMotor');
+			} else if (type == 'revolute') {
+				removeProps.push('offsetB');
+			} else if (type == 'wheel') {
+				removeProps.push('offsetA');
+			}
+
+			let def = {};
+			for (let prop of removeProps) {
+				def[prop] = { value: null, enumerable: false };
+			}
+			Object.defineProperties(this, def);
+
+			/**
+			 * Determines whether to draw the joint if spriteA
+			 * or spriteB is drawn.
+			 *
+			 * @type {Boolean}
+			 * @default true
+			 */
+			this.visible = true;
+
+			spriteA.joints.push(this);
+			spriteB.joints.push(this);
+		}
+
+		_createJoint(j) {
+			this._j = this.p.world.createJoint(j);
+		}
+
+		_display() {
+			if (this.type == 'distance') {
+				this._draw(
+					this.spriteA.x + this.offsetA.x,
+					this.spriteA.y + this.offsetA.y,
+					this.spriteB.x + this.offsetB.x,
+					this.spriteB.y + this.offsetB.y
+				);
+			} else if (this.type == 'revolute') {
+				this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y);
+			}
+			this.visible = null;
+		}
+
+		_draw(xA, yA, xB, yB) {
+			if (xB) {
+				this.p.line(xA, yA, xB, yB);
+			} else {
+				this.p.point(xA, yA);
+			}
+		}
+
+		/**
+		 * Function that draws the joint. Can be overridden by the user.
+		 *
+		 * @param {Number} xA
+		 * @param {Number} yA
+		 * @param {Number} [xB]
+		 * @param {Number} [yB]
+		 */
+		get draw() {
+			return this._display;
+		}
+		set draw(val) {
+			this._draw = val;
+		}
+
+		/**
+		 * Offset to the joint's anchorA position from the center of spriteA.
+		 *
+		 * Wheel joints do not have an offsetA.
+		 *
+		 * @type {p5.Vector}
+		 * @default {x: 0, y: 0}
+		 */
+		get offsetA() {
+			return this._offsetA;
+		}
+		set offsetA(val) {
+			this._offsetA.x = val.x;
+			this._offsetA.y = val.y;
+		}
+
+		/**
+		 * Offset to the joint's anchorB position from the center of spriteB.
+		 *
+		 * Revolute joints do not have an offsetB.
+		 *
+		 * @type {p5.Vector}
+		 * @default {x: 0, y: 0}
+		 */
+		get offsetB() {
+			return this._offsetB;
+		}
+		set offsetB(val) {
+			this._offsetB.x = val.x;
+			this._offsetB.y = val.y;
+		}
+
+		/**
+		 * The springiness of the joint, a 0-1 ratio.
+		 *
+		 * 0.0 makes the joint completely rigid, and
+		 * 1.0 turns the joint into a super loose spring,
+		 * like a broken slinky that was overextended.
+		 *
+		 * Springiness is a user friendly wrapper around Box2D's spring
+		 * frequency joint parameter. It's 0-1 ratio is piecewise mapped
+		 * to the reversed range of 30-0.2hz, except 0 remains 0.
+		 *
+		 * 0.0 -> 0hz (perfectly rigid)
+		 * >0.0-0.1 -> 30hz-4hz (steel rod)
+		 * 0.1-0.5 -> 4hz-2.5hz (tight spring)
+		 * 0.5-0.8 -> 2.5hz-1hz (bouncy spring)
+		 * 0.8-0.9 -> 1hz-0.5hz (slinky)
+		 * 0.9-1.0 -> 0.5hz-0.2hz (bungee cord)
+		 *
+		 * @type {Number}
+		 * @default 0.0
+		 */
+		get springiness() {
+			return this._springiness;
+		}
+		set springiness(val) {
+			if (val > 0 && val <= 0.1) {
+				val = this.p.map(val, 0, 0.1, 30, 4);
+			} else if (val <= 0.5) {
+				val = this.p.map(val, 0.1, 0.5, 4, 2.5);
+			} else if (val <= 0.8) {
+				val = this.p.map(val, 0.5, 0.8, 2.5, 1);
+			} else if (val <= 0.9) {
+				val = this.p.map(val, 0.8, 0.9, 1, 0.5);
+			} else if (val <= 1.0) {
+				val = this.p.map(val, 0.9, 1.0, 0.5, 0.2);
+			}
+			this._springiness = val;
+
+			if (this.type != 'wheel') {
+				this._j.setFrequency(val);
+				return;
+			}
+			this._j.setSpringFrequencyHz(val);
+		}
+
+		/**
+		 * Damping only effects joint's that have a
+		 * springiness greater than 0.
+		 *
+		 * Damping is a 0-1 ratio describing how quickly the joint loses
+		 * vibrational energy.
+		 *
+		 * 0.0 lets the joint continue to spring up and down very easily.
+		 * 1.0 makes the joint lose vibrational energy immediately,
+		 * making the joint completely rigid, regardless of its springiness.
+		 *
+		 * @type {Number}
+		 * @default 0.0
+		 */
+		get damping() {
+			if (this.type != 'wheel') {
+				return this._j.getDampingRatio();
+			}
+			return this._j.getSpringDampingRatio();
+		}
+		set damping(val) {
+			if (this.type != 'wheel') {
+				this._j.setDampingRatio(val);
+				return;
+			}
+			this._j.setSpringDampingRatio(val);
+		}
+
+		/**
+		 * The speed of the joint's motor.
+		 *
+		 * @type {Number}
+		 * @default 0
+		 */
+		get speed() {
+			return this._j.getJointSpeed();
+		}
+		set speed(val) {
+			if (!this._j.isMotorEnabled()) {
+				this._j.enableMotor(true);
+			}
+			this._j.setMotorSpeed(val);
+		}
+
+		get motorSpeed() {
+			return this._j.getMotorSpeed();
+		}
+
+		get enableMotor() {
+			return this._j.isMotorEnabled();
+		}
+		set enableMotor(val) {
+			this._j.enableMotor(val);
+		}
+
+		// /**
+		//  * The joint's current speed.
+		//  *
+		//  * @type {Number}
+		//  * @default 0
+		//  * @readonly
+		//  */
+		// get speed() {
+		// 	return this._j.getJointSpeed();
+		// }
+
+		/**
+		 * Max torque is how much a joint can resist twisting around
+		 * its axis of rotation.
+		 *
+		 * @type {Number}
+		 * @default 0
+		 */
+		get maxTorque() {
+			return this._j.getMaxMotorTorque();
+		}
+		set maxTorque(val) {
+			if (!this._j.isMotorEnabled() && val) {
+				this._j.enableMotor(true);
+			}
+			this._j.setMaxMotorTorque(val);
+		}
+
+		/**
+		 * The joint's current torque, the amount of force being applied on
+		 * the joint's axis of rotation.
+		 *
+		 * @type {Number}
+		 * @default 0
+		 * @readonly
+		 */
+		get torque() {
+			return this._j.getMotorTorque();
+		}
+
+		/**
+		 * The joint's current angle of rotation or translation, depending
+		 * on the joint's type.
+		 *
+		 * @type {Number}
+		 * @default 0
+		 * @readonly
+		 */
+		get angle() {
+			if (this.type == 'revolute') {
+				let ang = this._j.getJointAngle();
+				if (this.p._angleMode == 'radians') return ang;
+				return pInst.radians(ang);
+			} else if (this.type == 'prismatic') {
+				return this._j.getJointTranslation();
+			}
+		}
+
+		// /**
+		//  * A ratio that describes the joint's ability to resist elastic deformation.
+		//  *
+		//  * This friendly wrapper maps 0.0 to 1.0 onto the joint's max motor torque in the range of 100 (loose) to 0 (stiff) respectively.
+		//  */
+		// get stiffness() {
+		// 	return map(this._j.getMaxMotorForce(), 100, 0, 0, 1);
+		// }
+		// set stiffness(val) {
+		// 	this._j.setMaxMotorForce(map(val, 0, 1, 100, 0));
+		// }
+	};
+
+	this.DistanceJoint = class extends this.Joint {
+		/**
+		 * Distance joints are used to constrain the distance
+		 * between two sprites.
+		 *
+		 * @param {Sprite} spriteA
+		 * @param {Sprite} spriteB
+		 */
+		constructor(spriteA, spriteB) {
+			super(...arguments, 'distance');
+
+			let j = pl.DistanceJoint(
+				{},
+				spriteA.body,
+				spriteB.body,
+				spriteA.body.getWorldCenter(),
+				spriteB.body.getWorldCenter()
+			);
+			this._createJoint(j);
+		}
+	};
+
+	this.WheelJoint = class extends this.Joint {
+		/**
+		 * Wheel joints can be used to create vehicles!
+		 *
+		 * @param {Sprite} spriteA the vehicle body
+		 * @param {Sprite} spriteB the wheel
+		 */
+		constructor(spriteA, spriteB) {
+			super(...arguments, 'wheel');
+
+			let j = pl.WheelJoint(
+				{
+					maxMotorTorque: 1000,
+					frequencyHz: 4,
+					dampingRatio: 0.7
+				},
+				spriteA.body,
+				spriteB.body,
+				spriteB.body.getWorldCenter(),
+				new pl.Vec2(0, 1)
+			);
+			this._createJoint(j);
+		}
+	};
+
+	this.RevoluteJoint = class extends this.Joint {
+		/**
+		 * Revolute joints work like hinges.
+		 *
+		 * @param {Sprite} spriteA
+		 * @param {Sprite} spriteB
+		 */
+		constructor(spriteA, spriteB) {
+			super(...arguments, 'revolute');
+
+			let j = pl.RevoluteJoint({}, spriteA.body, spriteB.body, spriteA.body.getWorldCenter());
+			this._createJoint(j);
+		}
+
+		/**
+		 * The lower limit of rotation.
+		 *
+		 * @type {Number}
+		 * @default undefined
+		 */
+		get lowerLimit() {
+			let val = this._j.getLowerLimit();
+			if (this.p._angleMode == 'radians') return val;
+			return this.p.degrees(val);
+		}
+		set lowerLimit(val) {
+			if (!this._j.isLimitEnabled()) {
+				this._j.enableLimit(true);
+			}
+			if (this.p._angleMode == 'degrees') val = this.p.radians(val);
+			this._j.m_lowerAngle = val;
+		}
+
+		/**
+		 * The upper limit of rotation.
+		 *
+		 * @type {Number}
+		 * @default undefined
+		 */
+		get upperLimit() {
+			let val = this._j.getUpperLimit();
+			if (this.p._angleMode == 'radians') return val;
+			return this.p.degrees(val);
+		}
+		set upperLimit(val) {
+			if (!this._j.isLimitEnabled()) {
+				this._j.enableLimit(true);
+			}
+			if (this.p._angleMode == 'degrees') val = this.p.radians(val);
+			this._j.m_upperAngle = val;
+		}
+	};
+
+	this.PrismaticJoint = class extends this.Joint {
+		constructor(spriteA, spriteB) {
+			super(...arguments, 'prismatic');
+
+			let j = pl.PrismaticJoint(
+				{
+					enableLimit: true,
+					maxMotorForce: 1,
+					motorSpeed: 0,
+					enableMotor: true
+				},
+				spriteA.body,
+				spriteB.body,
+				spriteA.body.getWorldCenter(),
+				spriteB.body.getWorldCenter()
+			);
+			this._createJoint(j);
+		}
+
+		/**
+		 * The lower limit of translation.
+		 *
+		 * @type {Number}
+		 * @default undefined
+		 */
+		get lowerLimit() {
+			return this._j.getLowerLimit();
+		}
+		set lowerLimit(val) {
+			if (!this._j.isLimitEnabled()) {
+				this._j.enableLimit(true);
+			}
+			this._j.setLimits(val, this._j.getUpperLimit());
+		}
+
+		/**
+		 * The upper limit of translation.
+		 *
+		 * @type {Number}
+		 * @default undefined
+		 */
+		get upperLimit() {
+			return this._j.getUpperLimit();
+		}
+		set upperLimit(val) {
+			if (!this._j.isLimitEnabled()) {
+				this._j.enableLimit(true);
+			}
+			this._j.setLimits(this._j.getLowerLimit(), val);
+		}
+	};
+
+	this.WeldJoint = class extends this.Joint {
+		constructor(spriteA, spriteB) {
+			super(...arguments, 'weld');
+
+			let j = pl.WeldJoint({}, spriteA.body, spriteB.body, spriteA.body.getWorldCenter());
+			this._createJoint(j);
+		}
+	};
+
+	this.RopeJoint = class extends this.Joint {
+		constructor(spriteA, spriteB) {
+			super(...arguments, 'rope');
+
+			let j = pl.RopeJoint(
+				{
+					maxLength: 1
+				},
+				spriteA.body,
+				spriteB.body,
+				spriteA.body.getWorldCenter(),
+				spriteB.body.getWorldCenter()
+			);
+			this._createJoint(j);
+		}
+
+		get maxLength() {
+			return this._j.getMaxLength();
+		}
+		set maxLength(val) {
+			this._j.setMaxLength(val);
+		}
 	};
 
 	class Scale {
@@ -5989,7 +6516,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	this.Netcode = class {
 		/**
-		 * Work in Progress! Not ready for public use yet.
+		 * EXPERIMENTAL! Work in progress, not ready for public use yet.
 		 *
 		 * A `netcode` object is created automatically when p5play loads.
 		 *
