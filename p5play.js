@@ -5913,7 +5913,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * EXPERIMENTAL! Subject to change.
 		 *
-		 * Creates a joint between two sprites.
+		 * All other joint classes extend this class.
+		 *
+		 * Don't create a joint with this class directly,
+		 * use GlueJoint, DistanceJoint, WheelJoint, RevoluteJoint or
+		 * PrismaticJoint.
 		 *
 		 * @param {Sprite} spriteA
 		 * @param {Sprite} spriteB
@@ -5936,10 +5940,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.spriteB = spriteB;
 
+			type ??= 'glue';
 			/**
 			 * The type of joint. Can be one of:
 			 *
-			 * `distance`, `wheel`, `revolute`, `prismatic`.
+			 * "glue", "distance", "wheel", "revolute", "prismatic".
 			 *
 			 * Can't be changed after the joint is created.
 			 *
@@ -5947,6 +5952,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @readonly
 			 */
 			this.type = type;
+
+			if (type == 'glue') {
+				let j = pl.WeldJoint({}, spriteA.body, spriteB.body, spriteA.body.getWorldCenter());
+				this._createJoint(j);
+			}
 
 			let _this = this;
 
@@ -5970,9 +5980,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			let removeProps = [];
-			if (type == 'distance' || type == 'rope') {
+			if (type == 'glue') {
+				removeProps.push('speed');
+			}
+			if (type == 'distance' || type == 'glue' || type == 'rope') {
 				removeProps.push('motorSpeed', 'maxTorque', 'enableMotor');
-			} else if (type == 'revolute') {
+			}
+			if (type == 'revolute' || type == 'glue') {
 				removeProps.push('offsetB');
 			} else if (type == 'wheel') {
 				removeProps.push('offsetA');
@@ -6009,6 +6023,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					this.spriteB.x + this.offsetB.x,
 					this.spriteB.y + this.offsetB.y
 				);
+			} else if (this.type == 'glue') {
+				this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
 			} else if (this.type == 'revolute') {
 				this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y);
 			}
@@ -6079,7 +6095,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 *
 		 * Springiness is a user friendly wrapper around Box2D's spring
 		 * frequency joint parameter. It's 0-1 ratio is piecewise mapped
-		 * to the reversed range of 30-0.2hz, except 0 remains 0.
+		 * to the range of 30-0.2hz, except 0 remains 0.
 		 *
 		 * 0.0 -> 0hz (perfectly rigid)
 		 * >0.0-0.1 -> 30hz-4hz (steel rod)
@@ -6239,10 +6255,32 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		// set stiffness(val) {
 		// 	this._j.setMaxMotorForce(map(val, 0, 1, 100, 0));
 		// }
+
+		remove() {
+			if (this._removed) return;
+			this.spriteA.joints.splice(this.spriteA.joints.indexOf(this), 1);
+			this.spriteB.joints.splice(this.spriteB.joints.indexOf(this), 1);
+			this.p.world.destroyJoint(this._j);
+			this._removed = true;
+		}
+	};
+
+	this.GlueJoint = class extends this.Joint {
+		/**
+		 * Glue joints are used to glue two sprites together.
+		 *
+		 * @param {Sprite} spriteA
+		 * @param {Sprite} spriteB
+		 */
+		constructor(spriteA, spriteB) {
+			super(...arguments, 'glue');
+		}
 	};
 
 	this.DistanceJoint = class extends this.Joint {
 		/**
+		 * EXPERIMENTAL! Subject to change.
+		 *
 		 * Distance joints are used to constrain the distance
 		 * between two sprites.
 		 *
@@ -6265,6 +6303,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	this.WheelJoint = class extends this.Joint {
 		/**
+		 * EXPERIMENTAL! Subject to change.
+		 *
 		 * Wheel joints can be used to create vehicles!
 		 *
 		 * @param {Sprite} spriteA the vehicle body
@@ -6290,6 +6330,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	this.RevoluteJoint = class extends this.Joint {
 		/**
+		 * EXPERIMENTAL! Subject to change.
+		 *
 		 * Revolute joints work like hinges.
 		 *
 		 * @param {Sprite} spriteA
@@ -6390,15 +6432,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._j.enableLimit(true);
 			}
 			this._j.setLimits(this._j.getLowerLimit(), val);
-		}
-	};
-
-	this.WeldJoint = class extends this.Joint {
-		constructor(spriteA, spriteB) {
-			super(...arguments, 'weld');
-
-			let j = pl.WeldJoint({}, spriteA.body, spriteB.body, spriteA.body.getWorldCenter());
-			this._createJoint(j);
 		}
 	};
 
