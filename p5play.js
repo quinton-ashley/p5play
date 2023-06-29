@@ -5916,7 +5916,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * All other joint classes extend this class.
 		 *
 		 * Don't create a joint with this class directly,
-		 * use GlueJoint, DistanceJoint, WheelJoint, RevoluteJoint or
+		 * use GlueJoint, DistanceJoint, WheelJoint, PivotJoint or
 		 * PrismaticJoint.
 		 *
 		 * @param {Sprite} spriteA
@@ -5944,7 +5944,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * The type of joint. Can be one of:
 			 *
-			 * "glue", "distance", "wheel", "revolute", "prismatic".
+			 * "glue", "distance", "wheel", "pivot", "prismatic".
 			 *
 			 * Can't be changed after the joint is created.
 			 *
@@ -5961,7 +5961,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let _this = this;
 
 			for (let l of ['A', 'B']) {
-				if ((type == 'revolute' || type == 'wheel') && l == 'B') break;
+				if ((type == 'pivot' || type == 'wheel') && l == 'B') break;
 
 				const prop = '_offset' + l;
 				this[prop] = pInst.createVector.call(pInst);
@@ -5986,7 +5986,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (type == 'distance' || type == 'glue' || type == 'rope') {
 				removeProps.push('motorSpeed', 'maxTorque', 'enableMotor');
 			}
-			if (type == 'revolute' || type == 'glue') {
+			if (type == 'pivot' || type == 'glue') {
 				removeProps.push('offsetB');
 			} else if (type == 'wheel') {
 				removeProps.push('offsetA');
@@ -6015,21 +6015,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._j = this.p.world.createJoint(j);
 		}
 
-		_display() {
-			if (this.type == 'distance') {
-				this._draw(
-					this.spriteA.x + this.offsetA.x,
-					this.spriteA.y + this.offsetA.y,
-					this.spriteB.x + this.offsetB.x,
-					this.spriteB.y + this.offsetB.y
-				);
-			} else if (this.type == 'glue') {
-				this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
-			} else if (this.type == 'revolute') {
-				this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y);
-			}
-			this.visible = null;
-		}
+		_display() {}
 
 		_draw(xA, yA, xB, yB) {
 			if (xB) {
@@ -6226,24 +6212,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._j.getMotorTorque();
 		}
 
-		/**
-		 * The joint's current angle of rotation or translation, depending
-		 * on the joint's type.
-		 *
-		 * @type {Number}
-		 * @default 0
-		 * @readonly
-		 */
-		get angle() {
-			if (this.type == 'revolute') {
-				let ang = this._j.getJointAngle();
-				if (this.p._angleMode == 'radians') return ang;
-				return pInst.radians(ang);
-			} else if (this.type == 'prismatic') {
-				return this._j.getJointTranslation();
-			}
-		}
-
 		// /**
 		//  * A ratio that describes the joint's ability to resist elastic deformation.
 		//  *
@@ -6275,6 +6243,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		constructor(spriteA, spriteB) {
 			super(...arguments, 'glue');
 		}
+
+		_display() {
+			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
+			this.visible = null;
+		}
 	};
 
 	this.DistanceJoint = class extends this.Joint {
@@ -6298,6 +6271,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				spriteB.body.getWorldCenter()
 			);
 			this._createJoint(j);
+		}
+
+		_display() {
+			this._draw(
+				this.spriteA.x + this.offsetA.x,
+				this.spriteA.y + this.offsetA.y,
+				this.spriteB.x + this.offsetB.x,
+				this.spriteB.y + this.offsetB.y
+			);
+			this.visible = null;
 		}
 	};
 
@@ -6328,20 +6311,43 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 	};
 
-	this.RevoluteJoint = class extends this.Joint {
+	this.HingeJoint = class extends this.Joint {
 		/**
 		 * EXPERIMENTAL! Subject to change.
 		 *
-		 * Revolute joints work like hinges.
+		 * Hinge joints attach two sprites together at a pivot point,
+		 * constraining them to rotate around this point, like a hinge.
+		 * Aka a revolute joint.
 		 *
 		 * @param {Sprite} spriteA
 		 * @param {Sprite} spriteB
 		 */
 		constructor(spriteA, spriteB) {
-			super(...arguments, 'revolute');
+			super(...arguments, 'pivot');
 
 			let j = pl.RevoluteJoint({}, spriteA.body, spriteB.body, spriteA.body.getWorldCenter());
 			this._createJoint(j);
+		}
+
+		_display() {
+			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y);
+			this.visible = null;
+		}
+
+		/**
+		 * The joint's range of rotation. Setting the range
+		 * changes the joint's upper and lower limits.
+		 *
+		 * @type {Number}
+		 * @default undefined
+		 */
+		get range() {
+			return this.upperLimit - this.lowerLimit;
+		}
+		set range(val) {
+			val /= 2;
+			this.upperLimit = val;
+			this.lowerLimit = -val;
 		}
 
 		/**
@@ -6359,6 +6365,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (!this._j.isLimitEnabled()) {
 				this._j.enableLimit(true);
 			}
+			this.spriteA.body.setAwake(true);
+			this.spriteB.body.setAwake(true);
 			if (this.p._angleMode == 'degrees') val = this.p.radians(val);
 			this._j.m_lowerAngle = val;
 		}
@@ -6378,62 +6386,113 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (!this._j.isLimitEnabled()) {
 				this._j.enableLimit(true);
 			}
+			this.spriteA.body.setAwake(true);
+			this.spriteB.body.setAwake(true);
 			if (this.p._angleMode == 'degrees') val = this.p.radians(val);
 			this._j.m_upperAngle = val;
 		}
-	};
 
-	this.PrismaticJoint = class extends this.Joint {
+		/**
+		 * The joint's current angle of rotation.
+		 *
+		 * @type {Number}
+		 * @default 0
+		 * @readonly
+		 */
+		get angle() {
+			let ang = this._j.getJointAngle();
+			if (this.p._angleMode == 'radians') return ang;
+			return pInst.radians(ang);
+		}
+	};
+	this.RevoluteJoint = this.HingeJoint;
+
+	this.SliderJoint = class extends this.Joint {
+		/**
+		 * A slider joint constrains the motion of two sprites to sliding
+		 * along a common axis, without rotation. Aka a prismatic joint.
+		 *
+		 * @param {Sprite} spriteA
+		 * @param {Sprite} spriteB
+		 */
 		constructor(spriteA, spriteB) {
 			super(...arguments, 'prismatic');
 
 			let j = pl.PrismaticJoint(
 				{
+					lowerTranslation: -1,
+					upperTranslation: 1,
 					enableLimit: true,
-					maxMotorForce: 1,
+					maxMotorForce: 50,
 					motorSpeed: 0,
 					enableMotor: true
 				},
 				spriteA.body,
 				spriteB.body,
 				spriteA.body.getWorldCenter(),
-				spriteB.body.getWorldCenter()
+				new pl.Vec2(0, 1)
 			);
 			this._createJoint(j);
 		}
 
+		_display() {
+			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
+			this.visible = null;
+		}
+
 		/**
-		 * The lower limit of translation.
+		 * The joint's range of translation. Setting the range
+		 * changes the joint's upper and lower limits.
+		 *
+		 * @type {Number}
+		 * @default undefined
+		 */
+		get range() {
+			return this.upperLimit - this.lowerLimit;
+		}
+		set range(val) {
+			val /= 2;
+			this.upperLimit = val;
+			this.lowerLimit = -val;
+		}
+
+		/**
+		 * The mathematical lower (not positionally lower)
+		 * limit of translation.
 		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
 		get lowerLimit() {
-			return this._j.getLowerLimit();
+			return (this._j.getLowerLimit() / this.spriteA.tileSize) * plScale;
 		}
 		set lowerLimit(val) {
 			if (!this._j.isLimitEnabled()) {
 				this._j.enableLimit(true);
 			}
+			val = (val * this.spriteA.tileSize) / plScale;
 			this._j.setLimits(val, this._j.getUpperLimit());
 		}
 
 		/**
-		 * The upper limit of translation.
+		 * The mathematical upper (not positionally higher)
+		 * limit of translation.
 		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
 		get upperLimit() {
-			return this._j.getUpperLimit();
+			return (this._j.getUpperLimit() / this.spriteA.tileSize) * plScale;
 		}
 		set upperLimit(val) {
 			if (!this._j.isLimitEnabled()) {
 				this._j.enableLimit(true);
 			}
+			val = (val * this.spriteA.tileSize) / plScale;
 			this._j.setLimits(this._j.getLowerLimit(), val);
 		}
 	};
+	this.PrismaticJoint = this.SliderJoint;
 
 	this.RopeJoint = class extends this.Joint {
 		constructor(spriteA, spriteB) {
