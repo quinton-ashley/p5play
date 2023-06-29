@@ -5944,7 +5944,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * The type of joint. Can be one of:
 			 *
-			 * "glue", "distance", "wheel", "pivot", "prismatic".
+			 * "glue", "distance", "wheel", "hinge", "slider".
 			 *
 			 * Can't be changed after the joint is created.
 			 *
@@ -5961,7 +5961,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let _this = this;
 
 			for (let l of ['A', 'B']) {
-				if ((type == 'pivot' || type == 'wheel') && l == 'B') break;
+				if ((type == 'hinge' || type == 'wheel') && l == 'B') break;
 
 				const prop = '_offset' + l;
 				this[prop] = pInst.createVector.call(pInst);
@@ -5986,7 +5986,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (type == 'distance' || type == 'glue' || type == 'rope') {
 				removeProps.push('motorSpeed', 'maxTorque', 'enableMotor');
 			}
-			if (type == 'pivot' || type == 'glue') {
+			if (type == 'hinge' || type == 'glue') {
 				removeProps.push('offsetB');
 			} else if (type == 'wheel') {
 				removeProps.push('offsetA');
@@ -6146,7 +6146,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * The speed of the joint's motor.
+		 * The current speed of the joint's motor.
 		 *
 		 * @type {Number}
 		 * @default 0
@@ -6165,6 +6165,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return this._j.getMotorSpeed();
 		}
 
+		/**
+		 * Enable or disable the joint's motor.
+		 * Disabling the motor is like putting a
+		 * car in neutral.
+		 *
+		 * @type {Boolean}
+		 */
 		get enableMotor() {
 			return this._j.isMotorEnabled();
 		}
@@ -6172,58 +6179,40 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._j.enableMotor(val);
 		}
 
-		// /**
-		//  * The joint's current speed.
-		//  *
-		//  * @type {Number}
-		//  * @default 0
-		//  * @readonly
-		//  */
-		// get speed() {
-		// 	return this._j.getJointSpeed();
-		// }
-
 		/**
-		 * Max torque is how much a joint can resist twisting around
-		 * its axis of rotation.
+		 * Max power is how the amount of torque a joint motor can exert
+		 * around its axis of rotation.
 		 *
 		 * @type {Number}
 		 * @default 0
 		 */
-		get maxTorque() {
+		get maxPower() {
 			return this._j.getMaxMotorTorque();
 		}
-		set maxTorque(val) {
+		set maxPower(val) {
 			if (!this._j.isMotorEnabled() && val) {
 				this._j.enableMotor(true);
 			}
 			this._j.setMaxMotorTorque(val);
+			if (!val) this._j.enableMotor(false);
 		}
 
 		/**
-		 * The joint's current torque, the amount of force being applied on
+		 * The joint's current power, the amount of torque being applied on
 		 * the joint's axis of rotation.
 		 *
 		 * @type {Number}
 		 * @default 0
 		 * @readonly
 		 */
-		get torque() {
+		get power() {
 			return this._j.getMotorTorque();
 		}
 
-		// /**
-		//  * A ratio that describes the joint's ability to resist elastic deformation.
-		//  *
-		//  * This friendly wrapper maps 0.0 to 1.0 onto the joint's max motor torque in the range of 100 (loose) to 0 (stiff) respectively.
-		//  */
-		// get stiffness() {
-		// 	return map(this._j.getMaxMotorForce(), 100, 0, 0, 1);
-		// }
-		// set stiffness(val) {
-		// 	this._j.setMaxMotorForce(map(val, 0, 1, 100, 0));
-		// }
-
+		/**
+		 * Removes the joint from the world and from each of the
+		 * sprites' joints arrays.
+		 */
 		remove() {
 			if (this._removed) return;
 			this.spriteA.joints.splice(this.spriteA.joints.indexOf(this), 1);
@@ -6323,7 +6312,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Sprite} spriteB
 		 */
 		constructor(spriteA, spriteB) {
-			super(...arguments, 'pivot');
+			super(...arguments, 'hinge');
 
 			let j = pl.RevoluteJoint({}, spriteA.body, spriteB.body, spriteA.body.getWorldCenter());
 			this._createJoint(j);
@@ -6416,7 +6405,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * @param {Sprite} spriteB
 		 */
 		constructor(spriteA, spriteB) {
-			super(...arguments, 'prismatic');
+			super(...arguments, 'slider');
 
 			let j = pl.PrismaticJoint(
 				{
@@ -6430,7 +6419,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				spriteA.body,
 				spriteB.body,
 				spriteA.body.getWorldCenter(),
-				new pl.Vec2(0, 1)
+				new pl.Vec2(1, 0)
 			);
 			this._createJoint(j);
 		}
@@ -6438,6 +6427,23 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		_display() {
 			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
 			this.visible = null;
+		}
+
+		/**
+		 * The angle of the joint's axis which its sprites slide along.
+		 *
+		 * @type {Number}
+		 * @default 0
+		 */
+		get angle() {
+			return this._angle;
+		}
+		set angle(val) {
+			if (val == this._angle) return;
+			this._angle = val;
+			this._j.m_localXAxisA = new pl.Vec2(this.p.cos(val), this.p.sin(val));
+			this._j.m_localXAxisA.normalize();
+			this._j.m_localYAxisA = pl.Vec2.crossNumVec2(1.0, this._j.m_localXAxisA);
 		}
 
 		/**
