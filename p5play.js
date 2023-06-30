@@ -5911,13 +5911,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	this.Joint = class {
 		/**
-		 * EXPERIMENTAL! Subject to change.
+		 * Using this Joint class directly is not recommended, but
+		 * if it is used a GlueJoint will be created.
 		 *
-		 * All other joint classes extend this class.
+		 * It's better to use a specific joint class constructor:
 		 *
-		 * Don't create a joint with this class directly,
-		 * use GlueJoint, DistanceJoint, WheelJoint, PivotJoint or
-		 * PrismaticJoint.
+		 * GlueJoint, DistanceJoint, WheelJoint, HingeJoint,
+		 * SliderJoint, or RopeJoint.
+		 *
+		 * All other joint classes extend this class. Joint type
+		 * can not be changed after a joint is created.
 		 *
 		 * @param {Sprite} spriteA
 		 * @param {Sprite} spriteB
@@ -5944,7 +5947,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			/**
 			 * The type of joint. Can be one of:
 			 *
-			 * "glue", "distance", "wheel", "hinge", "slider".
+			 * "glue", "distance", "wheel", "hinge", "slider", or "rope".
 			 *
 			 * Can't be changed after the joint is created.
 			 *
@@ -5961,7 +5964,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let _this = this;
 
 			for (let l of ['A', 'B']) {
-				if ((type == 'hinge' || type == 'wheel') && l == 'B') break;
+				if (l == 'A' && type == 'wheel') continue;
+				if (l == 'B' && type == 'hinge') break;
 
 				const prop = '_offset' + l;
 				this[prop] = pInst.createVector.call(pInst);
@@ -5984,7 +5988,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				removeProps.push('speed');
 			}
 			if (type == 'distance' || type == 'glue' || type == 'rope') {
-				removeProps.push('motorSpeed', 'maxTorque', 'enableMotor');
+				removeProps.push('speed', 'maxPower', 'enableMotor');
 			}
 			if (type == 'hinge' || type == 'glue') {
 				removeProps.push('offsetB');
@@ -6015,10 +6019,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._j = this.p.world.createJoint(j);
 		}
 
-		_display() {}
+		_display() {
+			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
+			this.visible = null;
+		}
 
 		_draw(xA, yA, xB, yB) {
-			if (xB) {
+			if (yB) {
 				this.p.line(xA, yA, xB, yB);
 			} else {
 				this.p.point(xA, yA);
@@ -6232,17 +6239,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		constructor(spriteA, spriteB) {
 			super(...arguments, 'glue');
 		}
-
-		_display() {
-			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
-			this.visible = null;
-		}
 	};
 
 	this.DistanceJoint = class extends this.Joint {
 		/**
-		 * EXPERIMENTAL! Subject to change.
-		 *
 		 * Distance joints are used to constrain the distance
 		 * between two sprites.
 		 *
@@ -6275,9 +6275,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 	this.WheelJoint = class extends this.Joint {
 		/**
-		 * EXPERIMENTAL! Subject to change.
-		 *
 		 * Wheel joints can be used to create vehicles!
+		 *
+		 * By default the motor is disabled, angle is 90 degrees,
+		 * maxPower is 1000, springiness is 0.1, and damping is 0.7.
 		 *
 		 * @param {Sprite} spriteA the vehicle body
 		 * @param {Sprite} spriteB the wheel
@@ -6297,16 +6298,53 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				new pl.Vec2(0, 1)
 			);
 			this._createJoint(j);
+			this._angle = this.p._angleMode == 'degrees' ? 90 : 1.5707963267948966;
+		}
+
+		_display() {
+			let xA = this.spriteA.x;
+			let yA = this.spriteA.y;
+			let xB = this.spriteB.x + this.offsetB.x;
+			let yB = this.spriteB.y + this.offsetB.y;
+
+			// Calculate the slopes of the lines
+			let slopeA = this.p.tan(this.spriteA.rotation);
+			let slopeB = this.p.tan(this._angle + this.spriteA.rotation);
+
+			// Calculate the intersection point
+			let xI = (yB - yA + slopeA * xA - slopeB * xB) / (slopeA - slopeB);
+			let yI = slopeA * (xI - xA) + yA;
+
+			this._draw(xI, yI, xB, yB);
+			this.visible = null;
+		}
+
+		/**
+		 * The angle at which the wheel is attached to the vehicle body.
+		 *
+		 * The default is 90 degrees or PI/2 radians, which is vertical.
+		 *
+		 * @type {Number}
+		 * @default 90
+		 */
+		get angle() {
+			return this._angle;
+		}
+		set angle(val) {
+			if (val == this._angle) return;
+			this._angle = val;
+			this._j.m_localXAxisA = new pl.Vec2(this.p.cos(val), this.p.sin(val));
+			this._j.m_localXAxisA.normalize();
+			this._j.m_localYAxisA = pl.Vec2.crossNumVec2(1.0, this._j.m_localXAxisA);
 		}
 	};
 
 	this.HingeJoint = class extends this.Joint {
 		/**
-		 * EXPERIMENTAL! Subject to change.
-		 *
 		 * Hinge joints attach two sprites together at a pivot point,
 		 * constraining them to rotate around this point, like a hinge.
-		 * Aka a revolute joint.
+		 *
+		 * A known as a revolute joint.
 		 *
 		 * @param {Sprite} spriteA
 		 * @param {Sprite} spriteB
@@ -6399,7 +6437,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.SliderJoint = class extends this.Joint {
 		/**
 		 * A slider joint constrains the motion of two sprites to sliding
-		 * along a common axis, without rotation. Aka a prismatic joint.
+		 * along a common axis, without rotation.
+		 *
+		 * Also known as a prismatic joint.
 		 *
 		 * @param {Sprite} spriteA
 		 * @param {Sprite} spriteB
@@ -6422,11 +6462,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				new pl.Vec2(1, 0)
 			);
 			this._createJoint(j);
-		}
-
-		_display() {
-			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
-			this.visible = null;
+			this._angle = 0;
 		}
 
 		/**
@@ -6501,6 +6537,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	this.PrismaticJoint = this.SliderJoint;
 
 	this.RopeJoint = class extends this.Joint {
+		/**
+		 * A Rope joint prevents two sprites from going further
+		 * than a certain distance from each other, which is
+		 * defined by the max length of the rope, but they do allow
+		 * the sprites to get closer together.
+		 *
+		 * @param {Sprite} spriteA
+		 * @param {Sprite} spriteB
+		 */
 		constructor(spriteA, spriteB) {
 			super(...arguments, 'rope');
 
@@ -6516,6 +6561,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._createJoint(j);
 		}
 
+		/**
+		 * The maximum length of the rope.
+		 */
 		get maxLength() {
 			return this._j.getMaxLength();
 		}
