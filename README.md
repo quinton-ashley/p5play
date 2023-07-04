@@ -1,4 +1,4 @@
-# <img src="https://p5play.org/assets/logo.svg" width="64"> p5play ![](https://img.shields.io/github/package-json/v/quinton-ashley/p5play) ![](https://img.shields.io/github/license/quinton-ashley/p5play)
+# <img src="https://p5play.org/assets/p5play_logo.svg" width="64"> p5play ![](https://img.shields.io/github/package-json/v/quinton-ashley/p5play) ![](https://img.shields.io/github/license/quinton-ashley/p5play)
 
 [p5play][] is a JavaScript game engine that uses p5.js for graphics and Box2D for physics.
 
