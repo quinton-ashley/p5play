@@ -180,6 +180,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @default [allSprites]
 			 */
 			this.groups = [];
+			this.p.allSprites.push(this);
 
 			/**
 			 * Keys are the animation label, values are SpriteAnimation objects.
@@ -203,6 +204,28 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.removed = false;
 
+			if (group) {
+				group.push(this);
+				if (!ani) {
+					for (let _ani in group.animations) {
+						ani = _ani;
+						break;
+					}
+				}
+			} else {
+				group = this.p.allSprites;
+			}
+
+			if (group.dynamic) collider ??= 'dynamic';
+			if (group.kinematic) collider ??= 'kinematic';
+			if (group.static) collider ??= 'static';
+			collider ??= group.collider;
+
+			this._shape = group.shape;
+			this._life = 2147483647;
+			this._visible = true;
+			this._aniChangeCount = 0;
+
 			/**
 			 * Contains all the collision callback functions for this sprite
 			 * when it comes in contact with other sprites or groups.
@@ -223,8 +246,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._collisions = {};
 			this._overlappers = {};
 
-			group ??= this.p.allSprites;
-
 			/**
 			 * The tile size is used to change the size of one unit of
 			 * measurement for the sprite.
@@ -236,16 +257,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @default 1
 			 */
 			this.tileSize = group.tileSize || 1;
-
-			if (group.dynamic) collider ??= 'dynamic';
-			if (group.kinematic) collider ??= 'kinematic';
-			if (group.static) collider ??= 'static';
-			collider ??= group.collider;
-
-			this._shape = group.shape;
-			this._life = 2147483647;
-			this._visible = true;
-			this._aniChangeCount = 0;
 
 			let _this = this;
 
@@ -372,25 +383,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			w ??= group.w || group.width || group.d || group.diameter;
 			h ??= group.h || group.height;
 
-			if (typeof x == 'function') x = x(group.length);
-			if (typeof y == 'function') y = y(group.length);
+			if (typeof x == 'function') x = x(group.length - 1);
+			if (typeof y == 'function') y = y(group.length - 1);
 
 			this.x = x;
 			this.y = y;
-
-			this.mouse = new this.p._SpriteMouse();
-
-			group.push(this);
-
-			if (!group._isAllSpritesGroup) {
-				this.p.allSprites.push(this);
-				if (!ani) {
-					for (let _ani in group.animations) {
-						ani = _ani;
-						break;
-					}
-				}
-			}
 
 			if (ani) {
 				if (ani instanceof p5.Image) {
@@ -407,6 +404,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 				}
 			}
+
+			this.mouse = new this.p._SpriteMouse();
 
 			if (this.collider != 'none') {
 				if (this._vertexMode) this.addCollider(w, h);
@@ -507,12 +506,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this._shift = {};
 
-			let gidx = group.length - 1;
-
 			let gvx = group.vel.x || 0;
 			let gvy = group.vel.y || 0;
-			if (typeof gvx == 'function') gvx = gvx(gidx);
-			if (typeof gvy == 'function') gvy = gvy(gidx);
+			if (typeof gvx == 'function') gvx = gvx(group.length - 1);
+			if (typeof gvy == 'function') gvy = gvy(group.length - 1);
 			this.vel.x = gvx;
 			this.vel.y = gvy;
 
@@ -526,7 +523,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let val = group[prop];
 				if (val === undefined) continue;
 				if (typeof val == 'function' && isArrowFunction(val)) {
-					val = val(gidx);
+					val = val(group.length - 1);
 				}
 				if (typeof val == 'object') {
 					this[prop] = Object.assign({}, val);
@@ -587,6 +584,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.textColor ??= this.p.color(0);
 			this.textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
 
+			let shouldCreateSensor = false;
+			for (let g of this.groups) {
+				if (g._hasSensors) {
+					shouldCreateSensor = true;
+					break;
+				}
+			}
+			if (shouldCreateSensor && !this._hasSensors) this.addDefaultSensors();
+
 			this._massUndefinedByUser = true;
 			if (w === undefined && h === undefined) {
 				this._dimensionsUndefinedByUser = true;
@@ -600,12 +606,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * constructor except the first two parameters are x and y offsets,
 		 * the distance new collider should be from the center of the sprite.
 		 *
-		 * The collider type of sprites with multiple colliders can't be
-		 * changed, use a GlueJoint to connect sprites with different
-		 * collider types. Generally you should only add colliders to a
-		 * sprite that are the same size or smaller than the sprite's first
-		 * collider, if you need to add a larger collider, use a GlueJoint
-		 * to connect two sprites instead.
+		 * One limitation of the current implementation is that the collider
+		 * type can't be changed without losing every collider added to the
+		 * sprite besides the first. This will be fixed in a future release.
 		 *
 		 * @param {Number} offsetX distance from the center of the sprite
 		 * @param {Number} offsetY distance from the center of the sprite
@@ -4988,9 +4991,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * `new group.Sprite()` which both creates a group sprite using
 		 * soft inheritance and adds it to the group.
 		 *
-		 * This function adds a sprite or multiple sprites to the group,
-		 * whether they were already in the group or not, just like with
-		 * the Array.push() method. Only sprites can be added to a group.
+		 * Adds a sprite or multiple sprites to the group, whether they were
+		 * already in the group or not, just like with the Array.push()
+		 * method. Only sprites can be added to a group.
 		 *
 		 * @param {Sprite} sprites The sprite or sprites to be added
 		 * @returns {Number} the new length of the group
@@ -4999,14 +5002,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let s of sprites) {
 				if (!(s instanceof this.p.Sprite)) {
 					throw new Error('you can only add sprites to a group, no ' + typeof s + 's');
-				}
-
-				for (let tuid in this._hasOverlap) {
-					let isOverlap = this._hasOverlap[tuid];
-					if (isOverlap && !s._hasSensors) {
-						s.addDefaultSensors();
-					}
-					s._hasOverlap[tuid] = isOverlap;
 				}
 
 				super.push(s);
