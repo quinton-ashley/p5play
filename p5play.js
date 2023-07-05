@@ -1303,7 +1303,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * The sprite's stroke weight.
+		 * The sprite's stroke weight, the thickness of its outline.
 		 *
 		 * @type {Number}
 		 * @default undefined
@@ -3575,6 +3575,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (args[0] instanceof this.p.Sprite || args[0] instanceof this.p.Group) {
 				owner = args[0];
 				args = args.slice(1);
+				this._addedToSpriteOrGroup = true;
 			}
 			owner ??= this.p.allSprites;
 
@@ -5168,6 +5169,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * function. You don't need to name the animation if the sprite will only
 	 * use one animation. See SpriteAnimation for more information.
 	 *
+	 * If an animation was already added to a different sprite or group,
+	 * it can not be added to another sprite or group. A clone (copy) of
+	 * the animation will be automatically created and added instead.
+	 *
 	 * @memberof Sprite
 	 * @instance
 	 * @func addAnimation
@@ -5191,11 +5196,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				let name, ani;
 				if (args[0] instanceof this.p.SpriteAnimation) {
 					ani = args[0];
+					if (ani._addedToSpriteOrGroup) ani = ani.clone();
 					name = ani.name || 'default';
 					ani.name = name;
 				} else if (args[1] instanceof this.p.SpriteAnimation) {
 					name = args[0];
 					ani = args[1];
+					if (ani._addedToSpriteOrGroup) ani = ani.clone();
 					ani.name = name;
 				} else {
 					ani = new this.p.SpriteAnimation(this, ...args);
@@ -5203,6 +5210,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 				this.animations[name] = ani;
 				this._ani = ani;
+				ani._addedToSpriteOrGroup = true;
 
 				// only works if the animation was loaded in preload
 				if (this._dimensionsUndefinedByUser && (ani.w != 1 || ani.h != 1)) {
