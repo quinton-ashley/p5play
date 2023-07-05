@@ -3659,7 +3659,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			if (args.length == 0 || typeof args[0] == 'number') return;
 
-			owner.addAni(this);
+			owner.animations[this.name] = this;
+			owner._ani = this;
 
 			// list mode images can be added as a list of arguments or an array
 			if (Array.isArray(args[0]) && typeof args[0][0] == 'string') {
