@@ -1659,7 +1659,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (!this.body) return;
 			if (this.watch) this.mod[21] = true;
 			let t = this.massData;
-			t.mass = val;
+			t.mass = val > 0 ? val : 0.00000001;
 			this.body.setMassData(t);
 			delete this._massUndefinedByUser;
 		}
@@ -5192,6 +5192,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		this.Sprite.prototype.addImg =
 		this.Group.prototype.addImg =
 			function () {
+				if (this.p.p5play.disableImages) return;
 				let args = [...arguments];
 				let name, ani;
 				if (args[0] instanceof this.p.SpriteAnimation) {
@@ -7340,7 +7341,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				args[1] = h;
 			}
 		}
-		if (args.length < 3) args[2] = 'p2d';
+		args[2] = 'P2D';
 		let can = _createCanvas.call(pInst, ...args);
 		this.canvas.tabIndex = 0;
 		this.canvas.w = args[0];
@@ -7514,7 +7515,10 @@ canvas {
 	 * @param {function} [callback]
 	 */
 	this.loadImg = this.loadImage = function () {
-		if (this.p5play.disableImages) return;
+		if (this.p5play.disableImages) {
+			// return a dummy image object to prevent errors
+			return { w: 16, width: 16, h: 16, height: 16, pixels: [] };
+		}
 		let args = arguments;
 		let url = args[0];
 		let img = pInst.p5play.images[url];
@@ -7567,6 +7571,13 @@ canvas {
 		// 	}
 		// }, 3000);
 		return img;
+	};
+
+	const _image = this.image;
+
+	this.image = function () {
+		if (pInst.p5play.disableImages) return;
+		_image.call(pInst, ...arguments);
 	};
 
 	let errMsgs = {
