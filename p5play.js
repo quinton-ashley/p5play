@@ -8635,8 +8635,12 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	this.camera.off();
 
 	if (this.p5play._fps) {
-		this.p5play._postDrawFrameTime = performance.now();
-		this.p5play._fps = Math.round(1000 / (this.p5play._postDrawFrameTime - this.p5play._preDrawFrameTime)) || 1;
-	}
+        this.p5play._postDrawFrameTime = performance.now();
+        const calculatedFPS = Math.round(1000 / (this.p5play._postDrawFrameTime - this.p5play._preDrawFrameTime)) || 1;
+        
+        // Apply the frame rate limit (this._targetFrameRate)
+        this.p5play._fps = Math.min(calculatedFPS, this.getTargetFrameRate());
+
+    }
 	this.p5play._inPostDraw = false;
 });
