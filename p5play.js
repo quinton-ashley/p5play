@@ -2338,13 +2338,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			if (!this.body && !this.removed) return;
 
+			let contactTypes = [];
 			// for each type of collision and overlap event
 			let a = this;
+			let b;
 			for (let event in eventTypes) {
 				for (let k in this[event]) {
-					let contactType, b;
 					if (k >= 1000) b = this.p.p5play.sprites[k];
 					else b = this.p.p5play.groups[k];
+
 					let v = a[event][k] + 1;
 					this[event][k] = v;
 					if (b instanceof this.p.Group) b[event][a._uid] = v;
@@ -2352,17 +2354,18 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						delete a[event][k];
 						if (b instanceof this.p.Group) delete b[event][a._uid];
 						continue;
-					} else if (v == -1) {
-						contactType = eventTypes[event][2];
-					} else if (v == 1) {
-						contactType = eventTypes[event][0];
-					} else {
-						contactType = eventTypes[event][1];
 					}
 					if (b instanceof this.p.Group) continue;
 
-					let cb = this.p.world._findContact(contactType, a, b, true);
-					if (typeof cb == 'function') cb(a, b, v);
+					contactTypes = [];
+					if (v == 1 || v == -2) contactTypes.push(eventTypes[event][0]);
+					if (v != -1) contactTypes.push(eventTypes[event][1]);
+					if (v == -1 || v == -2) contactTypes.push(eventTypes[event][2]);
+
+					for (let contactType of contactTypes) {
+						let cb = this.p.world._findContact(contactType, a, b, true);
+						if (cb) cb(a, b, v);
+					}
 				}
 			}
 			if (this.removed) {
@@ -5465,6 +5468,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			return sprites[0];
 		}
 
+		/**
+		 * Sets contact trackers to 0 so on the next world step they will be
+		 * increased to 1.
+		 *
+		 * @param {*} contact
+		 */
 		_beginContact(contact) {
 			// Get both fixtures
 			let a = contact.m_fixtureA;
@@ -5498,6 +5507,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
+		/**
+		 * If contact ended between sprites that where previously in contact,
+		 * then their contact trackers are set to -2 which will be incremented to -1
+		 * on the next world step call.
+		 *
+		 * However, if contact begins and ends on the same frame, then the contact
+		 * trackers are set to -3 and incremented to -2 on the next world step call.
+		 *
+		 * @param {*} contact
+		 */
 		_endContact(contact) {
 			let a = contact.m_fixtureA;
 			let b = contact.m_fixtureB;
@@ -5506,8 +5525,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
 
-			a[contactType][b._uid] = -2;
-			b[contactType][a._uid] = -2;
+			a[contactType][b._uid] = a[contactType][b._uid] != 0 ? -2 : -3;
+			b[contactType][a._uid] = b[contactType][a._uid] != 0 ? -2 : -3;
 
 			for (let g of b.groups) {
 				let inContact = false;
@@ -5518,8 +5537,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 				}
 				if (!inContact) {
-					g[contactType][a._uid] = -2;
-					a[contactType][g._uid] = -2;
+					g[contactType][a._uid] = g[contactType][a._uid] != 0 ? -2 : -3;
+					a[contactType][g._uid] = a[contactType][g._uid] != 0 ? -2 : -3;
 				}
 			}
 
@@ -5532,11 +5551,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					}
 				}
 				if (!inContact) {
-					g[contactType][b._uid] = -2;
-					b[contactType][g._uid] = -2;
+					g[contactType][b._uid] = g[contactType][b._uid] != 0 ? -2 : -3;
+					b[contactType][g._uid] = b[contactType][g._uid] != 0 ? -2 : -3;
 					for (let g2 of b.groups) {
-						g[contactType][g2._uid] = -2;
-						g2[contactType][g._uid] = -2;
+						g[contactType][g2._uid] = g[contactType][g2._uid] != 0 ? -2 : 3;
+						g2[contactType][g._uid] = g2[contactType][g._uid] != 0 ? -2 : 3;
 					}
 				}
 			}
@@ -7525,6 +7544,7 @@ canvas {
 	 */
 	this.loadImg = this.loadImage = function () {
 		if (this.p5play.disableImages) {
+			pInst._decrementPreload();
 			// return a dummy image object to prevent errors
 			return { w: 16, width: 16, h: 16, height: 16, pixels: [] };
 		}
