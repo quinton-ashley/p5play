@@ -666,6 +666,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				shape: s,
 				isSensor: true
 			});
+			this._sortFixtures();
 			this._hasSensors = true;
 		}
 
@@ -3423,6 +3424,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Internal method called anytime a new sensor is created. Ensures
+		 * that sensors are moved to the back of the fixture list.
+		 */
+		_sortFixtures() {
+			let colliders = null;
+			let sensors = null;
+			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
+				if (fxt.m_isSensor) {
+					if (!sensors) sensors = fxt;
+					else sensors.m_next = fxt;
+				} else {
+					if (!colliders) colliders = fxt;
+					else colliders.m_next = fxt;
+				}
+			}
+			if (sensors) sensors.m_next = null;
+			if (colliders) colliders.m_next = sensors;
+			this.body.m_fixtureList = colliders || sensors;
+		}
+
+		/**
 		 * This function is used automatically if a sprite overlap detection
 		 * function is called but the sprite has no overlap sensors.
 		 *
@@ -3442,6 +3464,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						isSensor: true
 					});
 				}
+				this._sortFixtures();
 			} else {
 				this.addSensor();
 			}
