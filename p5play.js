@@ -180,7 +180,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @default [allSprites]
 			 */
 			this.groups = [];
-			this.p.allSprites.push(this);
 
 			/**
 			 * Keys are the animation label, values are SpriteAnimation objects.
@@ -195,6 +194,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 * @default []
 			 */
 			this.joints = [];
+			this.joints.removeAll = () => {
+				for (let j of this.joints) {
+					j.remove();
+				}
+			};
 
 			/**
 			 * True if the sprite was removed from the world
@@ -204,24 +208,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			 */
 			this.removed = false;
 
-			if (group) {
-				group.push(this);
-				if (!ani) {
-					for (let _ani in group.animations) {
-						ani = _ani;
-						break;
-					}
-				}
-			} else {
-				group = this.p.allSprites;
-			}
-
-			if (group.dynamic) collider ??= 'dynamic';
-			if (group.kinematic) collider ??= 'kinematic';
-			if (group.static) collider ??= 'static';
-			collider ??= group.collider;
-
-			this._shape = group.shape;
 			this._life = 2147483647;
 			this._visible = true;
 			this._aniChangeCount = 0;
@@ -245,6 +231,15 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this._collisions = {};
 			this._overlappers = {};
+
+			group ??= this.p.allSprites;
+
+			if (group.dynamic) collider ??= 'dynamic';
+			if (group.kinematic) collider ??= 'kinematic';
+			if (group.static) collider ??= 'static';
+			collider ??= group.collider;
+
+			this._shape = group.shape;
 
 			/**
 			 * The tile size is used to change the size of one unit of
@@ -383,11 +378,27 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			w ??= group.w || group.width || group.d || group.diameter;
 			h ??= group.h || group.height;
 
-			if (typeof x == 'function') x = x(group.length - 1);
-			if (typeof y == 'function') y = y(group.length - 1);
+			if (typeof x == 'function') x = x(group.length);
+			if (typeof y == 'function') y = y(group.length);
 
 			this.x = x;
 			this.y = y;
+
+			if (!group._isAllSpritesGroup) {
+				if (!ani) {
+					for (let _ani in group.animations) {
+						ani = _ani;
+						break;
+					}
+				}
+			}
+
+			// temporarily add all the groups the sprite belongs to,
+			// since the next section of code could potentially load an
+			// animation from one of the sprite's groups
+			for (let g = group; g; g = this.p.p5play.groups[g.parent]) {
+				this.groups.push(g);
+			}
 
 			if (ani) {
 				if (ani instanceof p5.Image) {
@@ -405,6 +416,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			}
 
+			// make groups list empty, the sprite will be "officially" added
+			// to its groups after its collider is potentially created
+			this.groups = [];
+
 			this.mouse = new this.p._SpriteMouse();
 
 			if (this.collider != 'none') {
@@ -421,6 +436,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				if (w !== undefined && h === undefined) this._shape = 'circle';
 				else this._shape = 'box';
 			}
+
+			group.push(this);
+			if (!group._isAllSpritesGroup) this.p.allSprites.push(this);
 
 			this._scale = new Scale();
 
@@ -583,15 +601,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			this.textColor ??= this.p.color(0);
 			this.textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
-
-			let shouldCreateSensor = false;
-			for (let g of this.groups) {
-				if (g._hasSensors) {
-					shouldCreateSensor = true;
-					break;
-				}
-			}
-			if (shouldCreateSensor && !this._hasSensors) this.addDefaultSensors();
 
 			this._massUndefinedByUser = true;
 			if (w === undefined && h === undefined) {
@@ -5032,7 +5041,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					throw new Error('you can only add sprites to a group, no ' + typeof s + 's');
 				}
 
+				for (let tuid in this._hasOverlap) {
+					let isOverlap = this._hasOverlap[tuid];
+					if (isOverlap && !s._hasSensors) {
+						s.addDefaultSensors();
+					}
+					s._hasOverlap[tuid] = isOverlap;
+				}
+
 				super.push(s);
+				// push to subgroups, excluding allSprites
 				if (this.parent) this.p.p5play.groups[this.parent].push(s);
 				s.groups.push(this);
 			}
@@ -8512,10 +8530,13 @@ canvas {
 
 	/**
 	 * Use this function to performance test your game code. FPS, amongst
-	 * the gaming community, refers to how many frames a game could render
-	 * per second, not including the delay between when frames are shown
-	 * on the screen. The higher the FPS, the better the game is
+	 * the gaming community, refers to how fast a computer can generate
+	 * frames per second, not including the delay between when frames are
+	 * shown on the screen. The higher the FPS, the better the game is
 	 * performing.
+	 *
+	 * Frame rate or display rate is different, that's the amount of frames
+	 * a display device can show frames.
 	 *
 	 * @returns {Number} The current FPS
 	 */
