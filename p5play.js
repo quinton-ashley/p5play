@@ -8377,7 +8377,7 @@ canvas {
 			for (let name in this._btns) {
 				let idx = this._btns[name];
 				if (pad.buttons[idx].pressed) this[name]++;
-				else this[name] = 0;
+				else this[name] = this[name] > 0 ? -1 : 0;
 			}
 
 			// sticks
