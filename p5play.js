@@ -3927,7 +3927,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			} // end SpriteSheet mode
 			else {
 				// list of images
-				if (Array.isArray(args[0])) args = args[0];
 				for (let i = 0; i < args.length; i++) {
 					if (args[i] instanceof p5.Image) this.push(args[i]);
 					else this.push(this.p.loadImage(args[i]));
