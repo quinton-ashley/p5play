@@ -6184,15 +6184,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 		set springiness(val) {
 			if (val > 0) {
-				val = this.p.map(val, 0, 0.1, 30, 4);
-			} else if (val > 0.1) {
-				val = this.p.map(val, 0.1, 0.5, 4, 2.5);
-			} else if (val > 0.5) {
-				val = this.p.map(val, 0.5, 0.8, 2.5, 1);
-			} else if (val > 0.8) {
-				val = this.p.map(val, 0.8, 0.9, 1, 0.5);
-			} else if (val > 0.9) {
-				val = this.p.map(val, 0.9, 1.0, 0.5, 0.2);
+				if (val < 0.1) {
+					val = this.p.map(val, 0, 0.1, 30, 4);
+				} else if (val < 0.5) {
+					val = this.p.map(val, 0.1, 0.5, 4, 2.5);
+				} else if (val < 0.8) {
+					val = this.p.map(val, 0.5, 0.8, 2.5, 1);
+				} else if (val < 0.9) {
+					val = this.p.map(val, 0.8, 0.9, 1, 0.5);
+				} else {
+					val = this.p.map(val, 0.9, 1.0, 0.5, 0.2);
+				}
 			}
 			this._springiness = val;
 
