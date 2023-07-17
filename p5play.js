@@ -5421,16 +5421,16 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		resize(w, h) {
 			w ??= this.p.width;
 			h ??= this.p.height;
+			this.hw = w * 0.5;
+			this.hh = h * 0.5;
 			this.origin = {
-				x: w * 0.5 - this.offset.x,
-				y: h * 0.5 - this.offset.y
+				x: this.hw - this.offset.x,
+				y: this.hh - this.offset.y
 			};
 			if (this.p.allSprites.tileSize != 1) {
 				this.origin.x -= this.p.allSprites.tileSize * 0.5;
 				this.origin.y -= this.p.allSprites.tileSize * 0.5;
 			}
-			this.hw = w * 0.5;
-			this.hh = h * 0.5;
 		}
 
 		/**
@@ -7280,11 +7280,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		d.append(logo);
 		await pInst.delay(100);
 		logo.style.opacity = '1';
-		logo.style.transition = 'scale 2s, opacity 0.4s ease-in-out';
+		logo.style.transition = 'scale 1.4s, opacity 0.4s ease-in-out';
 		logo.style.scale = '1.1';
-		await pInst.delay(1200);
+		await pInst.delay(1100);
 		logo.style.opacity = '0';
-		await pInst.delay(400);
+		await pInst.delay(300);
 		d.style.display = 'none';
 		d.remove();
 		document.getElementById('p5play-intro')?.remove();
@@ -7301,6 +7301,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			case 'openprocessing.org':
 			case 'preview.openprocessing.org':
 			case 'editor.p5js.org':
+			case 'codehs.com':
 			case 'codepen.io':
 			case 'cdpn.io':
 			case 'glitch.com':

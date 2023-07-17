@@ -8,7 +8,7 @@ Looking to turn your ideas into online games or interactive art? Check out p5pla
 
 ### Join the [p5play community Discord server][] to ask questions and meet other people making games with p5play! 👾
 
-p5play was created by Quinton Ashley [@quinton-ashley][]. p5.play v1 was created by Paolo Pedercini [@molleindustria][] and collaborators. If you have any questions or problems use the help channels on [discord][] or make an [issue report][] on this GitHub repository or email <info@p5play.org>
+p5play was created by Quinton Ashley [@quinton-ashley][]. p5.play v1 was created by Paolo Pedercini [@molleindustria][] and collaborators. If you have any questions or problems use the help channels on [Discord][] or make an [issue report][] on this GitHub repository or email <info@p5play.org>
 
 ## Support p5play 🤝
 
@@ -29,6 +29,7 @@ See the [LICENSING.md][] file in the p5play-web repository for information about
 [@quinton-ashley]: https://github.com/quinton-ashley
 [@molleindustria]: https://github.com/molleindustria
 [p5play-web]: https://github.com/quinton-ashley/p5play-web
-[p5play community discord server]: https://discord.gg/3UTbqUgmPF
-[discord]: https://discord.gg/3UTbqUgmPF
-[licensing.md]: https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md
+[p5play community Discord server]: https://discord.gg/3UTbqUgmPF
+[Discord]: https://discord.gg/3UTbqUgmPF
+[LICENSING.md]: https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md
+[p5play project planning page]: https://github.com/quinton-ashley/p5play/projects/1
