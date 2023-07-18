@@ -7021,29 +7021,29 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			a: 'aqua',
 			b: 'black',
 			c: 'crimson',
-			d: 'dark blue',
-			// e
-			f: 'fuchsia',
+			d: 'darkviolet',
+			e: 'peachpuff',
+			f: 'olive',
 			g: 'green',
-			h: 'hot pink',
-			i: 'blue', // indigo
-			// j
-			k: 'black',
-			l: 'lavender',
+			h: 'hotpink',
+			i: 'indigo',
+			j: 'navy',
+			k: 'khaki',
+			l: 'lime',
 			m: 'magenta',
 			n: 'brown',
 			o: 'orange',
 			p: 'pink',
-			// q
+			q: 'turquoise',
 			r: 'red',
-			s: 'sky blue',
-			t: 'turquoise',
+			s: 'skyblue',
+			t: 'tan',
 			u: 'blue',
 			v: 'violet',
 			w: 'white',
-			// x
-			y: 'yellow'
-			// z
+			x: 'gold',
+			y: 'yellow',
+			z: 'gray'
 		}
 	];
 
