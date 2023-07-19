@@ -437,8 +437,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				else this._shape = 'box';
 			}
 
-			group.push(this);
 			if (!group._isAllSpritesGroup) this.p.allSprites.push(this);
+			group.push(this);
 
 			this._scale = new Scale();
 
@@ -2435,15 +2435,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let x = this.p.width * 0.5 - this.p.world.origin.x + this.x * this.tileSize;
 			let y = this.p.height * 0.5 - this.p.world.origin.y + this.y * this.tileSize;
 
+			let largestSide = Math.max(this._w, this._h);
+
 			// skip drawing for out-of-view bodies, but
 			// edges can be very long, so they still should be drawn
 			if (
 				this.shape != 'chain' &&
 				this.p.camera.active &&
-				(x + this.w < this.p.camera.bound.min.x ||
-					x - this.w > this.p.camera.bound.max.x ||
-					y + this.h < this.p.camera.bound.min.y ||
-					y - this.h > this.p.camera.bound.max.y)
+				(x + largestSide < this.p.camera.bound.min.x ||
+					x - largestSide > this.p.camera.bound.max.x ||
+					y + largestSide < this.p.camera.bound.min.y ||
+					y - largestSide > this.p.camera.bound.max.y)
 			) {
 				this._visible = null;
 				return;
@@ -7241,9 +7243,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Use of delay is preferred.
-	 *
-	 * @deprecated
+	 * Alternative to delay, which is preferred, but this name may be more
+	 * familiar to Processing Java users.
 	 */
 	this.sleep = (millisecond) => {
 		return this.delay(millisecond);
