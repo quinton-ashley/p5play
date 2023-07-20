@@ -399,6 +399,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let g = group; g; g = this.p.p5play.groups[g.parent]) {
 				this.groups.push(g);
 			}
+			this.groups.reverse();
 
 			if (ani) {
 				if (ani instanceof p5.Image) {
