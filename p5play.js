@@ -380,6 +380,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			if (typeof x == 'function') x = x(group.length);
 			if (typeof y == 'function') y = y(group.length);
+			if (typeof w == 'function') w = w(group.length);
+			if (typeof h == 'function') h = h(group.length);
 
 			this.x = x;
 			this.y = y;
@@ -7304,7 +7306,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			case 'openprocessing.org':
 			case 'preview.openprocessing.org':
 			case 'editor.p5js.org':
-			case 'codehs.com':
 			case 'codepen.io':
 			case 'codera.app':
 			case 'cdpn.io':
@@ -7318,6 +7319,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					lh.endsWith('stackblitz.io') ||
 					lh.endsWith('glitch.me') ||
 					lh.endsWith('repl.co') ||
+					lh.endsWith('codehs.com') ||
 					location.origin.endsWith('preview.p5js.org')
 				) {
 					break;
