@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.8
+ * @version 3.9
  * @author quinton-ashley
  * @license gpl-v3-only
  */
@@ -2438,8 +2438,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 			let largestSide = Math.max(this._w, this._h);
 
-			// skip drawing for out-of-view bodies, but
-			// edges can be very long, so they still should be drawn
+			// if the sprite is off screen, then it doesn't get drawn
+			// this is an unsophisticated algorithm that
+			// errors on the side of drawing
 			if (
 				this.shape != 'chain' &&
 				this.p.camera.active &&
