@@ -500,6 +500,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 			};
 
+			this._angle = 0;
+			this._rotationSpeed = 0;
+
 			/**
 			 * The sprite's position on the previous frame.
 			 *
@@ -1811,7 +1814,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		get rotationSpeed() {
 			if (this.body) return this.body.getAngularVelocity();
-			return this._rotationSpeed || 0;
+			return this._rotationSpeed;
 		}
 		set rotationSpeed(val) {
 			if (this.body) this.body.setAngularVelocity(val);
@@ -1887,6 +1890,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		/**
 		 * The sprite's speed.
+		 *
+		 * Setting speed to a negative value will make the sprite move
+		 * 180 degrees opposite of its current direction angle.
 		 *
 		 * @type {Number}
 		 * @default 0
