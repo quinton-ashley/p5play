@@ -1164,6 +1164,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					'Cannot set the collider type of a polygon or chain collider to "none". Try having the sprite overlap with other sprites instead.'
 				);
 			}
+			if (this.joints.length) {
+				this.joints.removeAll();
+				console.warn('Changing the collider type of a sprite that has joints will remove all its joints.');
+			}
 			if (this.watch) this.mod[10] = true;
 
 			let oldCollider = this._collider;
@@ -6075,11 +6079,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 
 			let removeProps = [];
-			if (type == 'glue') {
-				removeProps.push('speed');
-			}
 			if (type == 'distance' || type == 'glue' || type == 'rope') {
-				removeProps.push('speed', 'maxPower', 'enableMotor');
+				removeProps.push('enableMotor', 'maxPower', 'motorSpeed', 'power', 'speed');
+			}
+			if (type == 'rope') {
+				removeProps.push('damping', 'springiness');
 			}
 			if (type == 'hinge' || type == 'glue') {
 				removeProps.push('offsetB');
@@ -6648,20 +6652,21 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				},
 				spriteA.body,
 				spriteB.body,
-				spriteA.body.getWorldCenter(),
-				spriteB.body.getWorldCenter()
+				spriteA.body.getWorldCenter()
 			);
 			this._createJoint(j);
+			this._j.m_localAnchorB.x = 0;
+			this._j.m_localAnchorB.y = 0;
 		}
 
 		/**
 		 * The maximum length of the rope.
 		 */
 		get maxLength() {
-			return this._j.getMaxLength();
+			return scaleXFrom(this._j.getMaxLength(), this.spriteA.tileSize);
 		}
 		set maxLength(val) {
-			this._j.setMaxLength(val);
+			this._j.setMaxLength(scaleXTo(val, this.spriteA.tileSize));
 		}
 	};
 
