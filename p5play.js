@@ -2419,6 +2419,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					if (this._shape == 'chain') this.p.stroke(this.stroke || this.color);
 					else if (this._stroke) this.p.stroke(this._stroke);
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
+						if (fxt.m_isSensor && !this.debug) continue;
 						this._drawFixture(fxt);
 					}
 				} else {
