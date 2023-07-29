@@ -1,10 +1,10 @@
 /**
  * p5play
- * @version 3.9
+ * @version 3.10
  * @author quinton-ashley
  * @license gpl-v3-only
  */
-p5.prototype.registerMethod('init', function p5PlayInit() {
+p5.prototype.registerMethod('init', function p5playInit() {
 	if (typeof window.planck == 'undefined') {
 		throw 'planck.js must be loaded before p5play';
 	}
@@ -455,7 +455,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 					let scalarX = val / this._x;
 					_this._w *= scalarX;
 					_this._hw *= scalarX;
-					_this._resizeCollider({ x: scalarX, y: 1 });
+					_this._resizeColliders({ x: scalarX, y: 1 });
 					this._x = val;
 					this._avg = (this._x + this._y) * 0.5;
 				}
@@ -473,7 +473,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 						this._h *= scalarY;
 						this._hh *= scalarY;
 					}
-					_this._resizeCollider({ x: 1, y: scalarY });
+					_this._resizeColliders({ x: 1, y: scalarY });
 					this._y = val;
 					this._avg = (this._x + this._y) * 0.5;
 				}
@@ -608,9 +608,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.textColor ??= this.p.color(0);
 			this.textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
 
-			this._massUndefinedByUser = true;
-			if (w === undefined && h === undefined) {
-				this._dimensionsUndefinedByUser = true;
+			this._massUndef = true;
+			if (w === undefined) {
+				this._dimensionsUndef = true;
+				this._widthUndef = true;
+				if (h === undefined) this._heightUndef = true;
 			}
 		}
 
@@ -621,9 +623,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * constructor except the first two parameters are x and y offsets,
 		 * the distance new collider should be from the center of the sprite.
 		 *
-		 * One limitation of the current implementation is that the collider
-		 * type can't be changed without losing every collider added to the
-		 * sprite besides the first. This will be fixed in a future release.
+		 * This function also auto-resets the sprite's mass, recalculating
+		 * the sprite's mass based on its new size.
+		 *
+		 * One limitation of the current implementation is that sprites
+		 * with multiple colliders can't have their collider
+		 * type changed without losing every collider added to the
+		 * sprite besides the first.
 		 *
 		 * @param {Number} offsetX distance from the center of the sprite
 		 * @param {Number} offsetY distance from the center of the sprite
@@ -652,6 +658,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this.body.sprite = this;
 			}
 			this.body.createFixture(props);
+			this.resetMass();
 		}
 
 		/**
@@ -999,7 +1006,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				'x',
 				'y'
 			];
-			if (!this._massUndefinedByUser || !this._dimensionsUndefinedByUser) {
+			// if mass or dimensions were defined by the user,
+			// then the mass setting should be copied to the new body
+			// else the new body's mass should be calculated based
+			// on its dimensions
+			if (!this._massUndef || !this._dimensionsUndef) {
 				props.push('mass');
 			}
 			for (let prop of props) {
@@ -1011,17 +1022,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			return body;
 		}
-
-		// get aabb() {
-		// 	return getAABB(this);
-		// }
-
-		// set advance(val) {
-		// 	this.body.advance(val);
-		// }
-		// set angularImpulse(val) {
-		// 	this.body.applyAngularImpulse(val, true);
-		// }
 
 		/**
 		 * Reference to the sprite's current animation.
@@ -1123,11 +1123,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * The center of mass of the sprite's physics body.
 		 *
-		 * @type {Number}
+		 * @type {p5.Vector}
 		 */
 		get centerOfMass() {
 			let center = this.body.getWorldCenter();
-			return scaleFrom(center.x, center.y, this.tileSize);
+			let v = scaleFrom(center.x, center.y, this.tileSize);
+			return this.p.createVector(v.x, v.y);
 		}
 
 		/**
@@ -1258,17 +1259,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		set colour(val) {
 			this.color = val;
 		}
-		/**
-		 * @deprecated
-		 */
-		get shapeColor() {
-			console.warn('sprite.shapeColor is deprecated, use sprite.color instead');
-			return this._color;
-		}
-		set shapeColor(val) {
-			console.warn('sprite.shapeColor is deprecated, use sprite.color instead');
-			this.color = val;
-		}
 
 		/**
 		 * Alias for sprite.fillColor
@@ -1362,6 +1352,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 * The density of the sprite's physics body.
 		 *
 		 * @type {Number}
+		 * @default 5
 		 */
 		get density() {
 			if (!this.fixture) return;
@@ -1545,23 +1536,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Use .static instead.
-		 *
-		 * @deprecated immovable
-		 */
-		get immovable() {
-			console.warn('sprite.immovable is deprecated, use sprite.static instead');
-			return this.body.isStatic();
-		}
-		set immovable(val) {
-			console.warn('sprite.immovable is deprecated, use sprite.static instead');
-			if (val) this.body.setStatic();
-		}
-		// get inertia() {
-		// 	return this.body.getInertia();
-		// }
-
-		/**
 		 * A reference to the sprite's current image.
 		 *
 		 * @type {p5.Image}
@@ -1609,13 +1583,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.watch) this.mod[18] = true;
 			if (this.body) this.body.setBullet(val);
 		}
-
-		// get joint() {
-		// 	return this.body.getJointList().joint;
-		// }
-		// get jointList() {
-		// 	return this.body.getJointList();
-		// }
 
 		/**
 		 * True if the sprite's physics body is kinematic.
@@ -1667,6 +1634,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.watch) this.mod[20] = true;
 			this._life = val;
 		}
+
 		/**
 		 * The mass of the sprite's physics body.
 		 *
@@ -1681,7 +1649,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			let t = this.massData;
 			t.mass = val > 0 ? val : 0.00000001;
 			this.body.setMassData(t);
-			delete this._massUndefinedByUser;
+			delete this._massUndef;
 		}
 
 		get massData() {
@@ -1689,6 +1657,17 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.body.getMassData(t);
 			t.center = scaleFrom(t.center.x, t.center.y, this.tileSize);
 			return t;
+		}
+
+		/**
+		 * Recalculates the sprite's mass based on its current
+		 * density and size.
+		 */
+		resetMass() {
+			if (!this.body) return;
+			if (this.watch) this.mod[21] = true;
+			this.body.resetMassData();
+			delete this._massUndef;
 		}
 
 		/**
@@ -1731,7 +1710,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		/**
 		 * Verbose alias for sprite.prevPos
 		 *
-		 * @type {object}
+		 * @type {Object}
 		 */
 		get previousPosition() {
 			return this.prevPos;
@@ -1740,6 +1719,11 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.prevPos = val;
 		}
 
+		/**
+		 * Verbose alias for sprite.prevRotation
+		 *
+		 * @type {Number}
+		 */
 		get previousRotation() {
 			return this.prevRotation;
 		}
@@ -1749,7 +1733,9 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		/**
 		 * Set to true to display the sprite pixel perfect.
-		 * This is useful when using pixel art.
+		 * This is useful when using pixel art. Be sure to move the sprite
+		 * by whole numbers if you want it to stay looking sharp,
+		 * otherwise it will experience subpixel rendering.
 		 *
 		 * @type {Boolean}
 		 * @default false
@@ -1797,7 +1783,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this.body.setAngularDamping(val);
 		}
 		/**
-		 * If true the sprite can not rotate.
+		 * If true, the sprite can not rotate.
 		 *
 		 * @type {Boolean}
 		 * @default false
@@ -1864,7 +1850,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				this._h *= scalars.y;
 				this._hh *= scalars.y;
 			}
-			this._resizeCollider(scalars);
+			this._resizeColliders(scalars);
 
 			this._scale._x = val.x;
 			this._scale._y = val.y;
@@ -1885,7 +1871,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (this.body) return !this.body.isAwake();
 			return undefined;
 		}
-
 		set sleeping(val) {
 			if (!this.body) return;
 			if (this.watch) this.mod[30] = true;
@@ -1925,6 +1910,22 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * If the sprite has been removed from the world.
+		 *
+		 * @type {Boolean}
+		 * @default false
+		 */
+		get removed() {
+			return this._removed;
+		}
+		set removed(val) {
+			if (!val || this._removed) return;
+			if (this.watch) this.mod[25] = true;
+			this._removed = true;
+			this._remove();
+		}
+
+		/**
 		 * The sprite's vertices.
 		 *
 		 * @type {Array}
@@ -1937,7 +1938,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 		_getVertices(output2DArrays) {
 			let f = this.fixture;
-			while (f.m_next) f = f.m_next;
+			while (f.m_next) {
+				if (f.m_isSensor) break;
+				f = f.m_next;
+			}
 			let s = f.getShape();
 			let v = [...s.m_vertices];
 			if (s.m_type == 'polygon') v.unshift(v.at(-1));
@@ -1946,12 +1950,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			for (let i = 0; i < v.length; i++) {
 				let arr = [fixRound((v[i].x / this.tileSize) * plScale + x), fixRound((v[i].y / this.tileSize) * plScale + y)];
 				if (output2DArrays) v[i] = arr;
-				else v[i] = pInst.createVector(arr[0], arr[1]);
+				else v[i] = this.p.createVector(arr[0], arr[1]);
 			}
 			return v;
 		}
-
-		// TODO set vertices
 
 		/**
 		 * If true the sprite is shown, if set to false the sprite is hidden.
@@ -2028,11 +2030,13 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			if (val < 0) val = 0.01;
 			if (val == this._w) return;
 			if (this.watch) this.mod[38] = true;
-			delete this._dimensionsUndefinedByUser;
+
 			let scalarX = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
-			this._resizeCollider({ x: scalarX, y: 1 });
+			this._resizeColliders({ x: scalarX, y: 1 });
+			delete this._widthUndef;
+			delete this._dimensionsUndef;
 		}
 		/**
 		 * Half the width of the sprite.
@@ -2080,11 +2084,12 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 			if (val == this._h) return;
 			if (this.watch) this.mod[17] = true;
-			delete this._dimensionsUndefinedByUser;
 			let scalarY = val / this._h;
 			this._h = val;
 			this._hh = val * 0.5;
-			this._resizeCollider({ x: 1, y: scalarY });
+			this._resizeColliders({ x: 1, y: scalarY });
+			delete this._heightUndef;
+			delete this._dimensionsUndef;
 		}
 		/**
 		 * Half the height of the sprite.
@@ -2162,7 +2167,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			this._h = val;
 			this._hh = this._hw;
 			if (shapeChange) return;
-			this._resizeCollider({ x: scalar, y: scalar });
+			this._resizeColliders({ x: scalar, y: scalar });
 		}
 		/**
 		 * The diameter of a circular sprite.
@@ -2198,28 +2203,28 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
-		 * Resizes the collider of the sprite.
+		 * Resizes the the sprite's colliders.
 		 *
 		 * @private
-		 * @param {*} scalars The x and y scalars to resize the collider by.
+		 * @param {*} scalars The x and y scalars to resize the colliders by.
 		 */
-		_resizeCollider(scalars) {
+		_resizeColliders(scalars) {
 			if (!this.body) return;
 
-			if (this.shape == 'circle') {
-				let fxt = this.fixture;
+			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
+				if (fxt.m_isSensor) continue;
 				let sh = fxt.m_shape;
-				sh.m_radius *= scalars.x;
-			} else {
-				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
-					if (fxt.m_isSensor) continue;
-					let sh = fxt.m_shape;
+				if (sh.m_type == 'circle') {
+					if (scalars.x != 1) sh.m_radius *= scalars.x;
+					else sh.m_radius *= scalars.y;
+				} else {
 					for (let vert of sh.m_vertices) {
 						vert.x *= scalars.x;
 						vert.y *= scalars.y;
 					}
 				}
 			}
+			if (this._widthUndef || this._heightUndef) this.resetMass();
 			if (this.collider == 'static') this.body.synchronizeFixtures();
 		}
 
@@ -2254,7 +2259,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				}
 				break;
 			}
-
 			return true;
 		}
 
@@ -2267,7 +2271,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get shape() {
 			return this._shape;
 		}
-
 		set shape(val) {
 			if (val == this._shape) return;
 
@@ -2310,7 +2313,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get update() {
 			return this._update;
 		}
-
 		set update(val) {
 			this._customUpdate = val;
 		}
@@ -2318,7 +2320,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		get vel() {
 			return this._vel;
 		}
-
 		set vel(val) {
 			this.vel.x = val.x;
 			this.vel.y = val.y;
@@ -2327,7 +2328,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		set velocity(val) {
 			this.vel = val;
 		}
-
 		get velocity() {
 			return this._vel;
 		}
@@ -2622,49 +2622,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		 */
 		applyTorque(val) {
 			this.body.applyTorque(val, true);
-		}
-
-		/**
-		 * Deprecated: set sprite.vel instead.
-		 *
-		 * Sets the velocity vector.
-		 *
-		 * @deprecated setVelocity
-		 * @param {Number} vector|x vector or horizontal velocity
-		 * @param {Number} y vertical velocity
-		 * @example
-		 * sprite.vel = createVector(1, 2);
-		 * // OR
-		 * sprite.vel.x = 1;
-		 * sprite.vel.y = 2;
-		 */
-		setVelocity(x, y) {
-			console.warn('setVelocity() is deprecated. Set sprite.vel instead.');
-			if (typeof x == 'object') {
-				y = x.y;
-				x = x.x;
-			}
-			this.vel.x = x;
-			this.vel.y = y;
-		}
-
-		/**
-		 * Deprecated: set direction and set speed separately
-		 *
-		 * Sets the speed of the sprite.
-		 * The action overwrites the current velocity.
-		 * If direction is not supplied, the current direction is maintained.
-		 * If direction is not supplied and there is no current velocity, the
-		 * current rotation angle used for the direction.
-		 *
-		 * @deprecated setSpeed
-		 * @param {Number} speed Scalar speed
-		 * @param {Number} [direction] angle
-		 */
-		setSpeed(speed, direction) {
-			console.warn('setSpeed is deprecated. Set sprite.direction and sprite.speed separately instead.');
-			if (direction) this.direction = direction;
-			this.speed = speed;
 		}
 
 		/**
@@ -3248,20 +3205,10 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 			}
 		}
 
-		get removed() {
-			return this._removed;
-		}
-		set removed(val) {
-			if (!val || this._removed) return;
-			if (this.watch) this.mod[25] = true;
-			this._removed = true;
-			this._remove();
-		}
-
 		/**
 		 * Warning: This function might be changed in a future release.
 		 *
-		 * Returns the sprite's unique identifier
+		 * Returns the sprite's unique identifier `sprite.idNum`.
 		 *
 		 * @returns the sprite's id
 		 */
@@ -3899,8 +3846,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 
 					if (!w || !h) {
 						// sprites will be given default dimensions, but groups
-						// are not, so _dimensionsUndefinedByUser is only for sprites
-						if (!owner._dimensionsUndefinedByUser && owner.w && owner.h) {
+						// are not, _dimensionsUndef is only for sprites
+						if (!owner._dimensionsUndef && owner.w && owner.h) {
 							w = owner.w;
 							h = owner.h;
 						} else if (tileSize) {
@@ -5278,7 +5225,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 				ani._addedToSpriteOrGroup = true;
 
 				// only works if the animation was loaded in preload
-				if (this._dimensionsUndefinedByUser && (ani.w != 1 || ani.h != 1)) {
+				if (this._dimensionsUndef && (ani.w != 1 || ani.h != 1)) {
 					this.w = ani.w;
 					this.h = ani.h;
 				}
@@ -6315,6 +6262,20 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		}
 
 		/**
+		 * Set to true if you want the joint's sprites to collide with
+		 * each other.
+		 *
+		 * @type {Boolean}
+		 * @default false
+		 */
+		get collideConnected() {
+			return this._j.getCollideConnected();
+		}
+		set collideConnected(val) {
+			this._j.m_collideConnected = val;
+		}
+
+		/**
 		 * Removes the joint from the world and from each of the
 		 * sprites' joints arrays.
 		 */
@@ -6759,223 +6720,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		};
 	})();
 
-	this.Netcode = class {
-		/**
-		 * EXPERIMENTAL! Work in progress, not ready for public use yet.
-		 *
-		 * A `netcode` object is created automatically when p5play loads.
-		 *
-		 * "Netcode is a blanket term most commonly used by
-		 * gamers relating to networking in online games, often referring to
-		 * synchronization issues between clients and servers. Players often
-		 * infer "bad netcodes" when they experience lag or when their inputs
-		 * are dropped." - Wikipedia
-		 *
-		 * The methods of this class will help p5play developers create online
-		 * multiplayer games and servers.
-		 */
-		constructor() {
-			this.typeSizes = {
-				boolean: 1,
-				Uint8: 1,
-				Vec2_boolean: 1,
-				Float16: 2,
-				number: 2,
-				color: 4,
-				Float32: 4,
-				Int32: 4,
-				Vec2: 4,
-				Float64: 8
-			};
-			this.player = 0;
-		}
-
-		connect() {}
-
-		disconnect() {}
-
-		/**
-		 * Converts a sprite to a binary representation, which is smaller
-		 * than serializing the data with JSON.stringify.
-		 *
-		 * This function is intended to be used to send sprite data over
-		 * a network.
-		 *
-		 * @param {Sprite} sprite
-		 * to binary. Defaults to all sprite properties.
-		 */
-		spriteToBinary(sprite) {
-			const props = pInst.Sprite.props;
-
-			// initial size is 2 bytes for sprite id and 1 for the ending byte
-			let size = 3;
-			// calculate size of buffer
-			for (let i = 0; i < props.length; i++) {
-				if (sprite.watch && !sprite.mod[i]) continue;
-				const prop = props[i];
-				const type = pInst.Sprite.propTypes[prop];
-
-				let val = sprite[prop];
-				if (prop == 'ani') val = val?.name;
-				if (val === undefined || val === null) continue;
-
-				if (type == 'string') {
-					const encoded = new TextEncoder().encode(val);
-					size += encoded.length + 3;
-				} else {
-					size += this.typeSizes[type] + 1;
-				}
-			}
-			if (size == 3) return null; // no data to send
-
-			const buffer = new ArrayBuffer(size);
-			const data = new DataView(buffer);
-			data.setFloat16 = (o, v) => data.setUint16(o, encodeFloat16(v));
-
-			data.setUint16(0, sprite._uid);
-
-			let o = 2; // byte offset
-			for (let i = 0; i < props.length; i++) {
-				if (sprite.watch && !sprite.mod[i]) continue;
-				const prop = props[i];
-				const type = pInst.Sprite.propTypes[prop];
-
-				let val = sprite[prop];
-				if (val === undefined || val === null) continue;
-
-				data.setUint8(o, i);
-				o += 1;
-
-				if (type == 'boolean') {
-					data.setUint8(o, val ? 1 : 0);
-				} else if (type == 'number' || type == 'Float16') {
-					data.setFloat16(o, val);
-				} else if (type == 'Float32') {
-					data.setFloat32(o, val);
-				} else if (type == 'Float64') {
-					data.setFloat64(o, val);
-				} else if (type == 'string') {
-					if (prop == 'ani') val = val.name;
-					const encoded = new TextEncoder().encode(val);
-					data.setUint16(o, encoded.length);
-					o += 2;
-					for (let j = 0; j < encoded.length; j++) {
-						data.setUint8(o, encoded[j]);
-						o += 1;
-					}
-					continue;
-				} else if (type == 'color') {
-					data.setUint8(o, val.levels[0]); // r
-					data.setUint8(o + 1, val.levels[1]); // g
-					data.setUint8(o + 2, val.levels[2]); // b
-					data.setUint8(o + 3, val.levels[3]); // a
-				} else if (type == 'Vec2') {
-					data.setFloat16(o, val.x);
-					data.setFloat16(o + 2, val.y);
-				} else if (type == 'Vec2_boolean') {
-					data.setUint8(o, (val.x ? 1 : 0) | (val.y ? 2 : 0));
-				} else if (type == 'Uint8') {
-					if (prop == 'collider') {
-						data.getUint8(o, sprite.__collider);
-					} else if (prop == 'shape') {
-						data.getUint8(o, sprite.__shape);
-					} else {
-						data.getUint8(o, val);
-					}
-				} else if (type == 'Int32') {
-					data.setInt32(o, val);
-				}
-				o += this.typeSizes[type];
-			}
-
-			data.setUint8(o, 255);
-
-			sprite.watch = true;
-			sprite.mod = [];
-
-			return new Uint8Array(buffer);
-		}
-
-		/**
-		 * Converts binary data, assigning the values to a sprite.
-		 *
-		 * @param {Uint8Array} binary - binary data
-		 * @param {number} [offset] - byte offset
-		 * @returns {Sprite} the sprite
-		 */
-		binaryToSprite(binary, offset) {
-			let data;
-			if (binary instanceof DataView) data = binary;
-			else data = new DataView(binary.buffer);
-
-			data.getFloat16 = (o) => decodeFloat16(data.getUint16(o));
-
-			let o = offset || 0;
-
-			let uid = data.getUint16(o);
-			o += 2;
-			let sprite = pInst.p5play.sprites[uid] || new pInst.Sprite();
-
-			while (o !== data.byteLength) {
-				const propId = data.getUint8(o);
-				if (propId === 255) break;
-				o += 1;
-
-				const prop = pInst.Sprite.props[propId];
-				const type = pInst.Sprite.propTypes[prop];
-
-				if (type === 'boolean') {
-					sprite[prop] = data.getUint8(o) !== 0;
-				} else if (type == 'number' || type === 'Float16') {
-					sprite[prop] = data.getFloat16(o);
-				} else if (type === 'Float32') {
-					sprite[prop] = data.getFloat32(o);
-				} else if (type === 'Float64') {
-					sprite[prop] = data.getFloat64(o);
-				} else if (type === 'string') {
-					const strLength = data.getUint16(o);
-					o += 2;
-					const strBytes = new Uint8Array(data.buffer, o, strLength);
-					sprite[prop] = new TextDecoder().decode(strBytes);
-					o += strLength;
-					continue;
-				} else if (type === 'color') {
-					const r = data.getUint8(o);
-					const g = data.getUint8(o + 1);
-					const b = data.getUint8(o + 2);
-					const a = data.getUint8(o + 3);
-					sprite[prop] = color(r, g, b, a);
-				} else if (type === 'Vec2') {
-					const x = data.getFloat16(o);
-					const y = data.getFloat16(o + 2);
-					sprite[prop] = { x, y };
-				} else if (type === 'Vec2_boolean') {
-					const byte = data.getUint8(o);
-					sprite[prop] = { x: (byte & 1) === 1, y: (byte & 2) === 2 };
-				} else if (type === 'Uint8') {
-					let val = data.getUint8(o);
-					if (prop === 'collider') {
-						sprite.collider = pInst.Sprite.colliderTypes[val];
-					} else if (prop === 'shape') {
-						sprite.shape = pInst.Sprite.shapeTypes[val];
-					} else {
-						sprite[prop] = val;
-					}
-				} else if (type === 'Int32') {
-					sprite[prop] = data.getInt32(o);
-				}
-				o += this.typeSizes[type];
-			}
-			data.offset = o;
-
-			return sprite;
-		}
-
-		inputToJSON() {}
-	};
-
-	this.netcode = new this.Netcode();
-
 	function isArrowFunction(fn) {
 		return !/^(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*(?:(?:(?:async\s(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*)?function|class)(?:\s|(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*)|(?:[_$\w][\w0-9_$]*\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\()|(?:\[\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*(?:(?:['][^']+['])|(?:["][^"]+["]))\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\]\())/.test(
 			fn.toString()
@@ -7022,18 +6766,8 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		return l;
 	}
 
-	/**
-	 * Deprecated. Use world.step and allSprites.update instead.
-	 *
-	 * @deprecated
-	 * @func updateSprites
-	 */
-	this.updateSprites = function () {
-		if (this.frameCount == 1) console.warn('updateSprites() is deprecated, use world.step() instead.');
-		this.world.step(...arguments);
-		this.allSprites.update();
-	};
-
+	// the default color palette has all the letters
+	// of the English alphabet mapped to colors
 	this.p5play.palettes ??= [
 		{
 			a: 'aqua',
@@ -7098,7 +6832,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * @param {String} txt Each character represents a pixel color value
 	 * @param {Number} scale The scale of the image
 	 * @param {Number|Object} palette Color palette
-	 * @returns A p5.js Image
+	 * @returns {p5.Image} A p5.Image object
 	 *
 	 * @example
 	 * let str = `
@@ -7147,35 +6881,6 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 		img.h = img.height;
 		pInst.p5play.images.onLoad(img);
 		return img; // return the p5 graphics object
-	};
-
-	/**
-	 * Deprecated, use sprite.draw() instead.
-	 *
-	 * allSprites.draw() is run automatically at the end of the p5.js
-	 * draw loop, unless a sprite or group is drawn separately within the
-	 * draw loop.
-	 *
-	 * @deprecated
-	 */
-	this.drawSprite = function (sprite) {
-		if (this.frameCount == 1) console.warn('drawSprite() is deprecated, use sprite.draw() instead.');
-		sprite.draw();
-	};
-
-	/**
-	 * Deprecated, use group.draw() instead.
-	 *
-	 * allSprites.draw() is run automatically at the end of the p5.js
-	 * draw loop, unless a sprite or group is drawn separately within the
-	 * draw loop.
-	 *
-	 * @deprecated
-	 */
-	this.drawSprites = function (group) {
-		if (this.frameCount == 1) console.warn('drawSprites() is deprecated, use group.draw() instead.');
-		group ??= this.allSprites;
-		group.draw();
 	};
 
 	/**
@@ -7259,7 +6964,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	};
 
 	/**
-	 * Alternative to delay, which is preferred, but this name may be more
+	 * Alternative to `delay`, which is preferred, but this name may be more
 	 * familiar to Processing Java users.
 	 */
 	this.sleep = (millisecond) => {
@@ -7275,7 +6980,7 @@ p5.prototype.registerMethod('init', function p5PlayInit() {
 	 * await play(sound);
 	 */
 	this.play = (sound) => {
-		if (!sound.play) throw new Error('Tried to play a sound but the sound is not a sound object: ' + sound);
+		if (!sound.play) throw new Error("Tried to play your input but it wasn't a sound object: " + sound);
 		// TODO reject if sound not found
 		return new Promise((resolve, reject) => {
 			sound.play();
@@ -7529,7 +7234,6 @@ main {
 	/**
 	 * Creates a p5.js canvas element. Includes some extra features such as
 	 * a pixelated mode. See the Canvas learn page for more information.
-	 *
 	 */
 	this.Canvas = function () {
 		return pInst.createCanvas(...arguments);
@@ -7589,6 +7293,9 @@ main {
 		onLoad: (img) => {} // called anytime an image is fully loaded
 	};
 
+	// This is a debugging tool that disables images from loading
+	// or displaying. Mainly used to test other people's projects without
+	// having to download their images.
 	this.p5play.disableImages = false;
 
 	const _loadImage = this.loadImage;
@@ -7727,7 +7434,7 @@ main {
 	errMsgs.Sprite.rotateTo[0] = errMsgs.Sprite.rotateTowards[0] = errMsgs.Sprite.rotate[0];
 
 	/**
-	 * A FriendlyError is a custom error class that extends the native JS Error class.
+	 * A FriendlyError is a custom error class that extends the native JS Error class. It's used internally by p5play to make error messages more helpful.
 	 *
 	 * @private
 	 * @param {String} func is the name of the function the error was thrown in
@@ -7869,6 +7576,7 @@ main {
 		}
 
 		/**
+		 * Same as the `released` function, which is preferred.
 		 * @param {string} inp
 		 * @returns {boolean} true on the first frame that the user released the input
 		 */
@@ -8224,19 +7932,6 @@ main {
 	}
 
 	/**
-	 * Obsolete: Use kb.pressing(key) instead.
-	 *
-	 * @deprecated
-	 * @obsolete
-	 * @param {String} key
-	 */
-	this.keyIsDown = function (keyCode) {
-		throw new Error(
-			`The p5.js keyIsDown function is outdated and can't be used in p5play. Trust me, you'll see that the p5play kb.pressing function is much better. It uses key name strings that are easier to write and easier to read! https://p5play.org/learn/input_devices.html The p5.js keyIsDown function relies on key codes and custom constants for key codes, which are not only hard to remember but were also deprecated in the JavaScript language standards over six years ago and shouldn't be used in new projects. More info: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode`
-		);
-	};
-
-	/**
 	 * @private
 	 * @param {*} e keyboard event
 	 * @returns key name
@@ -8540,13 +8235,6 @@ main {
 	 */
 	this.controllers = this.contro;
 
-	this.inputs = [];
-	this.inputs[this.netcode.player] = {
-		mouse: this.mouse,
-		kb: this.kb,
-		contro: this.contro
-	};
-
 	if (!this.getFPS) this.p5play._fps = 60;
 
 	/**
@@ -8562,22 +8250,6 @@ main {
 	 * @returns {Number} The current FPS
 	 */
 	this.getFPS ??= () => this.p5play._fps;
-
-	this.loadAds = (opt) => {
-		opt ??= {};
-		if (window.webkit !== undefined) {
-			// iOS
-			webkit.messageHandlers.loadAds.postMessage(JSON.stringify(opt));
-		}
-	};
-
-	this.showAd = (type) => {
-		if (type) type = type.toLowerCase();
-		type ??= 'interstitial';
-		if (window.webkit !== undefined) {
-			confirm('p5play:' + type);
-		}
-	};
 });
 
 // called before each p5.js draw function call
