@@ -5601,7 +5601,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (s1IsSprite) {
 						for (let g1 of s1.groups) {
 							cb = g0[type][g1._uid];
-							if (cb && (!findCB || cb !== true)) return cb;
+							if (cb && (!findCB || cb !== true)) {
+								if (g0._uid != g1._uid || s0._uid < s1._uid) {
+									return cb;
+								}
+							}
 						}
 					}
 				}
