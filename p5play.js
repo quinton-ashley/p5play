@@ -8290,6 +8290,7 @@ main {
 		let fps = this.getFPS();
 		this.p5play._fpsArr.push(fps);
 
+		this.push();
 		this.fill(this.p5play._statsColor);
 		this.textSize(16);
 		this.textFont('monospace');
@@ -8297,6 +8298,7 @@ main {
 		this.text('avg: ' + this.p5play._fpsAvg, x, y + 20);
 		this.text('min: ' + this.p5play._fpsMin, x, y + 40);
 		this.text('max: ' + this.p5play._fpsMax, x, y + 60);
+		this.pop();
 	};
 });
 
