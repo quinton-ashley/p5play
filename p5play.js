@@ -8242,18 +8242,62 @@ main {
 	if (!this.getFPS) this.p5play._fps = 60;
 
 	/**
-	 * Use this function to performance test your game code. FPS, amongst
-	 * the gaming community, refers to how fast a computer can generate
-	 * frames per second, not including the delay between when frames are
-	 * shown on the screen. The higher the FPS, the better the game is
-	 * performing.
+	 * FPS, amongst the gaming community, refers to how fast a computer
+	 * can generate frames per second, not including the delay between when
+	 * frames are actually shown on the screen. The higher the FPS, the
+	 * better the game is performing.
 	 *
-	 * Frame rate or display rate is different, that's the amount of frames
-	 * a display device can show frames.
+	 * Use this function to performance test your game code.
 	 *
 	 * @returns {Number} The current FPS
 	 */
 	this.getFPS ??= () => this.p5play._fps;
+
+	this.p5play._fpsArr = [60];
+
+	/**
+	 * Displays the current FPS as well as the average, minimum, and maximum
+	 * FPS achieved during the previous second.
+	 *
+	 * Use this function to performance test your game code.
+	 *
+	 * @param {Number} x
+	 * @param {Number} y
+	 */
+	this.renderStats = (x, y) => {
+		if (this.frameCount == 1) {
+			console.warn(
+				"renderStats() uses approximate FPS calculations. For more accurate results, use your web browser's performance testing tools."
+			);
+		}
+		x ??= 10;
+		y ??= 20;
+		if (this.frameCount == 1 || this.frameCount % 60 === 0) {
+			let avg = this.p5play._fpsArr.reduce((a, b) => a + b);
+			avg = Math.round(avg / this.p5play._fpsArr.length);
+			this.p5play._fpsAvg = avg;
+			this.p5play._fpsMin = Math.min(...this.p5play._fpsArr);
+			this.p5play._fpsMax = Math.max(...this.p5play._fpsArr);
+			this.p5play._fpsArr = [];
+
+			let c;
+			if (avg > 55) c = this.color(30, 255, 30);
+			else if (avg > 25) c = this.color(255, 100, 30);
+			else c = this.color(255, 30, 30);
+			this.p5play._statsColor = c;
+		}
+
+		let fps = this.getFPS();
+		this.p5play._fpsArr.push(fps);
+
+		this.fill(this.p5play._statsColor);
+		this.textSize(16);
+		this.textFont('monospace');
+		this.text('fps: ' + fps, x, y);
+		this.text('avg: ' + this.p5play._fpsAvg, x, y + 20);
+		this.text('min: ' + this.p5play._fpsMin, x, y + 40);
+		this.text('max: ' + this.p5play._fpsMax, x, y + 60);
+	};
 });
 
 // called before each p5.js draw function call
