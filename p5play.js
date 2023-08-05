@@ -26,6 +26,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.p5play.groups = {};
 	this.p5play.groupsCreated = 0;
 	this.p5play.spritesCreated = 0;
+	this.p5play.spritesDrawn = 0;
 
 	// change the angle mode so that the p5play default is degrees
 	this.angleMode('degrees');
@@ -2467,6 +2468,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			this._visible = true;
+			this.p.p5play.spritesDrawn++;
 
 			x = fixRound(x);
 			y = fixRound(y);
@@ -7024,8 +7026,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			case '127.0.0.1':
 			case 'localhost':
 			case 'p5play.org':
-			case 'openprocessing.org':
-			case 'preview.openprocessing.org':
 			case 'editor.p5js.org':
 			case 'codepen.io':
 			case 'codera.app':
@@ -7037,10 +7037,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				break;
 			default:
 				if (
+					/^[\d\.]+$/.test(lh) ||
 					lh.endsWith('stackblitz.io') ||
 					lh.endsWith('glitch.me') ||
 					lh.endsWith('repl.co') ||
 					lh.endsWith('codehs.com') ||
+					lh.endsWith('openprocessing.org') ||
 					location.origin.endsWith('preview.p5js.org')
 				) {
 					break;
@@ -8287,17 +8289,17 @@ main {
 			this.p5play._statsColor = c;
 		}
 
-		let fps = this.getFPS();
-		this.p5play._fpsArr.push(fps);
+		this.p5play._fpsArr.push(this.getFPS());
 
 		this.push();
 		this.fill(this.p5play._statsColor);
 		this.textSize(16);
 		this.textFont('monospace');
-		this.text('fps: ' + fps, x, y);
-		this.text('avg: ' + this.p5play._fpsAvg, x, y + 20);
-		this.text('min: ' + this.p5play._fpsMin, x, y + 40);
-		this.text('max: ' + this.p5play._fpsMax, x, y + 60);
+
+		this.text('sprites: ' + this.p5play.spritesDrawn, x, y);
+		this.text('fps avg: ' + this.p5play._fpsAvg, x, y + 20);
+		this.text('fps min: ' + this.p5play._fpsMin, x, y + 40);
+		this.text('fps max: ' + this.p5play._fpsMax, x, y + 60);
 		this.pop();
 	};
 });
@@ -8334,6 +8336,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.allSprites.cull(10000);
 	}
 
+	this.p5play.spritesDrawn = 0;
 	if (this.allSprites._autoDraw) {
 		this.camera.on();
 		this.allSprites.draw();
