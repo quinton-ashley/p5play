@@ -7169,6 +7169,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		this.canvas.addEventListener('touchstart', (e) => {
 			e.preventDefault();
 		});
+		this.canvas.resize = this.resizeCanvas;
 		this.world.resize();
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 
@@ -7266,8 +7267,6 @@ main {
 		this.camera._pos.x = this.world.hw;
 		this.camera._pos.y = this.world.hh;
 	};
-
-	this.canvas.resize = this.resizeCanvas;
 
 	const _background = this.background;
 
