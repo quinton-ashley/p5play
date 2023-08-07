@@ -7245,6 +7245,30 @@ main {
 		return pInst.createCanvas(...arguments);
 	};
 
+	const _resizeCanvas = this.resizeCanvas;
+
+	/**
+	 * Resizes the canvas, the world, and centers the camera.
+	 *
+	 * Visually the canvas will shrink or extend to the new size. Sprites
+	 * will not change position.
+	 *
+	 * If you would prefer to keep the camera focused on the same area, then
+	 * you must manually adjust the camera position after calling this
+	 * function.
+	 *
+	 * @param {number} w - The new width of the canvas.
+	 * @param {number} h - The new height of the canvas.
+	 */
+	this.resizeCanvas = (w, h) => {
+		_resizeCanvas.call(this, w, h);
+		this.world.resize();
+		this.camera._pos.x = this.world.hw;
+		this.camera._pos.y = this.world.hh;
+	};
+
+	this.canvas.resize = this.resizeCanvas;
+
 	const _background = this.background;
 
 	/**
