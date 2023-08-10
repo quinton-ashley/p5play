@@ -7235,6 +7235,9 @@ main {
 			this.p5play.os.platform = navigator.userAgentData.platform;
 		}
 
+		this.camera.x = 0;
+		this.camera.y = 0;
+
 		return can;
 	};
 
