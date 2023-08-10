@@ -7166,11 +7166,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		this.canvas.addEventListener('mouseleave', () => {
 			this.mouse.isOnCanvas = false;
 		});
-		this.canvas.addEventListener('touchstart', (e) => {
-			e.preventDefault();
-		});
+		this.canvas.addEventListener('touchstart', (e) => e.preventDefault());
+		// this stops the right click menu from appearing
+		this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 		this.canvas.resize = this.resizeCanvas;
 		this.world.resize();
+		this.camera.x = this.world.hw;
+		this.camera.y = this.world.hh;
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 
 		/* prevent callout to copy image, etc when tap to hold */
@@ -7234,9 +7236,6 @@ main {
 		} else if (navigator.userAgentData !== undefined) {
 			this.p5play.os.platform = navigator.userAgentData.platform;
 		}
-
-		this.camera.x = 0;
-		this.camera.y = 0;
 
 		return can;
 	};
@@ -8334,15 +8333,6 @@ main {
 p5.prototype.registerMethod('pre', function p5playPreDraw() {
 	if (this.p5play._fps) {
 		this.p5play._preDrawFrameTime = performance.now();
-	}
-
-	if (this.frameCount == 1) {
-		if (!this.camera.x) this.camera.x = this.world.hw;
-		if (!this.camera.y) this.camera.y = this.world.hh;
-		this.camera.init = true;
-
-		// this stops the right click menu from appearing
-		this.canvas.addEventListener('contextmenu', (event) => event.preventDefault());
 	}
 
 	this.mouse.x = (this.mouseX - this.world.hw) / this.camera.zoom + this.camera.x;
