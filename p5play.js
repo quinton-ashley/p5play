@@ -2416,7 +2416,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					this.p.line(0, -2, 0, 2);
 					this.p.line(-2, 0, 2, 0);
 				}
-				if (this.fixture != null) {
+				if (this.__collider != 3) {
 					if (this._shape == 'chain') this.p.stroke(this.stroke || this.color);
 					else if (this._stroke) this.p.stroke(this._stroke);
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
