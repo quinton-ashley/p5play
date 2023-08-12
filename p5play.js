@@ -5732,6 +5732,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.y = val.y;
 		}
 
+		_calcBoundsX(val) {
+			let mod = this.p.world.hw / this._zoom;
+			this.bound.min.x = val - mod - 100;
+			this.bound.max.x = val + mod + 100;
+		}
+
+		_calcBoundsY(val) {
+			let mod = this.p.world.hh / this._zoom;
+			this.bound.min.y = val - mod - 100;
+			this.bound.max.y = val + mod + 100;
+		}
+
 		/**
 		 * The camera x position.
 		 *
@@ -5745,9 +5757,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let x = -val + this.p.world.hw / this._zoom;
 			if (this.p.allSprites.pixelPerfect) x = Math.round(x);
 			this.__pos.x = x;
-
-			this.bound.min.x = val - this.p.world.hw / this._zoom - 100;
-			this.bound.max.x = val + this.p.world.hw / this._zoom + 100;
+			this._calcBoundsX(val);
 		}
 
 		/**
@@ -5763,9 +5773,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let y = -val + this.p.world.hh / this._zoom;
 			if (this.p.allSprites.pixelPerfect) y = Math.round(y);
 			this.__pos.y = y;
-
-			this.bound.min.y = val - this.p.world.hh / this._zoom - 100;
-			this.bound.max.y = val + this.p.world.hh / this._zoom + 100;
+			this._calcBoundsY(val);
 		}
 
 		/**
@@ -5791,6 +5799,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			this.__pos.x = x;
 			this.__pos.y = y;
+			this._calcBoundsX(this._pos.x);
+			this._calcBoundsY(this._pos.y);
 		}
 
 		/**
