@@ -12,26 +12,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	// store a reference to the p5 instance that p5play is being added to
 	const pInst = this;
 
-	// Google Analytics Tracking Code
-	{
-		let script = document.createElement('script');
-		script.src = 'https://www.googletagmanager.com/gtag/js?id=G-EHXNCTSYLK';
-		script.async = true;
-		document.head.append(script);
-
-		script.onload = function () {
-			window.dataLayer = window.dataLayer || [];
-			window.gtag = function () {
-				dataLayer.push(arguments);
-			};
-			gtag('js', new Date());
-			gtag('config', 'G-EHXNCTSYLK');
-
-			// Track library loading as an event
-			gtag('event', 'p5play_v3');
-		};
-	}
-
 	const log = console.log; // shortcut
 	this.log = console.log;
 
@@ -47,9 +27,29 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.p5play.groupsCreated = 0;
 	this.p5play.spritesCreated = 0;
 	this.p5play.spritesDrawn = 0;
+	this.p5play._renderStats = {};
 
 	// tracking
 	this.p5play._applyForceUsed = false;
+
+	// Google Analytics Tracking Code
+	if (typeof window._p5play_gtagged == 'undefined') {
+		let script = document.createElement('script');
+		script.src = 'https://www.googletagmanager.com/gtag/js?id=G-EHXNCTSYLK';
+		script.async = true;
+		document.head.append(script);
+		window._p5play_gtagged = true;
+
+		script.onload = () => {
+			window.dataLayer ??= [];
+			window.gtag = function () {
+				dataLayer.push(arguments);
+			};
+			gtag('js', new Date());
+			gtag('config', 'G-EHXNCTSYLK');
+			gtag('event', 'p5play_v3');
+		};
+	}
 
 	// change the angle mode so that the p5play default is degrees
 	this.angleMode('degrees');
@@ -8324,49 +8324,42 @@ main {
 	this.p5play._fpsArr = [60];
 
 	/**
-	 * Displays the current FPS as well as the average, minimum, and maximum
-	 * FPS achieved during the previous second.
+	 * Displays the number of sprites drawn, an approximation of the
+	 * current FPS as well as the average, minimum, and maximum FPS
+	 * achieved during the previous second.
 	 *
-	 * Use this function to performance test your game code.
+	 * FPS in this context refers to how many frames per second your
+	 * computer can generate, including physics calculations and any other
+	 * processes necessary to generate a frame, but not including the delay
+	 * between when frames are actually shown on the screen. The higher the
+	 * FPS, the better your game is performing.
+	 *
+	 * You can use this function for approximate performance testing. For
+	 * more accurate results, use your web browser's performance testing
+	 * tools.
+	 *
+	 * Generally having less sprites and using a smaller canvas will make
+	 * your game perform better.
 	 *
 	 * @param {Number} x
 	 * @param {Number} y
 	 */
 	this.renderStats = (x, y) => {
-		if (this.frameCount == 1) {
+		let rs = this.p5play._renderStats;
+		if (rs.show === undefined) {
+			if (this.allSprites.tileSize == 1 || this.allSprites.tileSize > 16) {
+				rs.fontSize = 16;
+			} else {
+				rs.fontSize = 10;
+			}
+			rs.gap = rs.fontSize * 1.25;
 			console.warn(
 				"renderStats() uses approximate FPS calculations. For more accurate results, use your web browser's performance testing tools."
 			);
 		}
-		x ??= 10;
-		y ??= 20;
-		if (this.frameCount == 1 || this.frameCount % 60 === 0) {
-			let avg = this.p5play._fpsArr.reduce((a, b) => a + b);
-			avg = Math.round(avg / this.p5play._fpsArr.length);
-			this.p5play._fpsAvg = avg;
-			this.p5play._fpsMin = Math.min(...this.p5play._fpsArr);
-			this.p5play._fpsMax = Math.max(...this.p5play._fpsArr);
-			this.p5play._fpsArr = [];
-
-			let c;
-			if (avg > 55) c = this.color(30, 255, 30);
-			else if (avg > 25) c = this.color(255, 100, 30);
-			else c = this.color(255, 30, 30);
-			this.p5play._statsColor = c;
-		}
-
-		this.p5play._fpsArr.push(this.getFPS());
-
-		this.push();
-		this.fill(this.p5play._statsColor);
-		this.textSize(16);
-		this.textFont('monospace');
-
-		this.text('sprites: ' + this.p5play.spritesDrawn, x, y);
-		this.text('fps avg: ' + this.p5play._fpsAvg, x, y + 20);
-		this.text('fps min: ' + this.p5play._fpsMin, x, y + 40);
-		this.text('fps max: ' + this.p5play._fpsMax, x, y + 60);
-		this.pop();
+		rs.x = x || 10;
+		rs.y = y || 20;
+		rs.show = true;
 	};
 });
 
@@ -8400,6 +8393,42 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.camera.off();
 	}
 	this.allSprites._autoDraw ??= true;
+
+	let rs = this.p5play._renderStats;
+	if (rs.show) {
+		if (this.frameCount == 1 || this.frameCount % 60 === 0) {
+			let avg = this.p5play._fpsArr.reduce((a, b) => a + b);
+			avg = Math.round(avg / this.p5play._fpsArr.length);
+			this.p5play._fpsAvg = avg;
+			this.p5play._fpsMin = Math.min(...this.p5play._fpsArr);
+			this.p5play._fpsMax = Math.max(...this.p5play._fpsArr);
+			this.p5play._fpsArr = [];
+
+			let c;
+			if (avg > 55) c = this.color(30, 255, 30);
+			else if (avg > 25) c = this.color(255, 100, 30);
+			else c = this.color(255, 30, 30);
+			this.p5play._statsColor = c;
+		}
+
+		this.p5play._fpsArr.push(this.getFPS());
+
+		this.push();
+		this.fill(0, 0, 0, 128);
+		this.rect(rs.x - 5, rs.y - rs.fontSize, rs.fontSize * 8.5, rs.gap * 4 + 5);
+		this.fill(this.p5play._statsColor);
+		this.textSize(rs.fontSize);
+		this.textFont('monospace');
+
+		let x = rs.x;
+		let y = rs.y;
+		this.text('sprites: ' + this.p5play.spritesDrawn, x, y);
+		this.text('fps avg: ' + this.p5play._fpsAvg, x, y + rs.gap);
+		this.text('fps min: ' + this.p5play._fpsMin, x, y + rs.gap * 2);
+		this.text('fps max: ' + this.p5play._fpsMax, x, y + rs.gap * 3);
+		this.pop();
+		rs.show = false;
+	}
 
 	if (this.world.autoStep) {
 		this.world.step();
