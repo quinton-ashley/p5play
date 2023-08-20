@@ -2645,6 +2645,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Applies a force to the sprite's center of mass attracting it to
 		 * the given position.
 		 *
+		 * Radius and easing not implemented yet!
+		 *
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} force
