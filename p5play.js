@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.10
+ * @version 3.11
  * @author quinton-ashley
  * @license gpl-v3-only
  */
@@ -29,9 +29,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.p5play.spritesDrawn = 0;
 	this.p5play._renderStats = {};
 
-	// tracking
-	this.p5play._applyForceUsed = false;
-
 	// Google Analytics Tracking Code
 	if (typeof window._p5play_gtagged == 'undefined') {
 		let script = document.createElement('script');
@@ -47,7 +44,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3');
+			gtag('event', 'p5play_v3_11');
 		};
 	}
 
@@ -1364,6 +1361,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._textColor = this._parseColor(val);
 		}
 
+		/**
+		 * A bearing indicates the direction that needs to be followed to
+		 * reach a destination. Setting a sprite's bearing doesn't do
+		 * anything by itself. You can apply a force at the sprite's
+		 * bearing angle using the `applyForce` function.
+		 * @example
+		 * sprite.bearing = angle;
+		 * sprite.applyForce(amount);
+		 */
+		get bearing() {
+			return this._bearing;
+		}
+		set bearing(val) {
+			if (this.watch) this.mod[39] = true;
+			this._bearing = val;
+		}
+
 		get debug() {
 			return this._debug;
 		}
@@ -1387,20 +1401,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setDensity(val);
 			}
-		}
-
-		/**
-		 * Use .layer instead.
-		 *
-		 * @deprecated depth
-		 */
-		get depth() {
-			console.warn('sprite.depth is deprecated, use sprite.layer instead');
-			return this._layer;
-		}
-		set depth(val) {
-			console.warn('sprite.depth is deprecated, use sprite.layer instead');
-			this.layer = val;
 		}
 
 		_getDirectionAngle(name) {
@@ -2579,66 +2579,112 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return { x: x || 0, y: y || 0 };
 		}
 
+		_parseForceArgs() {
+			let args = arguments;
+			if (args.length == 1 || (args.length == 3 && typeof args[2] == 'number')) {
+				args[3] = args[2];
+				args[2] = args[1];
+				args[1] = this.p.sin(this._bearing) * args[0];
+				args[0] = this.p.cos(this._bearing) * args[0];
+			} else if (args.length == 2 && typeof args[1] != 'number') {
+				args[2] = args[1];
+				args[1] = undefined;
+			}
+			let o = {};
+			o.forceVector = new pl.Vec2(this._args2Vec(args[0], args[1]));
+			if (args[2] !== undefined) {
+				o.poa = this._args2Vec(args[2], args[3]);
+				o.poa = scaleTo(o.poa.x, o.poa.y, this.tileSize);
+			}
+			return o;
+		}
+
 		/**
-		 * Apply a force that is scaled to the sprite's mass.
+		 * If this function is given a force amount, the force is applied
+		 * at the angle of the sprite's current bearing. Force can
+		 * also be given as a vector.
 		 *
-		 * @param {Number} x
-		 * @param {Number} y
-		 * @param {Number} [originX]
-		 * @param {Number} [originY]
+		 * The origin of the force can be given as a vector or as x and y
+		 * coordinates. If no origin is given, the force is applied to the
+		 * center of the sprite.
+		 *
+		 * @param {Number} amount
+		 * @param {Vector} [origin]
 		 * @example
+		 * sprite.applyForce(amount);
+		 * sprite.applyForce(amount, {x: originX, y: originY});
 		 * sprite.applyForce(x, y);
-		 * sprite.applyForce(x, y, originX, originY);
 		 * sprite.applyForce(x, y, {x: originX, y: originY});
 		 * sprite.applyForce({x, y}, {x: originX, y: originY});
 		 */
 		applyForce(x, y, originX, originY) {
-			if (!this.body || (!x && !y)) return;
-			if (window.gtag && !this.p.p5play._applyForceUsed) {
-				gtag('event', 'p5play_v3_applyForce');
-				this.p.p5play._applyForceUsed = true;
+			if (!this.body) return;
+			if (location.host == 'game.thegamebox.ca') {
+				return this.applyForceScaled(...arguments);
 			}
-			if (arguments.length == 2 && typeof y != 'number') {
-				originX = y;
-			}
-			let forceVector = new pl.Vec2(this._args2Vec(x, y));
-			forceVector = forceVector.mul(this.body.m_mass);
-			if (originX || originY) {
-				let o = this._args2Vec(originX, originY);
-				let forceOrigin = scaleTo(o.x, o.y, this.tileSize);
-				this.body.applyForce(forceVector, forceOrigin, false);
-			} else {
-				this.body.applyForceToCenter(forceVector, false);
-			}
+			let { forceVector, poa } = this._parseForceArgs(...arguments);
+			if (!poa) this.body.applyForceToCenter(forceVector);
+			else this.body.applyForce(forceVector, poa);
 		}
 
 		/**
-		 * Apply an impulse to the sprite's physics collider.
+		 * Applies a force that's scaled to the sprite's mass.
+		 *
+		 * @param {Number} amount
+		 * @param {Vector} [origin]
+		 */
+		applyForceScaled() {
+			if (!this.body) return;
+			let { forceVector, poa } = this._parseForceArgs(...arguments);
+			forceVector.mul(this.mass);
+			if (!poa) this.body.applyForceToCenter(forceVector);
+			else this.body.applyForce(forceVector, poa);
+		}
+
+		/**
+		 * Applies a force to the sprite's center of mass attracting it to
+		 * the given position.
 		 *
 		 * @param {Number} x
 		 * @param {Number} y
-		 * @param {Number} [originX]
-		 * @param {Number} [originY]
+		 * @param {Number} force
+		 * @param {Number} [radius] infinite if not given
+		 * @param {Number} [easing] solid if not given
 		 * @example
-		 * sprite.applyImpulse(x, y);
-		 * sprite.applyImpulse(x, y, originX, originY);
-		 * sprite.applyImpulse(x, y, {x: originX, y: originY});
-		 * sprite.applyImpulse({x, y}, {x: originX, y: originY});
+		 * sprite.attractTo(x, y, force);
+		 * sprite.attractTo({x, y}, force);
 		 */
-		applyImpulse(x, y, originX, originY) {
+		attractTo(x, y, force, radius, easing) {
 			if (!this.body) return;
-			if (arguments.length == 2 && typeof y != 'number') {
-				originX = y;
+			if (typeof x != 'number') {
+				let obj = x;
+				if (!obj || (obj == this.p.mouse && !this.p.mouse.active)) return;
+				force = y;
+				y = obj.y;
+				x = obj.x;
 			}
-			let impulseVector = new pl.Vec2(this._args2Vec(x, y));
-			let impulseOrigin;
-			if (originX === undefined) {
-				impulseOrigin = this.body.getPosition();
-			} else {
-				let o = this._args2Vec(originX, originY);
-				impulseOrigin = scaleTo(o.x, o.y, this.tileSize);
+			if (this.x == x && this.y == y) return;
+
+			let a = y - this.y;
+			let b = x - this.x;
+			let c = Math.sqrt(a * a + b * b);
+
+			let percent = force / c;
+
+			let forceVector = new pl.Vec2(b * percent, a * percent);
+			this.body.applyForceToCenter(forceVector);
+		}
+
+		repelFrom(x, y, force, radius, easing) {
+			if (!this.body) return;
+			if (typeof x != 'number') {
+				let obj = x;
+				if (!obj || (obj == this.p.mouse && !this.p.mouse.active)) return;
+				force = y;
+				y = obj.y;
+				x = obj.x;
 			}
-			this.body.applyLinearImpulse(impulseVector, impulseOrigin, true);
+			this.attractTo(x, y, -force, radius, easing);
 		}
 
 		/**
@@ -2647,50 +2693,35 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * A positive torque will rotate the sprite clockwise.
 		 * A negative torque will rotate the sprite counter-clockwise.
 		 *
+		 * This function is the rotational equivalent of applyForce().
+		 * It will not imperatively set the sprite's rotation.
+		 *
 		 * @param {Number} torque The amount of torque to apply.
 		 */
 		applyTorque(val) {
-			this.body.applyTorque(val, true);
+			if (!this.body) return;
+			this.body.applyTorque(val);
 		}
 
 		/**
-		 * Add to the speed of the sprite.
-		 * If direction is not supplied, the current direction is maintained.
-		 * If direction is not supplied and there is no current velocity, the * current rotation angle used for the direction.
-		 *
-		 * @param {Number} speed Scalar speed
-		 * @param {Number} [angle] Direction in degrees
-		 */
-		addSpeed(speed, angle) {
-			angle ??= this.direction;
-
-			this.vel.x += this.p.cos(angle) * speed;
-			this.vel.y += this.p.sin(angle) * speed;
-		}
-
-		/**
-		 * Move a sprite towards a position.
+		 * Moves a sprite towards a position.
 		 *
 		 * @param {Number|Object} x|position destination x or any object with x and y properties
 		 * @param {Number} y destination y
 		 * @param {Number} tracking [optional] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
 		 */
 		moveTowards(x, y, tracking) {
-			if (x === undefined || x === null) return;
-			if (typeof x != 'number') {
+			if (x === undefined) return;
+			if (typeof x != 'number' && x !== null) {
 				let obj = x;
 				if (obj == this.p.mouse && !this.p.mouse.active) return;
-				if (obj.x === undefined || obj.y === undefined) {
-					console.error(
-						'sprite.moveTowards/moveAway ERROR: movement destination not defined, object given with no x or y properties'
-					);
-					return;
+				if (!obj || obj.x === undefined || obj.y === undefined) {
+					throw 'sprite.moveTowards/moveAway ERROR: movement destination not defined.';
 				}
 				tracking = y;
 				y = obj.y;
 				x = obj.x;
 			}
-			if (x === undefined && y === undefined) return;
 			tracking ??= 0.1;
 
 			if (x !== undefined && x !== null) {
@@ -2707,13 +2738,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		/**
-		 * Move a sprite away from a position.
-		 *
-		 * @param {Number|Object} x|position x or any object with x and y properties
-		 * @param {Number} y
-		 * @param {Number} repel [optional] the higher the value, the faster the sprite moves away. Default is 0.1 (10% repel).
-		 */
 		moveAway(x, y, repel) {
 			this.moveTowards(...arguments);
 			this.vel.x *= -1;
@@ -2735,23 +2759,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * sprite.move(directionName);
 		 * sprite.move(directionName, speed);
-		 * sprite.move(directionName, speed, distance); // deprecated usage
 		 */
 		move(distance, direction, speed) {
 			let dirNameMode = isNaN(arguments[0]);
 			if (dirNameMode) {
 				direction = arguments[0];
 				speed = arguments[1];
-				distance = arguments[2];
-				if (distance !== undefined) {
-					console.warn(
-						`In p5play v3.3.0 the parameter ordering for the move() function was changed to: move(distance, direction, speed).`
-					);
-				}
+				distance = 1;
 			} else {
 				dirNameMode = isNaN(direction);
 			}
-			distance ??= 1;
+			if (!distance) return;
 
 			if (typeof direction == 'string') {
 				this._heading = direction;
@@ -2781,15 +2799,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * or to false if the sprite will not reach its destination
 		 */
 		moveTo(x, y, speed) {
-			if (x === undefined || x === null) return;
 			if (typeof x != 'number') {
 				let obj = x;
 				if (obj == this.p.mouse && !this.p.mouse.active) return;
-				if (obj.x === undefined || obj.y === undefined) {
-					console.error(
-						'sprite.moveTo ERROR: movement destination not defined, object given with no x or y properties'
-					);
-					return;
+				if (!obj || obj.x === undefined || obj.y === undefined) {
+					throw 'sprite.moveTo ERROR: destination not defined.';
 				}
 				speed = y;
 				y = obj.y;
@@ -3516,7 +3530,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		tile: 'string', // 35
 		tileSize: 'number', // 36
 		visible: 'boolean', // 37
-		w: 'number' // 38 (width)
+		w: 'number', // 38 (width)
+		bearing: 'number' // 39
 	};
 
 	this.Sprite.props = Object.keys(this.Sprite.propTypes);
@@ -4920,12 +4935,29 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
+		 * Apply a force on every sprite in a group.
+		 */
+		applyForce() {
+			for (let s of this) {
+				s.applyForce(...arguments);
+			}
+		}
+
+		/**
 		 * Apply a force on every sprite in a group that is scaled to
 		 * each sprite's mass.
 		 */
-		applyForce(x, y, originX, originY) {
+		applyForceScaled() {
 			for (let s of this) {
-				s.applyForce(x, y, originX, originY);
+				s.applyForceScaled(...arguments);
+			}
+		}
+
+		/**
+		 */
+		attractTo() {
+			for (let s of this) {
+				s.attractTo(...arguments);
 			}
 		}
 
@@ -4983,8 +5015,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		/**
-		 */
 		moveAway(x, y, tracking) {
 			if (typeof x != 'number') {
 				let obj = x;
@@ -5003,17 +5033,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				};
 				s.moveAway(dest.x, dest.y, tracking);
 			}
-		}
-
-		/**
-		 * Gets the member at index i.
-		 *
-		 * @deprecated get
-		 * @param {Number} i The index of the object to retrieve
-		 */
-		get(i) {
-			console.warn('Deprecated: use group[i] instead of group.get(i)');
-			return this[i];
 		}
 
 		/**
