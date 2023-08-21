@@ -2581,7 +2581,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		_parseForceArgs() {
 			let args = arguments;
-			if (args.length == 1 || (args.length == 3 && typeof args[2] == 'number')) {
+			if (typeof args[0] == 'number' && (args.length == 1 || typeof args[1] != 'number')) {
 				args[3] = args[2];
 				args[2] = args[1];
 				args[1] = this.p.sin(this._bearing) * args[0];
@@ -8345,9 +8345,9 @@ main {
 	this.p5play._fpsArr = [60];
 
 	/**
-	 * Displays the number of sprites drawn, an approximation of the
-	 * current FPS as well as the average, minimum, and maximum FPS
-	 * achieved during the previous second.
+	 * Displays the number of sprites drawn, an inaccurate
+	 * approximation of the current FPS as well as the average, minimum,
+	 * and maximum FPS achieved during the previous second.
 	 *
 	 * FPS in this context refers to how many frames per second your
 	 * computer can generate, including physics calculations and any other
@@ -8355,9 +8355,9 @@ main {
 	 * between when frames are actually shown on the screen. The higher the
 	 * FPS, the better your game is performing.
 	 *
-	 * You can use this function for approximate performance testing. For
-	 * more accurate results, use your web browser's performance testing
-	 * tools.
+	 * You can use this function for approximate performance testing. But
+	 * the only way to get accurate results, is to use your web browser's
+	 * performance testing tools.
 	 *
 	 * Generally having less sprites and using a smaller canvas will make
 	 * your game perform better.
@@ -8375,7 +8375,7 @@ main {
 			}
 			rs.gap = rs.fontSize * 1.25;
 			console.warn(
-				"renderStats() uses approximate FPS calculations. For more accurate results, use your web browser's performance testing tools."
+				"renderStats() uses inaccurate FPS approximations. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. The only way to get accurate results, is to use your web browser's performance testing tools."
 			);
 		}
 		rs.x = x || 10;
@@ -8389,6 +8389,8 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 	if (this.p5play._fps) {
 		this.p5play._preDrawFrameTime = performance.now();
 	}
+
+	this.p5play.spritesDrawn = 0;
 
 	this.mouse.x = (this.mouseX - this.world.hw) / this.camera.zoom + this.camera.x;
 	this.mouse.y = (this.mouseY - this.world.hh) / this.camera.zoom + this.camera.y;
@@ -8407,7 +8409,6 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.allSprites.cull(10000);
 	}
 
-	this.p5play.spritesDrawn = 0;
 	if (this.allSprites._autoDraw) {
 		this.camera.on();
 		this.allSprites.draw();
