@@ -221,16 +221,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 
-			/**
-			 * True if the sprite was removed from the world
-			 *
-			 * @type {Boolean}
-			 * @default false
-			 */
-			this.removed = false;
-
+			this._removed = false;
 			this._life = 2147483647;
 			this._visible = true;
+			this._pixelPerfect = false;
 			this._aniChangeCount = 0;
 
 			/**
@@ -523,6 +517,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this._angle = 0;
 			this._rotationSpeed = 0;
+			this._bearing = 0;
 
 			/**
 			 * The sprite's position on the previous frame.
@@ -1756,10 +1751,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Set to true to display the sprite pixel perfect.
-		 * This is useful when using pixel art. Be sure to move the sprite
-		 * by whole numbers if you want it to stay looking sharp,
-		 * otherwise it will experience subpixel rendering.
+		 * By default p5play draws sprites with subpixel rendering.
+		 *
+		 * Set pixelPerfect to true to make p5play always display sprites
+		 * at integer pixel precision. This is useful for making retro games.
 		 *
 		 * @type {Boolean}
 		 * @default false
@@ -2493,12 +2488,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._visible = true;
 			this.p.p5play.spritesDrawn++;
 
-			x = fixRound(x);
-			y = fixRound(y);
-
-			if (this._pixelPerfect) {
-				if (this._w % 2 == 0 || !isSlop((x % 1) - 0.5)) x = Math.round(x);
-				if (this._h % 2 == 0 || !isSlop((y % 1) - 0.5)) y = Math.round(y);
+			if (!this._pixelPerfect) {
+				x = fixRound(x);
+				y = fixRound(y);
+			} else {
+				if (this._w % 2 == 0) x = Math.round(x);
+				else x = Math.round(x - 0.5) + 0.5;
+				if (this._h % 2 == 0) y = Math.round(y);
+				else y = Math.round(y - 0.5) + 0.5;
 			}
 
 			for (let j of this.joints) {
@@ -4937,7 +4934,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Apply a force on every sprite in a group.
 		 */
 		applyForce() {
 			for (let s of this) {
@@ -4946,8 +4942,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Apply a force on every sprite in a group that is scaled to
-		 * each sprite's mass.
 		 */
 		applyForceScaled() {
 			for (let s of this) {
@@ -4960,6 +4954,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		attractTo() {
 			for (let s of this) {
 				s.attractTo(...arguments);
+			}
+		}
+
+		/**
+		 */
+		applyTorque() {
+			for (let s of this) {
+				s.applyTorque(...arguments);
 			}
 		}
 
@@ -5473,7 +5475,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Returns the sprites at a position.
+		 * Returns the sprites at a position on any layer.
 		 *
 		 * @param {Number} x
 		 * @param {Number} y
@@ -5510,9 +5512,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Returns the sprite at the top most layer position where
-		 * the mouse click occurs
-		 *
+		 * Returns the sprite at the specified position
+		 * on the top most layer.
+		 * .
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @returns {Sprite} a sprite
@@ -5691,14 +5693,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * A `camera` object is created automatically when p5play loads.
 		 * Currently, there can only be one camera per p5.js instance.
 		 *
-		 * A camera facilitates scrolling and zooming for scenes extending beyond
-		 * the canvas. A camera has a position, a zoom factor, and the mouse
-		 * coordinates relative to the view.
+		 * A camera facilitates zooming and scrolling for scenes extending beyond
+		 * the canvas. Moving the camera does not actually move the sprites.
+		 *
 		 * The camera is automatically created on the first draw cycle.
 		 *
 		 * In p5.js terms the camera wraps the whole drawing cycle in a
-		 * transformation matrix but it can be disable anytime during the draw
-		 * cycle for example to draw interface elements in an absolute position.
+		 * transformation matrix but it can be disabled anytime during the draw
+		 * cycle to draw interface elements in an absolute position.
 		 *
 		 * @param {Number} x Initial x coordinate
 		 * @param {Number} y Initial y coordinate
@@ -5715,10 +5717,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.__pos = { x: 0, y: 0 };
 
 			/**
-			 * Get the translated mouse position relative to the camera view.
-			 * Offsetting and scaling the canvas will not change the sprites' position
-			 * nor the mouseX and mouseY variables. Use this property to read the mouse
-			 * position if the camera moved or zoomed.
+			 * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
 			 *
 			 * @type {Object}
 			 */
@@ -5735,9 +5734,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * True if the camera is active.
-			 * Read only property. Use the methods Camera.on() and Camera.off()
+			 * Use the methods Camera.on() and Camera.off()
 			 * to enable or disable the camera.
 			 *
+			 * @readonly
 			 * @type {Boolean}
 			 * @default false
 			 */
@@ -5827,9 +5827,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Camera zoom.
 		 *
-		 * A scale of 1 will be the normal size. Setting it to 2 will
-		 * make everything twice the size. .5 will make everything half
-		 * size.
+		 * A scale of 1 will be the normal size. Setting it to 2
+		 * will make everything appear twice as big. .5 will make
+		 * everything look half size.
 		 *
 		 * @type {Number}
 		 * @default 1
@@ -5854,9 +5854,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Zoom the camera at a given speed.
 		 *
-		 * @param {Number} target The target zoom.
-		 * @param {Number} speed The amount of zoom per frame.
-		 * @returns {Promise} A promise that resolves when the camera reaches the target zoom.
+		 * @param {Number} target The target zoom
+		 * @param {Number} speed The amount of zoom per frame
+		 * @returns {Promise} resolves true when the camera reaches the target zoom
 		 */
 		zoomTo(target, speed) {
 			if (target == this._zoom) return Promise.resolve(true);
@@ -7096,6 +7096,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			case 'replit.com':
 			case 'stackblitz.com':
 			case 'jsfiddle.net':
+			case 'aijs-912fe.web.app':
 				break;
 			default:
 				if (
