@@ -9,7 +9,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		throw 'planck.js must be loaded before p5play';
 	}
 
-	// store a reference to the p5 instance that p5play is being added to
+	// store the p5 instance that p5play is being added to
 	const pInst = this;
 
 	const log = console.log; // shortcut
@@ -29,7 +29,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.p5play.spritesDrawn = 0;
 	this.p5play._renderStats = {};
 
-	// Google Analytics Tracking Code
+	// Google Analytics
 	if (typeof window._p5play_gtagged == 'undefined') {
 		let script = document.createElement('script');
 		script.src = 'https://www.googletagmanager.com/gtag/js?id=G-EHXNCTSYLK';
@@ -48,7 +48,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		};
 	}
 
-	// change the angle mode so that the p5play default is degrees
+	// the p5play default angle mode is degrees
 	this.angleMode('degrees');
 
 	// scale to planck coordinates from p5 coordinates
@@ -119,8 +119,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * An array of booleans that indicate which properties were
-			 * changed since the last frame. Used to only send modified
-			 * sprite data in binary netcode.
+			 * changed since the last frame. Useful for only sending
+			 * modified sprite data in binary netcode.
 			 *
 			 * @type {Array}
 			 */
@@ -3441,6 +3441,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Internal method called anytime a new sensor is created. Ensures
 		 * that sensors are moved to the back of the fixture list.
+		 *
+		 * @private
 		 */
 		_sortFixtures() {
 			let colliders = null;
@@ -5355,16 +5357,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.on('begin-contact', this._beginContact);
 			this.on('end-contact', this._endContact);
 
-			/**
-			 * Gravity force that affects all dynamic physics colliders.
-			 *
-			 * @type.x
-			 */
-			/**
-			 * Gravity force that affects all dynamic physics colliders.
-			 *
-			 * @type.y
-			 */
 			this._gravity = {
 				get x() {
 					return _this.m_gravity.x;
@@ -5401,6 +5393,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.autoStep = true;
 		}
 
+		/**
+		 * Gravity force vector that affects all dynamic physics colliders.
+		 *
+		 * @type {Object}
+		 * @property {Number} x
+		 * @property {Number} y
+		 * @default { x: 0, y: 0 }
+		 */
 		get gravity() {
 			return this._gravity;
 		}
@@ -5416,7 +5416,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Adjust the velocity threshold to allow for slow moving objects
 		 * but don't have it be too low, or else objects will never sleep.
 		 *
-		 * @type {number}
+		 * @type {Number}
 		 * @default 0.19
 		 */
 		get velocityThreshold() {
@@ -5429,10 +5429,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Resizes the world to the given width and height. Used when
-		 * the canvas is created or resized.
+		 * Resizes the world to the given width and height and resets the origin.
 		 *
-		 * @private
+		 * Used when the canvas is created or resized.
+		 *
+		 * @param {Number} w
+		 * @param {Number} h
 		 */
 		resize(w, h) {
 			w ??= this.p.width;
@@ -5443,10 +5445,38 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				x: this.hw - this.offset.x,
 				y: this.hh - this.offset.y
 			};
-			if (this.p.allSprites.tileSize != 1) {
+			if (this._tiled && this.p.allSprites.tileSize != 1) {
 				this.origin.x -= this.p.allSprites.tileSize * 0.5;
 				this.origin.y -= this.p.allSprites.tileSize * 0.5;
 			}
+		}
+
+		/**
+		 * Adjusts the origin (center) of the world so that coordinate (0, 0)
+		 * is offset from the top left corner of the canvas by
+		 * `allSprites.tileSize` / 2.
+		 *
+		 * It allows for simpler math when working with tiles if you want the
+		 * tiles to be aligned with the top left corner of the canvas.
+		 *
+		 * @type {Boolean}
+		 * @default undefined
+		 */
+		get tiled() {
+			return this._tiled;
+		}
+		set tiled(val) {
+			if (val && !this._tiled) {
+				let mod = this.p.allSprites.tileSize * 0.5;
+				this.origin.x -= mod;
+				this.origin.y -= mod;
+			}
+			if (val === false && this._tiled) {
+				let mod = this.p.allSprites.tileSize * 0.5;
+				this.origin.x += mod;
+				this.origin.y += mod;
+			}
+			this._tiled = val;
 		}
 
 		/**
@@ -5477,8 +5507,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Returns the sprites at a position on any layer.
 		 *
+		 * Optionally you can specify a group to search.
+		 *
 		 * @param {Number} x
 		 * @param {Number} y
+		 * @param {Group} [group] the group to search
 		 * @returns {Array} an array of sprites
 		 */
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn) {
@@ -5514,9 +5547,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Returns the sprite at the specified position
 		 * on the top most layer.
-		 * .
+		 *
+		 * Optionally you can specify a group to search.
+		 *
 		 * @param {Number} x
 		 * @param {Number} y
+		 * @param {Group} [group] the group to search
 		 * @returns {Sprite} a sprite
 		 */
 		getSpriteAt(x, y, group) {
@@ -5529,7 +5565,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Sets contact trackers to 0 so on the next world step they will be
 		 * increased to 1.
 		 *
-		 * @param {*} contact
+		 * @private
+		 * @param {planck.Contact} contact
 		 */
 		_beginContact(contact) {
 			// Get both fixtures
@@ -5566,13 +5603,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * If contact ended between sprites that where previously in contact,
-		 * then their contact trackers are set to -2 which will be incremented to -1
-		 * on the next world step call.
+		 * then their contact trackers are set to -2 which will be incremented
+		 * to -1 on the next world step call.
 		 *
 		 * However, if contact begins and ends on the same frame, then the contact
 		 * trackers are set to -3 and incremented to -2 on the next world step call.
 		 *
-		 * @param {*} contact
+		 * @private
+		 * @param {planck.Contact} contact
 		 */
 		_endContact(contact) {
 			let a = contact.m_fixtureA;
@@ -5670,8 +5708,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * simulation. A sprite starts "sleeping" when it stops moving and
 		 * doesn't collide with anything that it wasn't already touching.
 		 *
-		 * This is a performance optimization that can be disabled for
-		 * every sprite in the world.
+		 * This is an important performance optimization that you probably
+		 * shouldn't disable for every sprite in the world.
 		 *
 		 * @type {Boolean}
 		 * @default true
@@ -6983,12 +7021,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * @returns {SpriteAnimation}
 	 */
-	/**
-	 * Alias for `new SpriteAnimation()`
-	 *
-	 * @returns {SpriteAnimation}
-	 */
-	this.loadAni = this.loadAnimation = function () {
+	this.loadAnimation = this.loadAni = function () {
 		return new this.SpriteAnimation(...arguments);
 	};
 
@@ -7303,10 +7336,71 @@ main {
 		return can;
 	};
 
-	/**
-	 * Creates a p5.js canvas element. Includes some extra features such as
-	 * a pixelated mode. See the Canvas learn page for more information.
-	 */
+	// this is only for jsdoc
+	this.Canvas = class {
+		/**
+		 * Creates a p5.js canvas element. Includes some extra features such as
+		 * a pixelated mode. It can also use ratios instead of setting width and
+		 * height directly. See the Canvas learn page for more information.
+		 *
+		 * @param {Number} w width of the canvas
+		 * @param {Number} h height of the canvas
+		 * @param {String} [mode] 'pixelated' or 'fullscreen'
+		 * @example
+		 * new Canvas(400, 400);
+		 *
+		 * new Canvas('16:9');
+		 */
+		constructor(w, h, mode) {}
+
+		/**
+		 * The width of the canvas.
+		 *
+		 * @type {Number}
+		 * @default 100
+		 */
+		get w() {}
+
+		/**
+		 * The width of the canvas.
+		 *
+		 * @type {Number}
+		 * @default 100
+		 */
+		get width() {}
+
+		/**
+		 * The height of the canvas.
+		 *
+		 * @type {Number}
+		 * @default 100
+		 */
+		get h() {}
+
+		/**
+		 * The height of the canvas.
+		 *
+		 * @type {Number}
+		 * @default 100
+		 */
+		get height() {}
+
+		/**
+		 * Resizes the canvas, the world, and centers the camera.
+		 *
+		 * Visually the canvas will shrink or extend to the new size. Sprites
+		 * will not change position.
+		 *
+		 * If you would prefer to keep the camera focused on the same area, then
+		 * you must manually adjust the camera position after calling this
+		 * function.
+		 *
+		 * @param {Number} w - The new width of the canvas.
+		 * @param {Number} h - The new height of the canvas.
+		 */
+		resize() {}
+	};
+
 	this.Canvas = function () {
 		return pInst.createCanvas(...arguments);
 	};
@@ -7314,17 +7408,7 @@ main {
 	const _resizeCanvas = this.resizeCanvas;
 
 	/**
-	 * Resizes the canvas, the world, and centers the camera.
-	 *
-	 * Visually the canvas will shrink or extend to the new size. Sprites
-	 * will not change position.
-	 *
-	 * If you would prefer to keep the camera focused on the same area, then
-	 * you must manually adjust the camera position after calling this
-	 * function.
-	 *
-	 * @param {number} w - The new width of the canvas.
-	 * @param {number} h - The new height of the canvas.
+	 * Use of `canvas.resize()` is preferred.
 	 */
 	this.resizeCanvas = (w, h) => {
 		_resizeCanvas.call(this, w, h);
@@ -7405,7 +7489,7 @@ main {
 	 * @param {number} [height]
 	 * @param {function} [callback]
 	 */
-	this.loadImg = this.loadImage = function () {
+	this.loadImage = this.loadImg = function () {
 		if (this.p5play.disableImages) {
 			pInst._decrementPreload();
 			// return a dummy image object to prevent errors
@@ -7728,6 +7812,8 @@ main {
 		 * <a href="https://p5play.org/learn/input_devices.html">
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
+		 *
+		 * Used to create the `mouse` input object.
 		 */
 		constructor() {
 			super();
@@ -7828,11 +7914,18 @@ main {
 	 * Get user input from the mouse.
 	 * Stores the state of the left, center, or right mouse buttons.
 	 *
-	 * @type {Mouse}
+	 * @type {_Mouse}
 	 */
 	this.mouse = new this._Mouse();
 
 	this._SpriteMouse = class extends this._Mouse {
+		/**
+		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * Look at the Input reference pages before reading these docs.
+		 * </a>
+		 *
+		 * Used to create `sprite.mouse` input objects.
+		 */
 		constructor() {
 			super();
 			this.hover = 0;
@@ -7964,7 +8057,17 @@ main {
 		_ontouchend.call(this, e);
 	};
 
+	delete this._Mouse;
+
 	this._KeyBoard = class extends this.InputDevice {
+		/**
+		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * Look at the Input reference pages before reading these docs.
+		 * </a>
+		 *
+		 * Used to create the `kb` and `keyboard` objects, which store
+		 * the input status of keys on the keyboard.
+		 */
 		constructor() {
 			super();
 			this.default = ' ';
@@ -7997,7 +8100,7 @@ main {
 	/**
 	 * Get user input from the keyboard.
 	 *
-	 * @type {KeyBoard}
+	 * @type {_KeyBoard}
 	 */
 	this.kb = new this._KeyBoard();
 	delete this._KeyBoard;
@@ -8005,7 +8108,7 @@ main {
 	/**
 	 * Alias for kb.
 	 *
-	 * @type {KeyBoard}
+	 * @type {_KeyBoard}
 	 */
 	this.keyboard = this.kb;
 
@@ -8092,6 +8195,15 @@ main {
 	};
 
 	this._Contro = class extends this.InputDevice {
+		/**
+		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * Look at the Input reference pages before reading these docs.
+		 * </a>
+		 *
+		 * Used to create controller objects in the `controllers` array
+		 * (aka `contro`), these objects store the input status of buttons,
+		 * triggers, and sticks on game controllers.
+		 */
 		constructor(gp) {
 			super();
 			let inputs = [
@@ -8211,6 +8323,15 @@ main {
 	};
 
 	this._Contros = class extends Array {
+		/**
+		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * Look at the Input reference pages before reading these docs.
+		 * </a>
+		 *
+		 * Used to create `controllers` (aka `contro`) an array
+		 * of `_Contro` objects, which store the input status of buttons,
+		 * triggers, and sticks on game controllers.
+		 */
 		constructor() {
 			super();
 			let _this = this;
@@ -8317,7 +8438,7 @@ main {
 	/**
 	 * Get user input from game controllers.
 	 *
-	 * @type {Contros}
+	 * @type {_Contros}
 	 */
 	this.contro = new this._Contros();
 	delete this._Contros;
@@ -8337,7 +8458,9 @@ main {
 	 * frames are actually shown on the screen. The higher the FPS, the
 	 * better the game is performing.
 	 *
-	 * Use this function to performance test your game code.
+	 * This function is used by the renderStats() function, which is the easiest way
+	 * to get an approximation of your game's performance. But you should use your web
+	 * browser's performance testing tools for accurate results.
 	 *
 	 * @returns {Number} The current FPS
 	 */
