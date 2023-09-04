@@ -8074,26 +8074,58 @@ main {
 		}
 
 		ac(inp) {
-			if (inp.length == 1) return inp.toLowerCase();
-			if (!isNaN(inp)) {
-				if (inp == 38) return 'ArrowUp';
-				if (inp == 40) return 'ArrowDown';
-				if (inp == 37) return 'ArrowLeft';
-				if (inp == 39) return 'ArrowRight';
-				if (inp < 10) return inp + '';
-				throw new Error(
-					'Use key names with the keyboard input functions, not key codes! If you are trying to detect if the user pressed a number key make it a string. For example: "5"'
-				);
+			if (inp.length != 1 && !isNaN(inp)) {
+				if (inp == 38) return 'arrowUp';
+				if (inp == 40) return 'arrowDown';
+				if (inp == 37) return 'arrowLeft';
+				if (inp == 39) return 'arrowRight';
+				if (inp >= 10) {
+					throw new Error('Use key names with the keyboard input functions, not keyCode numbers!');
+				}
+				return inp;
 			}
-			if (inp == 'space' || inp == 'spacebar') return ' ';
-			return inp[0].toUpperCase() + inp.slice(1).toLowerCase();
+			return inp.toLowerCase();
 		}
 
+		_pre(k) {
+			if (!this[k] || this[k] < 0) {
+				this[k] = 1;
+			}
+		}
+
+		_rel(k) {
+			if (this[k] >= this.holdThreshold) {
+				this[k] = -3;
+			} else if (this[k] > 1) this[k] = -1;
+			else this[k] = -2;
+		}
+
+		get cmd() {
+			return this['meta'];
+		}
+		get command() {
+			return this['meta'];
+		}
+		get ctrl() {
+			return this['control'];
+		}
 		get space() {
 			return this[' '];
 		}
 		get spacebar() {
 			return this[' '];
+		}
+		get opt() {
+			return this['alt'];
+		}
+		get option() {
+			return this['alt'];
+		}
+		get win() {
+			return this['meta'];
+		}
+		get windows() {
+			return this['meta'];
 		}
 	};
 
@@ -8123,8 +8155,8 @@ main {
 			this.p5play.standardizeKeyboard = true;
 		}
 	} else {
-		// Firefox doesn't have navigator.keyboard
-		// so just make it use key codes
+		// Firefox and Safari don't have navigator.keyboard
+		// so just make them use key codes
 		this.p5play.standardizeKeyboard = true;
 	}
 
@@ -8142,19 +8174,24 @@ main {
 	}
 
 	let simpleKeyControls = {
-		w: 'up',
-		s: 'down',
-		a: 'left',
-		d: 'right',
-		ArrowUp: 'up',
-		ArrowDown: 'down',
-		ArrowLeft: 'left',
-		ArrowRight: 'right',
-		i: 'up2',
-		k: 'down2',
-		j: 'left2',
-		l: 'right2'
+		arrowUp: 'up',
+		arrowDown: 'down',
+		arrowLeft: 'left',
+		arrowRight: 'right'
 	};
+
+	{
+		let k = simpleKeyControls;
+		k.w = k.W = 'up';
+		k.s = k.S = 'down';
+		k.a = k.A = 'left';
+		k.d = k.D = 'right';
+
+		k.i = k.I = 'up2';
+		k.k = k.K = 'down2';
+		k.j = k.J = 'left2';
+		k.l = k.L = 'right2';
+	}
 
 	const _onkeydown = this._onkeydown;
 
@@ -8163,14 +8200,25 @@ main {
 		if (this.p5play.standardizeKeyboard) {
 			key = _getKeyFromCode(e);
 		}
-		let keys = [key];
+		// convert PascalCase key names into camelCase
+		// which is more common for JavaScript properties
+		if (key.length > 1) {
+			key = key[0].toLowerCase() + key.slice(1);
+		}
+		this.kb._pre(key);
+
 		let k = simpleKeyControls[key];
-		if (k) keys.push(k);
-		for (let k of keys) {
-			if (!this.kb[k] || this.kb[k] < 0) {
-				this.kb[k] = 1;
+		if (k) this.kb._pre(k);
+
+		if (key == 'shift') {
+			for (let k in this.kb) {
+				if (this.kb[k] > 0 && k.length == 1) {
+					this.kb[k] = 0;
+					this.kb[k.toUpperCase()] = 2;
+				}
 			}
 		}
+
 		_onkeydown.call(this, e);
 	};
 
@@ -8181,14 +8229,25 @@ main {
 		if (this.p5play.standardizeKeyboard) {
 			key = _getKeyFromCode(e);
 		}
-		let keys = [key];
+		if (key.length > 1) {
+			key = key[0].toLowerCase() + key.slice(1);
+		}
+		this.kb._rel(key);
+
 		let k = simpleKeyControls[key];
-		if (k) keys.push(k);
-		for (let k of keys) {
-			if (this.kb[k] >= this.kb.holdThreshold) {
-				this.kb[k] = -3;
-			} else if (this.kb[k] > 1) this.kb[k] = -1;
-			else this.kb[k] = -2;
+		if (k) this.kb._rel(k);
+
+		if (key == 'shift') {
+			for (let k in this.kb) {
+				if (this.kb[k] > 0 && k.length == 1) {
+					this.kb[k] = 0;
+					this.kb[k.toLowerCase()] = 2;
+				}
+			}
+		} else if (e.shiftKey) {
+			// if user is pressing shift but released another key
+			let k = key.toLowerCase();
+			if (this.kb[k] > 0) this.kb._rel(k);
 		}
 
 		_onkeyup.call(this, e);
