@@ -30,7 +30,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.p5play._renderStats = {};
 
 	// Google Analytics
-	if (typeof window._p5play_gtagged == 'undefined') {
+	if (
+		typeof window._p5play_gtagged == 'undefined' &&
+		typeof process == 'undefined' // don't track in node.js
+	) {
 		let script = document.createElement('script');
 		script.src = 'https://www.googletagmanager.com/gtag/js?id=G-EHXNCTSYLK';
 		script.async = true;
@@ -5420,12 +5423,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default 0.19
 		 */
 		get velocityThreshold() {
-			return this._velocityThreshold;
+			return pl.Settings.velocityThreshold;
 		}
 
 		set velocityThreshold(val) {
 			pl.Settings.velocityThreshold = val;
-			this._velocityThreshold = val;
 		}
 
 		/**
@@ -7612,12 +7614,14 @@ main {
 	errMsgs.Sprite.rotateTo[0] = errMsgs.Sprite.rotateTowards[0] = errMsgs.Sprite.rotate[0];
 
 	/**
-	 * A FriendlyError is a custom error class that extends the native JS Error class. It's used internally by p5play to make error messages more helpful.
+	 * A FriendlyError is a custom error class that extends the native JS
+	 * Error class. It's used internally by p5play to make error messages
+	 * more helpful.
 	 *
 	 * @private
-	 * @param {String} func is the name of the function the error was thrown in
-	 * @param {Number} errorNum is the error's code number
-	 * @param {Array} e is an array with references to the cause of the error
+	 * @param {String} func the name of the function the error was thrown in
+	 * @param {Number} errorNum the error's code number
+	 * @param {Array} e an array of values relevant to the error
 	 */
 	class FriendlyError extends Error {
 		constructor(func, errorNum, e) {
@@ -7857,6 +7861,8 @@ main {
 			 * @type {number}
 			 */
 			this.y;
+
+			this._visible = true;
 		}
 
 		/**
@@ -7872,6 +7878,30 @@ main {
 		 */
 		get position() {
 			return this._position;
+		}
+
+		/**
+		 * The mouse's CSS cursor style.
+		 * @type {string}
+		 */
+		get cursor() {
+			return pInst.canvas.style.cursor;
+		}
+		set cursor(val) {
+			pInst.cursor(val);
+		}
+
+		/**
+		 * Controls whether the mouse is visible or not.
+		 * @type {boolean}
+		 */
+		get visible() {
+			return this._visible;
+		}
+		set visible(val) {
+			this._visible = val;
+			if (val) pInst.canvas.style.cursor = 'default';
+			else pInst.canvas.style.cursor = 'none';
 		}
 
 		ac(inp) {
