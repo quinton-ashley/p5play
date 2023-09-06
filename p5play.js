@@ -8104,15 +8104,18 @@ main {
 		}
 
 		ac(inp) {
-			if (inp.length != 1 && !isNaN(inp)) {
-				if (inp == 38) return 'arrowUp';
-				if (inp == 40) return 'arrowDown';
-				if (inp == 37) return 'arrowLeft';
-				if (inp == 39) return 'arrowRight';
-				if (inp >= 10) {
-					throw new Error('Use key names with the keyboard input functions, not keyCode numbers!');
+			if (inp.length != 1) {
+				if (!isNaN(inp)) {
+					if (inp == 38) return 'arrowUp';
+					if (inp == 40) return 'arrowDown';
+					if (inp == 37) return 'arrowLeft';
+					if (inp == 39) return 'arrowRight';
+					if (inp >= 10) {
+						throw new Error('Use key names with the keyboard input functions, not keyCode numbers!');
+					}
+					return inp;
 				}
-				return inp;
+				inp = inp.replaceAll(/[ _-]/g, ' ');
 			}
 			return inp.toLowerCase();
 		}
@@ -8156,6 +8159,18 @@ main {
 		}
 		get windows() {
 			return this['meta'];
+		}
+		get arrowup() {
+			return this['arrowUp'];
+		}
+		get arrowdown() {
+			return this['arrowDown'];
+		}
+		get arrowleft() {
+			return this['arrowLeft'];
+		}
+		get arrowright() {
+			return this['arrowRight'];
 		}
 	};
 
