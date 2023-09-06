@@ -6129,6 +6129,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						},
 						set(val) {
 							_this._j['m_localAnchor' + l][axis] = (val / plScale) * _this['sprite' + l].tileSize;
+							if (_this.type == 'distance') {
+								_this._j.m_length = pl.Vec2.distance(
+									_this._j.m_bodyA.getWorldPoint(_this._j.m_localAnchorA),
+									_this._j.m_bodyB.getWorldPoint(_this._j.m_localAnchorB)
+								);
+							} else if (_this.type == 'hinge') {
+								_this._j.m_referenceAngle = _this._j.m_bodyB.getAngle() - _this._j.m_bodyA.getAngle();
+							}
 						}
 					});
 				}
@@ -8172,6 +8180,9 @@ main {
 		get arrowright() {
 			return this['arrowRight'];
 		}
+		get capslock() {
+			return this['capsLock'];
+		}
 	};
 
 	/**
@@ -8249,20 +8260,16 @@ main {
 		// which is more common for JavaScript properties
 		if (key.length > 1) {
 			key = key[0].toLowerCase() + key.slice(1);
+		} else {
+			let lower = key.toLowerCase();
+			let upper = key.toUpperCase();
+			if (key != upper) this.kb._pre(upper);
+			else this.kb._pre(lower);
 		}
 		this.kb._pre(key);
 
 		let k = simpleKeyControls[key];
 		if (k) this.kb._pre(k);
-
-		if (key == 'shift') {
-			for (let k in this.kb) {
-				if (this.kb[k] > 0 && k.length == 1) {
-					this.kb[k] = 0;
-					this.kb[k.toUpperCase()] = 2;
-				}
-			}
-		}
 
 		_onkeydown.call(this, e);
 	};
@@ -8276,20 +8283,18 @@ main {
 		}
 		if (key.length > 1) {
 			key = key[0].toLowerCase() + key.slice(1);
+		} else {
+			let lower = key.toLowerCase();
+			let upper = key.toUpperCase();
+			if (key != upper) this.kb._rel(upper);
+			else this.kb._rel(lower);
 		}
 		this.kb._rel(key);
 
 		let k = simpleKeyControls[key];
 		if (k) this.kb._rel(k);
 
-		if (key == 'shift') {
-			for (let k in this.kb) {
-				if (this.kb[k] > 0 && k.length == 1) {
-					this.kb[k] = 0;
-					this.kb[k.toLowerCase()] = 2;
-				}
-			}
-		} else if (e.shiftKey) {
+		if (e.shiftKey) {
 			// if user is pressing shift but released another key
 			let k = key.toLowerCase();
 			if (this.kb[k] > 0) this.kb._rel(k);
