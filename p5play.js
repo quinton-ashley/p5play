@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.11
+ * @version 3.12
  * @author quinton-ashley
  * @license gpl-v3-only
  */
@@ -9,7 +9,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		throw 'planck.js must be loaded before p5play';
 	}
 
-	// store the p5 instance that p5play is being added to
 	const pInst = this;
 
 	const log = console.log; // shortcut
@@ -47,7 +46,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_11');
+			gtag('event', 'p5play_v3_12');
 		};
 	}
 
@@ -80,6 +79,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Every sprite you create is added to the `allSprites`
 		 * group and put on the top layer, in front of all
 		 * previously created sprites.
+		 *
+		 * @constructor
+		 * @returns {Sprite} A new Sprite object
 		 *
 		 * @param {Number} [x] - horizontal position of the sprite
 		 * @param {Number} [y] - vertical position of the sprite
@@ -393,8 +395,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			y ??= group.y;
 			if (y === undefined) y = this.p.height / this.p.allSprites.tileSize / 2;
-			w ??= group.w || group.width || group.d || group.diameter;
-			h ??= group.h || group.height;
+			if (w === undefined || w === null) {
+				w = group.w || group.width || group.d || group.diameter;
+				h ??= group.h || group.height;
+			}
 
 			if (typeof x == 'function') x = x(group.length);
 			if (typeof y == 'function') y = y(group.length);
@@ -557,7 +561,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.vel.y = gvy;
 
 			// skip these properties
-			let skipProps = ['ani', 'collider', 'vel', 'x', 'y'];
+			let skipProps = [
+				'ani',
+				'collider',
+				'vel',
+				'x',
+				'y',
+				'w',
+				'h',
+				'd',
+				'diameter',
+				'dynamic',
+				'height',
+				'kinematic',
+				'speed',
+				'static',
+				'width'
+			];
 
 			// inherit properties from group in the order they were added
 			// skip props that were already set above
@@ -5514,6 +5534,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Group} [group] the group to search
+		 * @param {Boolean} [cameraActiveWhenDrawn] if true, only sprites that
+		 * were drawn when the camera was active will be returned
 		 * @returns {Array} an array of sprites
 		 */
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn) {
@@ -6114,31 +6136,38 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let _this = this;
 
-			for (let l of ['A', 'B']) {
-				if (l == 'A' && type == 'wheel') continue;
-				if (l == 'B' && type == 'hinge') break;
+			if (type != 'glue' && type != 'slider' && type != 'rope') {
+				for (let l of ['A', 'B']) {
+					if (l == 'A' && type == 'wheel') continue;
 
-				const prop = '_offset' + l;
-				this[prop] = pInst.createVector.call(pInst);
+					const prop = '_offset' + l;
+					this[prop] = pInst.createVector.call(pInst);
 
-				for (let axis of ['x', 'y']) {
-					Object.defineProperty(this[prop], axis, {
-						get() {
-							let val = (_this._j['m_localAnchor' + l][axis] / _this['sprite' + l].tileSize) * plScale;
-							return fixRound(val);
-						},
-						set(val) {
-							_this._j['m_localAnchor' + l][axis] = (val / plScale) * _this['sprite' + l].tileSize;
-							if (_this.type == 'distance') {
-								_this._j.m_length = pl.Vec2.distance(
-									_this._j.m_bodyA.getWorldPoint(_this._j.m_localAnchorA),
-									_this._j.m_bodyB.getWorldPoint(_this._j.m_localAnchorB)
-								);
-							} else if (_this.type == 'hinge') {
-								_this._j.m_referenceAngle = _this._j.m_bodyB.getAngle() - _this._j.m_bodyA.getAngle();
+					for (let axis of ['x', 'y']) {
+						Object.defineProperty(this[prop], axis, {
+							get() {
+								let val = (_this._j['m_localAnchor' + l][axis] / _this['sprite' + l].tileSize) * plScale;
+								return fixRound(val);
+							},
+							set(val) {
+								_this._j['m_localAnchor' + l][axis] = (val / plScale) * _this['sprite' + l].tileSize;
+								if (_this.type == 'distance' || _this.type == 'rope') {
+									_this._j.m_length = pl.Vec2.distance(
+										_this._j.m_bodyA.getWorldPoint(_this._j.m_localAnchorA),
+										_this._j.m_bodyB.getWorldPoint(_this._j.m_localAnchorB)
+									);
+								} else if (_this.type == 'hinge' || _this.type == 'wheel') {
+									let o;
+									if (l == 'A') o = 'B';
+									else o = 'A';
+									// body o's local point of body l anchor's world point
+									_this._j['m_localAnchor' + o][axis] = _this._j['m_body' + o].getLocalPoint(
+										_this._j['m_body' + l].getWorldPoint(_this._j['m_localAnchor' + l])
+									)[axis];
+								}
 							}
-						}
-					});
+						});
+					}
 				}
 			}
 
@@ -6148,11 +6177,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (type == 'rope') {
 				removeProps.push('damping', 'springiness');
-			}
-			if (type == 'hinge' || type == 'glue') {
-				removeProps.push('offsetB');
-			} else if (type == 'wheel') {
-				removeProps.push('offsetA');
 			}
 
 			let def = {};
@@ -6179,7 +6203,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_display() {
-			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y, this.spriteB.x, this.spriteB.y);
+			this._draw(this.spriteA.x, this.spriteA.y, this.spriteB.x, this.spriteB.y);
 			this.visible = null;
 		}
 
@@ -6209,7 +6233,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Offset to the joint's anchorA position from the center of spriteA.
 		 *
-		 * Wheel joints do not have an offsetA.
+		 * Only distance and hinge joints have an offsetA.
 		 *
 		 * @type {p5.Vector}
 		 * @default {x: 0, y: 0}
@@ -6225,7 +6249,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Offset to the joint's anchorB position from the center of spriteB.
 		 *
-		 * Revolute joints do not have an offsetB.
+		 * Only distance, hinge, and wheel joints have an offsetB.
 		 *
 		 * @type {p5.Vector}
 		 * @default {x: 0, y: 0}
@@ -6438,11 +6462,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_display() {
+			let ancA, ancB;
+			if (this.offsetA.x || this.offsetA.y) {
+				ancA = this.spriteA.body.getWorldPoint(this._j.m_localAnchorA);
+				ancA = scaleFrom(ancA.x, ancA.y, this.spriteA.tileSize);
+			}
+			if (this.offsetB.x || this.offsetB.y) {
+				ancB = this.spriteB.body.getWorldPoint(this._j.m_localAnchorB);
+				ancB = scaleFrom(ancB.x, ancB.y, this.spriteB.tileSize);
+			}
 			this._draw(
-				this.spriteA.x + this.offsetA.x,
-				this.spriteA.y + this.offsetA.y,
-				this.spriteB.x + this.offsetB.x,
-				this.spriteB.y + this.offsetB.y
+				!ancA ? this.spriteA.x : ancA.x,
+				!ancA ? this.spriteA.y : ancA.y,
+				!ancB ? this.spriteB.x : ancB.x,
+				!ancB ? this.spriteB.y : ancB.y
 			);
 			this.visible = null;
 		}
@@ -6479,8 +6512,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		_display() {
 			let xA = this.spriteA.x;
 			let yA = this.spriteA.y;
-			let xB = this.spriteB.x + this.offsetB.x;
-			let yB = this.spriteB.y + this.offsetB.y;
+
+			let xB, yB;
+			if (!this.offsetB.x && !this.offsetB.y) {
+				xB = this.spriteB.x;
+				yB = this.spriteB.y;
+			} else {
+				let ancB = this.spriteB.body.getWorldPoint(this._j.m_localAnchorB);
+				ancB = scaleFrom(ancB.x, ancB.y, this.spriteB.tileSize);
+				xB = ancB.x;
+				yB = ancB.y;
+			}
 
 			// Calculate the slopes of the lines
 			let slopeA = this.p.tan(this.spriteA.rotation);
@@ -6532,7 +6574,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_display() {
-			this._draw(this.spriteA.x + this.offsetA.x, this.spriteA.y + this.offsetA.y);
+			const offsetAx = this.offsetA.x;
+			const offsetAy = this.offsetA.y;
+			const rotationA = this.spriteA.rotation;
+
+			const rotatedOffsetAx = offsetAx * this.p.cos(rotationA) - offsetAy * this.p.sin(rotationA);
+			const rotatedOffsetAy = offsetAx * this.p.sin(rotationA) + offsetAy * this.p.cos(rotationA);
+
+			this._draw(this.spriteA.x + rotatedOffsetAx, this.spriteA.y + rotatedOffsetAy);
 			this.visible = null;
 		}
 
@@ -8007,9 +8056,9 @@ main {
 		}
 	};
 
-	const _onmousedown = this._onmousedown;
+	const _onmousedown = pInst._onmousedown;
 
-	this._onmousedown = function (e) {
+	pInst._onmousedown = function (e) {
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
@@ -8019,9 +8068,9 @@ main {
 		_onmousedown.call(this, e);
 	};
 
-	const _ontouchstart = this._ontouchstart;
+	const _ontouchstart = pInst._ontouchstart;
 
-	this._ontouchstart = function (e) {
+	pInst._ontouchstart = function (e) {
 		__onmousedown.call(this, 'left');
 		_ontouchstart.call(this, e);
 	};
@@ -8039,9 +8088,9 @@ main {
 		}
 	};
 
-	const _onmousemove = this._onmousemove;
+	const _onmousemove = pInst._onmousemove;
 
-	this._onmousemove = function (e) {
+	pInst._onmousemove = function (e) {
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
@@ -8077,9 +8126,9 @@ main {
 		}
 	};
 
-	const _onmouseup = this._onmouseup;
+	const _onmouseup = pInst._onmouseup;
 
-	this._onmouseup = function (e) {
+	pInst._onmouseup = function (e) {
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
@@ -8088,9 +8137,9 @@ main {
 		_onmouseup.call(this, e);
 	};
 
-	const _ontouchend = this._ontouchend;
+	const _ontouchend = pInst._ontouchend;
 
-	this._ontouchend = function (e) {
+	pInst._ontouchend = function (e) {
 		__onmouseup.call(this, 'left');
 		_ontouchend.call(this, e);
 	};
@@ -8249,9 +8298,9 @@ main {
 		k.l = k.L = 'right2';
 	}
 
-	const _onkeydown = this._onkeydown;
+	const _onkeydown = pInst._onkeydown;
 
-	this._onkeydown = function (e) {
+	pInst._onkeydown = function (e) {
 		let key = e.key;
 		if (this.p5play.standardizeKeyboard) {
 			key = _getKeyFromCode(e);
@@ -8263,8 +8312,10 @@ main {
 		} else {
 			let lower = key.toLowerCase();
 			let upper = key.toUpperCase();
-			if (key != upper) this.kb._pre(upper);
-			else this.kb._pre(lower);
+			if (lower != upper) {
+				if (key != upper) this.kb._pre(upper);
+				else this.kb._pre(lower);
+			}
 		}
 		this.kb._pre(key);
 
@@ -8274,9 +8325,9 @@ main {
 		_onkeydown.call(this, e);
 	};
 
-	const _onkeyup = this._onkeyup;
+	const _onkeyup = pInst._onkeyup;
 
-	this._onkeyup = function (e) {
+	pInst._onkeyup = function (e) {
 		let key = e.key;
 		if (this.p5play.standardizeKeyboard) {
 			key = _getKeyFromCode(e);
@@ -8286,8 +8337,10 @@ main {
 		} else {
 			let lower = key.toLowerCase();
 			let upper = key.toUpperCase();
-			if (key != upper) this.kb._rel(upper);
-			else this.kb._rel(lower);
+			if (lower != upper) {
+				if (key != upper) this.kb._rel(upper);
+				else this.kb._rel(lower);
+			}
 		}
 		this.kb._rel(key);
 
@@ -8555,7 +8608,7 @@ main {
 	/**
 	 * Alias for contro
 	 *
-	 * @type {Contros}
+	 * @type {_Contros}
 	 */
 	this.controllers = this.contro;
 
