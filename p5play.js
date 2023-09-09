@@ -5,6 +5,7 @@
  * @license gpl-v3-only
  */
 p5.prototype.registerMethod('init', function p5playInit() {
+	/// <reference path="p5">
 	if (typeof window.planck == 'undefined') {
 		throw 'planck.js must be loaded before p5play';
 	}
@@ -27,6 +28,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.p5play.spritesCreated = 0;
 	this.p5play.spritesDrawn = 0;
 	this.p5play._renderStats = {};
+	this.p5play.disableImages = false;
 
 	// Google Analytics
 	if (
@@ -69,6 +71,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
 	};
 
+	/**
+	 * @typedef {Object} planck
+	 * @typedef {Object} planck.Vec2
+	 * @typedef {Object} planck.Body
+	 * @typedef {Object} planck.Fixture
+	 * @typedef {Object} planck.World
+	 * @typedef {Object} planck.Contact
+	 */
+
+	/**
+	 * @class
+	 */
 	this.Sprite = class {
 		/**
 		 * <a href="https://p5play.org/learn/sprite.html">
@@ -202,7 +216,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * Groups the sprite belongs to, including allSprites
 			 *
-			 * @type {Array}
+			 * @type {Array<Group>}
 			 * @default [allSprites]
 			 */
 			this.groups = [];
@@ -216,7 +230,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * Joints that the sprite is attached to
-			 * @type {Array}
+			 * @type {Array<Joint>}
 			 * @default []
 			 */
 			this.joints = [];
@@ -1602,10 +1616,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * True if the sprite is moving.
+		 * Read only. True if the sprite is moving.
 		 *
 		 * @type {Boolean}
-		 * @readonly
 		 */
 		get isMoving() {
 			return this.vel.x != 0 || this.vel.y != 0;
@@ -1688,9 +1701,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set mass(val) {
 			if (!this.body) return;
 			if (this.watch) this.mod[21] = true;
-			let t = this.massData;
-			t.mass = val > 0 ? val : 0.00000001;
-			this.body.setMassData(t);
+			this.body.m_mass = val > 0 ? val : 0.00000001;
 			delete this._massUndef;
 		}
 
@@ -1968,11 +1979,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The sprite's vertices.
+		 * Read only. The sprite's vertices.
 		 *
-		 * @type {Array}
-		 * @return an array of p5.Vector objects
-		 * @readonly
+		 * @type {Array<p5.Vector>}
 		 */
 		get vertices() {
 			return this._getVertices();
@@ -2274,8 +2283,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Validate convexity.
 		 *
 		 * @private
-		 * @param vecs {Array} an array of planck.Vec2 vertices
-		 * @returns true if the polygon is convex
+		 * @param {Array<planck.Vec2>} vertices
+		 * @returns {Boolean} true if the polygon is convex
 		 */
 		_isConvexPoly(vecs) {
 			loopk: for (let k = 0; k < 2; k++) {
@@ -4253,20 +4262,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Returns the index of the last frame.
+		 * Read only. Returns the index of the last frame.
 		 *
 		 * @type {Number}
-		 * @readonly
 		 */
 		get lastFrame() {
 			return this.length - 1;
 		}
 
 		/**
-		 * Returns the current frame as p5.Image.
+		 * Read only. Returns the current frame as p5.Image.
 		 *
 		 * @type {p5.Image}
-		 * @readonly
 		 */
 		get frameImage() {
 			let f = this.frame;
@@ -4326,7 +4333,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The frames of the animation.
 		 *
-		 * @type {Array}
+		 * @type {Array<p5.Image}
 		 */
 		get frames() {
 			let frames = [];
@@ -4339,7 +4346,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The frames of the animation. Alt for ani.frames
 		 *
-		 * @type {Array}
+		 * @type {Array<Image>}
 		 */
 		get images() {
 			return this.frames;
@@ -4474,7 +4481,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Groups can have subgroups, which inherit the properties
 			 * of their parent groups.
 			 *
-			 * @type {Array}
+			 * @type {Array<Group}
 			 * @default []
 			 */
 			this.subgroups = [];
@@ -4656,6 +4663,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @memberof Group
 			 * @instance
 			 * @func add
+			 * @param {...Sprite} sprites
+			 * @return {Number} The new length of the group
 			 */
 			this.add = this.push;
 
@@ -5073,7 +5082,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * already in the group or not, just like with the Array.push()
 		 * method. Only sprites can be added to a group.
 		 *
-		 * @param {Sprite} sprites The sprite or sprites to be added
+		 * @param {...Sprite} sprites The sprite or sprites to be added
 		 * @returns {Number} the new length of the group
 		 */
 		push(...sprites) {
@@ -5536,7 +5545,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Group} [group] the group to search
 		 * @param {Boolean} [cameraActiveWhenDrawn] if true, only sprites that
 		 * were drawn when the camera was active will be returned
-		 * @returns {Array} an array of sprites
+		 * @returns {Array<Sprite>} an array of sprites
 		 */
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn) {
 			cameraActiveWhenDrawn ??= true;
@@ -5795,11 +5804,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 
 			/**
-			 * True if the camera is active.
+			 * Read only. True if the camera is active.
 			 * Use the methods Camera.on() and Camera.off()
 			 * to enable or disable the camera.
 			 *
-			 * @readonly
 			 * @type {Boolean}
 			 * @default false
 			 */
@@ -6118,14 +6126,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			type ??= 'glue';
 			/**
-			 * The type of joint. Can be one of:
+			 * Read only. The type of joint. Can be one of:
 			 *
 			 * "glue", "distance", "wheel", "hinge", "slider", or "rope".
 			 *
 			 * Can't be changed after the joint is created.
 			 *
 			 * @type {String}
-			 * @readonly
 			 */
 			this.type = type;
 
@@ -6390,12 +6397,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The joint's current power, the amount of torque being applied on
-		 * the joint's axis of rotation.
+		 * Read only.  The joint's current power, the amount of torque
+		 * being applied on the joint's axis of rotation.
 		 *
 		 * @type {Number}
 		 * @default 0
-		 * @readonly
 		 */
 		get power() {
 			return this._j.getMotorTorque();
@@ -6644,11 +6650,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The joint's current angle of rotation.
+		 * Read only. The joint's current angle of rotation.
 		 *
 		 * @type {Number}
 		 * @default 0
-		 * @readonly
 		 */
 		get angle() {
 			let ang = this._j.getJointAngle();
@@ -6915,7 +6920,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @private
 	 * @param {Number} l side length
 	 * @param {String} n name of the regular polygon
-	 * @returns {Boolean} an array [line, angle, sides]
+	 * @returns {Array} an array [line, angle, sides]
 	 */
 	function getRegularPolygon(l, n) {
 		if (n == 'triangle') l = [l, -120, 3];
@@ -6971,7 +6976,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @param {String} c A single character, a key found in the color palette object.
 	 * @param {Number|Object} palette Can be a palette object or number index
 	 * in the system's palettes array.
-	 * @returns a hex color string for use by p5.js functions
+	 * @returns {String} a hex color string for use by p5.js functions
 	 */
 	this.colorPal = (c, palette) => {
 		if (c instanceof p5.Color) return c;
@@ -8661,7 +8666,7 @@ main {
 			}
 			rs.gap = rs.fontSize * 1.25;
 			console.warn(
-				"renderStats() uses inaccurate FPS approximations. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. The only way to get accurate results, is to use your web browser's performance testing tools."
+				"renderStats() uses inaccurate FPS approximations. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. The only way to get accurate results is to use your web browser's performance testing tools."
 			);
 		}
 		rs.x = x || 10;
@@ -8670,8 +8675,9 @@ main {
 	};
 });
 
-// called before each p5.js draw function call
 p5.prototype.registerMethod('pre', function p5playPreDraw() {
+	// called before each p5.js draw function call
+
 	if (this.p5play._fps) {
 		this.p5play._preDrawFrameTime = performance.now();
 	}
@@ -8687,8 +8693,9 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 	this.contro._update();
 });
 
-// called after each p5.js draw function call
 p5.prototype.registerMethod('post', function p5playPostDraw() {
+	// called after each p5.js draw function call
+
 	this.p5play._inPostDraw = true;
 
 	if (this.allSprites.autoCull) {
