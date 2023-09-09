@@ -216,7 +216,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * Groups the sprite belongs to, including allSprites
 			 *
-			 * @type {Array<Group>}
+			 * @type {Group[]}
 			 * @default [allSprites]
 			 */
 			this.groups = [];
@@ -230,7 +230,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * Joints that the sprite is attached to
-			 * @type {Array<Joint>}
+			 * @type {Joint[]}
 			 * @default []
 			 */
 			this.joints = [];
@@ -1981,7 +1981,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Read only. The sprite's vertices.
 		 *
-		 * @type {Array<p5.Vector>}
+		 * @type {p5.Vector[]}
 		 */
 		get vertices() {
 			return this._getVertices();
@@ -2283,7 +2283,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Validate convexity.
 		 *
 		 * @private
-		 * @param {Array<planck.Vec2>} vertices
+		 * @param {planck.Vec2[]} vertices
 		 * @returns {Boolean} true if the polygon is convex
 		 */
 		_isConvexPoly(vecs) {
@@ -4333,7 +4333,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The frames of the animation.
 		 *
-		 * @type {Array<p5.Image}
+		 * @type {p5.Image[]}
 		 */
 		get frames() {
 			let frames = [];
@@ -4346,7 +4346,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The frames of the animation. Alt for ani.frames
 		 *
-		 * @type {Array<Image>}
+		 * @type {p5.Image[]}
 		 */
 		get images() {
 			return this.frames;
@@ -4481,7 +4481,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Groups can have subgroups, which inherit the properties
 			 * of their parent groups.
 			 *
-			 * @type {Array<Group}
+			 * @type {Group[]}
 			 * @default []
 			 */
 			this.subgroups = [];
@@ -5545,7 +5545,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Group} [group] the group to search
 		 * @param {Boolean} [cameraActiveWhenDrawn] if true, only sprites that
 		 * were drawn when the camera was active will be returned
-		 * @returns {Array<Sprite>} an array of sprites
+		 * @returns {Sprite[]} an array of sprites
 		 */
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn) {
 			cameraActiveWhenDrawn ??= true;
