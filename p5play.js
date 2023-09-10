@@ -449,7 +449,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let ts = this.tileSize;
 				if (!w && (this._ani.w != 1 || this._ani.h != 1)) {
 					w = this._ani.w / ts;
-					if (this.shape != 'circle') {
+					if (!h && this.shape != 'circle') {
 						h = this._ani.h / ts;
 					}
 				}
