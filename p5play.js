@@ -5,30 +5,14 @@
  * @license gpl-v3-only
  */
 p5.prototype.registerMethod('init', function p5playInit() {
-	/// <reference path="p5">
 	if (typeof window.planck == 'undefined') {
 		throw 'planck.js must be loaded before p5play';
 	}
 
 	const pInst = this;
 
-	const log = console.log; // shortcut
-	this.log = console.log;
-
 	const pl = planck;
 	const plScale = 60;
-
-	this.p5play ??= {};
-	this.p5play.os ??= {};
-	this.p5play.context ??= 'web';
-	this.p5play.standardizeKeyboard ??= false;
-	this.p5play.sprites = {};
-	this.p5play.groups = {};
-	this.p5play.groupsCreated = 0;
-	this.p5play.spritesCreated = 0;
-	this.p5play.spritesDrawn = 0;
-	this.p5play._renderStats = {};
-	this.p5play.disableImages = false;
 
 	// Google Analytics
 	if (
@@ -71,6 +55,57 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
 	};
 
+	class P5Play {
+		/**
+		 * This class is deleted after it's used
+		 * to create the `p5play` object
+		 * which stores information about the sketch.
+		 *
+		 * @constructor
+		 */
+		constructor() {
+			this.os = {};
+			this.context = 'web';
+			this.standardizeKeyboard = false;
+			/**
+			 * Contains all the sprites in the sketch,
+			 * but users should use the `allSprites` group.
+			 *
+			 * The keys are the sprite's unique ids.
+			 *
+			 * @type {Object}
+			 */
+			this.sprites = {};
+			/**
+			 * Contains all the groups in the sketch,
+			 *
+			 * The keys are the group's unique ids.
+			 *
+			 * @type {Object}
+			 */
+			this.groups = {};
+			this.groupsCreated = 0;
+			this.spritesCreated = 0;
+			this.spritesDrawn = 0;
+			this._renderStats = {};
+			/**
+			 * Used for debugging, set to true to make p5play
+			 * not load any images.
+			 *
+			 * @type {Boolean}
+			 */
+			this.disableImages = false;
+			/**
+			 * The default color palette, at index 0 of this array,
+			 * has all the letters of the English alphabet mapped to colors.
+			 */
+			this.palettes = [];
+		}
+	}
+
+	this.p5play = new P5Play();
+	delete this.P5Play;
+
 	/**
 	 * @typedef {Object} planck
 	 * @typedef {Object} planck.Vec2
@@ -79,6 +114,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @typedef {Object} planck.World
 	 * @typedef {Object} planck.Contact
 	 */
+
+	/**
+	 * Shortcut for console.log
+	 *
+	 * @type {Function}
+	 * @param {...any} args
+	 */
+	const log = console.log; // shortcut
+	this.log = console.log;
 
 	/**
 	 * @class
@@ -246,7 +290,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._pixelPerfect = false;
 			this._aniChangeCount = 0;
 
-			/**
+			/*
 			 * Contains all the collision callback functions for this sprite
 			 * when it comes in contact with other sprites or groups.
 			 */
@@ -255,7 +299,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._collided = {};
 
 			this._hasOverlap = {};
-			/**
+			/*
 			 * Contains all the overlap callback functions for this sprite
 			 * when it comes in contact with other sprites or groups.
 			 */
@@ -445,6 +489,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				} else {
 					if (typeof ani == 'string') this._changeAni(ani);
 					else this._ani = ani.clone();
+					this._ani.name = ani.name;
 				}
 				let ts = this.tileSize;
 				if (!w && (this._ani.w != 1 || this._ani.h != 1)) {
@@ -2499,8 +2544,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @private
 		 */
 		_display() {
-			let x = this.p.width * 0.5 - this.p.world.origin.x + this.x * this.tileSize;
-			let y = this.p.height * 0.5 - this.p.world.origin.y + this.y * this.tileSize;
+			let x = this.p.width * 0.5 - this.p.world._origin.x + this.x * this.tileSize;
+			let y = this.p.height * 0.5 - this.p.world._origin.y + this.y * this.tileSize;
 
 			let largestSide = Math.max(this._w, this._h);
 
@@ -4465,6 +4510,207 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			/**
+			 * @type {Number}
+			 */
+			this.x;
+			/**
+			 * @type {Number}
+			 */
+			this.y;
+			/**
+			 * @type {Number}
+			 */
+			this.vel;
+			/**
+			 * @type {Number}
+			 */
+			this.rotation;
+			/**
+			 * @type {Number}
+			 */
+			this.rotationSpeed;
+			/**
+			 * @type {Boolean}
+			 */
+			this.autoDraw;
+			/**
+			 * @type {Boolean}
+			 */
+			this.allowSleeping;
+			/**
+			 * @type {Number}
+			 */
+			this.autoUpdate;
+			/**
+			 * @type {Number}
+			 */
+			this.bounciness;
+			/**
+			 * @type {Number}
+			 */
+			this.collider;
+			/**
+			 * @type {Number}
+			 */
+			this.color;
+			/**
+			 * @type {Boolean}
+			 */
+			this.debug;
+			/**
+			 * @type {Number}
+			 */
+			this.density;
+			/**
+			 * @type {Number}
+			 */
+			this.direction;
+			/**
+			 * @type {Number}
+			 */
+			this.drag;
+			/**
+			 * @type {Number}
+			 */
+			this.friction;
+			/**
+			 * @type {Number}
+			 */
+			this.h;
+			/**
+			 * @type {Boolean}
+			 */
+			this.isSuperFast;
+			/**
+			 * @type {Number}
+			 */
+			this.layer;
+			/**
+			 * @type {Number}
+			 */
+			this.life;
+			/**
+			 * @type {Number}
+			 */
+			this.mass;
+			/**
+			 * @type {Object}
+			 */
+			this.mirror;
+			/**
+			 * @type {p5.Vector}
+			 */
+			this.offset;
+			/**
+			 * @type {Boolean}
+			 */
+			this.pixelPerfect;
+			/**
+			 * @type {Boolean}
+			 */
+			this.removed;
+			/**
+			 * @type {Number}
+			 */
+			this.rotationDrag;
+			/**
+			 * @type {Boolean}
+			 */
+			this.rotationLock;
+			/**
+			 * @type {p5.Vector}
+			 */
+			this.scale;
+			/**
+			 * @type {Number}
+			 */
+			this.shape;
+			/**
+			 * @type {Boolean}
+			 */
+			this.sleeping;
+			/**
+			 * @type {p5.Color}
+			 */
+			this.stroke;
+			/**
+			 * @type {Number}
+			 */
+			this.strokeWeight;
+			/**
+			 * @type {Number}
+			 */
+			this.text;
+			/**
+			 * @type {p5.Color}
+			 */
+			this.textColor;
+			/**
+			 * @type {String}
+			 */
+			this.tile;
+			/**
+			 * @type {Number}
+			 */
+			this.tileSize;
+			/**
+			 * @type {Boolean}
+			 */
+			this.visible;
+			/**
+			 * @type {Number}
+			 */
+			this.w;
+			/**
+			 * @type {Number}
+			 */
+			this.bearing;
+			/**
+			 * @type {Number}
+			 */
+			this.d;
+			/**
+			 * @type {Number}
+			 */
+			this.diameter;
+			/**
+			 * @type {Boolean}
+			 */
+			this.dynamic;
+			/**
+			 * @type {p5.Color}
+			 */
+			this.fill;
+			/**
+			 * @type {Number}
+			 */
+			this.height;
+			/**
+			 * @type {String}
+			 */
+			this.heading;
+			/**
+			 * @type {Boolean}
+			 */
+			this.kinematic;
+			/**
+			 * @type {Boolean}
+			 */
+			this.resetAnimationsOnChange;
+			/**
+			 * @type {Number}
+			 */
+			this.speed;
+			/**
+			 * @type {Boolean}
+			 */
+			this.static;
+			/**
+			 * @type {Number}
+			 */
+			this.width;
+
+			/**
 			 * Each group has a unique id number. Don't change it!
 			 * Its useful for debugging.
 			 *
@@ -5474,42 +5720,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			h ??= this.p.height;
 			this.hw = w * 0.5;
 			this.hh = h * 0.5;
-			this.origin = {
-				x: this.hw - this.offset.x,
-				y: this.hh - this.offset.y
+			this._origin = {
+				x: this.hw - this._offset.x,
+				y: this.hh - this._offset.y
 			};
-			if (this._tiled && this.p.allSprites.tileSize != 1) {
-				this.origin.x -= this.p.allSprites.tileSize * 0.5;
-				this.origin.y -= this.p.allSprites.tileSize * 0.5;
-			}
-		}
-
-		/**
-		 * Adjusts the origin (center) of the world so that coordinate (0, 0)
-		 * is offset from the top left corner of the canvas by
-		 * `allSprites.tileSize` / 2.
-		 *
-		 * It allows for simpler math when working with tiles if you want the
-		 * tiles to be aligned with the top left corner of the canvas.
-		 *
-		 * @type {Boolean}
-		 * @default undefined
-		 */
-		get tiled() {
-			return this._tiled;
-		}
-		set tiled(val) {
-			if (val && !this._tiled) {
-				let mod = this.p.allSprites.tileSize * 0.5;
-				this.origin.x -= mod;
-				this.origin.y -= mod;
-			}
-			if (val === false && this._tiled) {
-				let mod = this.p.allSprites.tileSize * 0.5;
-				this.origin.x += mod;
-				this.origin.y += mod;
-			}
-			this._tiled = val;
 		}
 
 		/**
@@ -6938,8 +7152,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		return l;
 	}
 
-	// the default color palette has all the letters
-	// of the English alphabet mapped to colors
 	this.p5play.palettes ??= [
 		{
 			a: 'aqua',
@@ -7141,7 +7353,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	/**
 	 * Awaitable function for playing sounds.
 	 *
-	 * @param {p5.Sound} sound
+	 * @param {any} sound
 	 * @returns {Promise}
 	 * @example
 	 * await play(sound);
