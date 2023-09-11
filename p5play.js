@@ -1082,9 +1082,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		/**
+		/*
 		 * Clones the collider's props to be transferred to a new collider.
-		 * @private
 		 */
 		_cloneBodyProps() {
 			let body = {};
@@ -1168,7 +1167,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * "Sleeping" sprites are not included in the physics simulation, a
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
-		 * with anything that it wasn't already _touching.
+		 * with anything that it wasn't already touching.
 		 *
 		 * @type {Boolean}
 		 * @default true
@@ -1962,7 +1961,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * "Sleeping" sprites are not included in the physics simulation, a
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
-		 * with anything that it wasn't already _touching.
+		 * with anything that it wasn't already touching.
 		 *
 		 * @type {Boolean}
 		 * @default true
@@ -2300,11 +2299,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.d = val * 2;
 		}
 
-		/**
+		/*
 		 * Resizes the the sprite's colliders.
-		 *
-		 * @private
-		 * @param {*} scalars The x and y scalars to resize the colliders by.
+		 * x and y scalars (0-1 values) are used to resize the collider.
 		 */
 		_resizeColliders(scalars) {
 			if (!this.body) return;
@@ -2326,12 +2323,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.collider == 'static') this.body.synchronizeFixtures();
 		}
 
-		/**
-		 * Validate convexity.
-		 *
-		 * @private
-		 * @param {planck.Vec2[]} vertices
-		 * @returns {Boolean} true if the polygon is convex
+		/*
+		 * Validates convexity.
 		 */
 		_isConvexPoly(vecs) {
 			loopk: for (let k = 0; k < 2; k++) {
@@ -2496,10 +2489,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		/**
+		/*
 		 * Default draw
-		 *
-		 * @private
 		 */
 		_draw() {
 			if (this.strokeWeight !== undefined) this.p.strokeWeight(this.strokeWeight);
@@ -2537,11 +2528,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		/**
+		/*
 		 * Displays the Sprite with rotation and scaling applied before
 		 * the sprite's draw function is called.
-		 *
-		 * @private
 		 */
 		_display() {
 			let x = this.p.width * 0.5 - this.p.world._origin.x + this.x * this.tileSize;
@@ -2610,10 +2599,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.autoDraw) this.autoDraw = null;
 		}
 
-		/**
+		/*
 		 * Draws a fixture. Used to draw the sprite's physics body.
-		 *
-		 * @private
 		 */
 		_drawFixture(fxt) {
 			const sh = fxt.m_shape;
@@ -3258,16 +3245,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this.changeAni(...arguments);
 		}
 
-		/**
+		/*
 		 * Changes the displayed animation. The animation must be added first
 		 * using the sprite.addAnimation method. The animation could also be
 		 * added using the group.addAnimation method to a group the sprite
 		 * has been added to.
 		 *
 		 * See SpriteAnimation for more control over the sequence.
-		 *
-		 * @private
-		 * @param {String} label SpriteAnimation identifier
 		 */
 		_changeAni(label) {
 			if (this._ani?._onChange) this._ani._onChange();
@@ -3517,11 +3501,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._overlappers[target._uid] == -1;
 		}
 
-		/**
+		/*
 		 * Internal method called anytime a new sensor is created. Ensures
 		 * that sensors are moved to the back of the fixture list.
-		 *
-		 * @private
 		 */
 		_sortFixtures() {
 			let colliders = null;
@@ -3657,6 +3639,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		return t;
 	};
 
+	/**
+	 * @class
+	 * @extends Array<p5.Image>
+	 */
 	this.SpriteAnimation = class extends Array {
 		/**
 		 * <a href="https://p5play.org/learn/sprite_animation.html">
@@ -4468,6 +4454,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
+	/**
+	 * @class
+	 * @extends Array<Sprite>
+	 */
 	this.Group = class extends Array {
 		/**
 		 * <a href="https://p5play.org/learn/group.html">
@@ -4677,10 +4667,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @type {Boolean}
 			 */
 			this.dynamic;
-			/**
-			 * @type {p5.Color}
-			 */
-			this.fill;
 			/**
 			 * @type {Number}
 			 */
@@ -4932,11 +4918,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.contains = this.includes;
 		}
 
-		/**
+		/*
 		 * Returns the highest layer in a group
-		 *
-		 * @private
-		 * @return {Number} The layer of the sprite drawn on the top
 		 */
 		_getTopLayer() {
 			if (this.length == 0) return 0;
@@ -5810,12 +5793,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return sprites[0];
 		}
 
-		/**
+		/*
 		 * Sets contact trackers to 0 so on the next world step they will be
 		 * increased to 1.
-		 *
-		 * @private
-		 * @param {planck.Contact} contact
 		 */
 		_beginContact(contact) {
 			// Get both fixtures
@@ -5850,16 +5830,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		/**
+		/*
 		 * If contact ended between sprites that where previously in contact,
 		 * then their contact trackers are set to -2 which will be incremented
 		 * to -1 on the next world step call.
 		 *
 		 * However, if contact begins and ends on the same frame, then the contact
 		 * trackers are set to -3 and incremented to -2 on the next world step call.
-		 *
-		 * @private
-		 * @param {planck.Contact} contact
 		 */
 		_endContact(contact) {
 			let a = contact.m_fixtureA;
@@ -5905,7 +5882,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		/**
+		/*
 		 * Used internally to find a contact boolean, for example to determine
 		 * if the sprites overlap.
 		 *
@@ -5913,12 +5890,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * the first contact callback it finds between the two sprites and
 		 * their groups.
 		 *
-		 * @private
-		 * @param {String} type the eventType of contact callback to find
-		 * @param {Sprite} s0
-		 * @param {Sprite} s1
-		 * @param {Boolean} findCB if true, will return a contact callback
-		 * @returns contact cb if one can be found between the two sprites
+		 * type is the eventType of contact callback to find
+		 * if findCB is true, will return a contact callback
 		 */
 		_findContact(type, s0, s1, findCB) {
 			let cb = s0[type][s1._uid];
@@ -7112,7 +7085,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		);
 	}
 
-	/**
+	/*
 	 * Checks if the given string contains a valid collider type
 	 * or collider type code letter:
 	 *
@@ -7120,23 +7093,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * 's' or 'static'
 	 * 'k' or 'kinematic'
 	 * 'n' or 'none'
-	 *
-	 * @private
-	 * @param {String} t type name
-	 * @returns {Boolean} true if the given string contains a valid collider type
 	 */
 	function isColliderType(t) {
 		let abr = t.slice(0, 2);
 		return t == 'd' || t == 's' || t == 'k' || t == 'n' || abr == 'dy' || abr == 'st' || abr == 'ki' || abr == 'no';
 	}
 
-	/**
+	/*
 	 * Returns an array with the line length, angle, and number of sides of a regular polygon
-	 *
-	 * @private
-	 * @param {Number} l side length
-	 * @param {String} n name of the regular polygon
-	 * @returns {Array} an array [line, angle, sides]
 	 */
 	function getRegularPolygon(l, n) {
 		if (n == 'triangle') l = [l, -120, 3];
@@ -7991,10 +7955,8 @@ main {
 			this.holdThreshold = 12;
 		}
 
-		/**
+		/*
 		 * Initializes the input's values to zero.
-		 *
-		 * @private
 		 */
 		init(inputs) {
 			for (let inp of inputs) {
@@ -8002,11 +7964,9 @@ main {
 			}
 		}
 
-		/**
+		/*
 		 * Attempt to auto-correct the user's input. Inheriting classes
 		 * override this method.
-		 *
-		 * @private
 		 */
 		ac(inp) {
 			return inp;
@@ -8490,11 +8450,6 @@ main {
 		this.p5play.standardizeKeyboard = true;
 	}
 
-	/**
-	 * @private
-	 * @param {*} e keyboard event
-	 * @returns key name
-	 */
 	function _getKeyFromCode(e) {
 		let code = e.code;
 		if (code.length == 4 && code.slice(0, 3) == 'Key') {
@@ -8709,6 +8664,10 @@ main {
 		}
 	};
 
+	/**
+	 * @class
+	 * @extends Array<Contro>
+	 */
 	this._Contros = class extends Array {
 		/**
 		 * <a href="https://p5play.org/learn/input_devices.html">
@@ -8810,10 +8769,8 @@ main {
 			}
 		}
 
-		/**
+		/*
 		 * Updates the state of all controllers.
-		 *
-		 * @private
 		 */
 		_update() {
 			for (let c of this) {

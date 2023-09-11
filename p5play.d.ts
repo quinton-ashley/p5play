@@ -24,7 +24,6 @@ class P5Play {
     groupsCreated: number;
     spritesCreated: number;
     spritesDrawn: number;
-    
     /**
      * Used for debugging, set to true to make p5play
      * not load any images.
@@ -256,11 +255,6 @@ class Sprite {
      *
      */
     removeSensors(): void;
-    /**
-     * Clones the collider's props to be transferred to a new collider.
-     * @private
-     */
-    private _cloneBodyProps;
     set animation(arg: SpriteAnimation);
     /**
      * Reference to the sprite's current animation.
@@ -290,7 +284,7 @@ class Sprite {
      *
      * "Sleeping" sprites are not included in the physics simulation, a
      * sprite starts "sleeping" when it stops moving and doesn't collide
-     * with anything that it wasn't already _touching.
+     * with anything that it wasn't already touching.
      *
      * @type {Boolean}
      * @default true
@@ -436,12 +430,6 @@ class Sprite {
      *
      */
     get draw(): () => void;
-    /**
-     * Default draw
-     *
-     * @private
-     */
-    private _draw;
     set dynamic(arg: boolean);
     /**
      * True if the sprite's physics body is dynamic.
@@ -661,7 +649,7 @@ class Sprite {
      *
      * "Sleeping" sprites are not included in the physics simulation, a
      * sprite starts "sleeping" when it stops moving and doesn't collide
-     * with anything that it wasn't already _touching.
+     * with anything that it wasn't already touching.
      *
      * @type {Boolean}
      * @default true
@@ -785,21 +773,6 @@ class Sprite {
      * @type {Number}
      */
     get radius(): number;
-    /**
-     * Resizes the the sprite's colliders.
-     *
-     * @private
-     * @param {*} scalars The x and y scalars to resize the colliders by.
-     */
-    private _resizeColliders;
-    /**
-     * Validate convexity.
-     *
-     * @private
-     * @param {planck.Vec2[]} vertices
-     * @returns {Boolean} true if the polygon is convex
-     */
-    private _isConvexPoly;
     set shape(arg: string);
     /**
      * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
@@ -825,27 +798,6 @@ class Sprite {
     get vel(): any;
     set velocity(arg: any);
     get velocity(): any;
-    /**
-     * Displays the Sprite with rotation and scaling applied before
-     * the sprite's draw function is called.
-     *
-     * @private
-     */
-    private _display;
-    /**
-     * Draws a fixture. Used to draw the sprite's physics body.
-     *
-     * @private
-     */
-    private _drawFixture;
-    _args2Vec(x: any, y: any): {
-        x: any;
-        y: any;
-    };
-    _parseForceArgs(...args: any[]): {
-        forceVector: any;
-        poa: any;
-    };
     /**
      * If this function is given a force amount, the force is applied
      * at the angle of the sprite's current bearing. Force can
@@ -1012,18 +964,6 @@ class Sprite {
      */
     changeAnimation(...args: string[]): Promise<void>;
     /**
-     * Changes the displayed animation. The animation must be added first
-     * using the sprite.addAnimation method. The animation could also be
-     * added using the group.addAnimation method to a group the sprite
-     * has been added to.
-     *
-     * See SpriteAnimation for more control over the sequence.
-     *
-     * @private
-     * @param {String} label SpriteAnimation identifier
-     */
-    private _changeAni;
-    /**
      * Removes the Sprite from the sketch and all the groups it
      * belongs to.
      *
@@ -1107,13 +1047,6 @@ class Sprite {
      */
     overlapped(target: Sprite | Group, callback?: Function): boolean;
     /**
-     * Internal method called anytime a new sensor is created. Ensures
-     * that sensors are moved to the back of the fixture list.
-     *
-     * @private
-     */
-    private _sortFixtures;
-    /**
      * This function is used automatically if a sprite overlap detection
      * function is called but the sprite has no overlap sensors.
      *
@@ -1125,7 +1058,11 @@ class Sprite {
     addDefaultSensors(): void;
 }
 function Turtle(size: any): any;
-class SpriteAnimation extends Array<any> {
+/**
+ * @class
+ * @extends Array<p5.Image>
+ */
+class SpriteAnimation extends Array<p5.Image> {
     /**
      * <a href="https://p5play.org/learn/sprite_animation.html">
      * Look at the Animation reference pages before reading these docs.
@@ -1268,7 +1205,7 @@ class SpriteAnimation extends Array<any> {
      *
      * @returns [Promise] a promise that resolves when the animation completes
      */
-    play(frame: any): any;
+    play(frame: any): Promise<any>;
     /**
      * Pauses the animation.
      *
@@ -1286,7 +1223,7 @@ class SpriteAnimation extends Array<any> {
      * @returns [Promise] a promise that resolves when the animation completes
      * rewinding
      */
-    rewind(): any;
+    rewind(): Promise<any>;
     /**
      * Plays the animation forwards and loops it.
      *
@@ -1313,7 +1250,7 @@ class SpriteAnimation extends Array<any> {
      * @param {Number} toFrame Frame number destination (starts from 0)
      * @returns [Promise] a promise that resolves when the animation completes
      */
-    goToFrame(toFrame: number): any;
+    goToFrame(toFrame: number): Promise<any>;
     /**
      * Read only. Returns the index of the last frame.
      *
@@ -1381,7 +1318,11 @@ class SpriteAnimation extends Array<any> {
 class SpriteAnimations {
     #private;
 }
-class Group extends Array<any> {
+/**
+ * @class
+ * @extends Array<Sprite>
+ */
+class Group extends Array<Sprite> {
     /**
      * <a href="https://p5play.org/learn/group.html">
      * Look at the Group reference pages before reading these docs.
@@ -1577,10 +1518,6 @@ class Group extends Array<any> {
      */
     dynamic: boolean;
     /**
-     * @type {p5.Color}
-     */
-    fill: p5.Color;
-    /**
      * @type {Number}
      */
     height: number;
@@ -1622,9 +1559,7 @@ class Group extends Array<any> {
      * @type {Group[]}
      * @default []
      */
-    subgroups: {
-        [x: string]: any;
-    }[];
+    subgroups: {}[];
     parent: any;
     /**
      * Keys are the animation label, values are SpriteAnimation objects.
@@ -1636,19 +1571,10 @@ class Group extends Array<any> {
      * Contains all the collision callback functions for this group
      * when it comes in contact with other sprites or groups.
      */
-    
-    
-    
-    
     /**
      * Contains all the overlap callback functions for this group
      * when it comes in contact with other sprites or groups.
      */
-    
-    
-    
-    
-    
     GroupSprite: any;
     Subgroup: any;
     mouse: {
@@ -1700,14 +1626,7 @@ class Group extends Array<any> {
     /**
      * Alias for group.includes
      */
-    contains: any;
-    /**
-     * Returns the highest layer in a group
-     *
-     * @private
-     * @return {Number} The layer of the sprite drawn on the top
-     */
-    private _getTopLayer;
+    contains: (searchElement: Sprite, fromIndex?: number) => boolean;
     set ani(arg: SpriteAnimation);
     /**
      * Reference to the group's current animation.
@@ -1749,7 +1668,6 @@ class Group extends Array<any> {
      * @type {Number}
      */
     set amount(arg: any);
-    
     centroid: {
         x: number;
         y: number;
@@ -1830,27 +1748,14 @@ class Group extends Array<any> {
     applyTorque(...args: any[]): void;
     /**
      */
-    move(distance: any, direction: any, speed: any): any;
+    move(distance: any, direction: any, speed: any): Promise<any[]>;
     /**
      */
-    moveTo(x: any, y: any, speed: any): any;
+    moveTo(x: any, y: any, speed: any): Promise<any[]>;
     /**
      */
     moveTowards(x: any, y: any, tracking: any): void;
     moveAway(x: any, y: any, tracking: any): void;
-    /**
-     * Its better to use the group Sprite constructor instead.
-     * `new group.Sprite()` which both creates a group sprite using
-     * soft inheritance and adds it to the group.
-     *
-     * Adds a sprite or multiple sprites to the group, whether they were
-     * already in the group or not, just like with the Array.push()
-     * method. Only sprites can be added to a group.
-     *
-     * @param {...Sprite} sprites The sprite or sprites to be added
-     * @returns {Number} the new length of the group
-     */
-    push(...sprites: Sprite[]): number;
     /**
      * Alias for group.length
      * @deprecated
@@ -1904,13 +1809,11 @@ class Group extends Array<any> {
 class World {
     p: any;
     mod: any[];
-    
     offset: {
         x: number;
         y: number;
     };
     contacts: any[];
-    
     set velocityThreshold(arg: number);
     /**
      * The lowest velocity an object can have before it is considered
@@ -1947,7 +1850,6 @@ class World {
     resize(w: number, h: number): void;
     hw: number;
     hh: number;
-    
     /**
      * Performs a physics simulation step that advances all sprites'
      * forward in time by 1/60th of a second if no timeStep is given.
@@ -1985,42 +1887,6 @@ class World {
      * @returns {Sprite} a sprite
      */
     getSpriteAt(x: number, y: number, group?: Group): Sprite;
-    /**
-     * Sets contact trackers to 0 so on the next world step they will be
-     * increased to 1.
-     *
-     * @private
-     * @param {planck.Contact} contact
-     */
-    private _beginContact;
-    /**
-     * If contact ended between sprites that where previously in contact,
-     * then their contact trackers are set to -2 which will be incremented
-     * to -1 on the next world step call.
-     *
-     * However, if contact begins and ends on the same frame, then the contact
-     * trackers are set to -3 and incremented to -2 on the next world step call.
-     *
-     * @private
-     * @param {planck.Contact} contact
-     */
-    private _endContact;
-    /**
-     * Used internally to find a contact boolean, for example to determine
-     * if the sprites overlap.
-     *
-     * If the findCB param is true, the function will search for
-     * the first contact callback it finds between the two sprites and
-     * their groups.
-     *
-     * @private
-     * @param {String} type the eventType of contact callback to find
-     * @param {Sprite} s0
-     * @param {Sprite} s1
-     * @param {Boolean} findCB if true, will return a contact callback
-     * @returns contact cb if one can be found between the two sprites
-     */
-    private _findContact;
     set allowSleeping(arg: boolean);
     /**
      * "Sleeping" sprites get temporarily ignored during physics
@@ -2059,8 +1925,6 @@ class Camera {
      */
     constructor(x: number, y: number, zoom: number);
     p: any;
-    
-    
     /**
      * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
      *
@@ -2341,9 +2205,7 @@ class Joint {
      */
     remove(): void;
 }
-const GlueJoint_base: any;
-class GlueJoint extends GlueJoint_base {
-    [x: string]: any;
+class GlueJoint extends Joint {
     /**
      * Glue joints are used to glue two sprites together.
      *
@@ -2352,9 +2214,7 @@ class GlueJoint extends GlueJoint_base {
      */
     constructor(spriteA: Sprite, spriteB: Sprite, ...args: any[]);
 }
-const DistanceJoint_base: any;
-class DistanceJoint extends DistanceJoint_base {
-    [x: string]: any;
+class DistanceJoint extends Joint {
     /**
      * Distance joints are used to constrain the distance
      * between two sprites.
@@ -2363,11 +2223,8 @@ class DistanceJoint extends DistanceJoint_base {
      * @param {Sprite} spriteB
      */
     constructor(spriteA: Sprite, spriteB: Sprite, ...args: any[]);
-    visible: any;
 }
-const WheelJoint_base: any;
-class WheelJoint extends WheelJoint_base {
-    [x: string]: any;
+class WheelJoint extends Joint {
     /**
      * Wheel joints can be used to create vehicles!
      *
@@ -2378,7 +2235,6 @@ class WheelJoint extends WheelJoint_base {
      * @param {Sprite} spriteB the wheel
      */
     constructor(spriteA: Sprite, spriteB: Sprite, ...args: any[]);
-    visible: any;
     set angle(arg: number);
     /**
      * The angle at which the wheel is attached to the vehicle body.
@@ -2390,9 +2246,7 @@ class WheelJoint extends WheelJoint_base {
      */
     get angle(): number;
 }
-const HingeJoint_base: any;
-class HingeJoint extends HingeJoint_base {
-    [x: string]: any;
+class HingeJoint extends Joint {
     /**
      * Hinge joints attach two sprites together at a pivot point,
      * constraining them to rotate around this point, like a hinge.
@@ -2403,7 +2257,6 @@ class HingeJoint extends HingeJoint_base {
      * @param {Sprite} spriteB
      */
     constructor(spriteA: Sprite, spriteB: Sprite, ...args: any[]);
-    visible: any;
     set range(arg: number);
     /**
      * The joint's range of rotation. Setting the range
@@ -2438,9 +2291,7 @@ class HingeJoint extends HingeJoint_base {
     get angle(): number;
 }
 var RevoluteJoint: any;
-const SliderJoint_base: any;
-class SliderJoint extends SliderJoint_base {
-    [x: string]: any;
+class SliderJoint extends Joint {
     /**
      * A slider joint constrains the motion of two sprites to sliding
      * along a common axis, without rotation.
@@ -2488,9 +2339,7 @@ class SliderJoint extends SliderJoint_base {
     get lowerLimit(): number;
 }
 var PrismaticJoint: any;
-const RopeJoint_base: any;
-class RopeJoint extends RopeJoint_base {
-    [x: string]: any;
+class RopeJoint extends Joint {
     /**
      * A Rope joint prevents two sprites from going further
      * than a certain distance from each other, which is
@@ -2523,7 +2372,6 @@ function sleep(millisecond: any): Promise<any>;
 function play(sound: any): Promise<any>;
 let userDisabledP5Errors: boolean;
 var canvas: any;
-function _createCanvas(...args: any[]): any;
 function createCanvas(...args: any[]): any;
 class Canvas {
     /**
@@ -2583,18 +2431,12 @@ class Canvas {
      */
     resize(): void;
 }
-function _resizeCanvas(w: any, h: any): void;
 function resizeCanvas(w: any, h: any): void;
-function _background(...args: any[]): void;
 function background(...args: any[]): void;
-function _fill(...args: any[]): void;
 function fill(...args: any[]): void;
-function _stroke(...args: any[]): void;
 function stroke(...args: any[]): void;
-function _loadImage(...args: any[]): any;
 function loadImage(...args: any[]): any;
 function loadImg(...args: any[]): any;
-function _image(...args: any[]): void;
 function image(...args: any[]): void;
 /**
  * A FriendlyError is a custom error class that extends the native JS
@@ -2620,19 +2462,8 @@ class InputDevice {
      * @type {number}
      */
     holdThreshold: number;
-    /**
-     * Initializes the input's values to zero.
-     *
-     * @private
-     */
-    private init;
-    /**
-     * Attempt to auto-correct the user's input. Inheriting classes
-     * override this method.
-     *
-     * @private
-     */
-    private ac;
+    init(inputs: any): void;
+    ac(inp: any): any;
     /**
      * @param {string} inp
      * @returns {boolean} true on the first frame that the user presses the input
@@ -2671,10 +2502,7 @@ class InputDevice {
     released(inp: string): boolean;
     releases(inp: any): boolean;
 }
-const _Mouse_base: any;
-class _Mouse extends _Mouse_base {
-    [x: string]: any;
-    
+class _Mouse extends InputDevice {
     default: string;
     drag: {
         left: number;
@@ -2717,7 +2545,6 @@ class _Mouse extends _Mouse_base {
      * @default true
      */
     get visible(): boolean;
-    ac(inp: any): any;
     /**
      * @param {string} inp
      * @returns {boolean} true on the first frame that the user reaches the holdThreshold for holding the input and could start to drag
@@ -2735,9 +2562,7 @@ class _Mouse extends _Mouse_base {
     dragged(inp: string): boolean;
 }
 var mouse: _Mouse;
-const _SpriteMouse_base: any;
-class _SpriteMouse extends _SpriteMouse_base {
-    [x: string]: any;
+class _SpriteMouse extends _Mouse {
     hover: number;
     /**
      * @returns {boolean} true on the first frame that the mouse is over the sprite
@@ -2752,19 +2577,8 @@ class _SpriteMouse extends _SpriteMouse_base {
      */
     hovered(): boolean;
 }
-function __onmousedown(btn: any): void;
-const _onmousedown: any;
-const _ontouchstart: any;
-function __onmousemove(btn: any): void;
-const _onmousemove: any;
-function __onmouseup(btn: any): void;
-const _onmouseup: any;
-const _ontouchend: any;
-const _KeyBoard_base: any;
-class _KeyBoard extends _KeyBoard_base {
-    [x: string]: any;
+class _KeyBoard extends InputDevice {
     default: string;
-    ac(inp: any): any;
     get cmd(): any;
     get command(): any;
     get ctrl(): any;
@@ -2788,11 +2602,7 @@ namespace simpleKeyControls {
     let arrowLeft: string;
     let arrowRight: string;
 }
-const _onkeydown: any;
-const _onkeyup: any;
-const _Contro_base: any;
-class _Contro extends _Contro_base {
-    [x: string]: any;
+class _Contro extends InputDevice {
     /**
      * <a href="https://p5play.org/learn/input_devices.html">
      * Look at the Input reference pages before reading these docs.
@@ -2813,15 +2623,16 @@ class _Contro extends _Contro_base {
         y: number;
         btn: number;
     };
-    
-    
     gamepad: any;
     id: any;
-    ac(inp: any): any;
     leftTrigger: any;
     rightTrigger: any;
 }
-class _Contros extends Array<any> {
+/**
+ * @class
+ * @extends Array<_Contro>
+ */
+class _Contros extends Array<_Contro> {
     /**
      * <a href="https://p5play.org/learn/input_devices.html">
      * Look at the Input reference pages before reading these docs.
@@ -2833,12 +2644,6 @@ class _Contros extends Array<any> {
      */
     constructor();
     default: string;
-    /**
-     * Updates the state of all controllers.
-     *
-     * @private
-     */
-    private _update;
 }
 var contro: _Contros;
 var controllers: _Contros;
