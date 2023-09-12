@@ -72,7 +72,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * but users should use the `allSprites` group.
 			 *
 			 * The keys are the sprite's unique ids.
-			 *
 			 * @type {Object}
 			 */
 			this.sprites = {};
@@ -80,7 +79,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Contains all the groups in the sketch,
 			 *
 			 * The keys are the group's unique ids.
-			 *
 			 * @type {Object}
 			 */
 			this.groups = {};
@@ -91,7 +89,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * Used for debugging, set to true to make p5play
 			 * not load any images.
-			 *
 			 * @type {Boolean}
 			 */
 			this.disableImages = false;
@@ -117,7 +114,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 	/**
 	 * Shortcut for console.log
-	 *
 	 * @type {Function}
 	 * @param {...any} args
 	 */
@@ -166,7 +162,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * Each sprite has a unique id number. Don't change it!
 			 * Its useful for debugging. Sprite id numbers start at 1000.
-			 *
 			 * @type {Number}
 			 */
 			this.idNum;
@@ -174,7 +169,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * If set to true, p5play will record all changes to the sprite's
 			 * properties in its `mod` array.
-			 *
 			 * @type {Boolean}
 			 * @default undefined
 			 */
@@ -184,7 +178,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * An array of booleans that indicate which properties were
 			 * changed since the last frame. Useful for only sending
 			 * modified sprite data in binary netcode.
-			 *
 			 * @type {Array}
 			 */
 			this.mod = [];
@@ -259,7 +252,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * Groups the sprite belongs to, including allSprites
-			 *
 			 * @type {Group[]}
 			 * @default [allSprites]
 			 */
@@ -267,7 +259,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * Keys are the animation label, values are SpriteAnimation objects.
-			 *
 			 * @type {SpriteAnimations}
 			 */
 			this.animations = new this.p.SpriteAnimations();
@@ -325,7 +316,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 *
 			 * For example, if the tile size is 16, then a sprite with
 			 * x=1 and y=1 will be drawn at position (16, 16) on the canvas.
-			 *
 			 * @type {Number}
 			 * @default 1
 			 */
@@ -587,7 +577,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * The sprite's position on the previous frame.
-			 *
 			 * @type {object}
 			 */
 			this.prevPos = { x, y };
@@ -604,7 +593,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 *
 			 * When the sprite.debug property is set to 'colliders', only the
 			 * collider shapes will be drawn.
-			 *
 			 * @type {boolean|string}
 			 * @default false
 			 */
@@ -1122,7 +1110,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Reference to the sprite's current animation.
-		 *
 		 * @type {SpriteAnimation}
 		 */
 		get animation() {
@@ -1150,7 +1137,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * It only needs to be set to false once and then it will
 		 * remain false for the rest of the sketch, unless changed.
-		 *
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1168,7 +1154,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * "Sleeping" sprites are not included in the physics simulation, a
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
 		 * with anything that it wasn't already touching.
-		 *
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1188,7 +1173,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * It only needs to be set to false once and then it will
 		 * remain false for the rest of the sketch, unless changed.
-		 *
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1202,7 +1186,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The bounciness of the sprite's physics body.
-		 *
 		 * @type {Number}
 		 * @default 0.2
 		 */
@@ -1219,7 +1202,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The center of mass of the sprite's physics body.
-		 *
 		 * @type {p5.Vector}
 		 */
 		get centerOfMass() {
@@ -1233,7 +1215,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * The collider type can be one of the following strings:
 		 * 'dynamic', 'static', 'kinematic', 'none'.
-		 *
 		 * @type {String}
 		 * @default 'dynamic'
 		 */
@@ -1332,7 +1313,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The sprite's current color. By default sprites get a random color.
-		 *
 		 * @type {p5.Color}
 		 * @default random color
 		 */
@@ -1346,7 +1326,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * Alias for color. colour is the British English spelling.
-		 *
 		 * @type {p5.Color}
 		 * @default random color
 		 */
@@ -1359,7 +1338,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Alias for sprite.fillColor
-		 *
 		 * @type {p5.Color}
 		 * @default random color
 		 */
@@ -1372,7 +1350,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Alias for sprite.color
-		 *
 		 * @type {p5.Color}
 		 * @default random color
 		 */
@@ -1385,7 +1362,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Alias for sprite.strokeColor
-		 *
 		 * @type {p5.Color}
 		 */
 		get stroke() {
@@ -1399,7 +1375,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The sprite's stroke color. By default the stroke of a sprite
 		 * is determined by its collider type.
-		 *
 		 * @type {p5.Color}
 		 */
 		get strokeColor() {
@@ -1411,7 +1386,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The sprite's stroke weight, the thickness of its outline.
-		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
@@ -1425,7 +1399,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The sprite's current text color. Black by default.
-		 *
 		 * @type {p5.Color}
 		 * @default black (#000000)
 		 */
@@ -1464,7 +1437,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The density of the sprite's physics body.
-		 *
 		 * @type {Number}
 		 * @default 5
 		 */
@@ -1506,7 +1478,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The angle of the sprite's movement or it's rotation angle if the
 		 * sprite is not moving.
-		 *
 		 * @type {Number}
 		 * @default 0 ("right")
 		 */
@@ -1531,7 +1502,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The amount of resistance a sprite has to being moved.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1572,7 +1542,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * True if the sprite's physics body is dynamic.
-		 *
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1603,7 +1572,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The amount the sprite's physics body resists moving
 		 * when rubbing against another physics body.
-		 *
 		 * @type {Number}
 		 * @default 0.5
 		 */
@@ -1624,7 +1592,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * It ignores cardinal direction word order, capitalization, spaces,
 		 * underscores, and dashes.
-		 *
 		 * @type {String}
 		 * @default undefined
 		 */
@@ -1637,7 +1604,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * A reference to the sprite's current image.
-		 *
 		 * @type {p5.Image}
 		 */
 		get img() {
@@ -1649,7 +1615,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * A reference to the sprite's current image.
-		 *
 		 * @type {p5.Image}
 		 */
 		get image() {
@@ -1661,7 +1626,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Read only. True if the sprite is moving.
-		 *
 		 * @type {Boolean}
 		 */
 		get isMoving() {
@@ -1671,7 +1635,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Set this to true if the sprite goes really fast to prevent
 		 * inaccurate physics simulation.
-		 *
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -1685,7 +1648,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * True if the sprite's physics body is kinematic.
-		 *
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -1700,7 +1662,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * By default sprites are drawn in the order they were created in.
 		 * You can change the draw order by editing sprite's layer
 		 * property. Sprites with the highest layer value get drawn first.
-		 *
 		 * @type {Number}
 		 */
 		get layer() {
@@ -1722,7 +1683,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * representing infinite life. This limitation makes sprite netcode
 		 * smaller. But don't worry, at 60 fps this gives users a definable
 		 * sprite life range between 1 frame and ~411 days!
-		 *
 		 * @type {Number}
 		 * @default 2147483647
 		 */
@@ -1736,7 +1696,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The mass of the sprite's physics body.
-		 *
 		 * @type {Number}
 		 */
 		get mass() {
@@ -1771,7 +1730,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The sprite's mirror states.
-		 *
 		 * @type {Object}
 		 * @property {Boolean} x - The sprite's horizontal mirror state.
 		 * @property {Boolean} y - The sprite's vertical mirror state.
@@ -1792,7 +1750,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * The sprite's x and y properties represent its center in world
 		 * coordinates. This point is also the sprite's center of rotation.
-		 *
 		 * @type {object}
 		 */
 		get offset() {
@@ -1808,7 +1765,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Verbose alias for sprite.prevPos
-		 *
 		 * @type {Object}
 		 */
 		get previousPosition() {
@@ -1820,7 +1776,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Verbose alias for sprite.prevRotation
-		 *
 		 * @type {Number}
 		 */
 		get previousRotation() {
@@ -1835,7 +1790,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * Set pixelPerfect to true to make p5play always display sprites
 		 * at integer pixel precision. This is useful for making retro games.
-		 *
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -1849,7 +1803,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The angle of the sprite's rotation, not the direction it is moving.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1869,7 +1822,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * The amount the sprite resists rotating.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1883,7 +1835,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * If true, the sprite can not rotate.
-		 *
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -1897,7 +1848,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * The speed of the sprite's rotation.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1919,7 +1869,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * The valueOf function for sprite.scale returns the scale as a
 		 * number. This enables users to do things like `sprite.scale *= 2`
 		 * to double the sprite's scale.
-		 *
 		 * @type {Number|Object}
 		 * @default 1
 		 */
@@ -1962,7 +1911,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * "Sleeping" sprites are not included in the physics simulation, a
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
 		 * with anything that it wasn't already touching.
-		 *
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1981,7 +1929,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * Setting speed to a negative value will make the sprite move
 		 * 180 degrees opposite of its current direction angle.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1996,7 +1943,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Is the sprite's physics collider static?
-		 *
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -2010,7 +1956,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * If the sprite has been removed from the world.
-		 *
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -2026,7 +1971,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Read only. The sprite's vertices.
-		 *
 		 * @type {p5.Vector[]}
 		 */
 		get vertices() {
@@ -2057,7 +2001,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * Becomes null when the sprite is off screen but will be drawn and
 		 * set to true again if it goes back on screen.
-		 *
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -2091,7 +2034,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * The position vector {x, y}
-		 *
 		 * @type {p5.Vector}
 		 */
 		get pos() {
@@ -2107,7 +2049,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * The position vector {x, y}
-		 *
 		 * @type {p5.Vector}
 		 */
 		get position() {
@@ -2355,7 +2296,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
-		 *
 		 * @type {String}
 		 * @default box
 		 */
@@ -3674,7 +3614,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * The name of the animation
-			 *
 			 * @type {String}
 			 */
 			this.name = 'default';
@@ -3695,7 +3634,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * The index of the current frame that the animation is on.
-			 *
 			 * @type {Number}
 			 */
 			this.frame = 0;
@@ -3707,7 +3645,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * The offset is how far the animation should be placed from
 			 * the location it is played at.
-			 *
 			 * @type {Object}
 			 * @example
 			 * ani.offset.x = 16;
@@ -3720,7 +3657,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * True if the animation is currently playing.
-			 *
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -3728,7 +3664,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * Animation visibility.
-			 *
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -3736,7 +3671,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * If set to false the animation will stop after reaching the last frame
-			 *
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -3748,7 +3682,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * This is useful for animations that are symmetric.
 			 * For example a walking cycle where the first frame is the
 			 * same as the last frame.
-			 *
 			 * @type {Boolean}
 			 * @default false
 			 */
@@ -3756,7 +3689,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * True if frame changed during the last draw cycle
-			 *
 			 * @type {Boolean}
 			 */
 			this.frameChanged = false;
@@ -4012,7 +3944,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Delay between frames in number of draw cycles.
 		 * If set to 4 the framerate of the animation would be the
 		 * sketch framerate divided by 4 (60fps = 15fps)
-		 *
 		 * @type {Number}
 		 * @default 4
 		 */
@@ -4039,7 +3970,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * Can be set to a number to scale both x and y
 		 * or an object with x and/or y properties.
-		 *
 		 * @type {Number|Object}
 		 * @default 1
 		 */
@@ -4296,7 +4226,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Read only. Returns the index of the last frame.
-		 *
 		 * @type {Number}
 		 */
 		get lastFrame() {
@@ -4305,7 +4234,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Read only. Returns the current frame as p5.Image.
-		 *
 		 * @type {p5.Image}
 		 */
 		get frameImage() {
@@ -4321,7 +4249,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Width of the animation.
-		 *
 		 * @type {Number}
 		 */
 		get w() {
@@ -4329,7 +4256,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * Width of the animation.
-		 *
 		 * @type {Number}
 		 */
 		get width() {
@@ -4343,7 +4269,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Height of the animation.
-		 *
 		 * @type {Number}
 		 */
 		get h() {
@@ -4351,7 +4276,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * Height of the animation.
-		 *
 		 * @type {Number}
 		 */
 		get height() {
@@ -4365,7 +4289,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The frames of the animation.
-		 *
 		 * @type {p5.Image[]}
 		 */
 		get frames() {
@@ -4378,7 +4301,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The frames of the animation. Alt for ani.frames
-		 *
 		 * @type {p5.Image[]}
 		 */
 		get images() {
@@ -4699,7 +4621,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * Each group has a unique id number. Don't change it!
 			 * Its useful for debugging.
-			 *
 			 * @type {Number}
 			 */
 			this.idNum = this.p.p5play.groupsCreated;
@@ -4714,7 +4635,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * Groups can have subgroups, which inherit the properties
 			 * of their parent groups.
-			 *
 			 * @type {Group[]}
 			 * @default []
 			 */
@@ -4722,7 +4642,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * The parent group's uid number.
-			 *
 			 * @type {Number}
 			 * @default undefined
 			 */
@@ -4741,7 +4660,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * Keys are the animation label, values are SpriteAnimation objects.
-			 *
 			 * @type {SpriteAnimations}
 			 */
 			this.animations = new this.p.SpriteAnimations();
@@ -4878,7 +4796,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				 *
 				 * It only needs to be set to false once and then it will
 				 * remain false for the rest of the sketch, unless changed.
-				 *
 				 * @type {Boolean}
 				 */
 				this.autoCull = true;
@@ -4933,7 +4850,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Reference to the group's current animation.
-		 *
 		 * @type {SpriteAnimation}
 		 */
 		get ani() {
@@ -4945,7 +4861,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * Reference to the group's current animation.
-		 *
 		 * @type {SpriteAnimation}
 		 */
 		get animation() {
@@ -4957,7 +4872,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The group's animations.
-		 *
 		 * @type {SpriteAnimations}
 		 */
 		get anis() {
@@ -4965,7 +4879,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * Reference to the group's current image.
-		 *
 		 * @type {p5.Image}
 		 */
 		get img() {
@@ -4976,7 +4889,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * Reference to the group's current image.
-		 *
 		 * @type {p5.Image}
 		 */
 		get image() {
@@ -4988,7 +4900,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Depending on the value that the amount property is set to, the group will
 		 * either add or remove sprites.
-		 *
 		 * @type {Number}
 		 */
 		set amount(val) {
@@ -5658,7 +5569,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Gravity force vector that affects all dynamic physics colliders.
-		 *
 		 * @type {Object}
 		 * @property {Number} x
 		 * @property {Number} y
@@ -5678,7 +5588,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * Adjust the velocity threshold to allow for slow moving objects
 		 * but don't have it be too low, or else objects will never sleep.
-		 *
 		 * @type {Number}
 		 * @default 0.19
 		 */
@@ -5932,7 +5841,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * This is an important performance optimization that you probably
 		 * shouldn't disable for every sprite in the world.
-		 *
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -5978,7 +5886,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
-			 *
 			 * @type {Object}
 			 */
 			this.mouse = {
@@ -5996,7 +5903,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Read only. True if the camera is active.
 			 * Use the methods Camera.on() and Camera.off()
 			 * to enable or disable the camera.
-			 *
 			 * @type {Boolean}
 			 * @default false
 			 */
@@ -6016,7 +5922,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The camera's position. {x, y}
-		 *
 		 * @type {Object}
 		 */
 		get pos() {
@@ -6028,7 +5933,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * The camera's position. Alias for pos.
-		 *
 		 * @type {Object}
 		 */
 		get position() {
@@ -6053,13 +5957,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The camera x position.
-		 *
 		 * @type {Number}
 		 */
 		get x() {
 			return this._pos.x;
 		}
 		set x(val) {
+			if (val === undefined || isNaN(val)) return;
 			this._pos.x = val;
 			let x = -val + this.p.world.hw / this._zoom;
 			if (this.p.allSprites.pixelPerfect) x = Math.round(x);
@@ -6069,13 +5973,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The camera y position.
-		 *
 		 * @type {Number}
 		 */
 		get y() {
 			return this._pos.y;
 		}
 		set y(val) {
+			if (val === undefined || isNaN(val)) return;
 			this._pos.y = val;
 			let y = -val + this.p.world.hh / this._zoom;
 			if (this.p.allSprites.pixelPerfect) y = Math.round(y);
@@ -6089,7 +5993,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * A scale of 1 will be the normal size. Setting it to 2
 		 * will make everything appear twice as big. .5 will make
 		 * everything look half size.
-		 *
 		 * @type {Number}
 		 * @default 1
 		 */
@@ -6097,6 +6000,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._zoom;
 		}
 		set zoom(val) {
+			if (val === undefined || isNaN(val)) return;
 			this._zoom = val;
 			let x = -this._pos.x + this.p.world.hw / val;
 			let y = -this._pos.y + this.p.world.hh / val;
@@ -6301,14 +6205,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * The first sprite in the joint.
-			 *
 			 * @type {Sprite}
 			 */
 			this.spriteA = spriteA;
 
 			/**
 			 * The second sprite in the joint.
-			 *
 			 * @type {Sprite}
 			 */
 			this.spriteB = spriteB;
@@ -6320,7 +6222,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * "glue", "distance", "wheel", "hinge", "slider", or "rope".
 			 *
 			 * Can't be changed after the joint is created.
-			 *
 			 * @type {String}
 			 */
 			this.type = type;
@@ -6384,7 +6285,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * Determines whether to draw the joint if spriteA
 			 * or spriteB is drawn.
-			 *
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -6430,7 +6330,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Offset to the joint's anchorA position from the center of spriteA.
 		 *
 		 * Only distance and hinge joints have an offsetA.
-		 *
 		 * @type {p5.Vector}
 		 * @default {x: 0, y: 0}
 		 */
@@ -6446,7 +6345,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Offset to the joint's anchorB position from the center of spriteB.
 		 *
 		 * Only distance, hinge, and wheel joints have an offsetB.
-		 *
 		 * @type {p5.Vector}
 		 * @default {x: 0, y: 0}
 		 */
@@ -6475,7 +6373,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * 0.5-0.8 -> 2.5hz-1hz (bouncy spring)
 		 * 0.8-0.9 -> 1hz-0.5hz (slinky)
 		 * 0.9-1.0 -> 0.5hz-0.2hz (bungee cord)
-		 *
 		 * @type {Number}
 		 * @default 0.0
 		 */
@@ -6515,7 +6412,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * 0.0 lets the joint continue to spring up and down very easily.
 		 * 1.0 makes the joint lose vibrational energy immediately,
 		 * making the joint completely rigid, regardless of its springiness.
-		 *
 		 * @type {Number}
 		 * @default 0.0
 		 */
@@ -6535,7 +6431,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The current speed of the joint's motor.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -6557,7 +6452,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Enable or disable the joint's motor.
 		 * Disabling the motor is like putting a
 		 * car in neutral.
-		 *
 		 * @type {Boolean}
 		 */
 		get enableMotor() {
@@ -6570,7 +6464,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Max power is how the amount of torque a joint motor can exert
 		 * around its axis of rotation.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -6588,7 +6481,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Read only.  The joint's current power, the amount of torque
 		 * being applied on the joint's axis of rotation.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -6599,7 +6491,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Set to true if you want the joint's sprites to collide with
 		 * each other.
-		 *
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -6735,7 +6626,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * The angle at which the wheel is attached to the vehicle body.
 		 *
 		 * The default is 90 degrees or PI/2 radians, which is vertical.
-		 *
 		 * @type {Number}
 		 * @default 90
 		 */
@@ -6783,7 +6673,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The joint's range of rotation. Setting the range
 		 * changes the joint's upper and lower limits.
-		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
@@ -6798,7 +6687,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The lower limit of rotation.
-		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
@@ -6819,7 +6707,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The upper limit of rotation.
-		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
@@ -6840,7 +6727,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Read only. The joint's current angle of rotation.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -6885,7 +6771,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The angle of the joint's axis which its sprites slide along.
-		 *
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -6903,7 +6788,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The joint's range of translation. Setting the range
 		 * changes the joint's upper and lower limits.
-		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
@@ -6919,7 +6803,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The mathematical lower (not positionally lower)
 		 * limit of translation.
-		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
@@ -6937,7 +6820,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The mathematical upper (not positionally higher)
 		 * limit of translation.
-		 *
 		 * @type {Number}
 		 * @default undefined
 		 */
@@ -7597,7 +7479,6 @@ main {
 
 		/**
 		 * The width of the canvas.
-		 *
 		 * @type {Number}
 		 * @default 100
 		 */
@@ -7605,7 +7486,6 @@ main {
 
 		/**
 		 * The width of the canvas.
-		 *
 		 * @type {Number}
 		 * @default 100
 		 */
@@ -7613,7 +7493,6 @@ main {
 
 		/**
 		 * The height of the canvas.
-		 *
 		 * @type {Number}
 		 * @default 100
 		 */
@@ -7621,7 +7500,6 @@ main {
 
 		/**
 		 * The height of the canvas.
-		 *
 		 * @type {Number}
 		 * @default 100
 		 */
@@ -7907,7 +7785,6 @@ main {
 
 	/**
 	 * A group of all the sprites.
-	 *
 	 * @type {Group}
 	 */
 	this.allSprites = new this.Group();
@@ -7915,14 +7792,12 @@ main {
 	/**
 	 * The planck physics world. Use this to change gravity and offset the
 	 * sprite's coordinate system.
-	 *
 	 * @type {World}
 	 */
 	this.world = new this.World();
 
 	/**
 	 * The default camera. Use this to pan and zoom the camera.
-	 *
 	 * @type {Camera}
 	 */
 	this.camera = new this.Camera();
@@ -7948,17 +7823,18 @@ main {
 		constructor() {
 			/**
 			 * The amount of frames an input must be pressed to be considered held.
-			 * Default is 12.
-			 *
 			 * @type {number}
+			 * @default 12
 			 */
 			this.holdThreshold = 12;
+
+			this._default = 0;
 		}
 
 		/*
 		 * Initializes the input's values to zero.
 		 */
-		init(inputs) {
+		_init(inputs) {
 			for (let inp of inputs) {
 				this[inp] = 0;
 			}
@@ -7968,7 +7844,7 @@ main {
 		 * Attempt to auto-correct the user's input. Inheriting classes
 		 * override this method.
 		 */
-		ac(inp) {
+		_ac(inp) {
 			return inp;
 		}
 
@@ -7977,8 +7853,8 @@ main {
 		 * @returns {boolean} true on the first frame that the user presses the input
 		 */
 		presses(inp) {
-			inp ??= this.default;
-			if (this[inp] === undefined) inp = this.ac(inp);
+			inp ??= this._default;
+			if (this[inp] === undefined) inp = this._ac(inp);
 			return this[inp] == 1 || this[inp] == -2;
 		}
 
@@ -7987,8 +7863,8 @@ main {
 		 * @returns {number} the amount of frames the user has been pressing the input
 		 */
 		pressing(inp) {
-			inp ??= this.default;
-			if (this[inp] === undefined) inp = this.ac(inp);
+			inp ??= this._default;
+			if (this[inp] === undefined) inp = this._ac(inp);
 			if (this[inp] == -2) return 1;
 			return this[inp] > 0 ? this[inp] : 0;
 		}
@@ -8007,8 +7883,8 @@ main {
 		 * @returns {boolean} true on the first frame that the user holds the input
 		 */
 		holds(inp) {
-			inp ??= this.default;
-			if (this[inp] === undefined) inp = this.ac(inp);
+			inp ??= this._default;
+			if (this[inp] === undefined) inp = this._ac(inp);
 			return this[inp] == this.holdThreshold;
 		}
 
@@ -8017,8 +7893,8 @@ main {
 		 * @returns {number} the amount of frames the user has been holding the input
 		 */
 		holding(inp) {
-			inp ??= this.default;
-			if (this[inp] === undefined) inp = this.ac(inp);
+			inp ??= this._default;
+			if (this[inp] === undefined) inp = this._ac(inp);
 			return this[inp] >= this.holdThreshold ? this[inp] : 0;
 		}
 
@@ -8027,8 +7903,8 @@ main {
 		 * @returns {boolean} true on the first frame that the user released a held input
 		 */
 		held(inp) {
-			inp ??= this.default;
-			if (this[inp] === undefined) inp = this.ac(inp);
+			inp ??= this._default;
+			if (this[inp] === undefined) inp = this._ac(inp);
 			return this[inp] == -3;
 		}
 
@@ -8037,8 +7913,8 @@ main {
 		 * @returns {boolean} true on the first frame that the user released the input
 		 */
 		released(inp) {
-			inp ??= this.default;
-			if (this[inp] === undefined) inp = this.ac(inp);
+			inp ??= this._default;
+			if (this[inp] === undefined) inp = this._ac(inp);
 			return this[inp] <= -1;
 		}
 
@@ -8057,6 +7933,8 @@ main {
 		 */
 		constructor() {
 			super();
+			this._default = 'left';
+
 			let _this = this;
 
 			// this.x and this.y store the actual position values of the mouse
@@ -8075,31 +7953,66 @@ main {
 				}
 			};
 
+			/**
+			 * The mouse's x position.
+			 * @type {Number}
+			 */
+			this.x;
+			/**
+			 * The mouse's y position.
+			 * @type {Number}
+			 */
+			this.y;
+			/**
+			 * The mouse's left button.
+			 * @type {Number}
+			 */
+			this.left;
+			/**
+			 * The mouse's center button.
+			 * @type {Number}
+			 */
+			this.center;
+			/**
+			 * The mouse's right button.
+			 * @type {Number}
+			 */
+			this.right;
+
 			let inputs = ['x', 'y', 'left', 'center', 'right'];
-			this.init(inputs);
-			this.default = 'left';
+			this._init(inputs);
+			/**
+			 * Contains the drag status of each of the mouse's buttons.
+			 * @type {object}
+			 */
 			this.drag = {
 				left: 0,
 				center: 0,
 				right: 0
 			};
+			/**
+			 * Whether the mouse is currently on the canvas or not.
+			 * @type {boolean}
+			 * @default false
+			 */
 			this.isOnCanvas = false;
+			/**
+			 * True if the mouse has ever interacted with the canvas.
+			 * @type {boolean}
+			 * @default false
+			 */
 			this.active = false;
-
-			/**
-			 * The mouse's x position.
-			 * @type {number}
-			 */
-			this.x;
-
-			/**
-			 * The mouse's y position.
-			 * @type {number}
-			 */
-			this.y;
 
 			this._visible = true;
 			this._cursor = 'default';
+		}
+
+		_ac(inp) {
+			inp = inp.toLowerCase();
+			if (inp.slice(0, 4) == 'left') inp = 'left';
+			else if (inp.slice(0, 5) == 'right') inp = 'right';
+			else if (inp.slice(0, 6) == 'middle') inp = 'center';
+			return inp;
 		}
 
 		/**
@@ -8146,20 +8059,12 @@ main {
 			else pInst.canvas.style.cursor = 'none';
 		}
 
-		ac(inp) {
-			if (inp.slice(0, 4)) inp = 'left';
-			else if (inp.slice(0, 5) == 'right') inp = 'right';
-			else if (inp.slice(0, 6) == 'middle') inp = 'center';
-			else inp = inp.toLowerCase();
-			return inp;
-		}
-
 		/**
 		 * @param {string} inp
 		 * @returns {boolean} true on the first frame that the user reaches the holdThreshold for holding the input and could start to drag
 		 */
 		drags(inp) {
-			inp ??= this.default;
+			inp ??= this._default;
 			return this.drag[inp] == 1;
 		}
 
@@ -8168,7 +8073,7 @@ main {
 		 * @returns {number} the amount of frames the user has been dragging while pressing the input
 		 */
 		dragging(inp) {
-			inp ??= this.default;
+			inp ??= this._default;
 			return this.drag[inp] > 0 ? this.drag[inp] : 0;
 		}
 
@@ -8177,7 +8082,7 @@ main {
 		 * @returns {boolean} true on the first frame that the user releases the input after dragging
 		 */
 		dragged(inp) {
-			inp ??= this.default;
+			inp ??= this._default;
 			return this.drag[inp] == -1;
 		}
 	};
@@ -8185,7 +8090,6 @@ main {
 	/**
 	 * Get user input from the mouse.
 	 * Stores the state of the left, center, or right mouse buttons.
-	 *
 	 * @type {_Mouse}
 	 */
 	this.mouse = new this._Mouse();
@@ -8332,6 +8236,7 @@ main {
 	delete this._Mouse;
 
 	this._KeyBoard = class extends this.InputDevice {
+		#test;
 		/**
 		 * <a href="https://p5play.org/learn/input_devices.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -8339,13 +8244,45 @@ main {
 		 *
 		 * Used to create the `kb` and `keyboard` objects, which store
 		 * the input status of keys on the keyboard.
+		 *
+		 * Most key properties will be undefined until the key is pressed.
 		 */
 		constructor() {
 			super();
-			this.default = ' ';
+			this._default = ' ';
+
+			this.alt = 0;
+			this.arrowUp = 0;
+			this.arrowDown = 0;
+			this.arrowLeft = 0;
+			this.arrowRight = 0;
+			this.backspace = 0;
+			this.capsLock = 0;
+			this.control = 0;
+			this.enter = 0;
+			this.meta = 0;
+			this.shift = 0;
+			this.tab = 0;
+
+			let k = (this._simpleKeyControls = {
+				arrowUp: 'up',
+				arrowDown: 'down',
+				arrowLeft: 'left',
+				arrowRight: 'right'
+			});
+
+			k.w = k.W = 'up';
+			k.s = k.S = 'down';
+			k.a = k.A = 'left';
+			k.d = k.D = 'right';
+
+			k.i = k.I = 'up2';
+			k.k = k.K = 'down2';
+			k.j = k.J = 'left2';
+			k.l = k.L = 'right2';
 		}
 
-		ac(inp) {
+		_ac(inp) {
 			if (inp.length != 1) {
 				if (!isNaN(inp)) {
 					if (inp == 38) return 'arrowUp';
@@ -8357,9 +8294,17 @@ main {
 					}
 					return inp;
 				}
-				inp = inp.replaceAll(/[ _-]/g, ' ');
+				inp = inp.replaceAll(/[ _-]/g, '');
 			}
-			return inp.toLowerCase();
+			inp = inp.toLowerCase();
+			if (inp.length != 1) {
+				if (inp == 'arrowup') return 'arrowUp';
+				if (inp == 'arrowdown') return 'arrowDown';
+				if (inp == 'arrowleft') return 'arrowLeft';
+				if (inp == 'arrowright') return 'arrowRight';
+				if (inp == 'capslock') return 'capsLock';
+			}
+			return inp;
 		}
 
 		_pre(k) {
@@ -8402,26 +8347,10 @@ main {
 		get windows() {
 			return this['meta'];
 		}
-		get arrowup() {
-			return this['arrowUp'];
-		}
-		get arrowdown() {
-			return this['arrowDown'];
-		}
-		get arrowleft() {
-			return this['arrowLeft'];
-		}
-		get arrowright() {
-			return this['arrowRight'];
-		}
-		get capslock() {
-			return this['capsLock'];
-		}
 	};
 
 	/**
 	 * Get user input from the keyboard.
-	 *
 	 * @type {_KeyBoard}
 	 */
 	this.kb = new this._KeyBoard();
@@ -8429,7 +8358,6 @@ main {
 
 	/**
 	 * Alias for kb.
-	 *
 	 * @type {_KeyBoard}
 	 */
 	this.keyboard = this.kb;
@@ -8458,26 +8386,6 @@ main {
 		return e.key;
 	}
 
-	let simpleKeyControls = {
-		arrowUp: 'up',
-		arrowDown: 'down',
-		arrowLeft: 'left',
-		arrowRight: 'right'
-	};
-
-	{
-		let k = simpleKeyControls;
-		k.w = k.W = 'up';
-		k.s = k.S = 'down';
-		k.a = k.A = 'left';
-		k.d = k.D = 'right';
-
-		k.i = k.I = 'up2';
-		k.k = k.K = 'down2';
-		k.j = k.J = 'left2';
-		k.l = k.L = 'right2';
-	}
-
 	const _onkeydown = pInst._onkeydown;
 
 	pInst._onkeydown = function (e) {
@@ -8499,7 +8407,7 @@ main {
 		}
 		this.kb._pre(key);
 
-		let k = simpleKeyControls[key];
+		let k = this.kb._simpleKeyControls[key];
 		if (k) this.kb._pre(k);
 
 		_onkeydown.call(this, e);
@@ -8524,7 +8432,7 @@ main {
 		}
 		this.kb._rel(key);
 
-		let k = simpleKeyControls[key];
+		let k = this.kb._simpleKeyControls[key];
 		if (k) this.kb._rel(k);
 
 		if (e.shiftKey) {
@@ -8548,6 +8456,9 @@ main {
 		 */
 		constructor(gp) {
 			super();
+			this._default = 'a';
+			this.connected = true;
+
 			let inputs = [
 				'a',
 				'b',
@@ -8559,6 +8470,8 @@ main {
 				'rt',
 				'select',
 				'start',
+				'lsb',
+				'rsb',
 				'up',
 				'down',
 				'left',
@@ -8566,7 +8479,7 @@ main {
 				'leftTrigger',
 				'rightTrigger'
 			];
-			this.init(inputs);
+			this._init(inputs);
 
 			this.leftStick = {
 				x: 0,
@@ -8591,8 +8504,8 @@ main {
 				rt: 7,
 				select: 8,
 				start: 9,
-				leftStickButton: 10,
-				rightStickButton: 11,
+				lsb: 10,
+				rsb: 11,
 				up: 12,
 				down: 13,
 				left: 14,
@@ -8621,19 +8534,26 @@ main {
 				this._btns.y = 2;
 			}
 
-			log(gp);
+			// log(gp);
 
 			this.gamepad = gp;
 			this.id = gp.id;
 		}
 
-		ac(inp) {
-			return inp.toLowerCase();
+		_ac(inp) {
+			inp = inp.toLowerCase();
+			if (inp == 'lb') inp = 'l';
+			else if (inp == 'rb') inp = 'r';
+			else if (inp == 'leftstickbutton') inp = 'lsb';
+			else if (inp == 'rightstickbutton') inp = 'rsb';
+			return inp;
 		}
 
 		_update() {
+			if (!this.connected) return;
+
 			this.gamepad = navigator.getGamepads()[this.gamepad.index];
-			if (!this.gamepad) return;
+			if (!this.gamepad?.connected) return;
 
 			let pad = this.gamepad;
 
@@ -8662,11 +8582,29 @@ main {
 
 			return true; // update completed
 		}
+		get ls() {
+			return this.leftStick;
+		}
+		get rs() {
+			return this.rightStick;
+		}
+		get lb() {
+			return this.l;
+		}
+		get rb() {
+			return this.r;
+		}
+		get leftStickButton() {
+			return this.lsb;
+		}
+		get rightStickButton() {
+			return this.rsb;
+		}
 	};
 
 	/**
 	 * @class
-	 * @extends Array<Contro>
+	 * @extends Array<_Contro>
 	 */
 	this._Contros = class extends Array {
 		/**
@@ -8682,14 +8620,41 @@ main {
 			super();
 			let _this = this;
 			window.addEventListener('gamepadconnected', (e) => {
-				_this._addContro(e.gamepad);
+				_this._onConnect(e.gamepad);
 			});
 
 			window.addEventListener('gamepaddisconnected', (e) => {
-				_this._removeContro(e.gamepad);
+				_this._onDisconnect(e.gamepad);
 			});
 
-			this.default = 'a';
+			/**
+			 * @type {Function}
+			 */
+			this.presses;
+			/**
+			 * @type {Function}
+			 */
+			this.pressing;
+			/**
+			 * @type {Function}
+			 */
+			this.pressed;
+			/**
+			 * @type {Function}
+			 */
+			this.holds;
+			/**
+			 * @type {Function}
+			 */
+			this.holding;
+			/**
+			 * @type {Function}
+			 */
+			this.held;
+			/**
+			 * @type {Function}
+			 */
+			this.released;
 
 			let methods = ['presses', 'pressing', 'pressed', 'holds', 'holding', 'held', 'released'];
 			for (let m of methods) {
@@ -8698,7 +8663,38 @@ main {
 				};
 			}
 
-			let inputs = [
+			this.a = 0;
+			this.b = 0;
+			this.x = 0;
+			this.y = 0;
+			this.l = 0;
+			this.r = 0;
+			this.lt = 0;
+			this.rt = 0;
+			this.select = 0;
+			this.start = 0;
+			this.lsb = 0;
+			this.rsb = 0;
+			this.up = 0;
+			this.down = 0;
+			this.left = 0;
+			this.right = 0;
+			/**
+			 * Analog value 0-1 of the left trigger.
+			 */
+			this.leftTrigger = 0;
+			/**
+			 * Analog value 0-1 of the right trigger.
+			 */
+			this.rightTrigger = 0;
+			// aliases
+			this.lb = 0;
+			this.rb = 0;
+			this.leftStickButton = 0;
+			this.rightStickButton = 0;
+
+			let props = [
+				'connected',
 				'a',
 				'b',
 				'x',
@@ -8709,23 +8705,47 @@ main {
 				'rt',
 				'select',
 				'start',
-				'leftStickButton',
-				'rightStickButton',
+				'lsb',
+				'rsb',
 				'up',
 				'down',
 				'left',
-				'right'
+				'right',
+				'leftTrigger',
+				'rightTrigger',
+				// aliases
+				'lb',
+				'rb',
+				'leftStickButton',
+				'rightStickButton'
 			];
-			for (let inp of inputs) {
-				Object.defineProperty(this, inp, {
+			for (let prop of props) {
+				Object.defineProperty(this, prop, {
 					get() {
-						if (_this[0]) return _this[0][inp];
+						if (_this[0]) return _this[0][prop];
 						return 0;
 					}
 				});
 			}
 
-			let props = ['leftStick', 'rightStick'];
+			/**
+			 * Has x and y properties with -1 to 1 values which
+			 * represent the position of the left stick.
+			 *
+			 * {x: 0, y: 0} is the center position.
+			 * @type {Object}
+			 */
+			this.leftStick;
+			/**
+			 * Has x and y properties with -1 to 1 values which
+			 * represent the position of the right stick.
+			 *
+			 * {x: 0, y: 0} is the center position.
+			 * @type {Object}
+			 */
+			this.rightStick;
+
+			props = ['leftStick', 'rightStick'];
 			for (let prop of props) {
 				this[prop] = {};
 				for (let axis of ['x', 'y']) {
@@ -8748,23 +8768,49 @@ main {
 			// so they need to be added as Contro objects
 			let gps = navigator.getGamepads();
 			for (let gp of gps) {
-				if (gp) this._addContro(gp);
+				if (gp) this._onConnect(gp);
 			}
 		}
 
-		_addContro(gp) {
+		// _addContro(gp) {
+		// 	if (!gp) return;
+		// 	log('contro[' + this.length + '] connected: ' + gp.id);
+		// 	this.push(new pInst._Contro(gp));
+		// }
+
+		// _removeContro(gp) {
+		// 	if (!gp) return;
+		// 	log('contro[' + this.length + '] disconnected: ' + gp.id);
+		// 	for (let i = 0; i < this.length; i++) {
+		// 		if (this[i].gamepad.index === gp.index) {
+		// 			this.splice(i, 1);
+		// 			break;
+		// 		}
+		// 	}
+		// }
+
+		_onConnect(gp) {
 			if (!gp) return;
-			log('controller ' + this.length + ' connected: ' + gp.id);
-			this.push(new pInst._Contro(gp));
+			for (let i = 0; i < this.length; i++) {
+				if (this[i].gamepad?.index === gp.index) {
+					this[i].connected = true;
+					log('contro[' + i + '] reconnected: ' + gp.id);
+					return;
+				}
+			}
+			log(gp);
+			log('contro[' + gp.index + '] connected: ' + gp.id);
+			let c = new pInst._Contro(gp);
+			this.push(c);
 		}
 
-		_removeContro(gp) {
+		_onDisconnect(gp) {
 			if (!gp) return;
-			log('controller ' + this.length + ' disconnected: ' + gp.id);
 			for (let i = 0; i < this.length; i++) {
-				if (this[i].gamepad.index === gp.index) {
-					this.splice(i, 1);
-					break;
+				if (this[i].gamepad?.index === gp.index) {
+					this[i].connected = false;
+					log('contro[' + i + '] disconnected: ' + gp.id);
+					return;
 				}
 			}
 		}
@@ -8781,7 +8827,6 @@ main {
 
 	/**
 	 * Get user input from game controllers.
-	 *
 	 * @type {_Contros}
 	 */
 	this.contro = new this._Contros();
@@ -8789,7 +8834,6 @@ main {
 
 	/**
 	 * Alias for contro
-	 *
 	 * @type {_Contros}
 	 */
 	this.controllers = this.contro;

@@ -9,7 +9,6 @@ class P5Play {
      * but users should use the `allSprites` group.
      *
      * The keys are the sprite's unique ids.
-     *
      * @type {Object}
      */
     sprites: any;
@@ -17,7 +16,6 @@ class P5Play {
      * Contains all the groups in the sketch,
      *
      * The keys are the group's unique ids.
-     *
      * @type {Object}
      */
     groups: any;
@@ -27,7 +25,6 @@ class P5Play {
     /**
      * Used for debugging, set to true to make p5play
      * not load any images.
-     *
      * @type {Boolean}
      */
     disableImages: boolean;
@@ -48,7 +45,6 @@ var p5play: P5Play;
  */
 /**
  * Shortcut for console.log
- *
  * @type {Function}
  * @param {...any} args
  */
@@ -94,14 +90,12 @@ class Sprite {
     /**
      * Each sprite has a unique id number. Don't change it!
      * Its useful for debugging. Sprite id numbers start at 1000.
-     *
      * @type {Number}
      */
     idNum: number;
     /**
      * If set to true, p5play will record all changes to the sprite's
      * properties in its `mod` array.
-     *
      * @type {Boolean}
      * @default undefined
      */
@@ -110,20 +104,17 @@ class Sprite {
      * An array of booleans that indicate which properties were
      * changed since the last frame. Useful for only sending
      * modified sprite data in binary netcode.
-     *
      * @type {Array}
      */
     mod: any[];
     /**
      * Groups the sprite belongs to, including allSprites
-     *
      * @type {Group[]}
      * @default [allSprites]
      */
     groups: Group[];
     /**
      * Keys are the animation label, values are SpriteAnimation objects.
-     *
      * @type {SpriteAnimations}
      */
     animations: SpriteAnimations;
@@ -139,7 +130,6 @@ class Sprite {
      *
      * For example, if the tile size is 16, then a sprite with
      * x=1 and y=1 will be drawn at position (16, 16) on the canvas.
-     *
      * @type {Number}
      * @default 1
      */
@@ -150,7 +140,6 @@ class Sprite {
      *
      * The collider type can be one of the following strings:
      * 'dynamic', 'static', 'kinematic', 'none'.
-     *
      * @type {String}
      * @default 'dynamic'
      */
@@ -182,7 +171,6 @@ class Sprite {
     get h(): number;
     /**
      * The sprite's position on the previous frame.
-     *
      * @type {object}
      */
     prevPos: object;
@@ -190,7 +178,6 @@ class Sprite {
     set drag(arg: number);
     /**
      * The amount of resistance a sprite has to being moved.
-     *
      * @type {Number}
      * @default 0
      */
@@ -258,7 +245,6 @@ class Sprite {
     set animation(arg: SpriteAnimation);
     /**
      * Reference to the sprite's current animation.
-     *
      * @type {SpriteAnimation}
      */
     get animation(): SpriteAnimation;
@@ -273,7 +259,6 @@ class Sprite {
      *
      * It only needs to be set to false once and then it will
      * remain false for the rest of the sketch, unless changed.
-     *
      * @type {Boolean}
      * @default true
      */
@@ -285,7 +270,6 @@ class Sprite {
      * "Sleeping" sprites are not included in the physics simulation, a
      * sprite starts "sleeping" when it stops moving and doesn't collide
      * with anything that it wasn't already touching.
-     *
      * @type {Boolean}
      * @default true
      */
@@ -298,7 +282,6 @@ class Sprite {
      *
      * It only needs to be set to false once and then it will
      * remain false for the rest of the sketch, unless changed.
-     *
      * @type {Boolean}
      * @default true
      */
@@ -306,21 +289,18 @@ class Sprite {
     set bounciness(arg: number);
     /**
      * The bounciness of the sprite's physics body.
-     *
      * @type {Number}
      * @default 0.2
      */
     get bounciness(): number;
     /**
      * The center of mass of the sprite's physics body.
-     *
      * @type {p5.Vector}
      */
     get centerOfMass(): p5.Vector;
     set color(arg: p5.Color);
     /**
      * The sprite's current color. By default sprites get a random color.
-     *
      * @type {p5.Color}
      * @default random color
      */
@@ -328,7 +308,6 @@ class Sprite {
     set colour(arg: p5.Color);
     /**
      * Alias for color. colour is the British English spelling.
-     *
      * @type {p5.Color}
      * @default random color
      */
@@ -336,7 +315,6 @@ class Sprite {
     set fill(arg: p5.Color);
     /**
      * Alias for sprite.fillColor
-     *
      * @type {p5.Color}
      * @default random color
      */
@@ -344,7 +322,6 @@ class Sprite {
     set fillColor(arg: p5.Color);
     /**
      * Alias for sprite.color
-     *
      * @type {p5.Color}
      * @default random color
      */
@@ -352,7 +329,6 @@ class Sprite {
     set stroke(arg: p5.Color);
     /**
      * Alias for sprite.strokeColor
-     *
      * @type {p5.Color}
      */
     get stroke(): p5.Color;
@@ -360,14 +336,12 @@ class Sprite {
     /**
      * The sprite's stroke color. By default the stroke of a sprite
      * is determined by its collider type.
-     *
      * @type {p5.Color}
      */
     get strokeColor(): p5.Color;
     set strokeWeight(arg: number);
     /**
      * The sprite's stroke weight, the thickness of its outline.
-     *
      * @type {Number}
      * @default undefined
      */
@@ -375,7 +349,6 @@ class Sprite {
     set textColor(arg: p5.Color);
     /**
      * The sprite's current text color. Black by default.
-     *
      * @type {p5.Color}
      * @default black (#000000)
      */
@@ -394,7 +367,6 @@ class Sprite {
     set density(arg: number);
     /**
      * The density of the sprite's physics body.
-     *
      * @type {Number}
      * @default 5
      */
@@ -403,7 +375,6 @@ class Sprite {
     /**
      * The angle of the sprite's movement or it's rotation angle if the
      * sprite is not moving.
-     *
      * @type {Number}
      * @default 0 ("right")
      */
@@ -433,7 +404,6 @@ class Sprite {
     set dynamic(arg: boolean);
     /**
      * True if the sprite's physics body is dynamic.
-     *
      * @type {Boolean}
      * @default true
      */
@@ -452,7 +422,6 @@ class Sprite {
     /**
      * The amount the sprite's physics body resists moving
      * when rubbing against another physics body.
-     *
      * @type {Number}
      * @default 0.5
      */
@@ -464,7 +433,6 @@ class Sprite {
      *
      * It ignores cardinal direction word order, capitalization, spaces,
      * underscores, and dashes.
-     *
      * @type {String}
      * @default undefined
      */
@@ -472,20 +440,17 @@ class Sprite {
     set img(arg: p5.Image);
     /**
      * A reference to the sprite's current image.
-     *
      * @type {p5.Image}
      */
     get img(): p5.Image;
     set image(arg: p5.Image);
     /**
      * A reference to the sprite's current image.
-     *
      * @type {p5.Image}
      */
     get image(): p5.Image;
     /**
      * Read only. True if the sprite is moving.
-     *
      * @type {Boolean}
      */
     get isMoving(): boolean;
@@ -493,7 +458,6 @@ class Sprite {
     /**
      * Set this to true if the sprite goes really fast to prevent
      * inaccurate physics simulation.
-     *
      * @type {Boolean}
      * @default false
      */
@@ -501,7 +465,6 @@ class Sprite {
     set kinematic(arg: boolean);
     /**
      * True if the sprite's physics body is kinematic.
-     *
      * @type {Boolean}
      * @default false
      */
@@ -511,7 +474,6 @@ class Sprite {
      * By default sprites are drawn in the order they were created in.
      * You can change the draw order by editing sprite's layer
      * property. Sprites with the highest layer value get drawn first.
-     *
      * @type {Number}
      */
     get layer(): number;
@@ -528,7 +490,6 @@ class Sprite {
      * representing infinite life. This limitation makes sprite netcode
      * smaller. But don't worry, at 60 fps this gives users a definable
      * sprite life range between 1 frame and ~411 days!
-     *
      * @type {Number}
      * @default 2147483647
      */
@@ -536,7 +497,6 @@ class Sprite {
     set mass(arg: number);
     /**
      * The mass of the sprite's physics body.
-     *
      * @type {Number}
      */
     get mass(): number;
@@ -553,7 +513,6 @@ class Sprite {
     set mirror(arg: any);
     /**
      * The sprite's mirror states.
-     *
      * @type {Object}
      * @property {Boolean} x - The sprite's horizontal mirror state.
      * @property {Boolean} y - The sprite's vertical mirror state.
@@ -567,21 +526,18 @@ class Sprite {
      *
      * The sprite's x and y properties represent its center in world
      * coordinates. This point is also the sprite's center of rotation.
-     *
      * @type {object}
      */
     get offset(): any;
     set previousPosition(arg: any);
     /**
      * Verbose alias for sprite.prevPos
-     *
      * @type {Object}
      */
     get previousPosition(): any;
     set previousRotation(arg: number);
     /**
      * Verbose alias for sprite.prevRotation
-     *
      * @type {Number}
      */
     get previousRotation(): number;
@@ -591,7 +547,6 @@ class Sprite {
      *
      * Set pixelPerfect to true to make p5play always display sprites
      * at integer pixel precision. This is useful for making retro games.
-     *
      * @type {Boolean}
      * @default false
      */
@@ -599,7 +554,6 @@ class Sprite {
     set rotation(arg: number);
     /**
      * The angle of the sprite's rotation, not the direction it is moving.
-     *
      * @type {Number}
      * @default 0
      */
@@ -607,7 +561,6 @@ class Sprite {
     set rotationDrag(arg: number);
     /**
      * The amount the sprite resists rotating.
-     *
      * @type {Number}
      * @default 0
      */
@@ -615,7 +568,6 @@ class Sprite {
     set rotationLock(arg: boolean);
     /**
      * If true, the sprite can not rotate.
-     *
      * @type {Boolean}
      * @default false
      */
@@ -623,7 +575,6 @@ class Sprite {
     set rotationSpeed(arg: number);
     /**
      * The speed of the sprite's rotation.
-     *
      * @type {Number}
      * @default 0
      */
@@ -638,7 +589,6 @@ class Sprite {
      * The valueOf function for sprite.scale returns the scale as a
      * number. This enables users to do things like `sprite.scale *= 2`
      * to double the sprite's scale.
-     *
      * @type {Number|Object}
      * @default 1
      */
@@ -650,7 +600,6 @@ class Sprite {
      * "Sleeping" sprites are not included in the physics simulation, a
      * sprite starts "sleeping" when it stops moving and doesn't collide
      * with anything that it wasn't already touching.
-     *
      * @type {Boolean}
      * @default true
      */
@@ -661,7 +610,6 @@ class Sprite {
      *
      * Setting speed to a negative value will make the sprite move
      * 180 degrees opposite of its current direction angle.
-     *
      * @type {Number}
      * @default 0
      */
@@ -669,7 +617,6 @@ class Sprite {
     set static(arg: boolean);
     /**
      * Is the sprite's physics collider static?
-     *
      * @type {Boolean}
      * @default false
      */
@@ -677,14 +624,12 @@ class Sprite {
     set removed(arg: boolean);
     /**
      * If the sprite has been removed from the world.
-     *
      * @type {Boolean}
      * @default false
      */
     get removed(): boolean;
     /**
      * Read only. The sprite's vertices.
-     *
      * @type {p5.Vector[]}
      */
     get vertices(): p5.Vector[];
@@ -694,7 +639,6 @@ class Sprite {
      *
      * Becomes null when the sprite is off screen but will be drawn and
      * set to true again if it goes back on screen.
-     *
      * @type {Boolean}
      * @default true
      */
@@ -702,14 +646,12 @@ class Sprite {
     set pos(arg: p5.Vector);
     /**
      * The position vector {x, y}
-     *
      * @type {p5.Vector}
      */
     get pos(): p5.Vector;
     set position(arg: p5.Vector);
     /**
      * The position vector {x, y}
-     *
      * @type {p5.Vector}
      */
     get position(): p5.Vector;
@@ -776,7 +718,6 @@ class Sprite {
     set shape(arg: string);
     /**
      * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
-     *
      * @type {String}
      * @default box
      */
@@ -1090,13 +1031,11 @@ class SpriteAnimation extends Array<p5.Image> {
     p: any;
     /**
      * The name of the animation
-     *
      * @type {String}
      */
     name: string;
     /**
      * The index of the current frame that the animation is on.
-     *
      * @type {Number}
      */
     frame: number;
@@ -1104,7 +1043,6 @@ class SpriteAnimation extends Array<p5.Image> {
     /**
      * The offset is how far the animation should be placed from
      * the location it is played at.
-     *
      * @type {Object}
      * @example
      * ani.offset.x = 16;
@@ -1113,21 +1051,18 @@ class SpriteAnimation extends Array<p5.Image> {
     demoMode: any;
     /**
      * True if the animation is currently playing.
-     *
      * @type {Boolean}
      * @default true
      */
     playing: boolean;
     /**
      * Animation visibility.
-     *
      * @type {Boolean}
      * @default true
      */
     visible: boolean;
     /**
      * If set to false the animation will stop after reaching the last frame
-     *
      * @type {Boolean}
      * @default true
      */
@@ -1137,14 +1072,12 @@ class SpriteAnimation extends Array<p5.Image> {
      * This is useful for animations that are symmetric.
      * For example a walking cycle where the first frame is the
      * same as the last frame.
-     *
      * @type {Boolean}
      * @default false
      */
     endOnFirstFrame: boolean;
     /**
      * True if frame changed during the last draw cycle
-     *
      * @type {Boolean}
      */
     frameChanged: boolean;
@@ -1157,7 +1090,6 @@ class SpriteAnimation extends Array<p5.Image> {
      * Delay between frames in number of draw cycles.
      * If set to 4 the framerate of the animation would be the
      * sketch framerate divided by 4 (60fps = 15fps)
-     *
      * @type {Number}
      * @default 4
      */
@@ -1172,7 +1104,6 @@ class SpriteAnimation extends Array<p5.Image> {
      *
      * Can be set to a number to scale both x and y
      * or an object with x and/or y properties.
-     *
      * @type {Number|Object}
      * @default 1
      */
@@ -1253,49 +1184,41 @@ class SpriteAnimation extends Array<p5.Image> {
     goToFrame(toFrame: number): Promise<any>;
     /**
      * Read only. Returns the index of the last frame.
-     *
      * @type {Number}
      */
     get lastFrame(): number;
     /**
      * Read only. Returns the current frame as p5.Image.
-     *
      * @type {p5.Image}
      */
     get frameImage(): p5.Image;
     /**
      * Width of the animation.
-     *
      * @type {Number}
      */
     get w(): number;
     /**
      * Width of the animation.
-     *
      * @type {Number}
      */
     get width(): number;
     /**
      * Height of the animation.
-     *
      * @type {Number}
      */
     get h(): number;
     /**
      * Height of the animation.
-     *
      * @type {Number}
      */
     get height(): number;
     /**
      * The frames of the animation.
-     *
      * @type {p5.Image[]}
      */
     get frames(): p5.Image[];
     /**
      * The frames of the animation. Alt for ani.frames
-     *
      * @type {p5.Image[]}
      */
     get images(): p5.Image[];
@@ -1548,14 +1471,12 @@ class Group extends Array<Sprite> {
     /**
      * Each group has a unique id number. Don't change it!
      * Its useful for debugging.
-     *
      * @type {Number}
      */
     idNum: number;
     /**
      * Groups can have subgroups, which inherit the properties
      * of their parent groups.
-     *
      * @type {Group[]}
      * @default []
      */
@@ -1563,7 +1484,6 @@ class Group extends Array<Sprite> {
     parent: any;
     /**
      * Keys are the animation label, values are SpriteAnimation objects.
-     *
      * @type {SpriteAnimations}
      */
     animations: SpriteAnimations;
@@ -1596,7 +1516,6 @@ class Group extends Array<Sprite> {
      *
      * It only needs to be set to false once and then it will
      * remain false for the rest of the sketch, unless changed.
-     *
      * @type {Boolean}
      */
     autoCull: boolean;
@@ -1630,41 +1549,35 @@ class Group extends Array<Sprite> {
     set ani(arg: SpriteAnimation);
     /**
      * Reference to the group's current animation.
-     *
      * @type {SpriteAnimation}
      */
     get ani(): SpriteAnimation;
     set animation(arg: SpriteAnimation);
     /**
      * Reference to the group's current animation.
-     *
      * @type {SpriteAnimation}
      */
     get animation(): SpriteAnimation;
     /**
      * The group's animations.
-     *
      * @type {SpriteAnimations}
      */
     get anis(): SpriteAnimations;
     set img(arg: p5.Image);
     /**
      * Reference to the group's current image.
-     *
      * @type {p5.Image}
      */
     get img(): p5.Image;
     set image(arg: p5.Image);
     /**
      * Reference to the group's current image.
-     *
      * @type {p5.Image}
      */
     get image(): p5.Image;
     /**
      * Depending on the value that the amount property is set to, the group will
      * either add or remove sprites.
-     *
      * @type {Number}
      */
     set amount(arg: any);
@@ -1821,7 +1734,6 @@ class World {
      *
      * Adjust the velocity threshold to allow for slow moving objects
      * but don't have it be too low, or else objects will never sleep.
-     *
      * @type {Number}
      * @default 0.19
      */
@@ -1832,7 +1744,6 @@ class World {
     set gravity(arg: any);
     /**
      * Gravity force vector that affects all dynamic physics colliders.
-     *
      * @type {Object}
      * @property {Number} x
      * @property {Number} y
@@ -1895,7 +1806,6 @@ class World {
      *
      * This is an important performance optimization that you probably
      * shouldn't disable for every sprite in the world.
-     *
      * @type {Boolean}
      * @default true
      */
@@ -1927,7 +1837,6 @@ class Camera {
     p: any;
     /**
      * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
-     *
      * @type {Object}
      */
     mouse: any;
@@ -1941,7 +1850,6 @@ class Camera {
      * Read only. True if the camera is active.
      * Use the methods Camera.on() and Camera.off()
      * to enable or disable the camera.
-     *
      * @type {Boolean}
      * @default false
      */
@@ -1959,28 +1867,24 @@ class Camera {
     set x(arg: number);
     /**
      * The camera x position.
-     *
      * @type {Number}
      */
     get x(): number;
     set y(arg: number);
     /**
      * The camera y position.
-     *
      * @type {Number}
      */
     get y(): number;
     set pos(arg: any);
     /**
      * The camera's position. {x, y}
-     *
      * @type {Object}
      */
     get pos(): any;
     set position(arg: any);
     /**
      * The camera's position. Alias for pos.
-     *
      * @type {Object}
      */
     get position(): any;
@@ -1991,7 +1895,6 @@ class Camera {
      * A scale of 1 will be the normal size. Setting it to 2
      * will make everything appear twice as big. .5 will make
      * everything look half size.
-     *
      * @type {Number}
      * @default 1
      */
@@ -2058,13 +1961,11 @@ class Joint {
     p: any;
     /**
      * The first sprite in the joint.
-     *
      * @type {Sprite}
      */
     spriteA: Sprite;
     /**
      * The second sprite in the joint.
-     *
      * @type {Sprite}
      */
     spriteB: Sprite;
@@ -2074,14 +1975,12 @@ class Joint {
      * "glue", "distance", "wheel", "hinge", "slider", or "rope".
      *
      * Can't be changed after the joint is created.
-     *
      * @type {String}
      */
     type: string;
     /**
      * Determines whether to draw the joint if spriteA
      * or spriteB is drawn.
-     *
      * @type {Boolean}
      * @default true
      */
@@ -2101,7 +2000,6 @@ class Joint {
      * Offset to the joint's anchorA position from the center of spriteA.
      *
      * Only distance and hinge joints have an offsetA.
-     *
      * @type {p5.Vector}
      * @default {x: 0, y: 0}
      */
@@ -2111,7 +2009,6 @@ class Joint {
      * Offset to the joint's anchorB position from the center of spriteB.
      *
      * Only distance, hinge, and wheel joints have an offsetB.
-     *
      * @type {p5.Vector}
      * @default {x: 0, y: 0}
      */
@@ -2134,7 +2031,6 @@ class Joint {
      * 0.5-0.8 -> 2.5hz-1hz (bouncy spring)
      * 0.8-0.9 -> 1hz-0.5hz (slinky)
      * 0.9-1.0 -> 0.5hz-0.2hz (bungee cord)
-     *
      * @type {Number}
      * @default 0.0
      */
@@ -2150,7 +2046,6 @@ class Joint {
      * 0.0 lets the joint continue to spring up and down very easily.
      * 1.0 makes the joint lose vibrational energy immediately,
      * making the joint completely rigid, regardless of its springiness.
-     *
      * @type {Number}
      * @default 0.0
      */
@@ -2158,7 +2053,6 @@ class Joint {
     set speed(arg: number);
     /**
      * The current speed of the joint's motor.
-     *
      * @type {Number}
      * @default 0
      */
@@ -2169,7 +2063,6 @@ class Joint {
      * Enable or disable the joint's motor.
      * Disabling the motor is like putting a
      * car in neutral.
-     *
      * @type {Boolean}
      */
     get enableMotor(): boolean;
@@ -2177,7 +2070,6 @@ class Joint {
     /**
      * Max power is how the amount of torque a joint motor can exert
      * around its axis of rotation.
-     *
      * @type {Number}
      * @default 0
      */
@@ -2185,7 +2077,6 @@ class Joint {
     /**
      * Read only.  The joint's current power, the amount of torque
      * being applied on the joint's axis of rotation.
-     *
      * @type {Number}
      * @default 0
      */
@@ -2194,7 +2085,6 @@ class Joint {
     /**
      * Set to true if you want the joint's sprites to collide with
      * each other.
-     *
      * @type {Boolean}
      * @default false
      */
@@ -2240,7 +2130,6 @@ class WheelJoint extends Joint {
      * The angle at which the wheel is attached to the vehicle body.
      *
      * The default is 90 degrees or PI/2 radians, which is vertical.
-     *
      * @type {Number}
      * @default 90
      */
@@ -2261,7 +2150,6 @@ class HingeJoint extends Joint {
     /**
      * The joint's range of rotation. Setting the range
      * changes the joint's upper and lower limits.
-     *
      * @type {Number}
      * @default undefined
      */
@@ -2269,7 +2157,6 @@ class HingeJoint extends Joint {
     set upperLimit(arg: number);
     /**
      * The upper limit of rotation.
-     *
      * @type {Number}
      * @default undefined
      */
@@ -2277,14 +2164,12 @@ class HingeJoint extends Joint {
     set lowerLimit(arg: number);
     /**
      * The lower limit of rotation.
-     *
      * @type {Number}
      * @default undefined
      */
     get lowerLimit(): number;
     /**
      * Read only. The joint's current angle of rotation.
-     *
      * @type {Number}
      * @default 0
      */
@@ -2305,7 +2190,6 @@ class SliderJoint extends Joint {
     set angle(arg: number);
     /**
      * The angle of the joint's axis which its sprites slide along.
-     *
      * @type {Number}
      * @default 0
      */
@@ -2314,7 +2198,6 @@ class SliderJoint extends Joint {
     /**
      * The joint's range of translation. Setting the range
      * changes the joint's upper and lower limits.
-     *
      * @type {Number}
      * @default undefined
      */
@@ -2323,7 +2206,6 @@ class SliderJoint extends Joint {
     /**
      * The mathematical upper (not positionally higher)
      * limit of translation.
-     *
      * @type {Number}
      * @default undefined
      */
@@ -2332,7 +2214,6 @@ class SliderJoint extends Joint {
     /**
      * The mathematical lower (not positionally lower)
      * limit of translation.
-     *
      * @type {Number}
      * @default undefined
      */
@@ -2390,28 +2271,24 @@ class Canvas {
     constructor(w: number, h: number, mode?: string);
     /**
      * The width of the canvas.
-     *
      * @type {Number}
      * @default 100
      */
     get w(): number;
     /**
      * The width of the canvas.
-     *
      * @type {Number}
      * @default 100
      */
     get width(): number;
     /**
      * The height of the canvas.
-     *
      * @type {Number}
      * @default 100
      */
     get h(): number;
     /**
      * The height of the canvas.
-     *
      * @type {Number}
      * @default 100
      */
@@ -2457,13 +2334,10 @@ var camera: Camera;
 class InputDevice {
     /**
      * The amount of frames an input must be pressed to be considered held.
-     * Default is 12.
-     *
      * @type {number}
+     * @default 12
      */
     holdThreshold: number;
-    init(inputs: any): void;
-    ac(inp: any): any;
     /**
      * @param {string} inp
      * @returns {boolean} true on the first frame that the user presses the input
@@ -2503,24 +2377,48 @@ class InputDevice {
     releases(inp: any): boolean;
 }
 class _Mouse extends InputDevice {
-    default: string;
-    drag: {
-        left: number;
-        center: number;
-        right: number;
-    };
-    isOnCanvas: boolean;
-    active: boolean;
     /**
      * The mouse's x position.
-     * @type {number}
+     * @type {Number}
      */
     x: number;
     /**
      * The mouse's y position.
-     * @type {number}
+     * @type {Number}
      */
     y: number;
+    /**
+     * The mouse's left button.
+     * @type {Number}
+     */
+    left: number;
+    /**
+     * The mouse's center button.
+     * @type {Number}
+     */
+    center: number;
+    /**
+     * The mouse's right button.
+     * @type {Number}
+     */
+    right: number;
+    /**
+     * Contains the drag status of each of the mouse's buttons.
+     * @type {object}
+     */
+    drag: object;
+    /**
+     * Whether the mouse is currently on the canvas or not.
+     * @type {boolean}
+     * @default false
+     */
+    isOnCanvas: boolean;
+    /**
+     * True if the mouse has ever interacted with the canvas.
+     * @type {boolean}
+     * @default false
+     */
+    active: boolean;
     /**
      * The mouse's position.
      * @type {object}
@@ -2578,30 +2476,31 @@ class _SpriteMouse extends _Mouse {
     hovered(): boolean;
 }
 class _KeyBoard extends InputDevice {
-    default: string;
-    get cmd(): any;
-    get command(): any;
-    get ctrl(): any;
+    alt: number;
+    arrowUp: number;
+    arrowDown: number;
+    arrowLeft: number;
+    arrowRight: number;
+    backspace: number;
+    capsLock: number;
+    control: number;
+    enter: number;
+    meta: number;
+    shift: number;
+    tab: number;
+    get cmd(): number;
+    get command(): number;
+    get ctrl(): number;
     get space(): any;
     get spacebar(): any;
-    get opt(): any;
-    get option(): any;
-    get win(): any;
-    get windows(): any;
-    get arrowup(): any;
-    get arrowdown(): any;
-    get arrowleft(): any;
-    get arrowright(): any;
-    get capslock(): any;
+    get opt(): number;
+    get option(): number;
+    get win(): number;
+    get windows(): number;
+    #private;
 }
 var kb: _KeyBoard;
 var keyboard: _KeyBoard;
-namespace simpleKeyControls {
-    let arrowUp: string;
-    let arrowDown: string;
-    let arrowLeft: string;
-    let arrowRight: string;
-}
 class _Contro extends InputDevice {
     /**
      * <a href="https://p5play.org/learn/input_devices.html">
@@ -2613,6 +2512,7 @@ class _Contro extends InputDevice {
      * triggers, and sticks on game controllers.
      */
     constructor(gp: any);
+    connected: boolean;
     leftStick: {
         x: number;
         y: number;
@@ -2627,6 +2527,20 @@ class _Contro extends InputDevice {
     id: any;
     leftTrigger: any;
     rightTrigger: any;
+    get ls(): {
+        x: number;
+        y: number;
+        btn: number;
+    };
+    get rs(): {
+        x: number;
+        y: number;
+        btn: number;
+    };
+    get lb(): any;
+    get rb(): any;
+    get leftStickButton(): any;
+    get rightStickButton(): any;
 }
 /**
  * @class
@@ -2643,7 +2557,78 @@ class _Contros extends Array<_Contro> {
      * triggers, and sticks on game controllers.
      */
     constructor();
-    default: string;
+    /**
+     * @type {Function}
+     */
+    presses: Function;
+    /**
+     * @type {Function}
+     */
+    pressing: Function;
+    /**
+     * @type {Function}
+     */
+    pressed: Function;
+    /**
+     * @type {Function}
+     */
+    holds: Function;
+    /**
+     * @type {Function}
+     */
+    holding: Function;
+    /**
+     * @type {Function}
+     */
+    held: Function;
+    /**
+     * @type {Function}
+     */
+    released: Function;
+    a: number;
+    b: number;
+    x: number;
+    y: number;
+    l: number;
+    r: number;
+    lt: number;
+    rt: number;
+    select: number;
+    start: number;
+    lsb: number;
+    rsb: number;
+    up: number;
+    down: number;
+    left: number;
+    right: number;
+    /**
+     * Analog value 0-1 of the left trigger.
+     */
+    leftTrigger: number;
+    /**
+     * Analog value 0-1 of the right trigger.
+     */
+    rightTrigger: number;
+    lb: number;
+    rb: number;
+    leftStickButton: number;
+    rightStickButton: number;
+    /**
+     * Has x and y properties with -1 to 1 values which
+     * represent the position of the left stick.
+     *
+     * {x: 0, y: 0} is the center position.
+     * @type {Object}
+     */
+    leftStick: any;
+    /**
+     * Has x and y properties with -1 to 1 values which
+     * represent the position of the right stick.
+     *
+     * {x: 0, y: 0} is the center position.
+     * @type {Object}
+     */
+    rightStick: any;
 }
 var contro: _Contros;
 var controllers: _Contros;
