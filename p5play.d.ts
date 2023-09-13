@@ -1487,16 +1487,10 @@ class Group extends Array<Sprite> {
      * @type {SpriteAnimations}
      */
     animations: SpriteAnimations;
-    /**
-     * Contains all the collision callback functions for this group
-     * when it comes in contact with other sprites or groups.
-     */
-    /**
-     * Contains all the overlap callback functions for this group
-     * when it comes in contact with other sprites or groups.
-     */
-    GroupSprite: any;
-    Subgroup: any;
+    Sprite: typeof Sprite;
+    GroupSprite: typeof Sprite;
+    Group: typeof Group;
+    Subgroup: typeof Group;
     mouse: {
         presses: any;
         pressing: any;

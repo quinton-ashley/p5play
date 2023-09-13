@@ -4664,7 +4664,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.animations = new this.p.SpriteAnimations();
 
-			/**
+			/*
 			 * Contains all the collision callback functions for this group
 			 * when it comes in contact with other sprites or groups.
 			 */
@@ -4673,7 +4673,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._collided = {};
 
 			this._hasOverlap = {};
-			/**
+			/*
 			 * Contains all the overlap callback functions for this group
 			 * when it comes in contact with other sprites or groups.
 			 */
@@ -4686,18 +4686,34 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let _this = this;
 
+			/**
+			 * @type {Sprite.constructor}
+			 */
+			this.Sprite;
+
 			this.Sprite = class extends this.p.Sprite {
 				constructor() {
 					super(_this, ...arguments);
 				}
 			};
+			/**
+			 * @type {Sprite.constructor}
+			 */
 			this.GroupSprite = this.Sprite;
+
+			/**
+			 * @type {Group.constructor}
+			 */
+			this.Group;
 
 			this.Group = class extends this.p.Group {
 				constructor() {
 					super(_this, ...arguments);
 				}
 			};
+			/**
+			 * @type {Group.constructor}
+			 */
 			this.Subgroup = this.Group;
 
 			this.mouse = {
