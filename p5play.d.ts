@@ -1575,6 +1575,8 @@ class Group extends Array<Sprite> {
      * @type {Number}
      */
     set amount(arg: any);
+    set velocity(arg: number);
+    get velocity(): number;
     centroid: {
         x: number;
         y: number;

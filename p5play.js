@@ -611,7 +611,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let skipProps = [
 				'ani',
 				'collider',
-				'vel',
 				'x',
 				'y',
 				'w',
@@ -621,8 +620,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				'dynamic',
 				'height',
 				'kinematic',
-				'speed',
 				'static',
+				'vel',
 				'width'
 			];
 
@@ -4926,6 +4925,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (shouldAdd) new this.Sprite();
 				else this[this.length - 1].remove();
 			}
+		}
+
+		get velocity() {
+			return this.vel;
+		}
+		set velocity(val) {
+			this.vel = val;
 		}
 
 		_resetCentroid() {
