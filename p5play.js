@@ -4687,7 +4687,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let _this = this;
 
 			/**
-			 * @type {Sprite.constructor}
+			 * @type {Sprite}
 			 */
 			this.Sprite;
 
@@ -4697,12 +4697,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 			/**
-			 * @type {Sprite.constructor}
+			 * @type {Sprite}
 			 */
 			this.GroupSprite = this.Sprite;
 
 			/**
-			 * @type {Group.constructor}
+			 * @type {Group}
 			 */
 			this.Group;
 
@@ -4712,7 +4712,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 			/**
-			 * @type {Group.constructor}
+			 * @type {Group}
 			 */
 			this.Subgroup = this.Group;
 
@@ -8499,14 +8499,12 @@ main {
 
 			this.leftStick = {
 				x: 0,
-				y: 0,
-				btn: 0
+				y: 0
 			};
 
 			this.rightStick = {
 				x: 0,
-				y: 0,
-				btn: 0
+				y: 0
 			};
 
 			this._btns = {

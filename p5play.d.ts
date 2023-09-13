@@ -2510,12 +2510,10 @@ class _Contro extends InputDevice {
     leftStick: {
         x: number;
         y: number;
-        btn: number;
     };
     rightStick: {
         x: number;
         y: number;
-        btn: number;
     };
     gamepad: any;
     id: any;
@@ -2524,12 +2522,10 @@ class _Contro extends InputDevice {
     get ls(): {
         x: number;
         y: number;
-        btn: number;
     };
     get rs(): {
         x: number;
         y: number;
-        btn: number;
     };
     get lb(): any;
     get rb(): any;
