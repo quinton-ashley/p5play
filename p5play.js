@@ -342,6 +342,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (_this.body) {
 						let pos = new pl.Vec2((val * _this.tileSize) / plScale, _this.body.getPosition().y);
 						_this.body.setPosition(pos);
+						_this.body.synchronizeTransform();
 					}
 					_this._position.x = val;
 				}
@@ -357,6 +358,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (_this.body) {
 						let pos = new pl.Vec2(_this.body.getPosition().x, (val * _this.tileSize) / plScale);
 						_this.body.setPosition(pos);
+						_this.body.synchronizeTransform();
 					}
 					_this._position.y = val;
 				}
@@ -722,8 +724,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Number} h height of the collider
 		 */
 		addCollider(offsetX, offsetY, w, h) {
-			if (this.collider == 'none') {
-				throw new Error('Cannot add a collider to a sprite that has none.');
+			if (this.__collider == 3) {
+				this._collider = 'kinematic';
+				this.__collider = 2;
 			}
 			let props = {};
 			props.shape = this._parseShape(...arguments);
@@ -765,9 +768,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.body) {
 				this.body = this.p.world.createBody({
 					position: scaleTo(this.x, this.y, this.tileSize),
-					type: 'dynamic'
+					type: 'kinematic'
 				});
 				this.body.sprite = this;
+				this.rotation = this._angle;
 			}
 			this.body.createFixture({
 				shape: s,
@@ -1276,9 +1280,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				} else {
 					this.addCollider();
 				}
-				if (this._hasSensors) {
-					this.addDefaultSensors();
-				}
+			}
+			if (this._hasSensors) {
+				this.addDefaultSensors();
 			}
 			for (let prop in bodyProps) {
 				if (bodyProps[prop] !== undefined) {
@@ -1801,7 +1805,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The angle of the sprite's rotation, not the direction it is moving.
+		 * The angle of the sprite's rotation, not the direction it's moving.
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1815,6 +1819,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.body) {
 				if (this.p._angleMode === 'degrees') val = this.p.radians(val);
 				this.body.setAngle(val);
+				this.body.synchronizeTransform();
 			} else {
 				this._angle = val;
 			}
@@ -2260,7 +2265,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			}
 			if (this._widthUndef || this._heightUndef) this.resetMass();
-			if (this.collider == 'static') this.body.synchronizeFixtures();
+			this.body.synchronizeFixtures();
 		}
 
 		/*
@@ -2347,6 +2352,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._customUpdate = val;
 		}
 
+		/**
+		 * The sprite's velocity vector {x, y}
+		 * @type {p5.Vector}
+		 * @default {x: 0, y: 0}
+		 */
 		get vel() {
 			return this._vel;
 		}
@@ -2355,6 +2365,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.vel.y = val.y;
 		}
 
+		/**
+		 * The sprite's velocity vector {x, y}
+		 * @type {p5.Vector}
+		 * @default {x: 0, y: 0}
+		 */
 		set velocity(val) {
 			this.vel = val;
 		}
@@ -4927,6 +4942,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
+		/**
+		 * The sprite's velocity vector {x, y}
+		 * @type {p5.Vector}
+		 * @default {x: 0, y: 0}
+		 */
 		get velocity() {
 			return this.vel;
 		}
@@ -5609,14 +5629,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * to be at rest.
 		 *
 		 * Adjust the velocity threshold to allow for slow moving objects
-		 * but don't have it be too low, or else objects will never sleep.
+		 * but don't have it be too low, or else objects will never sleep,
+		 * which will hurt performance.
+		 *
 		 * @type {Number}
 		 * @default 0.19
 		 */
 		get velocityThreshold() {
 			return pl.Settings.velocityThreshold;
 		}
-
 		set velocityThreshold(val) {
 			pl.Settings.velocityThreshold = val;
 		}
@@ -5666,7 +5687,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Returns the sprites at a position on any layer.
+		 * Returns the sprites at a position, ordered by layer.
 		 *
 		 * Optionally you can specify a group to search.
 		 *
@@ -5692,18 +5713,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 				return true;
 			});
+			if (fxts.length == 0) return [];
 
 			group ??= this.p.allSprites;
-
 			let sprites = [];
-			if (fxts.length > 0) {
-				for (let s of group) {
-					if (!s.body) continue;
-					if (fxts.includes(s.body.m_fixtureList)) {
-						if (s._cameraActiveWhenDrawn == cameraActiveWhenDrawn) sprites.push(s);
-					}
+			for (let fxt of fxts) {
+				const s = fxt.m_body.sprite;
+				if (s._cameraActiveWhenDrawn == cameraActiveWhenDrawn) {
+					if (!sprites.find((x) => x._uid == s._uid)) sprites.push(s);
 				}
 			}
+			sprites.sort((a, b) => (a._layer - b._layer) * -1);
 			return sprites;
 		}
 
@@ -5719,8 +5739,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @returns {Sprite} a sprite
 		 */
 		getSpriteAt(x, y, group) {
-			let sprites = this.getSpritesAt(x, y, group);
-			sprites.sort((a, b) => (a._layer - b._layer) * -1);
+			const sprites = this.getSpritesAt(x, y, group);
 			return sprites[0];
 		}
 
@@ -7235,7 +7254,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		});
 	};
 
-	this.p5play.playIntro = async function () {
+	async function playIntro() {
 		if (document.getElementById('p5play-intro')) return;
 		pInst._incrementPreload();
 		let d = document.createElement('div');
@@ -7258,7 +7277,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		d.remove();
 		document.getElementById('p5play-intro')?.remove();
 		pInst._decrementPreload();
-	};
+	}
 
 	{
 		let lh = location.hostname;
@@ -7289,7 +7308,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				) {
 					break;
 				}
-				this.p5play.playIntro();
+				playIntro();
 		}
 	}
 
@@ -7697,6 +7716,164 @@ main {
 		if (pInst.p5play.disableImages) return;
 		_image.call(pInst, ...arguments);
 	};
+
+	// if the user isn't using q5.js
+	// add text caching to p5.js
+	if (typeof this._textCache === 'undefined') {
+		const $ = this;
+		$._textCache = true;
+		$._TimedCache = class extends Map {
+			constructor() {
+				super();
+				this.maxSize = 500;
+			}
+			set(k, v) {
+				v.lastAccessed = Date.now();
+				super.set(k, v);
+				if (this.size > this.maxSize) this.gc();
+			}
+			get(k) {
+				const v = super.get(k);
+				if (v) v.lastAccessed = Date.now();
+				return v;
+			}
+			gc() {
+				let t = Infinity;
+				let oldest;
+				let i = 0;
+				for (const [k, v] of this.entries()) {
+					if (v.lastAccessed < t) {
+						t = v.lastAccessed;
+						oldest = i;
+					}
+					i++;
+				}
+				i = oldest;
+				for (const k of this.keys()) {
+					if (i == 0) {
+						oldest = k;
+						break;
+					}
+					i--;
+				}
+				this.delete(oldest);
+			}
+		};
+		$._tic = new $._TimedCache();
+		/**
+		 * Enables or disables text caching.
+		 * @param {Boolean} b
+		 * @param {Number} maxSize
+		 */
+		$.textCache = (b, maxSize) => {
+			if (maxSize) $._tic.maxSize = maxSize;
+			if (b !== undefined) $._textCache = b;
+			return $._textCache;
+		};
+		function _genTextImageKey(str, w, h) {
+			const ctx = $.canvas.getContext('2d');
+			const r = $._renderer;
+			return (
+				str.slice(0, 200) +
+				r._textStyle +
+				r._textSize +
+				r._textFont +
+				(r._doFill ? ctx.fillStyle : '') +
+				'_' +
+				(r._doStroke && r._strokeSet ? ctx.lineWidth + ctx.strokeStyle + '_' : '') +
+				(w || '') +
+				(h ? 'x' + h : '')
+			);
+		}
+		/**
+		 * Creates an image from text.
+		 * @param {String} str
+		 * @param {Number} w line width limit
+		 * @param {Number} h height limit
+		 * @returns {p5.Image}
+		 */
+		$.createTextImage = (str, w, h) => {
+			let og = $._textCache;
+			$._textCache = true;
+			$._useCache = true;
+			$.text(str, 0, 0, w, h);
+			$._useCache = false;
+			let k = _genTextImageKey(str, w, h);
+			$._textCache = og;
+			return $._tic.get(k);
+		};
+		const _text = $.text;
+		/**
+		 * Displays text on the canvas.
+		 *
+		 * @param {String} str text to display
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @param {Number} w line width limit
+		 * @param {Number} h height limit
+		 */
+		$.text = (str, x, y, w, h) => {
+			if (str === undefined) return;
+			str = str.toString();
+			const r = $._renderer;
+			if (!r._doFill && !r._doStroke) return;
+			let c, ti, k, cX, cY;
+			const ctx = $.canvas.getContext('2d');
+			let t = ctx.getTransform();
+			let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
+			if (!useCache) return _text.call($, str, x, y, w, h);
+			k = _genTextImageKey(str, w, h);
+			ti = $._tic.get(k);
+			if (ti) {
+				$.textImage(ti, x, y);
+				return;
+			}
+			ti = $.createGraphics.call($, 1, 1);
+			c = ti.canvas.getContext('2d');
+			c.font = `${r._textStyle} ${r._textSize}px ${r._textFont}`;
+			let lines = str.split('\n');
+			cX = 0;
+			cY = r._textLeading * lines.length;
+			let m = c.measureText(' ');
+			ti._ascent = m.fontBoundingBoxAscent;
+			ti._descent = m.fontBoundingBoxDescent;
+			h ??= cY + ti._descent;
+			ti.resizeCanvas(Math.ceil($.textWidth(str)), Math.ceil(h));
+			ti.pixelDensity($._pixelDensity);
+			c.fillStyle = ctx.fillStyle;
+			c.strokeStyle = ctx.strokeStyle;
+			for (let i = 0; i < lines.length; i++) {
+				if (r._doStroke && r._strokeSet) c.strokeText(lines[i], cX, cY);
+				let f = c.fillStyle;
+				if (!r._fillSet) c.fillStyle = 'black';
+				if (r._doFill) c.fillText(lines[i], cX, cY);
+				if (!r._fillSet) c.fillStyle = f;
+				cY += r._textLeading;
+				if (cY > h) break;
+			}
+			$._tic.set(k, ti);
+			$.textImage(ti, x, y);
+		};
+		/**
+		 * Displays an image based on text alignment settings.
+		 * @param {p5.Image} img
+		 * @param {Number} x
+		 * @param {Number} y
+		 */
+		$.textImage = (img, x, y) => {
+			let og = $._renderer._imageMode;
+			$.imageMode.call($, 'corner');
+			const ctx = $.canvas.getContext('2d');
+			if (ctx.textAlign == 'center') x -= img.width * 0.5;
+			else if (ctx.textAlign == 'right') x -= img.width;
+			if (ctx.textBaseline == 'alphabetic') y -= $._renderer._textLeading;
+			if (ctx.textBaseline == 'middle') y -= img._ascent * 0.5 + img._descent;
+			else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent;
+			else if (ctx.textBaseline == 'top') y -= img._descent;
+			$.image.call($, img, x, y);
+			$.imageMode.call($, og);
+		};
+	}
 
 	let errMsgs = {
 		generic: [
@@ -9018,11 +9195,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 
 	if (this.world.mouseTracking) {
 		let sprites = this.world.getSpritesAt(m.x, m.y);
-		sprites.sort((a, b) => (a._layer - b._layer) * -1);
-
 		let uiSprites = this.world.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
-		uiSprites.sort((a, b) => (a._layer - b._layer) * -1);
-
 		sprites = sprites.concat(uiSprites);
 
 		for (let i = 0; i < sprites.length; i++) {

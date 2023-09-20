@@ -221,6 +221,13 @@ class Sprite {
      * @param {Number} h height of the collider
      */
     addSensor(offsetX: number, offsetY: number, w: number, h: number, ...args: any[]): void;
+    set rotation(arg: number);
+    /**
+     * The angle of the sprite's rotation, not the direction it's moving.
+     * @type {Number}
+     * @default 0
+     */
+    get rotation(): number;
     /**
      * Removes the physics body colliders from the sprite but not
      * overlap sensors.
@@ -551,13 +558,6 @@ class Sprite {
      * @default false
      */
     get pixelPerfect(): boolean;
-    set rotation(arg: number);
-    /**
-     * The angle of the sprite's rotation, not the direction it is moving.
-     * @type {Number}
-     * @default 0
-     */
-    get rotation(): number;
     set rotationDrag(arg: number);
     /**
      * The amount the sprite resists rotating.
@@ -735,8 +735,18 @@ class Sprite {
      *
      */
     get update(): () => void;
-    set vel(arg: any);
-    get vel(): any;
+    set vel(arg: p5.Vector);
+    /**
+     * The sprite's velocity vector {x, y}
+     * @type {p5.Vector}
+     * @default {x: 0, y: 0}
+     */
+    get vel(): p5.Vector;
+    /**
+     * The sprite's velocity vector {x, y}
+     * @type {p5.Vector}
+     * @default {x: 0, y: 0}
+     */
     set velocity(arg: any);
     get velocity(): any;
     /**
@@ -1575,8 +1585,13 @@ class Group extends Array<Sprite> {
      * @type {Number}
      */
     set amount(arg: any);
-    set velocity(arg: number);
-    get velocity(): number;
+    set velocity(arg: p5.Vector);
+    /**
+     * The sprite's velocity vector {x, y}
+     * @type {p5.Vector}
+     * @default {x: 0, y: 0}
+     */
+    get velocity(): p5.Vector;
     centroid: {
         x: number;
         y: number;
@@ -1729,7 +1744,9 @@ class World {
      * to be at rest.
      *
      * Adjust the velocity threshold to allow for slow moving objects
-     * but don't have it be too low, or else objects will never sleep.
+     * but don't have it be too low, or else objects will never sleep,
+     * which will hurt performance.
+     *
      * @type {Number}
      * @default 0.19
      */
@@ -1770,7 +1787,7 @@ class World {
      */
     step(timeStep: number, velocityIterations: number, positionIterations: number): void;
     /**
-     * Returns the sprites at a position on any layer.
+     * Returns the sprites at a position, ordered by layer.
      *
      * Optionally you can specify a group to search.
      *
@@ -2311,6 +2328,37 @@ function stroke(...args: any[]): void;
 function loadImage(...args: any[]): any;
 function loadImg(...args: any[]): any;
 function image(...args: any[]): void;
+/**
+ * Enables or disables text caching.
+ * @param {Boolean} b
+ * @param {Number} maxSize
+ */
+function textCache(b: boolean, maxSize: number): boolean;
+/**
+ * Creates an image from text.
+ * @param {String} str
+ * @param {Number} w line width limit
+ * @param {Number} h height limit
+ * @returns {p5.Image}
+ */
+function createTextImage(str: string, w: number, h: number): p5.Image;
+/**
+ * Displays text on the canvas.
+ *
+ * @param {String} str text to display
+ * @param {Number} x
+ * @param {Number} y
+ * @param {Number} w line width limit
+ * @param {Number} h height limit
+ */
+function text(str: string, x: number, y: number, w: number, h: number): any;
+/**
+ * Displays an image based on text alignment settings.
+ * @param {p5.Image} img
+ * @param {Number} x
+ * @param {Number} y
+ */
+function textImage(img: p5.Image, x: number, y: number): void;
 /**
  * A FriendlyError is a custom error class that extends the native JS
  * Error class. It's used internally by p5play to make error messages
