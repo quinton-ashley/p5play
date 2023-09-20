@@ -7866,10 +7866,15 @@ main {
 			const ctx = $.canvas.getContext('2d');
 			if (ctx.textAlign == 'center') x -= img.width * 0.5;
 			else if (ctx.textAlign == 'right') x -= img.width;
+
+			let leadDiff;
 			if (ctx.textBaseline == 'alphabetic') y -= $._renderer._textLeading;
-			if (ctx.textBaseline == 'middle') y -= img._ascent * 0.5 + img._descent;
-			else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent;
-			else if (ctx.textBaseline == 'top') y -= img._descent;
+			else leadDiff = $._renderer._textLeading - $._renderer._textSize;
+
+			if (ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + leadDiff;
+			else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + leadDiff;
+			else if (ctx.textBaseline == 'top') y -= img._descent + leadDiff;
+
 			$.image.call($, img, x, y);
 			$.imageMode.call($, og);
 		};
