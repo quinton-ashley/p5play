@@ -207,10 +207,13 @@ class Sprite {
     addCollider(offsetX: number, offsetY: number, w: number, h: number, ...args: any[]): void;
     body: any;
     /**
-     * Adds a sensor to the sprite's physics body that's used to detect
-     * overlaps with other sprites.
+     * Adds a sensor to the sprite's physics body.
      *
-     * It accepts parameters in a similar format to the Sprite
+     * Sensors can't displace or be displaced by colliders.
+     * Sensors don't have any mass or other physical properties.
+     * Sensors simply detect overlaps with other sensors.
+     *
+     * This function accepts parameters in a similar format to the Sprite
      * constructor except the first two parameters are x and y offsets,
      * the relative distance the new sensor should be from the center of
      * the sprite.
@@ -341,8 +344,9 @@ class Sprite {
     get stroke(): p5.Color;
     set strokeColor(arg: p5.Color);
     /**
-     * The sprite's stroke color. By default the stroke of a sprite
-     * is determined by its collider type.
+     * Overrides sprite's stroke color. By default the stroke of a sprite
+     * is determined by its collider type, which can also be overridden by the
+     * sketch's stroke color.
      * @type {p5.Color}
      */
     get strokeColor(): p5.Color;
@@ -355,11 +359,37 @@ class Sprite {
     get strokeWeight(): number;
     set textColor(arg: p5.Color);
     /**
-     * The sprite's current text color. Black by default.
+     * The sprite's text fill color. Black by default.
      * @type {p5.Color}
      * @default black (#000000)
      */
     get textColor(): p5.Color;
+    set textColour(arg: any);
+    get textColour(): any;
+    set textFill(arg: any);
+    get textFill(): any;
+    set textSize(arg: number);
+    /**
+     * The sprite's text size, the sketch's current textSize by default.
+     * @type {Number}
+     */
+    get textSize(): number;
+    set textStroke(arg: p5.Color);
+    /**
+     * The sprite's text stroke color.
+     * No stroke by default, does not inherit from the sketch's stroke color.
+     * @type {p5.Color}
+     * @default undefined
+     */
+    get textStroke(): p5.Color;
+    set textStrokeWeight(arg: number);
+    /**
+     * The sprite's text stroke weight, the thickness of its outline.
+     * No stroke by default, does not inherit from the sketch's stroke weight.
+     * @type {Number}
+     * @default undefined
+     */
+    get textStrokeWeight(): number;
     set bearing(arg: number);
     /**
      * A bearing indicates the direction that needs to be followed to
@@ -998,13 +1028,12 @@ class Sprite {
      */
     overlapped(target: Sprite | Group, callback?: Function): boolean;
     /**
-     * This function is used automatically if a sprite overlap detection
+     * This function is used internally if a sprite overlap detection
      * function is called but the sprite has no overlap sensors.
      *
      * It creates sensor fixtures that are the same size as the sprite's
      * colliders. If you'd like to add more sensors to a sprite, use the
      * addSensor function.
-     *
      */
     addDefaultSensors(): void;
 }

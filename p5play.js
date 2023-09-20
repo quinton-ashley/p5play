@@ -692,8 +692,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				Math.round(this.p.random(30, 245))
 			);
 
-			this.textColor ??= this.p.color(0);
-			this.textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
+			this._textFill ??= this.p.color(0);
+			this._textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
 
 			this._massUndef = true;
 			if (w === undefined) {
@@ -750,10 +750,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Adds a sensor to the sprite's physics body that's used to detect
-		 * overlaps with other sprites.
+		 * Adds a sensor to the sprite's physics body.
 		 *
-		 * It accepts parameters in a similar format to the Sprite
+		 * Sensors can't displace or be displaced by colliders.
+		 * Sensors don't have any mass or other physical properties.
+		 * Sensors simply detect overlaps with other sensors.
+		 *
+		 * This function accepts parameters in a similar format to the Sprite
 		 * constructor except the first two parameters are x and y offsets,
 		 * the relative distance the new sensor should be from the center of
 		 * the sprite.
@@ -1376,8 +1379,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The sprite's stroke color. By default the stroke of a sprite
-		 * is determined by its collider type.
+		 * Overrides sprite's stroke color. By default the stroke of a sprite
+		 * is determined by its collider type, which can also be overridden by the
+		 * sketch's stroke color.
 		 * @type {p5.Color}
 		 */
 		get strokeColor() {
@@ -1401,16 +1405,68 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The sprite's current text color. Black by default.
+		 * The sprite's text fill color. Black by default.
 		 * @type {p5.Color}
 		 * @default black (#000000)
 		 */
 		get textColor() {
-			return this._textColor;
+			return this._textFill;
 		}
 		set textColor(val) {
 			if (this.watch) this.mod[34] = true;
-			this._textColor = this._parseColor(val);
+			this._textFill = this._parseColor(val);
+		}
+		get textColour() {
+			return this._textFill;
+		}
+		set textColour(val) {
+			this.textColor = val;
+		}
+		get textFill() {
+			return this._textFill;
+		}
+		set textFill(val) {
+			this.textColor = val;
+		}
+
+		/**
+		 * The sprite's text size, the sketch's current textSize by default.
+		 * @type {Number}
+		 */
+		get textSize() {
+			return this._textSize;
+		}
+		set textSize(val) {
+			if (this.watch) this.mod[40] = true;
+			this._textSize = val;
+		}
+
+		/**
+		 * The sprite's text stroke color.
+		 * No stroke by default, does not inherit from the sketch's stroke color.
+		 * @type {p5.Color}
+		 * @default undefined
+		 */
+		get textStroke() {
+			return this._textStroke;
+		}
+		set textStroke(val) {
+			if (this.watch) this.mod[41] = true;
+			this._textStroke = this._parseColor(val);
+		}
+
+		/**
+		 * The sprite's text stroke weight, the thickness of its outline.
+		 * No stroke by default, does not inherit from the sketch's stroke weight.
+		 * @type {Number}
+		 * @default undefined
+		 */
+		get textStrokeWeight() {
+			return this._textStrokeWeight;
+		}
+		set textStrokeWeight(val) {
+			if (this.watch) this.mod[42] = true;
+			this._textStrokeWeight = val;
 		}
 
 		/**
@@ -2476,7 +2532,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (this.text !== undefined) {
 				this.p.textAlign(this.p.CENTER, this.p.CENTER);
-				this.p.fill(this.textColor);
+				this.p.fill(this._textFill);
+				if (this._textStrokeWeight) this.p.strokeWeight(this._textStrokeWeight);
+				if (this._textStroke) this.p.stroke(this._textStroke);
+				else this.p.noStroke();
 				this.p.textSize(this.textSize * this.tileSize);
 				this.p.text(this.text, 0, 0);
 			}
@@ -3477,13 +3536,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * This function is used automatically if a sprite overlap detection
+		 * This function is used internally if a sprite overlap detection
 		 * function is called but the sprite has no overlap sensors.
 		 *
 		 * It creates sensor fixtures that are the same size as the sprite's
 		 * colliders. If you'd like to add more sensors to a sprite, use the
 		 * addSensor function.
-		 *
 		 */
 		addDefaultSensors() {
 			let shape;
@@ -3547,7 +3605,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		tileSize: 'number', // 36
 		visible: 'boolean', // 37
 		w: 'number', // 38 (width)
-		bearing: 'number' // 39
+		bearing: 'number', // 39
+		textSize: 'number', // 40
+		textStroke: 'color', // 41
+		textStrokeWeight: 'number' // 42
 	};
 
 	this.Sprite.props = Object.keys(this.Sprite.propTypes);
