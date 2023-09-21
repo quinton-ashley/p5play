@@ -1281,7 +1281,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this.body = undefined;
 			}
 
-			// replace colliders and overlap sensors
+			// replace colliders
 			if (this._collider != 'none') {
 				if (v) {
 					this.addCollider(0, 0, v);
@@ -4322,9 +4322,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (img instanceof p5.Image) return img;
 
 			let { x, y, w, h } = img; // image info
-			let g = createGraphics(w, h);
-			g.image(this.spriteSheet, this.offset.x, this.offset.y, w, h, x, y, w, h);
-			return g;
+
+			let image = this.p.createImage(w, h);
+			image.copy(this.spriteSheet, this.offset.x, this.offset.y, w, h, x, y, w, h);
+			return image;
 		}
 
 		/**
@@ -7894,18 +7895,18 @@ main {
 				$.textImage(ti, x, y);
 				return;
 			}
-			ti = $.createGraphics.call($, 1, 1);
-			c = ti.canvas.getContext('2d');
+			let tg = $.createGraphics.call($, 1, 1);
+			c = tg.canvas.getContext('2d');
 			c.font = `${r._textStyle} ${r._textSize}px ${r._textFont}`;
 			let lines = str.split('\n');
 			cX = 0;
 			cY = r._textLeading * lines.length;
 			let m = c.measureText(' ');
-			ti._ascent = m.fontBoundingBoxAscent;
-			ti._descent = m.fontBoundingBoxDescent;
-			h ??= cY + ti._descent;
-			ti.resizeCanvas(Math.ceil($.textWidth(str)), Math.ceil(h));
-			ti.pixelDensity($._pixelDensity);
+			tg._ascent = m.fontBoundingBoxAscent;
+			tg._descent = m.fontBoundingBoxDescent;
+			h ??= cY + tg._descent;
+			tg.resizeCanvas(Math.ceil($.textWidth(str)), Math.ceil(h));
+			tg.pixelDensity($._pixelDensity);
 			c.fillStyle = ctx.fillStyle;
 			c.strokeStyle = ctx.strokeStyle;
 			for (let i = 0; i < lines.length; i++) {
@@ -7917,6 +7918,9 @@ main {
 				cY += r._textLeading;
 				if (cY > h) break;
 			}
+			ti = tg;
+			// ti = $.createImage.call($, tg.canvas.width, tg.canvas.height);
+			// ti.copy(tg, 0, 0, tg.canvas.width, tg.canvas.height, 0, 0, tg.canvas.width, tg.canvas.height);
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		};
@@ -8353,7 +8357,7 @@ main {
 		 */
 		dragged(inp) {
 			inp ??= this._default;
-			return this.drag[inp] == -1;
+			return this.drag[inp] <= -1;
 		}
 	};
 
@@ -8395,7 +8399,7 @@ main {
 		 * @returns {boolean} true on the first frame that the mouse is no longer over the sprite
 		 */
 		hovered() {
-			return this.hover == -1;
+			return this.hover <= -1;
 		}
 	};
 
@@ -8438,11 +8442,9 @@ main {
 		let m = this.mouse;
 		if (m[btn] > 0 && m.drag[btn] <= 0) {
 			m.drag[btn] = 1;
-			m._isDragging = true;
 			let ms = this.world.mouseSprite?.mouse;
 			if (ms) {
 				ms.drag[btn] = 1;
-				ms._isDragging = true;
 			}
 		}
 	};
@@ -8464,6 +8466,7 @@ main {
 			m[btn] = -3;
 		} else if (m[btn] > 1) m[btn] = -1;
 		else m[btn] = -2;
+		if (m.drag[btn] > 0) m.drag[btn] = -1;
 
 		let msm = this.world.mouseSprite?.mouse;
 		if (msm) {
@@ -8475,9 +8478,7 @@ main {
 				} else {
 					msm[btn] = -2;
 				}
-				if (msm.drag[btn] > 0) {
-					msm.drag[btn] = msm[btn];
-				}
+				if (msm.drag[btn] > 0) msm.drag[btn] = -1;
 			} else {
 				msm[btn] = 0;
 				msm.drag[btn] = 0;
@@ -9262,6 +9263,10 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		if (m[btn] < 0) m[btn] = 0;
 		else if (m[btn] > 0) m[btn]++;
 		if (msm) msm[btn] = m[btn];
+
+		if (m.drag[btn] < 0) m.drag[btn] = 0;
+		else if (m.drag[btn] > 0) m.drag[btn]++;
+		if (msm) msm.drag[btn] = m.drag[btn];
 	}
 
 	if (this.world.mouseTracking) {
@@ -9279,31 +9284,33 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 			else if (s.mouse.hover < 0) s.mouse.hover = 0;
 		}
 
-		let ms = this.world.mouseSprite;
-
 		// if the user is not pressing any mouse buttons
 		if (m.left <= 0 && m.center <= 0 && m.right <= 0) {
-			ms = null;
 			this.world.mouseSprite = null;
-		} else {
-			for (let btn of ['left', 'center', 'right']) {
-				if (m.drag[btn] < 0) m.drag[btn] = 0;
-				else if (m.drag[btn] > 0) m.drag[btn]++;
-				if (msm) {
-					msm.drag[btn] = m.drag[btn];
-					msm.x = ms.x - m.x;
-					msm.y = ms.y - m.y;
-				}
-			}
 		}
 
+		let ms = this.world.mouseSprite;
+
+		let isDragging = m.drag.left > 0 || m.drag.center > 0 || m.drag.right > 0;
+
 		for (let s of this.world.mouseSprites) {
-			// mouse stopped hovering over the sprite and is not dragging it
-			if ((!msm?._isDragging || s != ms) && !sprites.includes(s)) {
+			// if the mouse stopped hovering over the sprite
+			if (!sprites.includes(s)) {
 				let sm = s.mouse;
-				sm.hover = -1;
-				sm.left = sm.center = sm.right = 0;
+				if (sm.hover > 0) {
+					sm.hover = -1;
+					sm.left = sm.center = sm.right = 0;
+				}
+				// if mouse is not dragging and the sprite is the current mouse sprite
+				if (!isDragging && s == ms) this.world.mouseSprite = ms = null;
 			}
+		}
+		if (ms) {
+			// if the user is dragging on a sprite, but not currently hovering
+			// over it, the mouse sprite should still be added to the mouseSprites array
+			if (!sprites.includes(ms)) sprites.push(ms);
+			msm.x = ms.x - m.x;
+			msm.y = ms.y - m.y;
 		}
 		this.world.mouseSprites = sprites;
 	}
