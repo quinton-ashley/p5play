@@ -32,7 +32,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_12');
+			gtag('event', 'p5play_v3_14');
 		};
 	}
 
@@ -761,6 +761,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * the relative distance the new sensor should be from the center of
 		 * the sprite.
 		 *
+		 * If a sensor is added to a sprite that has no collider (type "none")
+		 * then internally it will be given a dynamic physics body that isn't
+		 * affected by gravity so that the sensor can be added to it.
+		 *
 		 * @param {Number} offsetX distance from the center of the sprite
 		 * @param {Number} offsetY distance from the center of the sprite
 		 * @param {Number} w width of the collider
@@ -771,7 +775,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.body) {
 				this.body = this.p.world.createBody({
 					position: scaleTo(this.x, this.y, this.tileSize),
-					type: 'kinematic'
+					type: 'dynamic',
+					gravityScale: 0
 				});
 				this.body.sprite = this;
 				this.rotation = this._angle;
