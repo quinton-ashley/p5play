@@ -7918,9 +7918,7 @@ main {
 				cY += r._textLeading;
 				if (cY > h) break;
 			}
-			ti = tg;
-			// ti = $.createImage.call($, tg.canvas.width, tg.canvas.height);
-			// ti.copy(tg, 0, 0, tg.canvas.width, tg.canvas.height, 0, 0, tg.canvas.width, tg.canvas.height);
+			ti = tg.get();
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		};
