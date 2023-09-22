@@ -7918,8 +7918,7 @@ main {
 				cY += r._textLeading;
 				if (cY > h) break;
 			}
-			ti = tg;
-			// ti = tg.get(0, 0, tg.width, tg.height);
+			ti = tg.get();
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		};
