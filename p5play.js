@@ -1289,10 +1289,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				} else {
 					this.addCollider();
 				}
+				if (this._hasSensors) {
+					this.addDefaultSensors();
+				}
 			}
-			if (this._hasSensors) {
-				this.addDefaultSensors();
-			}
+
 			for (let prop in bodyProps) {
 				if (bodyProps[prop] !== undefined) {
 					this[prop] = bodyProps[prop];
