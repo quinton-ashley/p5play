@@ -7106,7 +7106,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		return l;
 	}
 
-	this.p5play.palettes ??= [
+	// default color palettes
+	this.p5play.palettes = [
 		{
 			a: 'aqua',
 			b: 'black',
@@ -7649,7 +7650,7 @@ main {
 
 	/**
 	 * Just like the p5.js background function except it also accepts
-	 * a color pallette code.
+	 * a color palette code.
 	 */
 	this.background = function () {
 		let args = arguments;
@@ -7665,7 +7666,7 @@ main {
 
 	/**
 	 * Just like the p5.js fill function except it also accepts
-	 * a color pallette code.
+	 * a color palette code.
 	 */
 	this.fill = function () {
 		let args = arguments;
@@ -7681,7 +7682,7 @@ main {
 
 	/**
 	 * Just like the p5.js stroke function except it also accepts
-	 * a color pallette code.
+	 * a color palette code.
 	 */
 	this.stroke = function () {
 		let args = arguments;
@@ -7744,12 +7745,6 @@ main {
 			return img;
 		}
 		const _cb = (_img) => {
-			// if (!_img.pixels.length) {
-			// 	log('hi');
-			// 	_loadImage.call(pInst, url, _cb);
-			// 	return;
-			// }
-
 			_img.w = _img.width;
 			_img.h = _img.height;
 			for (let cb of _img.cbs) {
@@ -7758,8 +7753,6 @@ main {
 			for (let i = 1; i < _img.calls; i++) {
 				pInst._decrementPreload();
 			}
-			// delete _img.calls;
-			// delete _img.cbs;
 			_img.cbs = [];
 			pInst.p5play.images.onLoad(img);
 		};
@@ -7769,11 +7762,6 @@ main {
 		if (cb) img.cbs.push(cb);
 		img.url = url;
 		pInst.p5play.images[url] = img;
-		// setTimeout(() => {
-		// 	if (!img.width && !img.height) {
-		// 		console.warn('Image may have failed to load: ' + url);
-		// 	}
-		// }, 3000);
 		return img;
 	};
 
@@ -7895,30 +7883,33 @@ main {
 				$.textImage(ti, x, y);
 				return;
 			}
+			let pd = $.pixelDensity();
 			let tg = $.createGraphics.call($, 1, 1);
 			c = tg.canvas.getContext('2d');
-			c.font = `${r._textStyle} ${r._textSize}px ${r._textFont}`;
+			c.font = `${r._textStyle} ${r._textSize * pd}px ${r._textFont}`;
 			let lines = str.split('\n');
 			cX = 0;
-			cY = r._textLeading * lines.length;
+			cY = r._textLeading * pd * lines.length;
 			let m = c.measureText(' ');
 			tg._ascent = m.fontBoundingBoxAscent;
 			tg._descent = m.fontBoundingBoxDescent;
 			h ??= cY + tg._descent;
-			tg.resizeCanvas(Math.ceil($.textWidth(str)), Math.ceil(h));
-			tg.pixelDensity($._pixelDensity);
+			tg.resizeCanvas(Math.ceil(tg.textWidth(str)), Math.ceil(h));
 			c.fillStyle = ctx.fillStyle;
 			c.strokeStyle = ctx.strokeStyle;
+			c.lineWidth = ctx.lineWidth * pd;
+			let f = c.fillStyle;
+			if (!r._fillSet) c.fillStyle = 'black';
 			for (let i = 0; i < lines.length; i++) {
 				if (r._doStroke && r._strokeSet) c.strokeText(lines[i], cX, cY);
-				let f = c.fillStyle;
-				if (!r._fillSet) c.fillStyle = 'black';
 				if (r._doFill) c.fillText(lines[i], cX, cY);
-				if (!r._fillSet) c.fillStyle = f;
 				cY += r._textLeading;
 				if (cY > h) break;
 			}
+			if (!r._fillSet) c.fillStyle = f;
 			ti = tg.get();
+			ti.width /= pd;
+			ti.height /= pd;
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		};
