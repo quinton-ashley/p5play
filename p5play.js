@@ -342,7 +342,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (_this.body) {
 						let pos = new pl.Vec2((val * _this.tileSize) / plScale, _this.body.getPosition().y);
 						_this.body.setPosition(pos);
-						_this.body.synchronizeTransform();
+						// _this.body.synchronizeTransform();
 					}
 					_this._position.x = val;
 				}
@@ -358,13 +358,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (_this.body) {
 						let pos = new pl.Vec2(_this.body.getPosition().x, (val * _this.tileSize) / plScale);
 						_this.body.setPosition(pos);
-						_this.body.synchronizeTransform();
+						// _this.body.synchronizeTransform();
 					}
 					_this._position.y = val;
 				}
 			});
 
-			// this._vel is used if the Sprite has no physics body
+			// used by this._vel if the Sprite has no physics body
 			this._velocity = {
 				x: 0,
 				y: 0
@@ -513,6 +513,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				else this._shape = 'box';
 			}
 
+			this._angle = 0;
+			this._rotationSpeed = 0;
+			this._bearing = 0;
+
 			if (!group._isAllSpritesGroup) this.p.allSprites.push(this);
 			group.push(this);
 
@@ -572,10 +576,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					_this._offsetCenterBy(0, val - this._y);
 				}
 			};
-
-			this._angle = 0;
-			this._rotationSpeed = 0;
-			this._bearing = 0;
 
 			/**
 			 * The sprite's position on the previous frame.
@@ -780,6 +780,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				});
 				this.body.sprite = this;
 				this.rotation = this._angle;
+				this.vel = this._velocity;
 			}
 			this.body.createFixture({
 				shape: s,
