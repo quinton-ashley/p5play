@@ -2580,9 +2580,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				x = fixRound(x);
 				y = fixRound(y);
 			} else {
-				if (this._w % 2 == 0) x = Math.round(x);
+				let w, h;
+				if (this.ani) {
+					w = this.ani[this.ani.frame].w;
+					h = this.ani[this.ani.frame].h;
+				} else {
+					w = this._w;
+					h = this._h;
+				}
+				if (w % 2 == 0) x = Math.round(x);
 				else x = Math.round(x - 0.5) + 0.5;
-				if (this._h % 2 == 0) y = Math.round(y);
+				if (h % 2 == 0) y = Math.round(y);
 				else y = Math.round(y - 0.5) + 0.5;
 			}
 
