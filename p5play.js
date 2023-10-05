@@ -7882,7 +7882,7 @@ main {
 			str = str.toString();
 			const r = $._renderer;
 			if (!r._doFill && !r._doStroke) return;
-			let c, ti, k, cX, cY;
+			let c, ti, k, cX, cY, _ascent, _descent;
 			const ctx = $.canvas.getContext('2d');
 			let t = ctx.getTransform();
 			let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
@@ -7901,9 +7901,9 @@ main {
 			cX = 0;
 			cY = r._textLeading * pd * lines.length;
 			let m = c.measureText(' ');
-			tg._ascent = m.fontBoundingBoxAscent;
-			tg._descent = m.fontBoundingBoxDescent;
-			h ??= cY + tg._descent;
+			_ascent = m.fontBoundingBoxAscent;
+			_descent = m.fontBoundingBoxDescent;
+			h ??= cY + _descent;
 			tg.resizeCanvas(Math.ceil(tg.textWidth(str)), Math.ceil(h));
 			c.fillStyle = ctx.fillStyle;
 			c.strokeStyle = ctx.strokeStyle;
@@ -7920,6 +7920,8 @@ main {
 			ti = tg.get();
 			ti.width /= pd;
 			ti.height /= pd;
+			ti._ascent = _ascent / pd;
+			ti._descent = _descent / pd;
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		};
