@@ -20,6 +20,8 @@ p5play is an open source project and will always be available for free, but your
 
 First, take a look at the [p5play project planning page][]. Let me know what you'd like to help with!
 
+See the [p5play-web][] repository readme.md for more info.
+
 [p5play]: https://p5play.org
 [p5play Patreon]: https://www.patreon.com/p5play
 [issue report]: https://github.com/quinton-ashley/p5play/issues
