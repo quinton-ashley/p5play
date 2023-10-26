@@ -1,24 +1,26 @@
 import * as p5 from 'p5';
 declare global {
+
 class P5Play {
-    os: {};
-    context: string;
-    standardizeKeyboard: boolean;
     /**
      * Contains all the sprites in the sketch,
      * but users should use the `allSprites` group.
      *
      * The keys are the sprite's unique ids.
-     * @type {Object}
+     * @type {Object.<number, Sprite>}
      */
-    sprites: any;
+    sprites: {
+        [x: number]: Sprite;
+    };
     /**
      * Contains all the groups in the sketch,
      *
      * The keys are the group's unique ids.
-     * @type {Object}
+     * @type {Object.<number, Group>}
      */
-    groups: any;
+    groups: {
+        [x: number]: Group;
+    };
     groupsCreated: number;
     spritesCreated: number;
     spritesDrawn: number;
@@ -31,8 +33,13 @@ class P5Play {
     /**
      * The default color palette, at index 0 of this array,
      * has all the letters of the English alphabet mapped to colors.
+     * @type {Array}
      */
     palettes: any[];
+    os: {};
+    context: string;
+    hasMouse: boolean;
+    standardizeKeyboard: boolean;
 }
 var p5play: P5Play;
 /**
@@ -62,9 +69,6 @@ class Sprite {
      * Every sprite you create is added to the `allSprites`
      * group and put on the top layer, in front of all
      * previously created sprites.
-     *
-     * @constructor
-     * @returns {Sprite} A new Sprite object
      *
      * @param {Number} [x] - horizontal position of the sprite
      * @param {Number} [y] - vertical position of the sprite
@@ -136,10 +140,19 @@ class Sprite {
     tileSize: number;
     set collider(arg: string);
     /**
-     * The sprite's collider type. Default is 'dynamic'.
+     * The sprite's collider type. Default is "dynamic".
      *
      * The collider type can be one of the following strings:
-     * 'dynamic', 'static', 'kinematic', 'none'.
+     * "dynamic", "static", "kinematic", "none".
+     *
+     * Sprites can't have their collider type
+     * set to "none" if they have a polygon or chain collider,
+     * multiple colliders, or multiple sensors.
+     *
+     * To achieve the same effect as setting collider type
+     * to "none", use `.overlaps(allSprites)` to have your
+     * sprite overlap with all sprites.
+     *
      * @type {String}
      * @default 'dynamic'
      */
@@ -156,7 +169,11 @@ class Sprite {
      * @type {Number}
      */
     get y(): number;
-    mouse: any;
+    /**
+     * Used to detect mouse events with the sprite.
+     * @type {_SpriteMouse}
+     */
+    mouse: _SpriteMouse;
     set w(arg: number);
     /**
      * The width of the sprite.
@@ -182,8 +199,13 @@ class Sprite {
      * @default 0
      */
     get drag(): number;
-    set debug(arg: any);
-    get debug(): any;
+    set debug(arg: boolean);
+    /**
+     * If true, an outline of the sprite's collider will be drawn.
+     * @type {Boolean}
+     * @default false
+     */
+    get debug(): boolean;
     /**
      * Adds a collider (fixture) to the sprite's physics body.
      *
@@ -228,6 +250,12 @@ class Sprite {
      * @param {Number} h height of the collider
      */
     addSensor(offsetX: number, offsetY: number, w: number, h: number, ...args: any[]): void;
+    set mass(arg: number);
+    /**
+     * The mass of the sprite's physics body.
+     * @type {Number}
+     */
+    get mass(): number;
     set rotation(arg: number);
     /**
      * The angle of the sprite's rotation, not the direction it's moving.
@@ -235,25 +263,20 @@ class Sprite {
      * @default 0
      */
     get rotation(): number;
+    set vel(arg: p5.Vector);
+    /**
+     * The sprite's velocity vector {x, y}
+     * @type {p5.Vector}
+     * @default {x: 0, y: 0}
+     */
+    get vel(): p5.Vector;
     /**
      * Removes the physics body colliders from the sprite but not
      * overlap sensors.
-     *
-     * Only use this method if you never want to use the sprite's
-     * colliders again. If you want to disable colliders without
-     * removing them, use the overlaps, overlapping, or overlapped
-     * functions instead.
-     *
      */
     removeColliders(): void;
     /**
      * Removes overlap sensors from the sprite.
-     *
-     * Only use this method if you never want to use the sprite's
-     * overlap sensors again. To disable overlap sensors without
-     * removing them, use the collides, colliding, or collided functions
-     * instead.
-     *
      */
     removeSensors(): void;
     set animation(arg: SpriteAnimation);
@@ -262,8 +285,16 @@ class Sprite {
      * @type {SpriteAnimation}
      */
     get animation(): SpriteAnimation;
-    set ani(arg: any);
-    get ani(): any;
+    set ani(arg: SpriteAnimation);
+    /**
+     * Reference to the sprite's current animation.
+     * @type {SpriteAnimation}
+     */
+    get ani(): SpriteAnimation;
+    /**
+     * Keys are the animation label, values are SpriteAnimation objects
+     * @type {SpriteAnimations}
+     */
     get anis(): SpriteAnimations;
     set autoDraw(arg: boolean);
     /**
@@ -370,8 +401,13 @@ class Sprite {
     get textColor(): p5.Color;
     set textColour(arg: any);
     get textColour(): any;
-    set textFill(arg: any);
-    get textFill(): any;
+    set textFill(arg: p5.Color);
+    /**
+     * The sprite's text fill color. Black by default.
+     * @type {p5.Color}
+     * @default black (#000000)
+     */
+    get textFill(): p5.Color;
     set textSize(arg: number);
     /**
      * The sprite's text size, the sketch's current textSize by default.
@@ -400,6 +436,7 @@ class Sprite {
      * reach a destination. Setting a sprite's bearing doesn't do
      * anything by itself. You can apply a force at the sprite's
      * bearing angle using the `applyForce` function.
+     * @type {Number}
      * @example
      * sprite.bearing = angle;
      * sprite.applyForce(amount);
@@ -420,7 +457,7 @@ class Sprite {
      * @default 0 ("right")
      */
     get direction(): number;
-    set draw(arg: () => void);
+    set draw(arg: Function);
     /**
      * Displays the sprite.
      *
@@ -433,7 +470,7 @@ class Sprite {
      * A sprite's draw function can be overridden with a
      * custom draw function, in which the center of the sprite is
      * at (0, 0).
-     *
+     * @type {Function}
      * @example
      * sprite.draw = function() {
      *   // an oval
@@ -441,7 +478,7 @@ class Sprite {
      * }
      *
      */
-    get draw(): () => void;
+    get draw(): Function;
     set dynamic(arg: boolean);
     /**
      * True if the sprite's physics body is dynamic.
@@ -535,12 +572,6 @@ class Sprite {
      * @default 2147483647
      */
     get life(): number;
-    set mass(arg: number);
-    /**
-     * The mass of the sprite's physics body.
-     * @type {Number}
-     */
-    get mass(): number;
     get massData(): {
         I: number;
         center: any;
@@ -555,8 +586,8 @@ class Sprite {
     /**
      * The sprite's mirror states.
      * @type {Object}
-     * @property {Boolean} x - The sprite's horizontal mirror state.
-     * @property {Boolean} y - The sprite's vertical mirror state.
+     * @property {Boolean} x - the sprite's horizontal mirror state
+     * @property {Boolean} y - the sprite's vertical mirror state
      * @default {x: false, y: false}
      */
     get mirror(): any;
@@ -568,6 +599,9 @@ class Sprite {
      * The sprite's x and y properties represent its center in world
      * coordinates. This point is also the sprite's center of rotation.
      * @type {object}
+     * @property {Number} x - the sprite's horizontal offset
+     * @property {Number} y - the sprite's vertical offset
+     * @default {x: 0, y: 0}
      */
     get offset(): any;
     set previousPosition(arg: any);
@@ -756,7 +790,7 @@ class Sprite {
      * @default box
      */
     get shape(): string;
-    set update(arg: () => void);
+    set update(arg: Function);
     /**
      * You can set the sprite's update function to a custom
      * update function which by default, will be run after every p5.js
@@ -766,16 +800,9 @@ class Sprite {
      *
      * There's no way to individually update a sprite or group
      * of sprites in the physics simulation though.
-     *
+     * @type {Function}
      */
-    get update(): () => void;
-    set vel(arg: p5.Vector);
-    /**
-     * The sprite's velocity vector {x, y}
-     * @type {p5.Vector}
-     * @default {x: 0, y: 0}
-     */
-    get vel(): p5.Vector;
+    get update(): Function;
     /**
      * The sprite's velocity vector {x, y}
      * @type {p5.Vector}
@@ -1182,12 +1209,10 @@ class SpriteAnimation extends Array<p5.Image> {
     play(frame: any): Promise<any>;
     /**
      * Pauses the animation.
-     *
      */
     pause(frame: any): void;
     /**
      * Stops the animation. Alt for pause.
-     *
      */
     stop(frame: any): void;
     /**
@@ -1200,22 +1225,18 @@ class SpriteAnimation extends Array<p5.Image> {
     rewind(): Promise<any>;
     /**
      * Plays the animation forwards and loops it.
-     *
      */
     loop(): void;
     /**
      * Prevents the animation from looping
-     *
      */
     noLoop(): void;
     /**
      * Goes to the next frame and stops.
-     *
      */
     nextFrame(): void;
     /**
      * Goes to the previous frame and stops.
-     *
      */
     previousFrame(): void;
     /**
@@ -1226,12 +1247,12 @@ class SpriteAnimation extends Array<p5.Image> {
      */
     goToFrame(toFrame: number): Promise<any>;
     /**
-     * Read only. Returns the index of the last frame.
+     * The index of the last frame. Read only.
      * @type {Number}
      */
     get lastFrame(): number;
     /**
-     * Read only. Returns the current frame as p5.Image.
+     * The current frame as p5.Image. Read only.
      * @type {p5.Image}
      */
     get frameImage(): p5.Image;
@@ -1256,27 +1277,25 @@ class SpriteAnimation extends Array<p5.Image> {
      */
     get height(): number;
     /**
-     * The frames of the animation.
+     * Deprecated. Use the animation object itself, which is an array of frames.
+     *
+     * The frames of the animation. Read only.
+     * @deprecated
      * @type {p5.Image[]}
      */
     get frames(): p5.Image[];
-    /**
-     * The frames of the animation. Alt for ani.frames
-     * @type {p5.Image[]}
-     */
-    get images(): p5.Image[];
 }
 /**
  * This SpriteAnimations class serves the same role that Group does
- * for Sprites. Except it doesn't extend Array, its instances are
- * objects. It is used to create `sprite.anis` and `group.anis`.
+ * for Sprites. This class is used interally to create `sprite.anis`
+ * and `group.anis`. It's not intended to be used directly by p5play users.
  *
- * In instances of this class, the keys are animation names,
+ * In instance objects of this class, the keys are animation names,
  * values are SpriteAnimation objects.
  *
  * Because users only expect instances of this class to contain
- * animation names as keys, it uses a internal private object
- * #_ to store animation properties. Getters and setters are used to
+ * animation names as keys, it uses an internal private object
+ * `#_` to store animation properties. Getters and setters are used to
  * access the private properties, enabling dynamic inheritance.
  *
  * @private
@@ -1301,7 +1320,7 @@ class Group extends Array<Sprite> {
      *
      * Group extends Array. You can use them in for loops just like arrays
      * since they inherit all the functions and properties of standard
-     * arrays such as group.length and function like group.includes().
+     * arrays such as `group.length` and functions like `group.includes()`.
      *
      * Since groups just contain references to sprites, a sprite can be in
      * multiple groups.
@@ -1557,11 +1576,10 @@ class Group extends Array<Sprite> {
      */
     autoCull: boolean;
     /**
-     * Alias for group.push
+     * Adds a sprite to the end of the group.
      *
-     * Its better to use the group Sprite constructor instead.
-     * `new group.Sprite()` which both creates a group sprite using
-     * soft inheritance and adds it to the group.
+     * Alias for `push`, the standard JS Array function for
+     * adding to an array.
      *
      * @memberof Group
      * @instance
@@ -1735,23 +1753,53 @@ class Group extends Array<Sprite> {
      */
     cull(top: number, bottom: number, left?: number, right?: number, cb?: Function): number;
     /**
-     * If no input is given all sprites in the group are removed.
+     * If no input is given to this function, the group itself will be
+     * marked as removed and deleted from p5play's internal memory, the
+     * `p5play.groups` array. Every sprite in the group will be removed
+     * from the world and every other group they belong to.
      *
-     * If a sprite or index is given, that sprite is removed from the
-     * group, but not from the sketch or any other groups it may be in.
+     * Groups should not be used after they are removed.
+     *
+     * If this function receives as input an index of a sprite in the
+     * group or the sprite itself, it will remove that sprite from
+     * this group and its super groups (if any), but NOT from the world.
+     *
+     * To remove a sprite from the world and every group it belongs to,
+     * use `sprite.remove()` instead.
      *
      * @param {Sprite} item The sprite to be removed
-     * @return {Sprite} the removed sprite
+     * @return {Sprite} the removed sprite or undefined if it was not found
      */
     remove(item: Sprite): Sprite;
     /**
-     * Removes all sprites from the group and destroys the group.
+     * Using `group.remove` instead is recommended because it's easier to use,
+     * and it uses this function internally.
      *
+     * Similar to `Array.splice` except it does not accept adding sprites,
+     * third parameters and beyond are ignored.
+     *
+     * This function also removes the group and its super-groups from the
+     * sprites' groups array.
+     *
+     * @param {Number} idx index
+     * @param {Number} amount number of sprites to remove
+     * @return {Sprite[]} the removed sprites
+     */
+    splice(idx: number, amount: number): Sprite[];
+    /**
+     * Not supported!
+     * @return {Number} the new length of the group
+     */
+    unshift(): number;
+    /**
+     * Removes all the sprites in the group from the world and
+     * every other group they belong to.
+     *
+     * Does not delete the group itself.
      */
     removeAll(): void;
     /**
      * Draws all the sprites in the group.
-     *
      */
     draw(): void;
     /**
@@ -1814,9 +1862,12 @@ class World {
      * This function is automatically called at the end of the p5.js draw
      * loop, unless it was already called inside the draw loop.
      *
+     * Decreasing velocityIterations and positionIterations will improve
+     * performance but decrease simulation quality.
+     *
      * @param {Number} timeStep - time step in seconds
-     * @param {Number} velocityIterations
-     * @param {Number} positionIterations
+     * @param {Number} velocityIterations - 8 by default
+     * @param {Number} positionIterations - 3 by default
      */
     step(timeStep: number, velocityIterations: number, positionIterations: number): void;
     /**
@@ -1844,6 +1895,7 @@ class World {
      * @returns {Sprite} a sprite
      */
     getSpriteAt(x: number, y: number, group?: Group): Sprite;
+    getMouseSprites(): Sprite[];
     set allowSleeping(arg: boolean);
     /**
      * "Sleeping" sprites get temporarily ignored during physics
@@ -2031,16 +2083,16 @@ class Joint {
      * @default true
      */
     visible: boolean;
-    set draw(arg: () => void);
+    set draw(arg: Function);
     /**
      * Function that draws the joint. Can be overridden by the user.
-     *
+     * @type {Function}
      * @param {Number} xA
      * @param {Number} yA
      * @param {Number} [xB]
      * @param {Number} [yB]
      */
-    get draw(): () => void;
+    get draw(): Function;
     set offsetA(arg: p5.Vector);
     /**
      * Offset to the joint's anchorA position from the center of spriteA.
@@ -2496,6 +2548,7 @@ class _Mouse extends InputDevice {
      * @default false
      */
     active: boolean;
+    update(): void;
     /**
      * The mouse's position.
      * @type {object}

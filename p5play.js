@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.14
+ * @version 3.15
  * @author quinton-ashley
  * @license gpl-v3-only
  */
@@ -55,31 +55,29 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
 	};
 
-	class P5Play {
+	/**
+	 * @class
+	 */
+	this.P5Play = class {
 		/**
 		 * This class is deleted after it's used
 		 * to create the `p5play` object
-		 * which stores information about the sketch.
-		 *
-		 * @constructor
+		 * which contains information about the sketch.
 		 */
 		constructor() {
-			this.os = {};
-			this.context = 'web';
-			this.standardizeKeyboard = false;
 			/**
 			 * Contains all the sprites in the sketch,
 			 * but users should use the `allSprites` group.
 			 *
 			 * The keys are the sprite's unique ids.
-			 * @type {Object}
+			 * @type {Object.<number, Sprite>}
 			 */
 			this.sprites = {};
 			/**
 			 * Contains all the groups in the sketch,
 			 *
 			 * The keys are the group's unique ids.
-			 * @type {Object}
+			 * @type {Object.<number, Group>}
 			 */
 			this.groups = {};
 			this.groupsCreated = 0;
@@ -95,12 +93,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * The default color palette, at index 0 of this array,
 			 * has all the letters of the English alphabet mapped to colors.
+			 * @type {Array}
 			 */
 			this.palettes = [];
-		}
-	}
 
-	this.p5play = new P5Play();
+			this.os = {};
+			this.context = 'web';
+			if (window.matchMedia) this.hasMouse = window.matchMedia('(any-hover: none)').matches ? false : true;
+			else this.hasMouse = true;
+			this.standardizeKeyboard = false;
+		}
+	};
+
+	/**
+	 * Contains information about the sketch.
+	 * @type {P5Play}
+	 */
+	this.p5play = new this.P5Play();
 	delete this.P5Play;
 
 	/**
@@ -134,9 +143,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * group and put on the top layer, in front of all
 		 * previously created sprites.
 		 *
-		 * @constructor
-		 * @returns {Sprite} A new Sprite object
-		 *
 		 * @param {Number} [x] - horizontal position of the sprite
 		 * @param {Number} [y] - vertical position of the sprite
 		 * @param {Number} [w] - width of the placeholder rectangle and of
@@ -158,6 +164,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		constructor(x, y, w, h, collider) {
 			this.p = pInst;
+
+			// using boolean flags is faster than instanceof checks
+			this._isSprite = true;
 
 			/**
 			 * Each sprite has a unique id number. Don't change it!
@@ -186,7 +195,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let group, ani;
 
-			if (args[0] !== undefined && args[0] instanceof this.p.Group) {
+			if (args[0] !== undefined && args[0]._isGroup) {
 				group = args[0];
 				args = args.slice(1);
 			}
@@ -441,11 +450,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			x ??= group.x;
 			if (x === undefined) {
 				x = this.p.width / this.p.allSprites.tileSize / 2;
-				this._vertexMode = true;
+				if (w) this._vertexMode = true;
 			}
 			y ??= group.y;
-			if (y === undefined) y = this.p.height / this.p.allSprites.tileSize / 2;
-			if (w === undefined || w === null) {
+			if (y === undefined) {
+				y = this.p.height / this.p.allSprites.tileSize / 2;
+			}
+			if (w === undefined) {
 				w = group.w || group.width || group.d || group.diameter;
 				h ??= group.h || group.height;
 			}
@@ -481,7 +492,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				} else {
 					if (typeof ani == 'string') this._changeAni(ani);
 					else this._ani = ani.clone();
-					this._ani.name = ani.name;
 				}
 				let ts = this.tileSize;
 				if (!w && (this._ani.w != 1 || this._ani.h != 1)) {
@@ -496,17 +506,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			// to its groups after its collider is potentially created
 			this.groups = [];
 
+			/**
+			 * Used to detect mouse events with the sprite.
+			 * @type {_SpriteMouse}
+			 */
 			this.mouse = new this.p._SpriteMouse();
 
 			if (this.collider != 'none') {
-				if (this._vertexMode) this.addCollider(w, h);
+				if (this._vertexMode) this.addCollider(w);
 				else this.addCollider(0, 0, w, h);
 			} else {
 				this.w = w || (this.tileSize > 1 ? 1 : 50);
 				this.h = h || this.w;
 				if (Array.isArray(w)) {
 					throw new Error(
-						'Cannot set the collider type of a sprite with a polygon or chain shape to "none". Try having the sprite overlap with other sprites instead.'
+						'Cannot set the collider type of a sprite with a polygon or chain shape to "none". To achieve the same effect, use .overlaps(allSprites) to have your sprite overlap with the allSprites group.'
 					);
 				}
 				if (w !== undefined && h === undefined) this._shape = 'circle';
@@ -724,9 +738,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Number} h height of the collider
 		 */
 		addCollider(offsetX, offsetY, w, h) {
+			if (this._removed) {
+				console.error("Can't add colliders to a sprite that was removed.");
+				return;
+			}
 			if (this.__collider == 3) {
-				this._collider = 'kinematic';
-				this.__collider = 2;
+				this._collider = 'dynamic';
+				this.__collider = 0;
 			}
 			let props = {};
 			props.shape = this._parseShape(...arguments);
@@ -744,7 +762,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					type: this.collider
 				});
 				this.body.sprite = this;
-			}
+			} else this.body.m_gravityScale ||= 1;
 			this.body.createFixture(props);
 			this.resetMass();
 		}
@@ -771,6 +789,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Number} h height of the collider
 		 */
 		addSensor(offsetX, offsetY, w, h) {
+			if (this._removed) {
+				console.error("Can't add sensors to a sprite that was removed.");
+				return;
+			}
 			let s = this._parseShape(...arguments);
 			if (!this.body) {
 				this.body = this.p.world.createBody({
@@ -779,6 +801,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					gravityScale: 0
 				});
 				this.body.sprite = this;
+				this.mass = 0;
+				this._massUndef = true;
 				this.rotation = this._angle;
 				this.vel = this._velocity;
 			}
@@ -794,19 +818,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let args = [...arguments];
 			let path, shape;
 
-			if (args.length < 3) {
+			if (args.length == 0) {
+				w = this._w;
+				h = this._h;
+			} else if (args.length < 3) {
 				offsetX = 0;
 				offsetY = 0;
 				w = args[0];
-				h = args[1];
 				this._vertexMode = true;
-			}
-
-			offsetX ??= 0;
-			offsetY ??= 0;
-			w ??= this._w;
-			if (!this.body && this.shape && this.shape != 'circle') {
-				h ??= this._h;
 			}
 
 			// if (w is chain array) or (diameter/side length and h is a
@@ -1009,42 +1028,34 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Removes the physics body colliders from the sprite but not
 		 * overlap sensors.
-		 *
-		 * Only use this method if you never want to use the sprite's
-		 * colliders again. If you want to disable colliders without
-		 * removing them, use the overlaps, overlapping, or overlapped
-		 * functions instead.
-		 *
 		 */
 		removeColliders() {
-			this._collides = {};
-			this._colliding = {};
-			this._collided = {};
-			this._removeFixtures(false);
+			if (!this.body) return;
+			this._removeContacts(0);
+			this._removeFixtures(0);
 		}
 
 		/**
 		 * Removes overlap sensors from the sprite.
-		 *
-		 * Only use this method if you never want to use the sprite's
-		 * overlap sensors again. To disable overlap sensors without
-		 * removing them, use the collides, colliding, or collided functions
-		 * instead.
-		 *
 		 */
 		removeSensors() {
-			this._hasOverlap = {};
-			this._overlaps = {};
-			this._overlapping = {};
-			this._overlapped = {};
-			this._removeFixtures(true);
+			if (!this.body) return;
+			this._removeContacts(1);
+			this._removeFixtures(1);
+			this._hasSensors = false;
 		}
 
-		// removes sensors or colliders or both
-		_removeFixtures(removeSensors) {
+		/*
+		 * removes sensors or colliders or both
+		 * @param type can be undefined, 0, or 1
+		 * undefined removes both
+		 * 0 removes colliders
+		 * 1 removes sensors
+		 */
+		_removeFixtures(type) {
 			let prevFxt;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
-				if (removeSensors === undefined || fxt.m_isSensor == removeSensors) {
+				if (type === undefined || fxt.m_isSensor == type) {
 					let _fxt = fxt.m_next;
 					fxt.destroyProxies(this.p.world.m_broadPhase);
 					if (!prevFxt) {
@@ -1054,6 +1065,25 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 				} else {
 					prevFxt = fxt;
+				}
+			}
+		}
+
+		/*
+		 * Removes contacts
+		 * @param type can be undefined, 0, or 1
+		 * undefined removes both
+		 * 0 removes colliders
+		 * 1 removes sensors
+		 */
+		_removeContacts(type) {
+			if (!this.body) return;
+			let ce = this.body.m_contactList;
+			while (ce) {
+				let con = ce.contact;
+				ce = ce.next;
+				if (type === undefined || con.m_fixtureA.m_isSensor == type) {
+					this.p.world.destroyContact(con);
 				}
 			}
 		}
@@ -1131,6 +1161,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.changeAni(val);
 		}
 
+		/**
+		 * Reference to the sprite's current animation.
+		 * @type {SpriteAnimation}
+		 */
 		get ani() {
 			return this._ani;
 		}
@@ -1138,6 +1172,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.changeAni(val);
 		}
 
+		/**
+		 * Keys are the animation label, values are SpriteAnimation objects
+		 * @type {SpriteAnimations}
+		 */
 		get anis() {
 			return this.animations;
 		}
@@ -1223,10 +1261,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The sprite's collider type. Default is 'dynamic'.
+		 * The sprite's collider type. Default is "dynamic".
 		 *
 		 * The collider type can be one of the following strings:
-		 * 'dynamic', 'static', 'kinematic', 'none'.
+		 * "dynamic", "static", "kinematic", "none".
+		 *
+		 * Sprites can't have their collider type
+		 * set to "none" if they have a polygon or chain collider,
+		 * multiple colliders, or multiple sensors.
+		 *
+		 * To achieve the same effect as setting collider type
+		 * to "none", use `.overlaps(allSprites)` to have your
+		 * sprite overlap with all sprites.
+		 *
 		 * @type {String}
 		 * @default 'dynamic'
 		 */
@@ -1234,6 +1281,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._collider;
 		}
 		set collider(val) {
+			if (val == this._collider) return;
+
 			val = val.toLowerCase();
 			let c = val[0];
 			if (c == 'd') val = 'dynamic';
@@ -1243,28 +1292,33 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			if (val == this._collider) return;
 
-			this.__collider = ['d', 's', 'k', 'n'].indexOf(c);
-
-			if (this._collider === undefined) {
-				this._collider = val;
-				return;
-			}
-
 			if (val == 'none' && (this._shape == 'chain' || this._shape == 'polygon')) {
 				throw new Error(
-					'Cannot set the collider type of a polygon or chain collider to "none". Try having the sprite overlap with other sprites instead.'
+					'Cannot set the collider type of a polygon or chain collider to "none". To achieve the same effect, use .overlaps(allSprites) to have your sprite overlap with the allSprites group.'
 				);
 			}
-			if (this.joints.length) {
-				this.joints.removeAll();
-				console.warn('Changing the collider type of a sprite that has joints will remove all its joints.');
-			}
-			if (this.watch) this.mod[10] = true;
 
-			let oldCollider = this._collider;
+			if (this._removed) {
+				throw new Error('Cannot change the collider type of a sprite that was removed.');
+			}
+
+			let oldCollider = this.__collider;
 
 			this._collider = val;
-			if (oldCollider !== undefined) this._reset();
+			this.__collider = ['d', 's', 'k', 'n'].indexOf(c);
+
+			if (this.watch) this.mod[10] = true;
+
+			if (oldCollider === undefined) return;
+
+			if (this.__collider != 3) {
+				if (this.body) this.body.setType(val);
+				if (oldCollider == 3) this.addCollider();
+			} else {
+				this.removeColliders();
+				if (this.fixture?.m_isSensor) this.body.m_gravityScale = 0;
+				else this.p.world.destroyBody(this.body);
+			}
 		}
 
 		_reset() {
@@ -1276,22 +1330,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this._vertexMode = true;
 			}
 
-			// remove body
+			// destroys all fixtures (colliders and sensors)
 			if (this.body) {
 				this.p.world.destroyBody(this.body);
 				this.body = undefined;
 			}
 
-			// replace colliders
-			if (this._collider != 'none') {
+			// remake colliders, if collider type is not "none"
+			if (this.__collider != 3) {
 				if (v) {
 					this.addCollider(0, 0, v);
 				} else {
 					this.addCollider();
 				}
-				if (this._hasSensors) {
-					this.addDefaultSensors();
-				}
+			}
+			// remake sensors
+			if (this._hasSensors) {
+				this.addDefaultSensors();
 			}
 
 			for (let prop in bodyProps) {
@@ -1429,6 +1484,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set textColour(val) {
 			this.textColor = val;
 		}
+		/**
+		 * The sprite's text fill color. Black by default.
+		 * @type {p5.Color}
+		 * @default black (#000000)
+		 */
 		get textFill() {
 			return this._textFill;
 		}
@@ -1481,6 +1541,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * reach a destination. Setting a sprite's bearing doesn't do
 		 * anything by itself. You can apply a force at the sprite's
 		 * bearing angle using the `applyForce` function.
+		 * @type {Number}
 		 * @example
 		 * sprite.bearing = angle;
 		 * sprite.applyForce(amount);
@@ -1493,6 +1554,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._bearing = val;
 		}
 
+		/**
+		 * If true, an outline of the sprite's collider will be drawn.
+		 * @type {Boolean}
+		 * @default false
+		 */
 		get debug() {
 			return this._debug;
 		}
@@ -1591,7 +1657,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * A sprite's draw function can be overridden with a
 		 * custom draw function, in which the center of the sprite is
 		 * at (0, 0).
-		 *
+		 * @type {Function}
 		 * @example
 		 * sprite.draw = function() {
 		 *   // an oval
@@ -1797,8 +1863,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The sprite's mirror states.
 		 * @type {Object}
-		 * @property {Boolean} x - The sprite's horizontal mirror state.
-		 * @property {Boolean} y - The sprite's vertical mirror state.
+		 * @property {Boolean} x - the sprite's horizontal mirror state
+		 * @property {Boolean} y - the sprite's vertical mirror state
 		 * @default {x: false, y: false}
 		 */
 		get mirror() {
@@ -1817,6 +1883,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * The sprite's x and y properties represent its center in world
 		 * coordinates. This point is also the sprite's center of rotation.
 		 * @type {object}
+		 * @property {Number} x - the sprite's horizontal offset
+		 * @property {Number} y - the sprite's vertical offset
+		 * @default {x: 0, y: 0}
 		 */
 		get offset() {
 			return this._offset;
@@ -2406,7 +2475,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * There's no way to individually update a sprite or group
 		 * of sprites in the physics simulation though.
-		 *
+		 * @type {Function}
 		 */
 		get update() {
 			return this._update;
@@ -2469,41 +2538,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			if (!this.body && !this.removed) return;
 
-			let contactTypes = [];
-			// for each type of collision and overlap event
-			let a = this;
-			let b;
-			for (let event in eventTypes) {
-				for (let k in this[event]) {
-					if (k >= 1000) b = this.p.p5play.sprites[k];
-					else b = this.p.p5play.groups[k];
-
-					let v = a[event][k] + 1;
-					this[event][k] = v;
-					if (b instanceof this.p.Group) b[event][a._uid] = v;
-					if (!b || v == 0) {
-						delete a[event][k];
-						if (b instanceof this.p.Group) delete b[event][a._uid];
-						continue;
-					}
-					if (b instanceof this.p.Group) continue;
-
-					contactTypes = [];
-					if (v == 1 || v == -2) contactTypes.push(eventTypes[event][0]);
-					if (v != -1) contactTypes.push(eventTypes[event][1]);
-					if (v == -1 || v == -2) contactTypes.push(eventTypes[event][2]);
-
-					for (let contactType of contactTypes) {
-						let cb = this.p.world._findContact(contactType, a, b, true);
-						if (cb) cb(a, b, v);
-					}
-				}
-			}
-			if (this.removed) {
-				if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
-					delete this.p.p5play.sprites[this._uid];
-				}
-			}
+			this.__step();
 		}
 
 		/*
@@ -2517,7 +2552,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this._ani || this.debug || this.p.p5play.disableImages) {
 				if (this.debug && this.debug != 'colliders') {
 					this.p.noFill();
-					this.p.stroke(0, 255, 0);
+					if (this.__collider != 3) this.p.stroke(0, 255, 0);
+					else this.p.stroke(120);
 					this.p.line(0, -2, 0, 2);
 					this.p.line(-2, 0, 2, 0);
 				}
@@ -3325,16 +3361,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.body) this.p.world.destroyBody(this.body);
 			this.body = null;
 
-			// when removed from the "scene" also remove all the references
-			// to the sprite from all its groups
+			// when removed from the world also remove all the sprite
+			// from all its groups
 			for (let g of this.groups) {
 				g.remove(this);
-			}
-
-			// all of p5play's references to the sprite can be removed
-			// only if the sprite is not colliding or overlapping with anything
-			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
-				delete this.p.p5play.sprites[this._uid];
 			}
 		}
 
@@ -3349,23 +3379,41 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return 's' + this.idNum;
 		}
 
-		_ensureCollide(target, callback) {
+		_setContactCB(target, cb, contactType, eventType) {
+			let type;
+			if (contactType == 0) type = eventTypes._collisions[eventType];
+			else type = eventTypes._overlappers[eventType];
+
+			if (this[type][target._uid] == cb) return;
+
+			let reverseCB = { cb };
+			this[type][target._uid] = cb;
+			target[type][this._uid] = reverseCB;
+			if (!target._isGroup) return;
+			for (let s of target) {
+				s[type][this._uid] = reverseCB;
+			}
+		}
+
+		_validCollideParams(target, cb) {
 			if (!target) {
 				throw new FriendlyError('Sprite.collide', 2);
 			}
-			if (!(target instanceof this.p.Sprite) && !(target instanceof this.p.Group)) {
+			if (!target._isSprite && !target._isGroup) {
 				throw new FriendlyError('Sprite.collide', 0, [target]);
 			}
-			if (callback && typeof callback != 'function') {
-				throw new FriendlyError('Sprite.collide', 1, [callback]);
+			if (cb && typeof cb != 'function') {
+				throw new FriendlyError('Sprite.collide', 1, [cb]);
 			}
+		}
 
+		_ensureCollide(target, cb, type) {
 			if (this._hasOverlap[target._uid] !== false) {
 				this._hasOverlap[target._uid] = false;
 			}
 			if (target._hasOverlap[this._uid] !== false) {
 				target._hasOverlap[this._uid] = false;
-				if (target instanceof this.p.Group) {
+				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = false;
 					}
@@ -3388,9 +3436,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Function} [callback]
 		 */
 		collides(target, callback) {
-			this._ensureCollide(target, callback);
-			this._collides[target._uid] = callback || true;
-			return this._collisions[target._uid] == 1;
+			this._validCollideParams(target, callback);
+			this._ensureCollide(target);
+			if (callback) this._setContactCB(target, callback, 0, 0);
+			return this._collisions[target._uid] == 1 || this._collisions[target._uid] <= -3;
 		}
 
 		/**
@@ -3403,9 +3452,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {Number} frames
 		 */
 		colliding(target, callback) {
-			this._ensureCollide(target, callback);
-			this._colliding[target._uid] = callback || true;
+			this._validCollideParams(target, callback);
+			this._ensureCollide(target);
+			if (callback) this._setContactCB(target, callback, 0, 1);
 			let val = this._collisions[target._uid];
+			if (val <= -3) return 1;
 			return val > 0 ? val : 0;
 		}
 
@@ -3418,44 +3469,28 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {Boolean}
 		 */
 		collided(target, callback) {
-			this._ensureCollide(target, callback);
-			this._collided[target._uid] = callback || true;
-			return this._collisions[target._uid] == -1;
+			this._validCollideParams(target, callback);
+			this._ensureCollide(target);
+			if (callback) this._setContactCB(target, callback, 0, 2);
+			return this._collisions[target._uid] <= -1;
 		}
 
-		_removeContactsWith(target) {
-			if (target instanceof this.p.Group) {
-				for (let s of target) {
-					this._removeContactsWith(s);
-				}
-			} else {
-				this.__removeContactsWith(target);
-			}
-		}
-
-		__removeContactsWith(o) {
-			if (!this.body) return;
-			for (let ce = this.body.getContactList(); ce; ce = ce.next) {
-				let c = ce.contact;
-				if (c.m_fixtureA.m_body.sprite._uid == o._uid || c.m_fixtureB.m_body.sprite._uid == o._uid) {
-					this.p.world.destroyContact(c);
-				}
-			}
-		}
-
-		_ensureOverlap(target, callback) {
+		_validOverlapParams(target, cb) {
 			if (!target) {
 				throw new FriendlyError('Sprite.overlap', 2);
 			}
-			if (!(target instanceof this.p.Sprite) && !(target instanceof this.p.Group)) {
+			if (!target._isSprite && !target._isGroup) {
 				throw new FriendlyError('Sprite.overlap', 0, [target]);
 			}
-			if (callback && typeof callback != 'function') {
-				throw new FriendlyError('Sprite.overlap', 1, [callback]);
+			if (cb && typeof cb != 'function') {
+				throw new FriendlyError('Sprite.overlap', 1, [cb]);
 			}
+		}
+
+		_ensureOverlap(target) {
 			if (!this._hasSensors) this.addDefaultSensors();
 			if (!target._hasSensors) {
-				if (target instanceof this.p.Sprite) {
+				if (target._isSprite) {
 					target.addDefaultSensors();
 				} else {
 					for (let s of target) {
@@ -3464,14 +3499,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					target._hasSensors = true;
 				}
 			}
-			if (this._hasOverlap[target._uid] != true) {
+			if (!this._hasOverlap[target._uid]) {
 				this._removeContactsWith(target);
 				this._hasOverlap[target._uid] = true;
 			}
-			if (target._hasOverlap[this._uid] != true) {
+
+			if (!target._hasOverlap[this._uid]) {
 				target._removeContactsWith(this);
 				target._hasOverlap[this._uid] = true;
-				if (target instanceof this.p.Group) {
+				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = true;
 					}
@@ -3494,9 +3530,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Function} [callback]
 		 */
 		overlaps(target, callback) {
-			this._ensureOverlap(target, callback);
-			this._overlaps[target._uid] = callback || true;
-			return this._overlappers[target._uid] == 1;
+			this._validOverlapParams(target, callback);
+			this._ensureOverlap(target);
+			if (callback) this._setContactCB(target, callback, 1, 0);
+			return this._overlappers[target._uid] == 1 || this._overlappers[target._uid] <= -3;
 		}
 
 		/**
@@ -3509,9 +3546,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {Number} frames
 		 */
 		overlapping(target, callback) {
-			this._ensureOverlap(target, callback);
-			this._overlapping[target._uid] = callback || true;
+			this._validOverlapParams(target, callback);
+			this._ensureOverlap(target);
+			if (callback) this._setContactCB(target, callback, 1, 1);
 			let val = this._overlappers[target._uid];
+			if (val <= -3) return 1;
 			return val > 0 ? val : 0;
 		}
 
@@ -3524,9 +3563,30 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {Boolean}
 		 */
 		overlapped(target, callback) {
-			this._ensureOverlap(target, callback);
-			this._overlapped[target._uid] = callback || true;
-			return this._overlappers[target._uid] == -1;
+			this._validOverlapParams(target, callback);
+			this._ensureOverlap(target);
+			if (callback) this._setContactCB(target, callback, 1, 2);
+			return this._overlappers[target._uid] <= -1;
+		}
+
+		_removeContactsWith(target) {
+			if (target._isGroup) {
+				for (let s of target) {
+					this._removeContactsWith(s);
+				}
+			} else {
+				this.__removeContactsWith(target);
+			}
+		}
+
+		__removeContactsWith(o) {
+			if (!this.body) return;
+			for (let ce = this.body.getContactList(); ce; ce = ce.next) {
+				let c = ce.contact;
+				if (c.m_fixtureA.m_body.sprite._uid == o._uid || c.m_fixtureB.m_body.sprite._uid == o._uid) {
+					this.p.world.destroyContact(c);
+				}
+			}
 		}
 
 		/*
@@ -3536,17 +3596,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		_sortFixtures() {
 			let colliders = null;
 			let sensors = null;
+			let lastColl, lastSens;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				if (fxt.m_isSensor) {
 					if (!sensors) sensors = fxt;
 					else sensors.m_next = fxt;
+					lastSens = fxt;
 				} else {
 					if (!colliders) colliders = fxt;
 					else colliders.m_next = fxt;
+					lastColl = fxt;
 				}
 			}
-			if (sensors) sensors.m_next = null;
-			if (colliders) colliders.m_next = sensors;
+			if (sensors) lastSens.m_next = null;
+			if (colliders) lastColl.m_next = sensors;
 			this.body.m_fixtureList = colliders || sensors;
 		}
 
@@ -3559,6 +3622,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * addSensor function.
 		 */
 		addDefaultSensors() {
+			if (this._hasSensors) return;
 			let shape;
 			if (this.body) {
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
@@ -3710,7 +3774,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let owner;
 
-			if (args[0] instanceof this.p.Sprite || args[0] instanceof this.p.Group) {
+			if (typeof args[0] == 'object' && (args[0]._isSprite || args[0]._isGroup)) {
 				owner = args[0];
 				args = args.slice(1);
 				this._addedToSpriteOrGroup = true;
@@ -4086,6 +4150,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let i = 0; i < this.length; i++) {
 				ani.push(this[i]);
 			}
+			ani.name = this.name;
 			ani.offset.x = this.offset.x;
 			ani.offset.y = this.offset.y;
 			ani.frameDelay = this.frameDelay;
@@ -4219,7 +4284,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Pauses the animation.
-		 *
 		 */
 		pause(frame) {
 			this.playing = false;
@@ -4228,7 +4292,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Stops the animation. Alt for pause.
-		 *
 		 */
 		stop(frame) {
 			this.playing = false;
@@ -4249,7 +4312,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Plays the animation forwards and loops it.
-		 *
 		 */
 		loop() {
 			this.looping = true;
@@ -4258,7 +4320,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Prevents the animation from looping
-		 *
 		 */
 		noLoop() {
 			this.looping = false;
@@ -4266,7 +4327,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Goes to the next frame and stops.
-		 *
 		 */
 		nextFrame() {
 			if (this.frame < this.length - 1) this.frame = this.frame + 1;
@@ -4278,7 +4338,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Goes to the previous frame and stops.
-		 *
 		 */
 		previousFrame() {
 			if (this.frame > 0) this.frame = this.frame - 1;
@@ -4315,7 +4374,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Read only. Returns the index of the last frame.
+		 * The index of the last frame. Read only.
 		 * @type {Number}
 		 */
 		get lastFrame() {
@@ -4323,7 +4382,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Read only. Returns the current frame as p5.Image.
+		 * The current frame as p5.Image. Read only.
 		 * @type {p5.Image}
 		 */
 		get frameImage() {
@@ -4379,7 +4438,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The frames of the animation.
+		 * Deprecated. Use the animation object itself, which is an array of frames.
+		 *
+		 * The frames of the animation. Read only.
+		 * @deprecated
 		 * @type {p5.Image[]}
 		 */
 		get frames() {
@@ -4389,29 +4451,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			return frames;
 		}
-
-		/**
-		 * The frames of the animation. Alt for ani.frames
-		 * @type {p5.Image[]}
-		 */
-		get images() {
-			return this.frames;
-		}
 	};
 
 	this.SpriteAnimation.props = ['frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale', 'demoMode'];
 
 	/**
 	 * This SpriteAnimations class serves the same role that Group does
-	 * for Sprites. Except it doesn't extend Array, its instances are
-	 * objects. It is used to create `sprite.anis` and `group.anis`.
+	 * for Sprites. This class is used interally to create `sprite.anis`
+	 * and `group.anis`. It's not intended to be used directly by p5play users.
 	 *
-	 * In instances of this class, the keys are animation names,
+	 * In instance objects of this class, the keys are animation names,
 	 * values are SpriteAnimation objects.
 	 *
 	 * Because users only expect instances of this class to contain
-	 * animation names as keys, it uses a internal private object
-	 * #_ to store animation properties. Getters and setters are used to
+	 * animation names as keys, it uses an internal private object
+	 * `#_` to store animation properties. Getters and setters are used to
 	 * access the private properties, enabling dynamic inheritance.
 	 *
 	 * @private
@@ -4484,7 +4538,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * Group extends Array. You can use them in for loops just like arrays
 		 * since they inherit all the functions and properties of standard
-		 * arrays such as group.length and function like group.includes().
+		 * arrays such as `group.length` and functions like `group.includes()`.
 		 *
 		 * Since groups just contain references to sprites, a sprite can be in
 		 * multiple groups.
@@ -4511,6 +4565,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					throw new Error('A group can only contain sprites');
 				}
 			}
+
+			this._isGroup = true;
 
 			/**
 			 * @type {Number}
@@ -4714,7 +4770,34 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Its useful for debugging.
 			 * @type {Number}
 			 */
-			this.idNum = this.p.p5play.groupsCreated;
+			this.idNum;
+
+			if (this.p.p5play.groupsCreated < 999) {
+				this.idNum = this.p.p5play.groupsCreated;
+			} else {
+				// find the first empty slot in the groups array
+				for (let i = 1; i < this.p.p5play.groups.length; i++) {
+					if (!this.p.p5play.groups[i]) {
+						this.idNum = i;
+						break;
+					}
+				}
+				if (!this.idNum) {
+					console.warn(
+						'ERROR: Surpassed the limit of 999 groups in memory. Use less groups or delete groups from the p5play.groups array to recycle ids.'
+					);
+					// if there are no empty slots, try to prevent a crash by
+					// finding the first slot that has a group with no sprites in it
+					for (let i = 1; i < this.p.p5play.groups.length; i++) {
+						if (!this.p.p5play.groups[i].length) {
+							this.idNum = i;
+							break;
+						}
+					}
+					this.idNum ??= 1;
+				}
+			}
+
 			this._uid = this.idNum;
 			this.p.p5play.groups[this._uid] = this;
 			this.p.p5play.groupsCreated++;
@@ -4777,25 +4860,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let _this = this;
 
-			/**
-			 * @type {Sprite}
-			 */
-			this.Sprite;
-
 			this.Sprite = class extends this.p.Sprite {
 				constructor() {
 					super(_this, ...arguments);
 				}
 			};
 			/**
-			 * @type {Sprite}
+			 * @class
 			 */
 			this.GroupSprite = this.Sprite;
 
-			/**
-			 * @type {Group}
-			 */
-			this.Group;
+			// JSDoc breaks if I don't put @class for GroupSprite
+			// but for typescript defs they should be typeof Sprite
+			// and get replaced as such by the p5play-types build.js script
 
 			this.Group = class extends this.p.Group {
 				constructor() {
@@ -4803,7 +4880,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 			/**
-			 * @type {Group}
+			 * @class
 			 */
 			this.Subgroup = this.Group;
 
@@ -4912,11 +4989,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			/**
-			 * Alias for group.push
+			 * Adds a sprite to the end of the group.
 			 *
-			 * Its better to use the group Sprite constructor instead.
-			 * `new group.Sprite()` which both creates a group sprite using
-			 * soft inheritance and adds it to the group.
+			 * Alias for `push`, the standard JS Array function for
+			 * adding to an array.
 			 *
 			 * @memberof Group
 			 * @instance
@@ -5051,17 +5127,42 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		_ensureCollide(target, callback) {
+		_validCollideParams(target, cb) {
 			if (!target) {
 				throw new FriendlyError('Group.collide', 2);
 			}
-			if (!(target instanceof this.p.Sprite) && !(target instanceof this.p.Group)) {
+			if (!target._isSprite && !target._isGroup) {
 				throw new FriendlyError('Group.collide', 0, [target]);
 			}
-			if (callback && typeof callback != 'function') {
-				throw new FriendlyError('Group.collide', 1, [callback]);
+			if (cb && typeof cb != 'function') {
+				throw new FriendlyError('Group.collide', 1, [cb]);
 			}
+		}
 
+		_setContactCB(target, cb, contactType, eventType) {
+			let type;
+			if (contactType == 0) type = eventTypes._collisions[eventType];
+			else type = eventTypes._overlappers[eventType];
+
+			if (this[type][target._uid] == cb) return;
+
+			let reverseCB = { cb };
+			this[type][target._uid] = cb;
+			for (let s of this) {
+				s[type][target._uid] = cb;
+			}
+			target[type][this._uid] = reverseCB;
+			if (!target._isGroup) return;
+			for (let s of target) {
+				s[type][this._uid] = reverseCB;
+				for (let s2 of this) {
+					s[type][s2._uid] = reverseCB;
+					s2[type][s._uid] = cb;
+				}
+			}
+		}
+
+		_ensureCollide(target) {
 			if (this._hasOverlap[target._uid] !== false) {
 				this._hasOverlap[target._uid] = false;
 				for (let s of this) {
@@ -5070,7 +5171,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (target._hasOverlap[this._uid] !== false) {
 				target._hasOverlap[this._uid] = false;
-				if (target instanceof this.p.Group) {
+				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = false;
 					}
@@ -5093,9 +5194,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Function} [callback]
 		 */
 		collides(target, callback) {
-			this._ensureCollide(target, callback);
-			this._collides[target._uid] = callback || true;
-			return this._collisions[target._uid] == 1;
+			this._validCollideParams(target, callback);
+			this._ensureCollide(target);
+			if (callback) this._setContactCB(target, callback, 0, 0);
+			return this._collisions[target._uid] == 1 || this._collisions[target._uid] <= -3;
 		}
 
 		/**
@@ -5108,9 +5210,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {Number} frames
 		 */
 		colliding(target, callback) {
-			this._ensureCollide(target, callback);
-			this._colliding[target._uid] = callback || true;
+			this._validCollideParams(target, callback);
+			this._ensureCollide(target);
+			if (callback) this._setContactCB(target, callback, 0, 1);
 			let val = this._collisions[target._uid];
+			if (val <= -3) return 1;
 			return val > 0 ? val : 0;
 		}
 
@@ -5123,27 +5227,25 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {Boolean}
 		 */
 		collided(target, callback) {
-			this._ensureCollide(target, callback);
-			this._collided[target._uid] = callback || true;
-			return this._collisions[target._uid] == -1;
+			this._validCollideParams(target, callback);
+			this._ensureCollide(target);
+			if (callback) this._setContactCB(target, callback, 0, 2);
+			return this._collisions[target._uid] <= -1;
 		}
 
-		_removeContactsWith(o) {
-			for (let s of this) {
-				s._removeContactsWith(o);
-			}
-		}
-
-		_ensureOverlap(target, callback) {
+		_validOverlapParams(target, cb) {
 			if (!target) {
 				throw new FriendlyError('Group.overlap', 2);
 			}
-			if (!(target instanceof this.p.Sprite) && !(target instanceof this.p.Group)) {
+			if (!target._isSprite && !target._isGroup) {
 				throw new FriendlyError('Group.overlap', 0, [target]);
 			}
-			if (callback && typeof callback != 'function') {
-				throw new FriendlyError('Group.overlap', 1, [callback]);
+			if (cb && typeof cb != 'function') {
+				throw new FriendlyError('Group.overlap', 1, [cb]);
 			}
+		}
+
+		_ensureOverlap(target) {
 			if (!this._hasSensors) {
 				for (let s of this) {
 					if (!s._hasSensors) s.addDefaultSensors();
@@ -5151,7 +5253,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this._hasSensors = true;
 			}
 			if (!target._hasSensors) {
-				if (target instanceof this.p.Sprite) {
+				if (target._isSprite) {
 					target.addDefaultSensors();
 				} else {
 					for (let s of target) {
@@ -5170,9 +5272,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (target._hasOverlap[this._uid] != true) {
 				target._removeContactsWith(this);
 				target._hasOverlap[this._uid] = true;
-				if (target instanceof this.p.Group) {
+				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = true;
+						for (let s2 of this) {
+							s._hasOverlap[s2._uid] = true;
+							s2._hasOverlap[s._uid] = true;
+						}
 					}
 				}
 			}
@@ -5193,9 +5299,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Function} [callback]
 		 */
 		overlaps(target, callback) {
-			this._ensureOverlap(target, callback);
-			this._overlaps[target._uid] = callback || true;
-			return this._overlappers[target._uid] == 1;
+			this._validOverlapParams(target, callback);
+			this._ensureOverlap(target);
+			if (callback) this._setContactCB(target, callback, 1, 0);
+			return this._overlappers[target._uid] == 1 || this._overlappers[target._uid] <= -3;
 		}
 
 		/**
@@ -5208,9 +5315,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {Number} frames
 		 */
 		overlapping(target, callback) {
-			this._ensureOverlap(target, callback);
-			this._overlapping[target._uid] = callback || true;
+			this._validOverlapParams(target, callback);
+			this._ensureOverlap(target);
+			if (callback) this._setContactCB(target, callback, 1, 1);
 			let val = this._overlappers[target._uid];
+			if (val <= -3) return 1;
 			return val > 0 ? val : 0;
 		}
 
@@ -5223,9 +5332,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {Boolean}
 		 */
 		overlapped(target, callback) {
-			this._ensureOverlap(target, callback);
-			this._overlapped[target._uid] = callback || true;
-			return this._overlappers[target._uid] == -1;
+			this._validOverlapParams(target, callback);
+			this._ensureOverlap(target);
+			if (callback) this._setContactCB(target, callback, 1, 2);
+			return this._overlappers[target._uid] <= -1;
+		}
+
+		_removeContactsWith(o) {
+			for (let s of this) {
+				s._removeContactsWith(o);
+			}
 		}
 
 		/**
@@ -5349,20 +5465,41 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		push(...sprites) {
 			for (let s of sprites) {
 				if (!(s instanceof this.p.Sprite)) {
-					throw new Error('you can only add sprites to a group, no ' + typeof s + 's');
+					throw new Error('You can only add sprites to a group, not ' + typeof s);
+				}
+				if (s.removed) {
+					console.error("Can't add a removed sprite to a group");
+					continue;
 				}
 
 				for (let tuid in this._hasOverlap) {
-					let isOverlap = this._hasOverlap[tuid];
-					if (isOverlap && !s._hasSensors) {
+					let hasOverlap = this._hasOverlap[tuid];
+					if (hasOverlap && !s._hasSensors) {
 						s.addDefaultSensors();
 					}
-					s._hasOverlap[tuid] = isOverlap;
+					let b;
+					if (tuid >= 1000) b = this.p.p5play.sprites[tuid];
+					else b = this.p.p5play.groups[tuid];
+
+					if (!b || b.removed) continue;
+
+					if (!hasOverlap) b._ensureCollide(s);
+					else b._ensureOverlap(s);
+				}
+				for (let event in eventTypes) {
+					let contactTypes = eventTypes[event];
+					for (let contactType of contactTypes) {
+						for (let tuid in this[contactType]) {
+							s[contactType][tuid] = this[contactType][tuid];
+						}
+					}
 				}
 
 				super.push(s);
 				// push to subgroups, excluding allSprites
+				// since sprites are automatically added to allSprites
 				if (this.parent) this.p.p5play.groups[this.parent].push(s);
+
 				s.groups.push(this);
 			}
 			return this.length;
@@ -5436,19 +5573,27 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * If no input is given all sprites in the group are removed.
+		 * If no input is given to this function, the group itself will be
+		 * marked as removed and deleted from p5play's internal memory, the
+		 * `p5play.groups` array. Every sprite in the group will be removed
+		 * from the world and every other group they belong to.
 		 *
-		 * If a sprite or index is given, that sprite is removed from the
-		 * group, but not from the sketch or any other groups it may be in.
+		 * Groups should not be used after they are removed.
+		 *
+		 * If this function receives as input an index of a sprite in the
+		 * group or the sprite itself, it will remove that sprite from
+		 * this group and its super groups (if any), but NOT from the world.
+		 *
+		 * To remove a sprite from the world and every group it belongs to,
+		 * use `sprite.remove()` instead.
 		 *
 		 * @param {Sprite} item The sprite to be removed
-		 * @return {Sprite} the removed sprite
+		 * @return {Sprite} the removed sprite or undefined if it was not found
 		 */
 		remove(item) {
 			if (item === undefined) {
-				while (this.length > 0) {
-					this[0].remove();
-				}
+				this.removeAll();
+				if (!this._isAllSpritesGroup) this.removed = true;
 				return;
 			}
 
@@ -5460,29 +5605,118 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				idx = this.indexOf(item);
 			}
 
-			if (idx != -1) {
-				let s = this[idx];
-				if (!s.removed) {
-					let gIdx = s.groups.findIndex((g) => g._uid == this._uid);
-					s.groups.splice(gIdx, 1);
-				}
-				this.splice(idx, 1);
-				return s;
-			}
-			throw new Error('Sprite not found in group');
+			if (idx == -1) return;
+
+			let s = this[idx];
+			this.splice(idx, 1);
+			return s;
 		}
 
 		/**
-		 * Removes all sprites from the group and destroys the group.
+		 * Using `group.remove` instead is recommended because it's easier to use,
+		 * and it uses this function internally.
 		 *
+		 * Similar to `Array.splice` except it does not accept adding sprites,
+		 * third parameters and beyond are ignored.
+		 *
+		 * This function also removes the group and its super-groups from the
+		 * sprites' groups array.
+		 *
+		 * @param {Number} idx index
+		 * @param {Number} amount number of sprites to remove
+		 * @return {Sprite[]} the removed sprites
+		 */
+		splice(idx, amount) {
+			let removed = super.splice(idx, amount);
+			if (!removed) return;
+
+			let gIDs = [];
+			for (let s of removed) {
+				if (s.removed) continue;
+
+				// remove from the removed sprites' group array
+				// this group and its super-groups
+				let gID = this._uid;
+				do {
+					gIDs.push(gID);
+					let gIdx = s.groups.findIndex((g) => g._uid == gID);
+					let g = s.groups.splice(gIdx, 1);
+					gID = g[0].parent;
+				} while (gID);
+			}
+
+			// loop through the groups that the sprite was removed from
+			for (let gID of gIDs) {
+				let a = this.p.p5play.groups[gID];
+				for (let contactType of ['_collisions', '_overlappers']) {
+					// loop through group's contacts with other sprites and groups
+					for (let b_uid in a[contactType]) {
+						if (a[contactType][b_uid] == 0) continue;
+						let b;
+						if (b_uid >= 1000) b = this.p.p5play.sprites[b_uid];
+						else b = this.p.p5play.groups[b_uid];
+						// check if any group members are still in contact with the sprite
+						let inContact = false;
+						for (let s of a) {
+							if (s[contactType][b._uid] > 0) {
+								inContact = true;
+								break;
+							}
+						}
+						// if not, set the contact to the collided or overlapped state
+						if (!inContact) {
+							a[contactType][b._uid] = -2;
+							b[contactType][a._uid] = -2;
+						}
+					}
+				}
+			}
+			return removed;
+		}
+
+		/**
+		 * Removes the last sprite in the group.
+		 * @return {Sprite} the removed sprite or undefined if the group is empty
+		 */
+		pop() {
+			return this.remove(this.length - 1);
+		}
+
+		/**
+		 * Removes the last sprite in the group.
+		 * @return {Sprite} the removed sprite or undefined if the group is empty
+		 */
+		shift() {
+			return this.remove(0);
+		}
+
+		/**
+		 * Not supported!
+		 * @return {Number} the new length of the group
+		 */
+		unshift() {
+			console.error('unshift is not supported for groups');
+			return this.length;
+		}
+
+		/**
+		 * Removes all the sprites in the group from the world and
+		 * every other group they belong to.
+		 *
+		 * Does not delete the group itself.
 		 */
 		removeAll() {
-			this.remove();
+			while (this.length > 0) {
+				this[0].remove();
+			}
+		}
+
+		_step() {
+			this.__step();
 		}
 
 		/**
 		 * Draws all the sprites in the group.
-		 *
 		 */
 		draw() {
 			let g = [...this];
@@ -5516,6 +5750,90 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			}
 			if (this._autoUpdate) this._autoUpdate = null;
+		}
+	};
+
+	//      a -> b
+	// sprite -> sprite
+	// sprite -> group
+	//  group -> group
+	this.Sprite.prototype.__step = this.Group.prototype.__step = function () {
+		// for each type of collision and overlap event
+		let a = this;
+		let b;
+		for (let event in eventTypes) {
+			for (let k in this[event]) {
+				if (k >= 1000) {
+					if (a._isGroup || a._uid >= k) continue;
+					b = this.p.p5play.sprites[k];
+				} else {
+					if (a._isGroup && a._uid >= k) continue;
+					b = this.p.p5play.groups[k];
+				}
+
+				let v = a[event][k] + 1;
+				if (!b || v == 0 || v == -2) {
+					delete a[event][k];
+					if (b) delete b[event][a._uid];
+					continue;
+				}
+				this[event][k] = v;
+				b[event][a._uid] = v;
+			}
+		}
+	};
+
+	this.Sprite.prototype.___step = this.Group.prototype.___step = function () {
+		let a = this;
+		let b, contactType, shouldOverlap, cb;
+		let checkCollisions = true;
+		for (let event in eventTypes) {
+			for (let k in this[event]) {
+				if (k >= 1000) {
+					if (a._isGroup || a._uid >= k) continue;
+					b = this.p.p5play.sprites[k];
+				} else {
+					if (a._isGroup && a._uid >= k) continue;
+					b = this.p.p5play.groups[k];
+				}
+
+				let v = a[event][k];
+
+				// contact callbacks can only be called between sprites
+				if (a._isGroup || b._isGroup) continue;
+
+				// is there even a chance that a contact callback exists?
+				shouldOverlap = a._hasOverlap[b._uid] ?? b._hasOverlap[a._uid];
+				if ((checkCollisions && shouldOverlap !== false) || (!checkCollisions && shouldOverlap !== true)) {
+					continue;
+				}
+
+				for (let i = 0; i < 3; i++) {
+					if (i == 0 && v != 1 && v != -3) continue;
+					if (i == 1 && v == -1) continue;
+					if (i == 2 && v >= 1) continue;
+					contactType = eventTypes[event][i];
+					cb = a[contactType][b._uid];
+					if (!cb) cb = b[contactType][a._uid];
+					if (cb) {
+						if (cb.cb) cb.cb.call(b, b, a, v);
+						else cb(a, b, v);
+					}
+				}
+			}
+			checkCollisions = false;
+		}
+
+		// all of p5play's references to the sprite can be removed
+		// only if the sprite is not colliding or overlapping with anything
+		// otherwise the sprite will be removed from the world but
+		// and the reference to it will be removed after the collided
+		// and/or overlapped events are handled
+		if (this.removed) {
+			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
+				if (this._isSprite) delete this.p.p5play.sprites[this._uid];
+				else delete this.p.p5play.groups[this._uid];
+			}
 		}
 	};
 
@@ -5745,9 +6063,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * This function is automatically called at the end of the p5.js draw
 		 * loop, unless it was already called inside the draw loop.
 		 *
+		 * Decreasing velocityIterations and positionIterations will improve
+		 * performance but decrease simulation quality.
+		 *
 		 * @param {Number} timeStep - time step in seconds
-		 * @param {Number} velocityIterations
-		 * @param {Number} positionIterations
+		 * @param {Number} velocityIterations - 8 by default
+		 * @param {Number} positionIterations - 3 by default
 		 */
 		step(timeStep, velocityIterations, positionIterations) {
 			for (let s of this.p.allSprites) {
@@ -5756,10 +6077,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				s.prevRotation = s.rotation;
 			}
 			super.step(timeStep || 1 / (this.p._targetFrameRate || 60), velocityIterations || 8, positionIterations || 3);
+
 			let sprites = Object.values(this.p.p5play.sprites);
-			for (let s of sprites) {
-				s._step();
-			}
+			let groups = Object.values(this.p.p5play.groups);
+
+			for (let s of sprites) s._step();
+			for (let g of groups) g._step();
+
+			for (let s of sprites) s.___step();
+			for (let g of groups) g.___step();
+
 			if (this.autoStep) this.autoStep = null;
 		}
 
@@ -5820,9 +6147,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return sprites[0];
 		}
 
+		getMouseSprites() {
+			let sprites = this.getSpritesAt(this.p.mouse.x, this.p.mouse.y);
+			if (this.p.camera._wasOff) {
+				let uiSprites = this.getSpritesAt(this.p.camera.mouse.x, this.p.camera.mouse.y, this.p.allSprites, false);
+				if (uiSprites.length) sprites = [...uiSprites, ...sprites];
+			}
+			return sprites;
+		}
+
 		/*
-		 * Sets contact trackers to 0 so on the next world step they will be
-		 * increased to 1.
+		 * Sets contact trackers to 0, after the world's super.step()
+		 * they will be increased to 1.
 		 */
 		_beginContact(contact) {
 			// Get both fixtures
@@ -5838,15 +6174,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			for (let g of b.groups) {
 				if (!a[t][g._uid] || a[t][g._uid] < 0) {
-					g[t][a._uid] = 0;
 					a[t][g._uid] = 0;
+					g[t][a._uid] = 0;
 				}
 			}
 
 			for (let g of a.groups) {
 				if (!b[t][g._uid] || b[t][g._uid] < 0) {
-					g[t][b._uid] = 0;
 					b[t][g._uid] = 0;
+					g[t][b._uid] = 0;
 				}
 				for (let g2 of b.groups) {
 					if (!g[t][g2._uid] || g[t][g2._uid] < 0) {
@@ -5863,7 +6199,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * to -1 on the next world step call.
 		 *
 		 * However, if contact begins and ends on the same frame, then the contact
-		 * trackers are set to -3 and incremented to -2 on the next world step call.
+		 * trackers are set to -4 and incremented to -3 on the next world step call.
 		 */
 		_endContact(contact) {
 			let a = contact.m_fixtureA;
@@ -5873,8 +6209,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
 
-			a[contactType][b._uid] = a[contactType][b._uid] != 0 ? -2 : -3;
-			b[contactType][a._uid] = b[contactType][a._uid] != 0 ? -2 : -3;
+			a[contactType][b._uid] = a[contactType][b._uid] != 0 ? -2 : -4;
+			b[contactType][a._uid] = b[contactType][a._uid] != 0 ? -2 : -4;
 
 			for (let g of b.groups) {
 				let inContact = false;
@@ -5885,8 +6221,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 				}
 				if (!inContact) {
-					g[contactType][a._uid] = g[contactType][a._uid] != 0 ? -2 : -3;
-					a[contactType][g._uid] = a[contactType][g._uid] != 0 ? -2 : -3;
+					g[contactType][a._uid] = g[contactType][a._uid] != 0 ? -2 : -4;
+					a[contactType][g._uid] = a[contactType][g._uid] != 0 ? -2 : -4;
 				}
 			}
 
@@ -5899,54 +6235,40 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 				}
 				if (!inContact) {
-					g[contactType][b._uid] = g[contactType][b._uid] != 0 ? -2 : -3;
-					b[contactType][g._uid] = b[contactType][g._uid] != 0 ? -2 : -3;
+					g[contactType][b._uid] = g[contactType][b._uid] != 0 ? -2 : -4;
+					b[contactType][g._uid] = b[contactType][g._uid] != 0 ? -2 : -4;
 					for (let g2 of b.groups) {
-						g[contactType][g2._uid] = g[contactType][g2._uid] != 0 ? -2 : 3;
-						g2[contactType][g._uid] = g2[contactType][g._uid] != 0 ? -2 : 3;
+						g[contactType][g2._uid] = g[contactType][g2._uid] != 0 ? -2 : -4;
+						g2[contactType][g._uid] = g2[contactType][g._uid] != 0 ? -2 : -4;
 					}
 				}
 			}
 		}
 
 		/*
-		 * Used internally to find a contact boolean, for example to determine
-		 * if the sprites overlap.
+		 * Used internally to find contact callbacks.
 		 *
-		 * If the findCB param is true, the function will search for
-		 * the first contact callback it finds between the two sprites and
-		 * their groups.
-		 *
-		 * type is the eventType of contact callback to find
-		 * if findCB is true, will return a contact callback
+		 * @param type is the eventType of contact callback to find
+		 * @param s0 is the first sprite
+		 * @param s1 is the second sprite
 		 */
-		_findContact(type, s0, s1, findCB) {
+		_findContact(type, s0, s1) {
 			let cb = s0[type][s1._uid];
-			if (cb && (!findCB || cb !== true)) return cb;
+			if (cb) return cb;
 
-			let s1IsSprite = s1 instanceof this.p.Sprite;
-
-			if (s1IsSprite) {
-				for (let g1 of s1.groups) {
-					cb = s0[type][g1._uid];
-					if (cb && (!findCB || cb !== true)) return cb;
-				}
+			for (let g1 of s1.groups) {
+				cb = s0[type][g1._uid];
+				if (cb) return cb;
 			}
 
-			if (s0 instanceof this.p.Sprite) {
-				for (let g0 of s0.groups) {
-					cb = g0[type][s1._uid];
-					if (cb && (!findCB || cb !== true)) return cb;
-					if (s1IsSprite) {
-						for (let g1 of s1.groups) {
-							cb = g0[type][g1._uid];
-							if (cb && (!findCB || cb !== true)) {
-								if (g0._uid != g1._uid || s0._uid < s1._uid) {
-									return cb;
-								}
-							}
-						}
-					}
+			for (let g0 of s0.groups) {
+				cb = g0[type][s1._uid];
+				if (cb) return cb;
+
+				for (let g1 of s1.groups) {
+					if (g0._uid != g1._uid) continue;
+					cb = g0[type][g1._uid];
+					if (cb) return cb;
 				}
 			}
 			return false;
@@ -6000,7 +6322,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._pos = { x: 0, y: 0 };
 
 			// camera translation
-			this.__pos = { x: 0, y: 0 };
+			this.__pos = { x: 0, y: 0, rounded: {} };
 
 			/**
 			 * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
@@ -6084,8 +6406,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.x = val;
 			let x = -val + this.p.world.hw / this._zoom;
-			if (this.p.allSprites.pixelPerfect) x = Math.round(x);
 			this.__pos.x = x;
+			if (this.p.allSprites.pixelPerfect) {
+				this.__pos.rounded.x = Math.round(x);
+			}
 			this._calcBoundsX(val);
 		}
 
@@ -6100,8 +6424,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.y = val;
 			let y = -val + this.p.world.hh / this._zoom;
-			if (this.p.allSprites.pixelPerfect) y = Math.round(y);
 			this.__pos.y = y;
+			if (this.p.allSprites.pixelPerfect) {
+				this.__pos.rounded.y = Math.round(y);
+			}
 			this._calcBoundsY(val);
 		}
 
@@ -6122,12 +6448,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._zoom = val;
 			let x = -this._pos.x + this.p.world.hw / val;
 			let y = -this._pos.y + this.p.world.hh / val;
-			if (this.p.allSprites.pixelPerfect) {
-				x = Math.round(x);
-				y = Math.round(y);
-			}
 			this.__pos.x = x;
 			this.__pos.y = y;
+			if (this.p.allSprites.pixelPerfect) {
+				this.__pos.rounded.x = Math.round(x);
+				this.__pos.rounded.y = Math.round(y);
+			}
 			this._calcBoundsX(this._pos.x);
 			this._calcBoundsY(this._pos.y);
 		}
@@ -6169,7 +6495,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.active) {
 				this.p.push();
 				this.p.scale(this._zoom);
-				this.p.translate(this.__pos.x, this.__pos.y);
+				if (!this.p.allSprites.pixelPerfect) {
+					this.p.translate(this.__pos.x, this.__pos.y);
+				} else {
+					this.__pos.rounded.x ??= Math.round(this.__pos.x);
+					this.__pos.rounded.y ??= Math.round(this.__pos.y);
+					this.p.translate(this.__pos.rounded.x, this.__pos.rounded.y);
+				}
 				this.active = true;
 			}
 		}
@@ -6184,6 +6516,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.active) {
 				this.p.pop();
 				this.active = false;
+				this._wasOff = true;
 			}
 		}
 	}; //end camera class
@@ -6209,10 +6542,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		a = a.m_body.sprite;
 		b = b.m_body.sprite;
 
-		// if `a` has an overlap enabled with `b` their colliders should not produce a
-		// contact event, the overlap contact event is between their sensors
-		let shouldOverlap = a.p.world._findContact('_hasOverlap', a, b);
-		if (!shouldOverlap) shouldOverlap = a.p.world._findContact('_hasOverlap', b, a);
+		let shouldOverlap = a._hasOverlap[b._uid] ?? b._hasOverlap[a._uid];
+
+		// if `a` has an overlap enabled with `b` their colliders should
+		// not produce a contact event, the overlap contact event should
+		// only be produced between their sensors
 		if (shouldOverlap) return false;
 		return true;
 	};
@@ -6320,6 +6654,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		constructor(spriteA, spriteB, type) {
 			this.p = pInst;
+
+			if (!spriteA?._isSprite || !spriteB?._isSprite) {
+				throw new Error('The Joint constructor requires two sprites as input.');
+			}
+
+			if (!spriteA.body) spriteA.addDefaultSensors();
+			if (!spriteB.body) spriteB.addDefaultSensors();
 
 			/**
 			 * The first sprite in the joint.
@@ -6431,7 +6772,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Function that draws the joint. Can be overridden by the user.
-		 *
+		 * @type {Function}
 		 * @param {Number} xA
 		 * @param {Number} yA
 		 * @param {Number} [xB]
@@ -7324,9 +7665,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * await play(sound);
 	 */
 	this.play = (sound) => {
-		if (!sound.play) throw new Error("Tried to play your input but it wasn't a sound object: " + sound);
-		// TODO reject if sound not found
-		return new Promise((resolve, reject) => {
+		if (!sound?.play) {
+			throw new Error("Tried to play your sound but it wasn't a sound object.");
+		}
+		return new Promise((resolve) => {
 			sound.play();
 			sound.onended(() => resolve());
 		});
@@ -8059,20 +8401,19 @@ main {
 	}
 
 	/**
-	 * A group of all the sprites.
+	 * A group that includes all the sprites.
 	 * @type {Group}
 	 */
 	this.allSprites = new this.Group();
 
 	/**
-	 * The planck physics world. Use this to change gravity and offset the
-	 * sprite's coordinate system.
+	 * The physics world.
 	 * @type {World}
 	 */
 	this.world = new this.World();
 
 	/**
-	 * The default camera. Use this to pan and zoom the camera.
+	 * The default camera.
 	 * @type {Camera}
 	 */
 	this.camera = new this.Camera();
@@ -8086,14 +8427,12 @@ main {
 		 * Root class for storing the state of inputs (mouse, keyboard,
 		 * gamepads).
 		 *
-		 * -3 means input was released after being held, pressed for 12 frames
-		 * -2 means input was pressed and released on the same frame
+		 * -3 means input was pressed and released on the same frame
+		 * -2 means input was released after being held
 		 * -1 means input was released
 		 * 0 means input is not pressed
 		 * 1 means input was pressed
 		 * >1 means input is still being pressed
-		 * 12 means input was held
-		 * >12 means input is being held
 		 */
 		constructor() {
 			/**
@@ -8130,7 +8469,7 @@ main {
 		presses(inp) {
 			inp ??= this._default;
 			if (this[inp] === undefined) inp = this._ac(inp);
-			return this[inp] == 1 || this[inp] == -2;
+			return this[inp] == 1 || this[inp] == -3;
 		}
 
 		/**
@@ -8140,7 +8479,7 @@ main {
 		pressing(inp) {
 			inp ??= this._default;
 			if (this[inp] === undefined) inp = this._ac(inp);
-			if (this[inp] == -2) return 1;
+			if (this[inp] == -3) return 1;
 			return this[inp] > 0 ? this[inp] : 0;
 		}
 
@@ -8180,7 +8519,7 @@ main {
 		held(inp) {
 			inp ??= this._default;
 			if (this[inp] === undefined) inp = this._ac(inp);
-			return this[inp] == -3;
+			return this[inp] == -2;
 		}
 
 		/**
@@ -8288,6 +8627,14 @@ main {
 			else if (inp.slice(0, 5) == 'right') inp = 'right';
 			else if (inp.slice(0, 6) == 'middle') inp = 'center';
 			return inp;
+		}
+
+		update() {
+			this.x = (pInst.mouseX - pInst.world.hw) / pInst.camera.zoom + pInst.camera.x;
+			this.y = (pInst.mouseY - pInst.world.hh) / pInst.camera.zoom + pInst.camera.y;
+
+			pInst.camera.mouse.x = pInst.mouseX;
+			pInst.camera.mouse.y = pInst.mouseY;
 		}
 
 		/**
@@ -8405,18 +8752,21 @@ main {
 	};
 
 	const __onmousedown = function (btn) {
-		this.mouse[btn]++;
 		this.mouse.active = true;
+		this.mouse[btn]++;
 		if (this.world.mouseSprites.length) {
-			let ms = this.world.mouseSprite;
+			let msm = this.world.mouseSprite?.mouse;
 			// old mouse sprite didn't have the mouse released on it
-			if (ms) {
-				ms.mouse[btn] = 0;
-				ms.mouse.drag[btn] = 0;
+			if (msm) {
+				msm[btn] = 0;
+				msm.hover = 0;
+				msm.drag[btn] = 0;
 			}
 			ms = this.world.mouseSprites[0];
-			ms.mouse[btn] = 1;
 			this.world.mouseSprite = ms;
+			msm = ms.mouse;
+			msm[btn] = 1;
+			if (msm.hover <= 0) msm.hover = 1;
 		}
 	};
 
@@ -8435,8 +8785,12 @@ main {
 	const _ontouchstart = pInst._ontouchstart;
 
 	pInst._ontouchstart = function (e) {
-		__onmousedown.call(this, 'left');
 		_ontouchstart.call(this, e);
+		if (touches.length == 1) {
+			this.mouse.update();
+			this.world.mouseSprites = this.world.getMouseSprites();
+		}
+		__onmousedown.call(this, 'left');
 	};
 
 	const __onmousemove = function (btn) {
@@ -8464,20 +8818,20 @@ main {
 	const __onmouseup = function (btn) {
 		let m = this.mouse;
 		if (m[btn] >= m.holdThreshold) {
-			m[btn] = -3;
+			m[btn] = -2;
 		} else if (m[btn] > 1) m[btn] = -1;
-		else m[btn] = -2;
+		else m[btn] = -3;
 		if (m.drag[btn] > 0) m.drag[btn] = -1;
 
 		let msm = this.world.mouseSprite?.mouse;
 		if (msm) {
 			if (msm.hover > 1) {
 				if (msm[btn] >= this.mouse.holdThreshold) {
-					msm[btn] = -3;
+					msm[btn] = -2;
 				} else if (msm[btn] > 1) {
 					msm[btn] = -1;
 				} else {
-					msm[btn] = -2;
+					msm[btn] = -3;
 				}
 				if (msm.drag[btn] > 0) msm.drag[btn] = -1;
 			} else {
@@ -8501,8 +8855,8 @@ main {
 	const _ontouchend = pInst._ontouchend;
 
 	pInst._ontouchend = function (e) {
-		__onmouseup.call(this, 'left');
 		_ontouchend.call(this, e);
+		__onmouseup.call(this, 'left');
 	};
 
 	delete this._Mouse;
@@ -8587,9 +8941,9 @@ main {
 
 		_rel(k) {
 			if (this[k] >= this.holdThreshold) {
-				this[k] = -3;
+				this[k] = -2;
 			} else if (this[k] > 1) this[k] = -1;
-			else this[k] = -2;
+			else this[k] = -3;
 		}
 
 		get cmd() {
@@ -8830,7 +9184,9 @@ main {
 			// buttons
 			for (let name in this._btns) {
 				let idx = this._btns[name];
-				if (pad.buttons[idx].pressed) this[name]++;
+				let b = pad.buttons[idx];
+				if (!b) continue;
+				if (b.pressed) this[name]++;
 				else this[name] = this[name] > 0 ? -1 : 0;
 			}
 
@@ -9042,23 +9398,6 @@ main {
 			}
 		}
 
-		// _addContro(gp) {
-		// 	if (!gp) return;
-		// 	log('contro[' + this.length + '] connected: ' + gp.id);
-		// 	this.push(new pInst._Contro(gp));
-		// }
-
-		// _removeContro(gp) {
-		// 	if (!gp) return;
-		// 	log('contro[' + this.length + '] disconnected: ' + gp.id);
-		// 	for (let i = 0; i < this.length; i++) {
-		// 		if (this[i].gamepad.index === gp.index) {
-		// 			this.splice(i, 1);
-		// 			break;
-		// 		}
-		// 	}
-		// }
-
 		_onConnect(gp) {
 			if (!gp) return;
 			for (let i = 0; i < this.length; i++) {
@@ -9175,11 +9514,7 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 
 	this.p5play.spritesDrawn = 0;
 
-	this.mouse.x = (this.mouseX - this.world.hw) / this.camera.zoom + this.camera.x;
-	this.mouse.y = (this.mouseY - this.world.hh) / this.camera.zoom + this.camera.y;
-
-	this.camera.mouse.x = this.mouseX;
-	this.camera.mouse.y = this.mouseY;
+	this.mouse.update();
 
 	this.contro._update();
 });
@@ -9263,7 +9598,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	for (let btn of ['left', 'center', 'right']) {
 		if (m[btn] < 0) m[btn] = 0;
 		else if (m[btn] > 0) m[btn]++;
-		if (msm) msm[btn] = m[btn];
+		if (msm?.hover) msm[btn] = m[btn];
 
 		if (m.drag[btn] < 0) m.drag[btn] = 0;
 		else if (m.drag[btn] > 0) m.drag[btn]++;
@@ -9271,17 +9606,12 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	}
 
 	if (this.world.mouseTracking) {
-		let sprites = this.world.getSpritesAt(m.x, m.y);
-		let uiSprites = this.world.getSpritesAt(this.camera.mouse.x, this.camera.mouse.y, this.allSprites, false);
-		sprites = sprites.concat(uiSprites);
+		let sprites = this.world.getMouseSprites();
 
 		for (let i = 0; i < sprites.length; i++) {
 			let s = sprites[i];
-			if (i == 0) {
-				s.mouse.hover++;
-				continue;
-			}
-			if (s.mouse.hover > 0) s.mouse.hover = -1;
+			if (i == 0) s.mouse.hover++;
+			else if (s.mouse.hover > 0) s.mouse.hover = -1;
 			else if (s.mouse.hover < 0) s.mouse.hover = 0;
 		}
 
