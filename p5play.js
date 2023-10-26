@@ -5491,6 +5491,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					for (let contactType of contactTypes) {
 						for (let tuid in this[contactType]) {
 							s[contactType][tuid] = this[contactType][tuid];
+							if (tuid >= 1000) continue;
+							let b = this.p.p5play.groups[tuid];
+							if (!b) continue;
+							for (let s2 of b) {
+								s[contactType][s2._uid] = this[contactType][tuid];
+								s2[contactType][s._uid] = b[contactType][this._uid];
+							}
 						}
 					}
 				}
