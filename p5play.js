@@ -2546,7 +2546,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		_draw() {
 			if (this.strokeWeight !== undefined) this.p.strokeWeight(this.strokeWeight);
-			if (this._ani?.draw && this.debug != 'colliders') {
+			if (this._ani && this.debug != 'colliders' && !this.p.p5play.disableImages) {
 				this._ani.draw(this._offset._x, this._offset._y, 0, this._scale._x, this._scale._y);
 			}
 			if (!this._ani || this.debug || this.p.p5play.disableImages) {
@@ -2617,7 +2617,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				y = fixRound(y);
 			} else {
 				let w, h;
-				if (this.ani) {
+				if (this.ani && !this.p.p5play.disableImages) {
 					w = this.ani[this.ani.frame].w;
 					h = this.ani[this.ani.frame].h;
 				} else {
@@ -5472,12 +5472,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					continue;
 				}
 
+				let b;
 				for (let tuid in this._hasOverlap) {
 					let hasOverlap = this._hasOverlap[tuid];
 					if (hasOverlap && !s._hasSensors) {
 						s.addDefaultSensors();
 					}
-					let b;
 					if (tuid >= 1000) b = this.p.p5play.sprites[tuid];
 					else b = this.p.p5play.groups[tuid];
 
@@ -5489,13 +5489,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				for (let event in eventTypes) {
 					let contactTypes = eventTypes[event];
 					for (let contactType of contactTypes) {
-						for (let tuid in this[contactType]) {
-							s[contactType][tuid] = this[contactType][tuid];
-							if (tuid >= 1000) continue;
-							let b = this.p.p5play.groups[tuid];
+						for (let b_uid in this[contactType]) {
+							if (b_uid >= 1000) b = this.p.p5play.sprites[b_uid];
+							else b = this.p.p5play.groups[b_uid];
 							if (!b) continue;
+
+							s[contactType][b_uid] = this[contactType][b_uid];
+							b[contactType][s._uid] = b[contactType][this._uid];
+
+							if (b._isSprite) continue;
 							for (let s2 of b) {
-								s[contactType][s2._uid] = this[contactType][tuid];
+								s[contactType][s2._uid] = this[contactType][b_uid];
 								s2[contactType][s._uid] = b[contactType][this._uid];
 							}
 						}
@@ -5873,7 +5877,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		this.Group.prototype.addImg =
 			function () {
 				if (this.p.p5play.disableImages) {
-					this._ani = {};
+					this._ani = new this.p.SpriteAnimation();
 					return;
 				}
 				let args = [...arguments];
