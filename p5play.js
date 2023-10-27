@@ -8797,7 +8797,7 @@ main {
 
 	pInst._ontouchstart = function (e) {
 		_ontouchstart.call(this, e);
-		if (touches.length == 1) {
+		if (this.touches.length == 1) {
 			this.mouse.update();
 			this.world.mouseSprites = this.world.getMouseSprites();
 		}
@@ -8824,6 +8824,13 @@ main {
 
 		__onmousemove.call(this, btn);
 		_onmousemove.call(this, e);
+	};
+
+	const _ontouchmove = pInst._ontouchmove;
+
+	pInst._ontouchmove = function (e) {
+		_ontouchmove.call(this, e);
+		__onmousemove.call(this, 'left');
 	};
 
 	const __onmouseup = function (btn) {
