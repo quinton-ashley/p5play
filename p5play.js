@@ -2890,15 +2890,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * sprite.move(directionName, speed);
 		 */
 		move(distance, direction, speed) {
+			if (!distance) return;
+
 			let dirNameMode = isNaN(arguments[0]);
 			if (dirNameMode) {
 				direction = arguments[0];
 				speed = arguments[1];
 				distance = 1;
-			} else {
-				dirNameMode = isNaN(direction);
 			}
-			if (!distance) return;
 
 			if (typeof direction == 'string') {
 				this._heading = direction;
@@ -2908,10 +2907,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let x = this.x + this.p.cos(direction) * distance;
 			let y = this.y + this.p.sin(direction) * distance;
-			if (dirNameMode && this.tileSize > 1) {
-				x = Math.round(x);
-				y = Math.round(y);
-			} else if (direction % 90 == 0) {
+			if (direction % 45 == 0) {
 				x = fixRound(x);
 				y = fixRound(y);
 			}
