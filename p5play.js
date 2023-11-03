@@ -2522,7 +2522,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_step() {
-			if (!this.body && !this.removed) {
+			if (!this.body && !this._removed) {
 				this.rotation += this._rotationSpeed;
 				this.x += this.vel.x;
 				this.y += this.vel.y;
@@ -2536,7 +2536,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			}
 
-			if (!this.body && !this.removed) return;
+			if (!this.body && !this._removed) return;
 
 			this.__step();
 		}
@@ -5459,6 +5459,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @returns {Number} the new length of the group
 		 */
 		push(...sprites) {
+			if (this.removed) {
+				console.warn(
+					"Adding a sprite to a group that was removed. Use `group.removeAll()` to remove all of a group's sprites without removing the group itself. Restoring the group in p5play's memory."
+				);
+				this.p.p5play.groups[this._uid] = this;
+				this.removed = false;
+			}
 			for (let s of sprites) {
 				if (!(s instanceof this.p.Sprite)) {
 					throw new Error('You can only add sprites to a group, not ' + typeof s);
@@ -5771,9 +5778,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		for (let event in eventTypes) {
 			for (let k in this[event]) {
 				if (k >= 1000) {
+					// if a is group or a is sprite and a._uid >= k
 					if (a._isGroup || a._uid >= k) continue;
 					b = this.p.p5play.sprites[k];
 				} else {
+					// if a is group and a._uid >= k
 					if (a._isGroup && a._uid >= k) continue;
 					b = this.p.p5play.groups[k];
 				}
@@ -5804,10 +5813,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					b = this.p.p5play.groups[k];
 				}
 
-				let v = a[event][k];
-
 				// contact callbacks can only be called between sprites
-				if (a._isGroup || b._isGroup) continue;
+				if (a._isGroup || b?._isGroup) continue;
 
 				// is there even a chance that a contact callback exists?
 				shouldOverlap = a._hasOverlap[b._uid] ?? b._hasOverlap[a._uid];
@@ -5815,6 +5822,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					continue;
 				}
 
+				let v = a[event][k];
 				for (let i = 0; i < 3; i++) {
 					if (i == 0 && v != 1 && v != -3) continue;
 					if (i == 1 && v == -1) continue;
@@ -5836,7 +5844,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		// otherwise the sprite will be removed from the world but
 		// and the reference to it will be removed after the collided
 		// and/or overlapped events are handled
-		if (this.removed) {
+		if (this._removed) {
 			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
 				if (this._isSprite) delete this.p.p5play.sprites[this._uid];
 				else delete this.p.p5play.groups[this._uid];
