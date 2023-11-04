@@ -3387,6 +3387,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			target[type][this._uid] = reverseCB;
 			if (!target._isGroup) return;
 			for (let s of target) {
+				this[type][s._uid] = cb;
 				s[type][this._uid] = reverseCB;
 			}
 		}
@@ -5833,7 +5834,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (i == 2 && v >= 1) continue;
 					contactType = eventTypes[event][i];
 					cb = a[contactType][b._uid];
-					if (!cb) cb = b[contactType][a._uid];
 					if (cb) {
 						if (cb.cb) cb.cb.call(b, b, a, v);
 						else cb(a, b, v);
