@@ -5170,6 +5170,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = false;
+						for (let s2 of this) {
+							s._hasOverlap[s2._uid] = false;
+							s2._hasOverlap[s._uid] = false;
+						}
 					}
 				}
 			}
