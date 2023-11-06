@@ -3413,6 +3413,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = false;
+						this._hasOverlap[s._uid] = false;
 					}
 				}
 			}
@@ -3507,6 +3508,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = true;
+						this._hasOverlap[s._uid] = true;
 					}
 				}
 			}
@@ -3621,7 +3623,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		addDefaultSensors() {
 			if (this._hasSensors) return;
 			let shape;
-			if (this.body) {
+			if (this.body && this.fixtureList) {
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 					if (fxt.m_isSensor) continue;
 					shape = fxt.m_shape;
@@ -5147,6 +5149,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this[type][target._uid] = cb;
 			for (let s of this) {
 				s[type][target._uid] = cb;
+				target[type][s._uid] = reverseCB;
 			}
 			target[type][this._uid] = reverseCB;
 			if (!target._isGroup) return;
@@ -5164,6 +5167,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this._hasOverlap[target._uid] = false;
 				for (let s of this) {
 					s._hasOverlap[target._uid] = false;
+					target._hasOverlap[s._uid] = false;
 				}
 			}
 			if (target._hasOverlap[this._uid] !== false) {
@@ -5171,6 +5175,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = false;
+						this._hasOverlap[s._uid] = false;
 						for (let s2 of this) {
 							s._hasOverlap[s2._uid] = false;
 							s2._hasOverlap[s._uid] = false;
@@ -5268,6 +5273,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this._hasOverlap[target._uid] = true;
 				for (let s of this) {
 					s._hasOverlap[target._uid] = true;
+					target._hasOverlap[s._uid] = true;
 				}
 			}
 			if (target._hasOverlap[this._uid] != true) {
@@ -5276,6 +5282,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (target._isGroup) {
 					for (let s of target) {
 						s._hasOverlap[this._uid] = true;
+						this._hasOverlap[s._uid] = true;
 						for (let s2 of this) {
 							s._hasOverlap[s2._uid] = true;
 							s2._hasOverlap[s._uid] = true;
@@ -8805,6 +8812,17 @@ main {
 
 	pInst._ontouchstart = function (e) {
 		_ontouchstart.call(this, e);
+		let touch = this.touches.at(-1);
+		touch.duration = 0;
+		touch.presses = function () {
+			return this.duration == 1 || this.duration == -3;
+		};
+		touch.pressing = function () {
+			return this.duration > 0 ? this.duration : 0;
+		};
+		touch.released = function () {
+			return this.duration <= -1;
+		};
 		if (this.touches.length == 1) {
 			this.mouse.update();
 			this.world.mouseSprites = this.world.getMouseSprites();
