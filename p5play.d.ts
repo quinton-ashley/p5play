@@ -1650,65 +1650,65 @@ class Group extends Array<Sprite> {
     collide(target: any, callback: any): boolean;
     /**
      * Returns true on the first frame that the group collides with the
-     * target sprite or group.
+     * target group.
      *
      * Custom collision event handling can be done by using this function
      * in an if statement or adding a callback as the second parameter.
      *
-     * @param {Sprite|Group} target
+     * @param {Group} target
      * @param {Function} [callback]
      */
-    collides(target: Sprite | Group, callback?: Function): boolean;
+    collides(target: Group, callback?: Function): boolean;
     /**
-     * Returns a truthy value while the group is colliding with the
-     * target sprite or group. The value is the number of frames that
-     * the group has been colliding with the target.
+     * Returns the amount of frames that the group has been colliding
+     * with the target group for, which is a truthy value. Returns 0 if
+     * the group is not colliding with the target group.
      *
-     * @param {Sprite|Group} target
+     * @param {Group} target
      * @param {Function} [callback]
      * @return {Number} frames
      */
-    colliding(target: Sprite | Group, callback?: Function): number;
+    colliding(target: Group, callback?: Function): number;
     /**
      * Returns true on the first frame that the group no longer overlaps
-     * with the target sprite or group.
+     * with the target group.
      *
-     * @param {Sprite|Group} target
+     * @param {Group} target
      * @param {Function} [callback]
      * @return {Boolean}
      */
-    collided(target: Sprite | Group, callback?: Function): boolean;
+    collided(target: Group, callback?: Function): boolean;
     overlap(target: any, callback: any): boolean;
     /**
      * Returns true on the first frame that the group overlaps with the
-     * target sprite or group.
+     * target group.
      *
      * Custom overlap event handling can be done by using this function
      * in an if statement or adding a callback as the second parameter.
      *
-     * @param {Sprite|Group} target
+     * @param {Group} target
      * @param {Function} [callback]
      */
-    overlaps(target: Sprite | Group, callback?: Function): boolean;
+    overlaps(target: Group, callback?: Function): boolean;
     /**
-     * Returns a truthy value while the group is overlapping with the
-     * target sprite or group. The value returned is the number of
-     * frames the group has been overlapping with the target.
+     * Returns the amount of frames that the group has been overlapping
+     * with the target group for, which is a truthy value. Returns 0 if
+     * the group is not overlapping with the target group.
      *
-     * @param {Sprite|Group} target
+     * @param {Group} target
      * @param {Function} [callback]
      * @return {Number} frames
      */
-    overlapping(target: Sprite | Group, callback?: Function): number;
+    overlapping(target: Group, callback?: Function): number;
     /**
      * Returns true on the first frame that the group no longer overlaps
-     * with the target sprite or group.
+     * with the target group.
      *
-     * @param {Sprite|Group} target
+     * @param {Group} target
      * @param {Function} [callback]
      * @return {Boolean}
      */
-    overlapped(target: Sprite | Group, callback?: Function): boolean;
+    overlapped(target: Group, callback?: Function): boolean;
     /**
      */
     applyForce(...args: any[]): void;
