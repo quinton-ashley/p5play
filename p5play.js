@@ -3399,6 +3399,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (l[target._uid] == cb) return;
 			l[target._uid] = cb;
 
+			if (this._uid == target._uid) return;
+
 			l = ledger[target._uid];
 			if (!l || !l[this._uid]) return;
 			delete l[this._uid];
@@ -5133,10 +5135,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				throw new FriendlyError('Group.collide', 2);
 			}
 			if (target._isSprite) {
-				if (cb) {
+				if (cb && !FriendlyError.warned0) {
 					console.warn(
 						'Deprecated use of a group.collide function with a sprite as input. Use sprite.collides, sprite.colliding, or sprite.collided instead.'
 					);
+					FriendlyError.warned0 = true;
 				}
 			} else if (!target._isGroup) {
 				throw new FriendlyError('Group.collide', 0, [target]);
@@ -5144,6 +5147,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_setContactCB(target, cb, contactType, eventType) {
+			if (target._isSprite) {
+				let reversedCB = function (a, b, v) {
+					return cb.call(b, b, a, v);
+				};
+				target._setContactCB(this, reversedCB, contactType, eventType);
+				return;
+			}
+
 			let type;
 			if (contactType == 0) type = eventTypes._collisions[eventType];
 			else type = eventTypes._overlappers[eventType];
@@ -5158,6 +5169,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let c2 = (ledger[s._uid] ??= {});
 				c2[target._uid] = cb;
 			}
+
+			if (this._uid == target._uid) return;
 
 			l = ledger[target._uid];
 			if (!l || !l[this._uid]) return;
@@ -5260,10 +5273,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				throw new FriendlyError('Group.overlap', 2);
 			}
 			if (target._isSprite) {
-				if (cb) {
+				if (cb && !FriendlyError.warned1) {
 					console.warn(
 						'Deprecated use of a group.overlap function with a sprite as input. Use sprite.overlaps, sprite.overlapping, or sprite.overlapped instead.'
 					);
+					FriendlyError.warned1 = true;
 				}
 			} else if (!target._isGroup) {
 				throw new FriendlyError('Group.overlap', 0, [target]);
@@ -5854,23 +5868,25 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (i == 2 && v >= 1) continue;
 					contactType = eventTypes[event][i];
 
-					let l = this.p.p5play[contactType][a._uid];
-					if (l) {
-						cb = l[b._uid];
+					let la = this.p.p5play[contactType][a._uid];
+					if (la) {
+						cb = la[b._uid];
 						if (cb) cb.call(a, a, b, v);
 						for (let g of b.groups) {
-							cb = l[g._uid];
+							cb = la[g._uid];
 							if (cb) cb.call(a, a, b, v);
 						}
 					}
 
-					l = this.p.p5play[contactType][b._uid];
-					if (l) {
-						cb = l[a._uid];
+					let lb = this.p.p5play[contactType][b._uid];
+					if (lb) {
+						cb = lb[a._uid];
 						if (cb) cb.call(b, b, a, v);
 						for (let g of a.groups) {
-							cb = l[g._uid];
-							if (cb) cb.call(b, b, a, v);
+							cb = lb[g._uid];
+							if (cb && (!la || cb != la[g._uid])) {
+								cb.call(b, b, a, v);
+							}
 						}
 					}
 				}
