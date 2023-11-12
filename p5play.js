@@ -2644,8 +2644,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			} else {
 				let w, h;
 				if (this.ani && !this.p.p5play.disableImages) {
-					w = this.ani[this.ani.frame].w;
-					h = this.ani[this.ani.frame].h;
+					w = this.ani[this.ani._frame].w;
+					h = this.ani[this.ani._frame].h;
 				} else {
 					w = this._w;
 					h = this._h;
@@ -3304,10 +3304,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (flipY) this._ani.scale.y = -this._ani.scale.y;
 
 				if (start < 0) start = this._ani.length + start;
-				if (start !== undefined) this._ani.frame = start;
+				if (start !== undefined) this._ani._frame = start;
 
 				if (end !== undefined) this._ani.goToFrame(end);
-				else if (this._ani.frame == this._ani.lastFrame) resolve();
+				else if (this._ani._frame == this._ani.lastFrame) resolve();
 
 				this._ani._onComplete = this._ani._onChange = () => {
 					if (flipX) this._ani.scale.x = -this._ani.scale.x;
@@ -3360,7 +3360,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._ani = ani;
 			this._ani.name = label;
 			// reset to frame 0 of that animation
-			if (this.resetAnimationsOnChange) this._ani.frame = 0;
+			if (this.resetAnimationsOnChange) this._ani._frame = 0;
 		}
 
 		/**
@@ -4129,7 +4129,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set frame(val) {
 			if (val < 0 || val >= this.length) {
-				throw new FriendlyError('SpriteAnimation.frame', 2, [val, this.length]);
+				throw new FriendlyError('SpriteAnimation.frame', [val, this.length]);
 			}
 			this._frame = val;
 		}
@@ -8404,9 +8404,9 @@ main {
 			constructor: {
 				base: "Hey so, I tried to make a new SpriteAnimation but couldn't",
 				0: `I don't know how to display this type of image: "$0". I can only use ".png" image files.`,
-				1: 'The name of the animation must be the first input parameter.',
-				2: 'Index $0 out of bounds. That means there is no frame $0 in this animation. It only has $1 frames!'
-			}
+				1: 'The name of the animation must be the first input parameter.'
+			},
+			frame: 'Index $0 out of bounds. That means there is no frame $0 in this animation. It only has $1 frames!'
 		},
 		Group: {
 			constructor: {
