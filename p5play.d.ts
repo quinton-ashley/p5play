@@ -36,6 +36,16 @@ class P5Play {
      * @type {Array}
      */
     palettes: any[];
+    /**
+     * Set to the latest version of p5play v3's
+     * minor version number. For example to enable
+     * v3.16 features, set this to 16.
+     *
+     * Some features are not backwards compatible
+     * with older versions of p5play, so this
+     * variable is used to enable them.
+     */
+    targetVersion: number;
     os: {};
     context: string;
     hasMouse: boolean;
@@ -1108,7 +1118,6 @@ class SpriteAnimation extends Array<p5.Image> {
      * The index of the current frame that the animation is on.
      * @type {Number}
      */
-    frame: number;
     targetFrame: number;
     /**
      * The offset is how far the animation should be placed from
@@ -1155,6 +1164,8 @@ class SpriteAnimation extends Array<p5.Image> {
     onChange: any;
     rotation: any;
     spriteSheet: any;
+    set frame(arg: number);
+    get frame(): number;
     set frameDelay(arg: number);
     /**
      * Delay between frames in number of draw cycles.
@@ -1767,10 +1778,10 @@ class Group extends Array<Sprite> {
      * To remove a sprite from the world and every group it belongs to,
      * use `sprite.remove()` instead.
      *
-     * @param {Sprite} item The sprite to be removed
-     * @return {Sprite} the removed sprite or undefined if it was not found
+     * @param {Sprite|Number} item The sprite to be removed or its index
+     * @return {Sprite} the removed sprite or undefined if the specified sprite was not found
      */
-    remove(item: Sprite): Sprite;
+    remove(item: Sprite | number): Sprite;
     /**
      * Using `group.remove` instead is recommended because it's easier to use,
      * and it uses this function internally.
@@ -1814,10 +1825,15 @@ class Group extends Array<Sprite> {
 class World {
     p: any;
     mod: any[];
-    offset: {
-        x: number;
-        y: number;
-    };
+    /**
+     * Changes the world's origin point,
+     * where (0, 0) is on the canvas.
+     * @type {Object}
+     * @property {Number} x
+     * @property {Number} y
+     * @default { x: 0, y: 0 }
+     */
+    origin: any;
     contacts: any[];
     set velocityThreshold(arg: number);
     /**
@@ -1845,17 +1861,6 @@ class World {
      */
     get gravity(): any;
     /**
-     * Resizes the world to the given width and height and resets the origin.
-     *
-     * Used when the canvas is created or resized.
-     *
-     * @param {Number} w
-     * @param {Number} h
-     */
-    resize(w: number, h: number): void;
-    hw: number;
-    hh: number;
-    /**
      * Performs a physics simulation step that advances all sprites'
      * forward in time by 1/60th of a second if no timeStep is given.
      *
@@ -1865,11 +1870,11 @@ class World {
      * Decreasing velocityIterations and positionIterations will improve
      * performance but decrease simulation quality.
      *
-     * @param {Number} timeStep - time step in seconds
-     * @param {Number} velocityIterations - 8 by default
-     * @param {Number} positionIterations - 3 by default
+     * @param {Number} [timeStep] - time step in seconds
+     * @param {Number} [velocityIterations] - 8 by default
+     * @param {Number} [positionIterations] - 3 by default
      */
-    step(timeStep: number, velocityIterations: number, positionIterations: number): void;
+    step(timeStep?: number, velocityIterations?: number, positionIterations?: number): void;
     /**
      * Returns the sprites at a position, ordered by layer.
      *
@@ -1910,28 +1915,6 @@ class World {
     get allowSleeping(): boolean;
 }
 class Camera {
-    /**
-     * <a href="https://p5play.org/learn/camera.html">
-     * Look at the Camera reference pages before reading these docs.
-     * </a>
-     *
-     * A `camera` object is created automatically when p5play loads.
-     * Currently, there can only be one camera per p5.js instance.
-     *
-     * A camera facilitates zooming and scrolling for scenes extending beyond
-     * the canvas. Moving the camera does not actually move the sprites.
-     *
-     * The camera is automatically created on the first draw cycle.
-     *
-     * In p5.js terms the camera wraps the whole drawing cycle in a
-     * transformation matrix but it can be disabled anytime during the draw
-     * cycle to draw interface elements in an absolute position.
-     *
-     * @param {Number} x Initial x coordinate
-     * @param {Number} y Initial y coordinate
-     * @param {Number} zoom magnification
-     */
-    constructor(x: number, y: number, zoom: number);
     p: any;
     /**
      * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
@@ -1962,6 +1945,12 @@ class Camera {
             y: number;
         };
     };
+    set pos(arg: any);
+    /**
+     * The camera's position. {x, y}
+     * @type {Object}
+     */
+    get pos(): any;
     set x(arg: number);
     /**
      * The camera x position.
@@ -1974,12 +1963,6 @@ class Camera {
      * @type {Number}
      */
     get y(): number;
-    set pos(arg: any);
-    /**
-     * The camera's position. {x, y}
-     * @type {Object}
-     */
-    get pos(): any;
     set position(arg: any);
     /**
      * The camera's position. Alias for pos.

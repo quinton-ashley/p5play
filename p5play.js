@@ -83,6 +83,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.groupsCreated = 0;
 			this.spritesCreated = 0;
 			this.spritesDrawn = 0;
+
 			/**
 			 * Used for debugging, set to true to make p5play
 			 * not load any images.
@@ -95,6 +96,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @type {Array}
 			 */
 			this.palettes = [];
+
+			/**
+			 * Set to the latest version of p5play v3's
+			 * minor version number. For example to enable
+			 * v3.16 features, set this to 16.
+			 *
+			 * Some features are not backwards compatible
+			 * with older versions of p5play, so this
+			 * variable is used to enable them.
+			 */
+			this.targetVersion = 0;
 
 			this.os = {};
 			this.context = 'web';
@@ -2597,18 +2609,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/*
-		 * Displays the Sprite with rotation and scaling applied before
-		 * the sprite's draw function is called.
+		 * Applies `rotation`, `mirror` scaling, and `world.origin`
+		 * translation before the sprite's `draw` function is called.
+		 *
+		 * If the sprite is off screen according to the camera's bounds,
+		 * `camera.bound`, then the sprite doesn't get drawn.
+		 * The algorithm for checking if a sprite is on screen is
+		 * unsophisticated and errors on the side of drawing the sprite.
 		 */
 		_display() {
-			let x = this.p.width * 0.5 - this.p.world._origin.x + this.x * this.tileSize;
-			let y = this.p.height * 0.5 - this.p.world._origin.y + this.y * this.tileSize;
+			let x = this.x * this.tileSize + this.p.world.origin.x;
+			let y = this.y * this.tileSize + this.p.world.origin.y;
 
 			let largestSide = Math.max(this._w, this._h);
 
-			// if the sprite is off screen, then it doesn't get drawn
-			// this is an unsophisticated algorithm that
-			// errors on the side of drawing
 			if (
 				this.shape != 'chain' &&
 				this.p.camera.active &&
@@ -3806,7 +3820,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * The index of the current frame that the animation is on.
 			 * @type {Number}
 			 */
-			this.frame = 0;
+			this._frame = 0;
 
 			this._cycles = 0;
 
@@ -4110,6 +4124,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
+		get frame() {
+			return this._frame;
+		}
+		set frame(val) {
+			if (val < 0 || val >= this.length) {
+				throw new FriendlyError('SpriteAnimation.frame', 2, [val, this.length]);
+			}
+			this._frame = val;
+		}
+
 		/**
 		 * Delay between frames in number of draw cycles.
 		 * If set to 4 the framerate of the animation would be the
@@ -4203,7 +4227,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.p.translate(this.x, this.y);
 			this.p.rotate(r || this.rotation);
 			this.p.scale(sx * this._scale._x, sy * this._scale._y);
-			let img = this[this.frame];
+			let img = this[this._frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
 					let { x, y, w, h } = img; // image info
@@ -4228,7 +4252,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					'Warning: ' +
 						this.name +
 						' animation not loaded yet or frame ' +
-						this.frame +
+						this._frame +
 						' does not exist. Load this animation in the p5.js preload function if you need to use it at the start of your program.'
 				);
 			}
@@ -4238,20 +4262,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		update() {
 			this._cycles++;
-			let previousFrame = this.frame;
+			let previousFrame = this._frame;
 			this.frameChanged = false;
 
 			//go to frame
 			if (this.length === 1) {
 				this.playing = false;
-				this.frame = 0;
+				this._frame = 0;
 			}
 
 			if (this.playing && this._cycles % this.frameDelay === 0) {
 				this.frameChanged = true;
 
-				if ((this.targetFrame == -1 && this.frame == this.lastFrame) || this.frame == this.targetFrame) {
-					if (this.endOnFirstFrame) this.frame = 0;
+				if ((this.targetFrame == -1 && this._frame == this.lastFrame) || this._frame == this.targetFrame) {
+					if (this.endOnFirstFrame) this._frame = 0;
 					if (this.looping) this.targetFrame = -1;
 					else this.playing = false;
 					if (this._onComplete) this._onComplete();
@@ -4260,23 +4284,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 
 				//going to target frame up
-				if (this.targetFrame > this.frame && this.targetFrame !== -1) {
-					this.frame++;
+				if (this.targetFrame > this._frame && this.targetFrame !== -1) {
+					this._frame++;
 				}
 				//going to target frame down
-				else if (this.targetFrame < this.frame && this.targetFrame !== -1) {
-					this.frame--;
-				} else if (this.targetFrame === this.frame && this.targetFrame !== -1) {
+				else if (this.targetFrame < this._frame && this.targetFrame !== -1) {
+					this._frame--;
+				} else if (this.targetFrame === this._frame && this.targetFrame !== -1) {
 					this.playing = false;
 				} else if (this.looping) {
 					//advance frame
 					//if next frame is too high
-					if (this.frame >= this.lastFrame) {
-						this.frame = 0;
-					} else this.frame++;
+					if (this._frame >= this.lastFrame) {
+						this._frame = 0;
+					} else this._frame++;
 				} else {
 					//if next frame is too high
-					if (this.frame < this.lastFrame) this.frame++;
+					if (this._frame < this.lastFrame) this._frame++;
 				}
 			}
 		}
@@ -4288,7 +4312,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		play(frame) {
 			this.playing = true;
-			if (frame !== undefined) this.frame = frame;
+			if (frame !== undefined) this._frame = frame;
 			this.targetFrame = -1;
 			return new Promise((resolve) => {
 				this._onComplete = () => {
@@ -4303,7 +4327,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		pause(frame) {
 			this.playing = false;
-			if (frame) this.frame = frame;
+			if (frame) this._frame = frame;
 		}
 
 		/**
@@ -4311,7 +4335,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		stop(frame) {
 			this.playing = false;
-			if (frame) this.frame = frame;
+			if (frame) this._frame = frame;
 		}
 
 		/**
@@ -4345,8 +4369,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Goes to the next frame and stops.
 		 */
 		nextFrame() {
-			if (this.frame < this.length - 1) this.frame = this.frame + 1;
-			else if (this.looping) this.frame = 0;
+			if (this._frame < this.length - 1) this._frame = this._frame + 1;
+			else if (this.looping) this._frame = 0;
 
 			this.targetFrame = -1;
 			this.playing = false;
@@ -4356,8 +4380,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Goes to the previous frame and stops.
 		 */
 		previousFrame() {
-			if (this.frame > 0) this.frame = this.frame - 1;
-			else if (this.looping) this.frame = this.length - 1;
+			if (this._frame > 0) this._frame = this._frame - 1;
+			else if (this.looping) this._frame = this.length - 1;
 
 			this.targetFrame = -1;
 			this.playing = false;
@@ -4378,7 +4402,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			// select next.  When it's not being used it gets set to -1.
 			this.targetFrame = toFrame;
 
-			if (this.targetFrame !== this.frame) {
+			if (this.targetFrame !== this._frame) {
 				this.playing = true;
 			}
 			return new Promise((resolve) => {
@@ -4402,7 +4426,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @type {p5.Image}
 		 */
 		get frameImage() {
-			let f = this.frame;
+			let f = this._frame;
 			let img = this[f];
 			if (img instanceof p5.Image) return img;
 
@@ -4425,10 +4449,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @type {Number}
 		 */
 		get width() {
-			if (this[this.frame] instanceof p5.Image) {
-				return this[this.frame].width;
-			} else if (this[this.frame]) {
-				return this[this.frame].w;
+			if (this[this._frame] instanceof p5.Image) {
+				return this[this._frame].width;
+			} else if (this[this._frame]) {
+				return this[this._frame].w;
 			}
 			return 1;
 		}
@@ -4445,10 +4469,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @type {Number}
 		 */
 		get height() {
-			if (this[this.frame] instanceof p5.Image) {
-				return this[this.frame].height;
-			} else if (this[this.frame]) {
-				return this[this.frame].h;
+			if (this[this._frame] instanceof p5.Image) {
+				return this[this._frame].height;
+			} else if (this[this._frame]) {
+				return this[this._frame].h;
 			}
 			return 1;
 		}
@@ -4793,7 +4817,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			} else {
 				// find the first empty slot in the groups array
 				for (let i = 1; i < this.p.p5play.groups.length; i++) {
-					if (!this.p.p5play.groups[i]) {
+					if (!this.p.p5play.groups[i]?.removed) {
 						this.idNum = i;
 						break;
 					}
@@ -5603,8 +5627,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				throw new TypeError('The callback to group.cull must be a function');
 			}
 
-			let cx = this.p.camera.x - this.p.world.hw / this.p.camera.zoom;
-			let cy = this.p.camera.y - this.p.world.hh / this.p.camera.zoom;
+			let cx = this.p.camera.x - this.p.canvas.hw / this.p.camera.zoom;
+			let cy = this.p.camera.y - this.p.canvas.hh / this.p.camera.zoom;
 
 			let minX = -left + cx;
 			let minY = -top + cy;
@@ -5640,8 +5664,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * To remove a sprite from the world and every group it belongs to,
 		 * use `sprite.remove()` instead.
 		 *
-		 * @param {Sprite} item The sprite to be removed
-		 * @return {Sprite} the removed sprite or undefined if it was not found
+		 * @param {Sprite|Number} item The sprite to be removed or its index
+		 * @return {Sprite} the removed sprite or undefined if the specified sprite was not found
 		 */
 		remove(item) {
 			if (item === undefined) {
@@ -5902,7 +5926,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		if (this._removed) {
 			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
 				if (this._isSprite) delete this.p.p5play.sprites[this._uid];
-				else delete this.p.p5play.groups[this._uid];
+				else if (this.p.p5play.targetVersion >= 16) delete this.p.p5play.groups[this._uid];
 
 				// remove contact events
 				for (let eventType in eventTypes) {
@@ -6021,30 +6045,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this.mod = [];
 
-			this._offset = { x: 0, y: 0 };
-			let _this = this;
-			this.offset = {
-				get x() {
-					return _this._offset.x;
-				},
-				set x(val) {
-					_this._offset.x = val || 0;
-					_this.resize();
-				},
-				get y() {
-					return _this._offset.y;
-				},
-				set y(val) {
-					_this._offset.y = val || 0;
-					_this.resize();
-				}
-			};
-			this.resize();
-			this.contacts = [];
+			/**
+			 * Changes the world's origin point,
+			 * where (0, 0) is on the canvas.
+			 * @type {Object}
+			 * @property {Number} x
+			 * @property {Number} y
+			 * @default { x: 0, y: 0 }
+			 */
+			this.origin = { x: 0, y: 0 };
 
+			this.contacts = [];
 			this.on('begin-contact', this._beginContact);
 			this.on('end-contact', this._endContact);
 
+			let _this = this;
 			this._gravity = {
 				get x() {
 					return _this.m_gravity.x;
@@ -6115,25 +6130,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Resizes the world to the given width and height and resets the origin.
-		 *
-		 * Used when the canvas is created or resized.
-		 *
-		 * @param {Number} w
-		 * @param {Number} h
-		 */
-		resize(w, h) {
-			w ??= this.p.width;
-			h ??= this.p.height;
-			this.hw = w * 0.5;
-			this.hh = h * 0.5;
-			this._origin = {
-				x: this.hw - this._offset.x,
-				y: this.hh - this._offset.y
-			};
-		}
-
-		/**
 		 * Performs a physics simulation step that advances all sprites'
 		 * forward in time by 1/60th of a second if no timeStep is given.
 		 *
@@ -6143,9 +6139,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Decreasing velocityIterations and positionIterations will improve
 		 * performance but decrease simulation quality.
 		 *
-		 * @param {Number} timeStep - time step in seconds
-		 * @param {Number} velocityIterations - 8 by default
-		 * @param {Number} positionIterations - 3 by default
+		 * @param {Number} [timeStep] - time step in seconds
+		 * @param {Number} [velocityIterations] - 8 by default
+		 * @param {Number} [positionIterations] - 3 by default
 		 */
 		step(timeStep, velocityIterations, positionIterations) {
 			for (let s of this.p.allSprites) {
@@ -6386,12 +6382,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * In p5.js terms the camera wraps the whole drawing cycle in a
 		 * transformation matrix but it can be disabled anytime during the draw
 		 * cycle to draw interface elements in an absolute position.
-		 *
-		 * @param {Number} x Initial x coordinate
-		 * @param {Number} y Initial y coordinate
-		 * @param {Number} zoom magnification
 		 */
-		constructor(x, y, zoom) {
+		constructor() {
 			this.p = pInst;
 			let _this = this;
 
@@ -6432,9 +6424,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this._zoomIdx = -1;
 
-			this._zoom = zoom || 1;
-			this.x = x || 0;
-			this.y = y || 0;
+			this._zoom = 1;
 		}
 
 		/**
@@ -6461,13 +6451,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_calcBoundsX(val) {
-			let mod = this.p.world.hw / this._zoom;
+			let mod = this.p.canvas.hw / this._zoom;
 			this.bound.min.x = val - mod - 100;
 			this.bound.max.x = val + mod + 100;
 		}
 
 		_calcBoundsY(val) {
-			let mod = this.p.world.hh / this._zoom;
+			let mod = this.p.canvas.hh / this._zoom;
 			this.bound.min.y = val - mod - 100;
 			this.bound.max.y = val + mod + 100;
 		}
@@ -6482,7 +6472,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set x(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.x = val;
-			let x = -val + this.p.world.hw / this._zoom;
+			let x = -val + this.p.canvas.hw / this._zoom;
 			this.__pos.x = x;
 			if (this.p.allSprites.pixelPerfect) {
 				this.__pos.rounded.x = Math.round(x);
@@ -6500,7 +6490,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set y(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.y = val;
-			let y = -val + this.p.world.hh / this._zoom;
+			let y = -val + this.p.canvas.hh / this._zoom;
 			this.__pos.y = y;
 			if (this.p.allSprites.pixelPerfect) {
 				this.__pos.rounded.y = Math.round(y);
@@ -6523,8 +6513,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set zoom(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._zoom = val;
-			let x = -this._pos.x + this.p.world.hw / val;
-			let y = -this._pos.y + this.p.world.hh / val;
+			let x = -this._pos.x + this.p.canvas.hw / val;
+			let y = -this._pos.y + this.p.canvas.hh / val;
 			this.__pos.x = x;
 			this.__pos.y = y;
 			if (this.p.allSprites.pixelPerfect) {
@@ -7928,9 +7918,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		// this stops the right click menu from appearing
 		this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 		this.canvas.resize = this.resizeCanvas;
-		this.world.resize();
-		this.camera.x = this.world.hw;
-		this.camera.y = this.world.hh;
+		this.canvas.hw = this.canvas.w * 0.5;
+		this.canvas.hh = this.canvas.h * 0.5;
+		this.camera.x = this.canvas.hw;
+		this.camera.y = this.canvas.hh;
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 
 		/* prevent callout to copy image, etc when tap to hold */
@@ -8070,9 +8061,10 @@ main {
 	 */
 	this.resizeCanvas = (w, h) => {
 		_resizeCanvas.call(this, w, h);
-		this.world.resize();
-		this.camera._pos.x = this.world.hw;
-		this.camera._pos.y = this.world.hh;
+		this.canvas.hw = this.canvas.w * 0.5;
+		this.canvas.hh = this.canvas.h * 0.5;
+		this.camera._pos.x = this.canvas.hw;
+		this.camera._pos.y = this.canvas.hh;
 	};
 
 	const _background = this.background;
@@ -8412,7 +8404,8 @@ main {
 			constructor: {
 				base: "Hey so, I tried to make a new SpriteAnimation but couldn't",
 				0: `I don't know how to display this type of image: "$0". I can only use ".png" image files.`,
-				1: 'The name of the animation must be the first input parameter.'
+				1: 'The name of the animation must be the first input parameter.',
+				2: 'Index $0 out of bounds. That means there is no frame $0 in this animation. It only has $1 frames!'
 			}
 		},
 		Group: {
@@ -8707,8 +8700,8 @@ main {
 		}
 
 		update() {
-			this.x = (pInst.mouseX - pInst.world.hw) / pInst.camera.zoom + pInst.camera.x;
-			this.y = (pInst.mouseY - pInst.world.hh) / pInst.camera.zoom + pInst.camera.y;
+			this.x = (pInst.mouseX - pInst.canvas.hw) / pInst.camera.zoom + pInst.camera.x;
+			this.y = (pInst.mouseY - pInst.canvas.hh) / pInst.camera.zoom + pInst.camera.y;
 
 			pInst.camera.mouse.x = pInst.mouseX;
 			pInst.camera.mouse.y = pInst.mouseY;
