@@ -375,7 +375,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (_this.body) {
 						let pos = new pl.Vec2((val * _this.tileSize) / plScale, _this.body.getPosition().y);
 						_this.body.setPosition(pos);
-						// _this.body.synchronizeTransform();
 					}
 					_this._position.x = val;
 				}
@@ -391,7 +390,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (_this.body) {
 						let pos = new pl.Vec2(_this.body.getPosition().x, (val * _this.tileSize) / plScale);
 						_this.body.setPosition(pos);
-						// _this.body.synchronizeTransform();
 					}
 					_this._position.y = val;
 				}
@@ -541,15 +539,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				else this.addCollider(0, 0, w, h);
 			} else {
 				this.w = w || (this.tileSize > 1 ? 1 : 50);
-				this.h = h || this.w;
 				if (Array.isArray(w)) {
 					throw new Error(
 						'Cannot set the collider type of a sprite with a polygon or chain shape to "none". To achieve the same effect, use .overlaps(allSprites) to have your sprite overlap with the allSprites group.'
 					);
 				}
 				if (w !== undefined && h === undefined) this._shape = 'circle';
-				else this._shape = 'box';
+				else {
+					this._shape = 'box';
+					this.h = h;
+				}
 			}
+
+			this._validateShape(this._shape);
 
 			this._angle = 0;
 			this._rotationSpeed = 0;
@@ -843,6 +845,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let path, shape;
 
 			if (args.length == 0) {
+				offsetX = 0;
+				offsetY = 0;
 				w = this._w;
 				h = this._h;
 			} else if (args.length < 3) {
@@ -851,6 +855,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				w = args[0];
 				this._vertexMode = true;
 			}
+
+			let dimensions;
 
 			// if (w is chain array) or (diameter/side length and h is a
 			// collider type or the name of a regular polygon)
@@ -866,21 +872,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					path = w;
 				}
 			} else {
-				if (w !== undefined && h === undefined) shape ??= 'circle';
-				shape ??= 'box';
-			}
-
-			if (shape == 'box' || shape == 'circle') {
+				if (w !== undefined && h === undefined) {
+					shape ??= 'circle';
+				} else {
+					shape ??= 'box';
+				}
 				w ??= this.tileSize > 1 ? 1 : 50;
 				h ??= w;
-			}
 
-			let dimensions;
-
-			// the actual dimensions of the collider for a box or circle are a
-			// little bit smaller so that they can slid past each other
-			// when in a tile grid
-			if (shape == 'box' || shape == 'circle') {
+				// the actual dimensions of the collider for a box or circle are a
+				// little bit smaller so that they can slid past each other
+				// when in a tile grid
 				dimensions = scaleTo(w - 0.08, h - 0.08, this.tileSize);
 			}
 
@@ -1036,13 +1038,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (!this._shape) {
 				this._shape = shape;
+				this._validateShape(shape);
 			}
 			this._w = w;
 			this._hw = w * 0.5;
-
-			if (this._shape == 'circle') {
-				this._diameter = w;
-			} else {
+			if (this.__shape != 1) {
 				this._h = h;
 				this._hh = h * 0.5;
 			}
@@ -2271,12 +2271,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @type {Number}
 		 */
 		get h() {
-			if (this.shape == 'circle') return this._w;
+			if (this.__shape == 1) return this._w;
 			return this._h;
 		}
 		set h(val) {
 			if (val < 0) val = 0.01;
-			if (this.shape == 'circle') {
+			if (this.__shape == 1) {
 				this.w = val;
 				return;
 			}
@@ -2324,8 +2324,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @type {Number}
 		 */
 		get d() {
-			this._diameter ??= this.w;
-			return this._diameter;
+			return this._w;
 		}
 		set d(val) {
 			if (val < 0) {
@@ -2334,9 +2333,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			let shapeChange = this.shape != 'circle';
 			if (!shapeChange) {
-				if (this._diameter == val) return;
+				if (this._w == val) return;
 				if (this.watch) this.mod[38] = true;
-				this._diameter = val;
 			} else {
 				if (this.watch) {
 					this.mod[29] = true;
@@ -2348,6 +2346,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 				this._removeFixtures();
 				this._h = undefined;
+				this._hh = undefined;
 				this._shape = undefined;
 				if (this._collider != 'none') {
 					this.addCollider(0, 0, val);
@@ -2362,8 +2361,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let scalar = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
-			this._h = val;
-			this._hh = this._hw;
 			if (shapeChange) return;
 			this._resizeColliders({ x: scalar, y: scalar });
 		}
@@ -2372,7 +2369,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @type {Number}
 		 */
 		get diameter() {
-			return this.d;
+			return this._w;
 		}
 		set diameter(val) {
 			this.d = val;
@@ -2471,12 +2468,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val == 'circle') {
 				this.d = this.w;
 			} else {
+				if (val == 'box') {
+					this._h = this._w;
+					this._hh = this._hw;
+				}
 				this._shape = val;
 				this._reset();
 			}
 		}
 
 		_validateShape(val) {
+			// ['box', 'circle', 'chain', 'polygon']
 			let __shape = this.p.Sprite.shapeTypes.indexOf(val);
 			if (__shape == -1) {
 				throw new Error(
@@ -2582,7 +2584,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					this.p.line(-2, 0, 2, 0);
 				}
 				if (this.__collider != 3) {
-					if (this._shape == 'chain') this.p.stroke(this.stroke || this.color);
+					if (this.__shape == 2) this.p.stroke(this.stroke || this.color);
 					else if (this._stroke) this.p.stroke(this._stroke);
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 						if (fxt.m_isSensor && !this.debug) continue;
@@ -2590,9 +2592,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 				} else {
 					this.p.stroke(this._stroke || 120);
-					if (this._shape == 'box') {
+					if (this.__shape == 0) {
 						this.p.rect(this._offset._x, this._offset._y, this.w * this.tileSize, this.h * this.tileSize);
-					} else if (this._shape == 'circle') {
+					} else if (this.__shape == 1) {
 						this.p.circle(this._offset._x, this._offset._y, this.d * this.tileSize);
 					}
 				}
@@ -6388,7 +6390,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let _this = this;
 
 			// camera position
-			this._pos = { x: 0, y: 0 };
+			this._pos = this.p.createVector.call(this.p);
 
 			// camera translation
 			this.__pos = { x: 0, y: 0, rounded: {} };
@@ -6396,17 +6398,36 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			/**
 			 * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
 			 * @type {Object}
+			 * @property {Number} x
+			 * @property {Number} y
 			 */
 			this.mouse = {
 				x: this.p.mouseX,
 				y: this.p.mouseY
 			};
+
 			/**
-			 * @type.x {Number}
+			 * Vector of the absolute position of the mouse.
+			 * @type {p5.Vector}
 			 */
-			/**
-			 * @type.y {Number}
-			 */
+			this.mouse.pos = this.p.createVector.call(this.p);
+
+			Object.defineProperty(this.mouse.pos, 'x', {
+				get() {
+					return _this.mouse.x;
+				},
+				set(val) {
+					_this.mouse.x = val;
+				}
+			});
+			Object.defineProperty(this.mouse.pos, 'y', {
+				get() {
+					return _this.mouse.y;
+				},
+				set(val) {
+					_this.mouse.y = val;
+				}
+			});
 
 			/**
 			 * Read only. True if the camera is active.
@@ -8622,20 +8643,25 @@ main {
 			let _this = this;
 
 			// this.x and this.y store the actual position values of the mouse
-			this._position = {
-				get x() {
+			this._pos = pInst.createVector.call(pInst);
+
+			Object.defineProperty(this._pos, 'x', {
+				get() {
 					return _this.x;
 				},
-				set x(val) {
+				set(val) {
 					_this.x = val;
-				},
-				get y() {
+				}
+			});
+
+			Object.defineProperty(this._pos, 'y', {
+				get() {
 					return _this.y;
 				},
-				set y(val) {
+				set(val) {
 					_this.y = val;
 				}
-			};
+			});
 
 			/**
 			 * The mouse's x position.
@@ -8712,14 +8738,14 @@ main {
 		 * @type {object}
 		 */
 		get pos() {
-			return this._position;
+			return this._pos;
 		}
 		/**
 		 * The mouse's position. Alias for pos.
 		 * @type {object}
 		 */
 		get position() {
-			return this._position;
+			return this._pos;
 		}
 
 		/**
