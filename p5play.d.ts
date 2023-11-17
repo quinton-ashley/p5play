@@ -76,8 +76,20 @@ class Sprite {
      * </a>
      *
      * The Sprite constructor can be used in many different ways.
+     *
+     * In fact it's so flexible that I've only listed out some of the
+     * most common ways it can be used in the examples section below.
+     * Try experimenting with it! It's likely to work the way you
+     * expect it to, if not you'll just get an error.
+     *
+     * Special feature! If the first parameter to this constructor is a
+     * loaded p5.Image, SpriteAnimation, or name of a SpriteAnimation,
+     * then the Sprite will be created with that animation. If the
+     * dimensions of the sprite are not given, then the Sprite will be
+     * created using the dimensions of the animation.
+     *
      * Every sprite you create is added to the `allSprites`
-     * group and put on the top layer, in front of all
+     * group and put on the top draw order layer, in front of all
      * previously created sprites.
      *
      * @param {Number} [x] - horizontal position of the sprite
@@ -91,11 +103,13 @@ class Sprite {
      * 'static', 'kinematic', or 'none'
      * @example
      *
-     * let sprite = new Sprite();
+     * let spr = new Sprite();
      *
      * let rectangle = new Sprite(x, y, width, height);
      *
      * let circle = new Sprite(x, y, diameter);
+     *
+     * let spr = new Sprite(aniName, x, y);
      *
      * let line = new Sprite(x, y, [length, angle]);
      */
@@ -201,6 +215,12 @@ class Sprite {
      * @type {Number}
      */
     get w(): number;
+    set h(arg: number);
+    /**
+     * The height of the sprite.
+     * @type {Number}
+     */
+    get h(): number;
     /**
      * The sprite's position on the previous frame.
      * @type {object}
@@ -757,12 +777,6 @@ class Sprite {
      * @type {Number}
      */
     get halfWidth(): number;
-    set h(arg: number);
-    /**
-     * The height of the sprite.
-     * @type {Number}
-     */
-    get h(): number;
     set hh(arg: number);
     /**
      * Half the height of the sprite.
@@ -881,14 +895,22 @@ class Sprite {
      */
     applyTorque(val: any): void;
     /**
-     * Moves a sprite towards a position.
+     * Moves a sprite towards a position at a percentage of the distance
+     * between itself and the destination.
      *
-     * @param {Number|Object} x|position destination x or any object with x and y properties
-     * @param {Number} y destination y
-     * @param {Number} tracking [optional] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
+     * @param {Number|Object} x destination x or any object with x and y properties
+     * @param {Number} [y] destination y
+     * @param {Number} [tracking] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
      */
-    moveTowards(x: number | any, y: number, tracking: number): void;
-    moveAway(x: any, y: any, repel: any, ...args: any[]): void;
+    moveTowards(x: number | any, y?: number, tracking?: number): void;
+    /**
+     * Moves the sprite away from a position, the opposite of moveTowards,
+     * at a percentage of the distance between itself and the position.
+     * @param {Number} x
+     * @param {Number} [y]
+     * @param {Number} [repel] range from 0-1
+     */
+    moveAway(x: number, y?: number, repel?: number, ...args: any[]): void;
     /**
      * Move the sprite a certain distance from its current position.
      *
@@ -1746,7 +1768,9 @@ class Group extends Array<Sprite> {
     /**
      */
     moveTowards(x: any, y: any, tracking: any): void;
-    moveAway(x: any, y: any, tracking: any): void;
+    /**
+     */
+    moveAway(x: any, y: any, repel: any): void;
     /**
      * Alias for group.length
      * @deprecated
