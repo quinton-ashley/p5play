@@ -103,24 +103,10 @@ class Sprite {
     p: any;
     /**
      * Each sprite has a unique id number. Don't change it!
-     * Its useful for debugging. Sprite id numbers start at 1000.
+     * They are useful for debugging.
      * @type {Number}
      */
     idNum: number;
-    /**
-     * If set to true, p5play will record all changes to the sprite's
-     * properties in its `mod` array.
-     * @type {Boolean}
-     * @default undefined
-     */
-    watch: boolean;
-    /**
-     * An array of booleans that indicate which properties were
-     * changed since the last frame. Useful for only sending
-     * modified sprite data in binary netcode.
-     * @type {Array}
-     */
-    mod: any[];
     /**
      * Groups the sprite belongs to, including allSprites
      * @type {Group[]}
@@ -138,6 +124,24 @@ class Sprite {
      * @default []
      */
     joints: Joint[];
+    /**
+     * If set to true, p5play will record all changes to the sprite's
+     * properties in its `mod` array. Intended to be used to enable
+     * online multiplayer.
+     * @type {Boolean}
+     * @default undefined
+     */
+    watch: boolean;
+    /**
+     * An Object that has sprite property number codes as keys,
+     * these correspond to the index of the property in the
+     * Sprite.props array. The booleans values this object stores,
+     * indicate which properties were changed since the last frame.
+     * Useful for limiting the amount of sprite data sent in binary
+     * netcode to only the sprite properties that have been modified.
+     * @type {Object}
+     */
+    mod: any;
     /**
      * The tile size is used to change the size of one unit of
      * measurement for the sprite.
@@ -184,18 +188,19 @@ class Sprite {
      * @type {_SpriteMouse}
      */
     mouse: _SpriteMouse;
+    set shape(arg: string);
+    /**
+     * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
+     * @type {String}
+     * @default box
+     */
+    get shape(): string;
     set w(arg: number);
     /**
      * The width of the sprite.
      * @type {Number}
      */
     get w(): number;
-    set h(arg: number);
-    /**
-     * The height of the sprite.
-     * @type {Number}
-     */
-    get h(): number;
     /**
      * The sprite's position on the previous frame.
      * @type {object}
@@ -223,8 +228,8 @@ class Sprite {
      * constructor except the first two parameters are x and y offsets,
      * the distance new collider should be from the center of the sprite.
      *
-     * This function also auto-resets the sprite's mass, recalculating
-     * the sprite's mass based on its new size.
+     * This function also recalculates the sprite's mass based on its
+     * new size.
      *
      * One limitation of the current implementation is that sprites
      * with multiple colliders can't have their collider
@@ -707,10 +712,11 @@ class Sprite {
      */
     get removed(): boolean;
     /**
-     * Read only. The sprite's vertices.
-     * @type {p5.Vector[]}
+     * The sprite's vertices, in vertex mode format.
+     * @type {Array}
      */
-    get vertices(): p5.Vector[];
+    set vertices(arg: any[]);
+    get vertices(): any[];
     set visible(arg: boolean);
     /**
      * If true the sprite is shown, if set to false the sprite is hidden.
@@ -751,6 +757,12 @@ class Sprite {
      * @type {Number}
      */
     get halfWidth(): number;
+    set h(arg: number);
+    /**
+     * The height of the sprite.
+     * @type {Number}
+     */
+    get h(): number;
     set hh(arg: number);
     /**
      * Half the height of the sprite.
@@ -793,13 +805,6 @@ class Sprite {
      * @type {Number}
      */
     get radius(): number;
-    set shape(arg: string);
-    /**
-     * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
-     * @type {String}
-     * @default box
-     */
-    get shape(): string;
     set update(arg: Function);
     /**
      * You can set the sprite's update function to a custom
@@ -1919,14 +1924,10 @@ class Camera {
     /**
      * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
      * @type {Object}
+     * @property {Number} x
+     * @property {Number} y
      */
     mouse: any;
-    /**
-     * @type.x {Number}
-     */
-    /**
-     * @type.y {Number}
-     */
     /**
      * Read only. True if the camera is active.
      * Use the methods Camera.on() and Camera.off()

@@ -210,38 +210,25 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			/**
 			 * Each sprite has a unique id number. Don't change it!
-			 * Its useful for debugging. Sprite id numbers start at 1000.
+			 * They are useful for debugging.
 			 * @type {Number}
 			 */
 			this.idNum;
 
-			/**
-			 * If set to true, p5play will record all changes to the sprite's
-			 * properties in its `mod` array.
-			 * @type {Boolean}
-			 * @default undefined
-			 */
-			this.watch;
-
-			/**
-			 * An array of booleans that indicate which properties were
-			 * changed since the last frame. Useful for only sending
-			 * modified sprite data in binary netcode.
-			 * @type {Array}
-			 */
-			this.mod = [];
+			// id num is not set until the input params are validated
 
 			let args = [...arguments];
 
 			let group, ani;
 
+			// first arg was a group to add the sprite to
+			// used internally by the GroupSprite class
 			if (args[0] !== undefined && args[0]._isGroup) {
 				group = args[0];
 				args = args.slice(1);
 			}
 
-			if (!args.length) this._noArgs = true;
-
+			// first arg is a SpriteAnimation, animation name, or p5.Image
 			if (
 				args[0] !== undefined &&
 				isNaN(args[0]) &&
@@ -252,6 +239,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				args = args.slice(1);
 			}
 
+			// invalid
 			if (args.length == 1 && typeof args[0] == 'number') {
 				throw new FriendlyError('Sprite', 0, [args[0]]);
 			}
@@ -261,7 +249,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			w = args[2];
 			h = args[3];
 			collider = args[4];
-			this._originMode = 'center';
 
 			if (Array.isArray(x)) {
 				x = undefined;
@@ -271,27 +258,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				collider = args[2];
 			}
 
-			// if (w is chain array) or (diameter/side length and h is a
-			// collider type or the name of a regular polygon)
-			if (Array.isArray(w) || typeof h == 'string') {
-				if (!isNaN(w)) w = Number(w);
-				if (typeof w != 'number' && Array.isArray(w[0])) {
-					this._originMode = 'start';
+			// valid use to create a circle: new Sprite(x, y, d, colliderType)
+			if (typeof h == 'string') {
+				if (isColliderType(h)) {
+					collider = h;
+				} else {
+					w = getRegularPolygon(w, h);
 				}
-				if (h !== undefined) {
-					if (Array.isArray(h)) {
-						throw new FriendlyError('Sprite', 1, [`[[${w}], [${h}]]`]);
-					}
-					if (isColliderType(h)) {
-						collider = h;
-					} else {
-						w = getRegularPolygon(w, h);
-					}
-					h = undefined;
-				}
-			} else if (isNaN(w)) {
-				collider = w;
-				w = undefined;
+				h = undefined;
+			} else if (Array.isArray(h)) {
+				throw new FriendlyError('Sprite', 1, [`[[${w}], [${h}]]`]);
 			}
 
 			this.idNum = this.p.p5play.spritesCreated;
@@ -324,6 +300,26 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 
+			/**
+			 * If set to true, p5play will record all changes to the sprite's
+			 * properties in its `mod` array. Intended to be used to enable
+			 * online multiplayer.
+			 * @type {Boolean}
+			 * @default undefined
+			 */
+			this.watch;
+
+			/**
+			 * An Object that has sprite property number codes as keys,
+			 * these correspond to the index of the property in the
+			 * Sprite.props array. The booleans values this object stores,
+			 * indicate which properties were changed since the last frame.
+			 * Useful for limiting the amount of sprite data sent in binary
+			 * netcode to only the sprite properties that have been modified.
+			 * @type {Object}
+			 */
+			this.mod = {};
+
 			this._removed = false;
 			this._life = 2147483647;
 			this._visible = true;
@@ -335,13 +331,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._overlappers = {};
 
 			group ??= this.p.allSprites;
-
-			if (group.dynamic) collider ??= 'dynamic';
-			if (group.kinematic) collider ??= 'kinematic';
-			if (group.static) collider ??= 'static';
-			collider ??= group.collider;
-
-			this._shape = group.shape;
 
 			/**
 			 * The tile size is used to change the size of one unit of
@@ -462,6 +451,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this._layer = group._layer;
 			this._layer ??= this.p.allSprites._getTopLayer() + 1;
+
+			if (group.dynamic) collider ??= 'dynamic';
+			if (group.kinematic) collider ??= 'kinematic';
+			if (group.static) collider ??= 'static';
 			collider ??= group.collider;
 
 			if (!collider || typeof collider != 'string') {
@@ -471,16 +464,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			x ??= group.x;
 			if (x === undefined) {
-				x = this.p.width / this.p.allSprites.tileSize / 2;
+				x = this.p.width / this.tileSize / 2;
 				if (w) this._vertexMode = true;
 			}
 			y ??= group.y;
 			if (y === undefined) {
-				y = this.p.height / this.p.allSprites.tileSize / 2;
+				y = this.p.height / this.tileSize / 2;
 			}
+
+			let forcedBoxShape = false;
 			if (w === undefined) {
-				w = group.w || group.width || group.d || group.diameter;
-				h ??= group.h || group.height;
+				w = group.w || group.width || group.d || group.diameter || group.v || group.vertices;
+				if (!h && !group.d && !group.diameter) {
+					h = group.h || group.height;
+					forcedBoxShape = true;
+				}
 			}
 
 			if (typeof x == 'function') x = x(group.length);
@@ -518,9 +516,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let ts = this.tileSize;
 				if (!w && (this._ani.w != 1 || this._ani.h != 1)) {
 					w = this._ani.w / ts;
-					if (!h && this.shape != 'circle') {
-						h = this._ani.h / ts;
-					}
+					h ??= this._ani.h / ts;
 				}
 			}
 
@@ -534,31 +530,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.mouse = new this.p._SpriteMouse();
 
-			if (this.collider != 'none') {
-				if (this._vertexMode) this.addCollider(w);
-				else this.addCollider(0, 0, w, h);
-			} else {
-				this.w = w || (this.tileSize > 1 ? 1 : 50);
-				if (Array.isArray(w)) {
-					throw new Error(
-						'Cannot set the collider type of a sprite with a polygon or chain shape to "none". To achieve the same effect, use .overlaps(allSprites) to have your sprite overlap with the allSprites group.'
-					);
-				}
-				if (w !== undefined && h === undefined) this._shape = 'circle';
-				else {
-					this._shape = 'box';
-					this.h = h;
-				}
-			}
-
-			this._validateShape(this._shape);
-
 			this._angle = 0;
 			this._rotationSpeed = 0;
 			this._bearing = 0;
-
-			if (!group._isAllSpritesGroup) this.p.allSprites.push(this);
-			group.push(this);
 
 			this._scale = new Scale();
 
@@ -617,6 +591,37 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 
+			this._massUndef = true;
+			if (w === undefined) {
+				this._dimensionsUndef = true;
+				this._widthUndef = true;
+				w = this.tileSize > 1 ? 1 : 50;
+				if (h === undefined) this._heightUndef = true;
+			}
+
+			if (forcedBoxShape) h ??= this.tileSize > 1 ? 1 : 50;
+
+			this._shape = group.shape;
+
+			// if collider is not "none"
+			if (this.__collider != 3) {
+				if (this._vertexMode) this.addCollider(w);
+				else this.addCollider(0, 0, w, h);
+				this.shape = this._shape;
+			} else {
+				this.w = w;
+				if (Array.isArray(w)) {
+					throw new Error(
+						'Cannot set the collider type of a sprite with a polygon or chain shape to "none". To achieve the same effect, use .overlaps(allSprites) to have your sprite overlap with the allSprites group.'
+					);
+				}
+				if (w !== undefined && h === undefined) this.shape = 'circle';
+				else {
+					this.shape = 'box';
+					this.h = h;
+				}
+			}
+
 			/**
 			 * The sprite's position on the previous frame.
 			 * @type {object}
@@ -640,7 +645,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.debug = false;
 
-			this._shift = {};
+			if (!group._isAllSpritesGroup) this.p.allSprites.push(this);
+			group.push(this);
 
 			let gvx = group.vel.x || 0;
 			let gvy = group.vel.y || 0;
@@ -723,8 +729,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			}
 
-			this._validateShape(this._shape);
-
 			// "random" color that's not too dark or too light
 			this.color ??= this.p.color(
 				Math.round(this.p.random(30, 245)),
@@ -734,13 +738,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this._textFill ??= this.p.color(0);
 			this._textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
-
-			this._massUndef = true;
-			if (w === undefined) {
-				this._dimensionsUndef = true;
-				this._widthUndef = true;
-				if (h === undefined) this._heightUndef = true;
-			}
 		}
 
 		/**
@@ -750,8 +747,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * constructor except the first two parameters are x and y offsets,
 		 * the distance new collider should be from the center of the sprite.
 		 *
-		 * This function also auto-resets the sprite's mass, recalculating
-		 * the sprite's mass based on its new size.
+		 * This function also recalculates the sprite's mass based on its
+		 * new size.
 		 *
 		 * One limitation of the current implementation is that sprites
 		 * with multiple colliders can't have their collider
@@ -849,21 +846,22 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				offsetY = 0;
 				w = this._w;
 				h = this._h;
-			} else if (args.length < 3) {
+			} else if (args.length <= 2) {
 				offsetX = 0;
 				offsetY = 0;
 				w = args[0];
+				h = args[1];
 				this._vertexMode = true;
 			}
 
 			let dimensions;
 
-			// if (w is chain array) or (diameter/side length and h is a
+			// if (w is vertex array) or (side length and h is a
 			// collider type or the name of a regular polygon)
 			if (Array.isArray(w) || typeof h == 'string') {
 				if (!isNaN(w)) w = Number(w);
 				if (typeof w != 'number' && Array.isArray(w[0])) {
-					this._originMode = 'start';
+					this._originMode ??= 'start';
 				}
 				if (typeof h == 'string') {
 					path = getRegularPolygon(w, h);
@@ -873,9 +871,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			} else {
 				if (w !== undefined && h === undefined) {
-					shape ??= 'circle';
+					shape = 'circle';
 				} else {
-					shape ??= 'box';
+					shape = 'box';
 				}
 				w ??= this.tileSize > 1 ? 1 : 50;
 				h ??= w;
@@ -913,7 +911,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						x = path[0][0];
 						y = path[0][1];
 						// log(x, y);
-						if (!this.body) {
+						if (!this.fixture || !this._relativeOrigin) {
 							this.x = x;
 							this.y = y;
 						} else {
@@ -924,7 +922,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 					for (let i = 0; i < path.length; i++) {
 						if (this._vertexMode) {
-							if (i == 0 && !this.body) continue;
+							if (i == 0 && !this.fixture) continue;
 							// verts are relative to the first vert
 							vert.x = path[i][0] - x;
 							vert.y = path[i][1] - y;
@@ -956,12 +954,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 				}
 
+				let isConvex = false;
 				if (
 					isSlop(Math.abs(vecs[0].x) - Math.abs(vecs[vecs.length - 1].x)) &&
 					isSlop(Math.abs(vecs[0].y) - Math.abs(vecs[vecs.length - 1].y))
 				) {
-					shape = 'polygon';
+					if (this._shape != 'chain') shape = 'polygon';
+					else shape = 'chain';
 					this._originMode = 'center';
+					if (this._isConvexPoly(vecs.slice(0, -1))) isConvex = true;
 				} else {
 					shape = 'chain';
 				}
@@ -970,11 +971,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this._hw = w * 0.5;
 				h = max.y - min.y;
 				this._hh = h * 0.5;
-
-				let isConvex = false;
-				if (shape == 'polygon' && this._isConvexPoly(vecs.slice(0, -1))) {
-					isConvex = true;
-				}
 
 				if (this._originMode == 'start') {
 					for (let i = 0; i < vecs.length; i++) {
@@ -999,17 +995,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					centerX = sumX / vl;
 					centerY = sumY / vl;
 
-					if (!this.body) {
+					if (!this.fixture) {
 						this._relativeOrigin = { x: centerX, y: centerY };
 					}
 
-					// use bounding box method to get center
-					// not how planck does it!
-					// centerX = this._hw - min.x;
-					// centerY = this._hh - min.y;
-
 					if (this._vertexMode && usesVertices) {
-						if (!this.body) {
+						if (!this.fixture) {
 							// repositions the sprite's x, y coordinates
 							// to be in the center of the shape
 							this.x += centerX;
@@ -1036,10 +1027,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					s = pl.Chain(vecs, false);
 				}
 			}
-			if (!this._shape) {
-				this._shape = shape;
-				this._validateShape(shape);
-			}
+			this.shape ??= shape;
 			this._w = w;
 			this._hw = w * 0.5;
 			if (this.__shape != 1) {
@@ -1317,9 +1305,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val == this._collider) return;
 
 			if (val == 'none' && (this._shape == 'chain' || this._shape == 'polygon')) {
-				throw new Error(
+				console.error(
 					'Cannot set the collider type of a polygon or chain collider to "none". To achieve the same effect, use .overlaps(allSprites) to have your sprite overlap with the allSprites group.'
 				);
+				return;
 			}
 
 			if (this._removed) {
@@ -1343,46 +1332,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (this.fixture?.m_isSensor) this.body.m_gravityScale = 0;
 				else this.p.world.destroyBody(this.body);
 			}
-		}
-
-		_reset() {
-			let bodyProps = this._cloneBodyProps();
-
-			let v;
-			if (this._shape == 'chain' || this._shape == 'polygon') {
-				v = this._getVertices(true);
-				this._vertexMode = true;
-			}
-
-			// destroys all fixtures (colliders and sensors)
-			if (this.body) {
-				this.p.world.destroyBody(this.body);
-				this.body = undefined;
-			}
-
-			// remake colliders, if collider type is not "none"
-			if (this.__collider != 3) {
-				if (v) {
-					this.addCollider(0, 0, v);
-				} else {
-					this.addCollider();
-				}
-			}
-			// remake sensors
-			if (this._hasSensors) {
-				this.addDefaultSensors();
-			}
-
-			for (let prop in bodyProps) {
-				if (bodyProps[prop] !== undefined) {
-					this[prop] = bodyProps[prop];
-				}
-			}
-			let ox = this._offset._x;
-			let oy = this._offset._y;
-			this._offset._x = 0;
-			this._offset._y = 0;
-			this._offsetCenterBy(ox, oy);
 		}
 
 		_parseColor(val) {
@@ -1881,7 +1830,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.body) return;
 			if (this.watch) this.mod[21] = true;
 			this.body.resetMassData();
-			delete this._massUndef;
 		}
 
 		/**
@@ -2130,19 +2078,29 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Read only. The sprite's vertices.
-		 * @type {p5.Vector[]}
+		 * The sprite's vertices, in vertex mode format.
+		 * @type {Array}
 		 */
+		set vertices(val) {
+			if (this.__collider == 3) {
+				throw new Error('Cannot set vertices of a sprite with collider type of "none".');
+			}
+			if (this.watch) this.mod[29] = true;
+
+			this._removeFixtures();
+
+			this._originMode = 'start';
+			this.addCollider(val);
+			if (this._hasSensors) {
+				this.addDefaultSensors();
+			}
+		}
 		get vertices() {
 			return this._getVertices();
 		}
 
-		_getVertices(output2DArrays) {
+		_getVertices(internalUse) {
 			let f = this.fixture;
-			while (f.m_next) {
-				if (f.m_isSensor) break;
-				f = f.m_next;
-			}
 			let s = f.getShape();
 			let v = [...s.m_vertices];
 			if (s.m_type == 'polygon') v.unshift(v.at(-1));
@@ -2150,7 +2108,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let y = this.y;
 			for (let i = 0; i < v.length; i++) {
 				let arr = [fixRound((v[i].x / this.tileSize) * plScale + x), fixRound((v[i].y / this.tileSize) * plScale + y)];
-				if (output2DArrays) v[i] = arr;
+				if (internalUse) v[i] = arr;
 				else v[i] = this.p.createVector(arr[0], arr[1]);
 			}
 			return v;
@@ -2271,8 +2229,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @type {Number}
 		 */
 		get h() {
-			if (this.__shape == 1) return this._w;
-			return this._h;
+			return this._h || this._w;
 		}
 		set h(val) {
 			if (val < 0) val = 0.01;
@@ -2327,42 +2284,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._w;
 		}
 		set d(val) {
-			if (val < 0) {
-				this.remove();
-				return;
-			}
-			let shapeChange = this.shape != 'circle';
+			if (val < 0) val = 0.01;
+			let shapeChange = this.__shape != 1;
+			if (!shapeChange && this._w == val) return;
+
+			if (this.watch) this.mod[38] = true;
+
 			if (!shapeChange) {
-				if (this._w == val) return;
-				if (this.watch) this.mod[38] = true;
-			} else {
-				if (this.watch) {
-					this.mod[29] = true;
-					this.mod[38] = true;
-				}
-				let bodyProps;
-				if (this._collider != 'none') {
-					bodyProps = this._cloneBodyProps();
-				}
-				this._removeFixtures();
-				this._h = undefined;
-				this._hh = undefined;
-				this._shape = undefined;
-				if (this._collider != 'none') {
-					this.addCollider(0, 0, val);
-					for (let prop in bodyProps) {
-						if (bodyProps[prop] !== undefined) {
-							this[prop] = bodyProps[prop];
-						}
-					}
-				}
-				this._shape = 'circle';
+				let scalar = val / this._w;
+				this._resizeColliders({ x: scalar, y: scalar });
 			}
-			let scalar = val / this._w;
 			this._w = val;
 			this._hw = val * 0.5;
-			if (shapeChange) return;
-			this._resizeColliders({ x: scalar, y: scalar });
+			if (shapeChange) this.shape = 'circle';
 		}
 		/**
 		 * The diameter of a circular sprite.
@@ -2462,22 +2396,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set shape(val) {
 			if (val == this._shape) return;
 
-			this._validateShape(val);
-
-			if (this.watch) this.mod[29] = true;
-			if (val == 'circle') {
-				this.d = this.w;
-			} else {
-				if (val == 'box') {
-					this._h = this._w;
-					this._hh = this._hw;
-				}
-				this._shape = val;
-				this._reset();
-			}
-		}
-
-		_validateShape(val) {
 			// ['box', 'circle', 'chain', 'polygon']
 			let __shape = this.p.Sprite.shapeTypes.indexOf(val);
 			if (__shape == -1) {
@@ -2489,7 +2407,69 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						'"'
 				);
 			}
+
+			if (this.__collider == 3 && __shape >= 2) {
+				console.error(
+					'Cannot set the collider shape to chain or polygon if the sprite has a collider type of "none". To achieve the same effect, use .overlaps(allSprites) to have your sprite overlap with the allSprites group.'
+				);
+				return;
+			}
+
+			if (this.__shape == 1 && __shape != 0) {
+				console.error('Cannot change a circle collider into a chain or polygon shape.');
+				return;
+			}
+
+			let prevShape = this.__shape;
 			this.__shape = __shape;
+			this._shape = val;
+
+			if (this.watch) this.mod[29] = true;
+			if (prevShape === undefined) return;
+
+			if (this.__shape == 0) {
+				this._h = this._w;
+				this._hh = this._hw;
+			} else {
+				this._h = undefined;
+				this._hh = undefined;
+			}
+
+			let v, w;
+			if (prevShape != 1 && this.__shape != 1) {
+				v = this._getVertices(true);
+			} else {
+				w = this._w;
+			}
+
+			// destroys all (colliders and sensors)
+			this._removeFixtures();
+
+			// remake colliders, if collider type is not "none"
+			if (this.__collider != 3) {
+				if (v) {
+					this._originMode ??= 'center';
+					this.addCollider(v);
+				}
+				// turn circle into dodecagon chain/polygon?
+				// else if (prevShape == 1) {
+				// 	this.addCollider(0, 0, [this._w, -30, 12]);
+				// }
+				else {
+					this.addCollider();
+				}
+			}
+			// remake sensors
+			if (this._hasSensors) {
+				this.addDefaultSensors();
+			}
+
+			let ox = this._offset._x;
+			let oy = this._offset._y;
+			if (!ox && !oy) return;
+			this._offset._x = 0;
+			this._offset._y = 0;
+			this._offsetCenterBy(ox, oy);
 		}
 
 		/**
@@ -2571,7 +2551,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Default draw
 		 */
 		_draw() {
-			if (this.strokeWeight !== undefined) this.p.strokeWeight(this.strokeWeight);
+			if (this._strokeWeight !== undefined) {
+				this.p.strokeWeight(this._strokeWeight);
+			}
 			if (this._ani && this.debug != 'colliders' && !this.p.p5play.disableImages) {
 				this._ani.draw(this._offset._x, this._offset._y, 0, this._scale._x, this._scale._y);
 			}
@@ -2583,15 +2565,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					this.p.line(0, -2, 0, 2);
 					this.p.line(-2, 0, 2, 0);
 				}
+
 				if (this.__collider != 3) {
-					if (this.__shape == 2) this.p.stroke(this.stroke || this.color);
-					else if (this._stroke) this.p.stroke(this._stroke);
+					if (this._strokeWeight !== 0) {
+						if (this.__shape == 2) this.p.stroke(this.stroke || this.color);
+						else if (this._stroke) this.p.stroke(this._stroke);
+					}
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 						if (fxt.m_isSensor && !this.debug) continue;
 						this._drawFixture(fxt);
 					}
 				} else {
-					this.p.stroke(this._stroke || 120);
+					if (this._strokeWeight !== 0) this.p.stroke(this._stroke || 120);
 					if (this.__shape == 0) {
 						this.p.rect(this._offset._x, this._offset._y, this.w * this.tileSize, this.h * this.tileSize);
 					} else if (this.__shape == 1) {
@@ -2861,11 +2846,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Moves a sprite towards a position.
+		 * Moves a sprite towards a position at a percentage of the distance
+		 * between itself and the destination.
 		 *
-		 * @param {Number|Object} x|position destination x or any object with x and y properties
-		 * @param {Number} y destination y
-		 * @param {Number} tracking [optional] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
+		 * @param {Number|Object} x destination x or any object with x and y properties
+		 * @param {Number} [y] destination y
+		 * @param {Number} [tracking] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
 		 */
 		moveTowards(x, y, tracking) {
 			if (x === undefined) return;
@@ -2895,6 +2881,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
+		/**
+		 * Moves the sprite away from a position, the opposite of moveTowards,
+		 * at a percentage of the distance between itself and the position.
+		 * @param {Number} x
+		 * @param {Number} [y]
+		 * @param {Number} [repel] range from 0-1
+		 */
 		moveAway(x, y, repel) {
 			this.moveTowards(...arguments);
 			this.vel.x *= -1;
@@ -5220,6 +5213,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				for (let s of this) {
 					s._hasOverlap[target._uid] = false;
 					target._hasOverlap[s._uid] = false;
+					// if this group is the same group as the target
+					if (this._uid == target._uid) {
+						for (let s2 of target) {
+							s._hasOverlap[s2._uid] = true;
+							s2._hasOverlap[s._uid] = true;
+						}
+					}
 				}
 			}
 			if (target._hasOverlap[this._uid] !== false) {
@@ -5333,6 +5333,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				for (let s of this) {
 					s._hasOverlap[target._uid] = true;
 					target._hasOverlap[s._uid] = true;
+					// if this group is the same group as the target
+					if (this._uid == target._uid) {
+						for (let s2 of target) {
+							s._hasOverlap[s2._uid] = true;
+							s2._hasOverlap[s._uid] = true;
+						}
+					}
 				}
 			}
 			if (target._hasOverlap[this._uid] != true) {
@@ -5497,11 +5504,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 
-		moveAway(x, y, tracking) {
+		/**
+		 */
+		moveAway(x, y, repel) {
 			if (typeof x != 'number') {
 				let obj = x;
 				if (obj == this.p.mouse && !this.p.mouse.active) return;
-				tracking = y;
+				repel = y;
 				y = obj.y;
 				x = obj.x;
 			}
@@ -5513,7 +5522,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					x: s.distCentroid.x + x,
 					y: s.distCentroid.y + y
 				};
-				s.moveAway(dest.x, dest.y, tracking);
+				s.moveAway(dest.x, dest.y, repel);
 			}
 		}
 
@@ -7524,14 +7533,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * 'n' or 'none'
 	 */
 	function isColliderType(t) {
+		if (t == 'd' || t == 's' || t == 'k' || t == 'n') return true;
 		let abr = t.slice(0, 2);
-		return t == 'd' || t == 's' || t == 'k' || t == 'n' || abr == 'dy' || abr == 'st' || abr == 'ki' || abr == 'no';
+		return abr == 'dy' || abr == 'st' || abr == 'ki' || abr == 'no';
 	}
 
 	/*
-	 * Returns an array with the line length, angle, and number of sides of a regular polygon
+	 * Returns an array with the line length, angle, and number of sides
+	 * of a regular polygon, which is used internally to create a Sprite
+	 * using line mode.
 	 */
-	function getRegularPolygon(l, n) {
+	function getRegularPolygon(lineLength, name) {
+		let l = lineLength;
+		let n = name.toLowerCase();
 		if (n == 'triangle') l = [l, -120, 3];
 		else if (n == 'square') l = [l, -90, 4];
 		else if (n == 'pentagon') l = [l, -72, 5];
@@ -7542,6 +7556,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		else if (n == 'decagon') l = [l, -36, 10];
 		else if (n == 'hendecagon') l = [l, -32.7272727273, 11];
 		else if (n == 'dodecagon') l = [l, -30, 12];
+		if (l == lineLength) throw new Error('Invalid, not a regular polygon: ' + name);
 		return l;
 	}
 
@@ -8395,7 +8410,8 @@ main {
 			constructor: {
 				base: "Sorry I'm unable to make a new Sprite",
 				0: "What is $0 for? If you're trying to specify the x position of the sprite, please specify the y position as well.",
-				1: "If you're trying to specify points for a chain Sprite, please use an array of position arrays.\n$0"
+				1: "If you're trying to specify points for a chain Sprite, please use an array of position arrays.\n$0",
+				2: 'Invalid input parameters: $0'
 			},
 			hw: {
 				0: "I can't change the halfWidth of a Sprite directly, change the sprite's width instead."
