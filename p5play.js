@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.16
+ * @version 3.17
  * @author quinton-ashley
  * @license gpl-v3-only
  */
@@ -8369,13 +8369,12 @@ main {
 				$.textImage(ti, x, y);
 				return;
 			}
-			let pd = $.pixelDensity();
 			let tg = $.createGraphics.call($, 1, 1);
 			c = tg.canvas.getContext('2d');
-			c.font = `${r._textStyle} ${r._textSize * pd}px ${r._textFont}`;
+			c.font = `${r._textStyle} ${r._textSize}px ${r._textFont}`;
 			let lines = str.split('\n');
 			cX = 0;
-			cY = r._textLeading * pd * lines.length;
+			cY = r._textLeading * lines.length;
 			let m = c.measureText(' ');
 			_ascent = m.fontBoundingBoxAscent;
 			_descent = m.fontBoundingBoxDescent;
@@ -8383,7 +8382,7 @@ main {
 			tg.resizeCanvas(Math.ceil(tg.textWidth(str)), Math.ceil(h));
 			c.fillStyle = ctx.fillStyle;
 			c.strokeStyle = ctx.strokeStyle;
-			c.lineWidth = ctx.lineWidth * pd;
+			c.lineWidth = ctx.lineWidth;
 			let f = c.fillStyle;
 			if (!r._fillSet) c.fillStyle = 'black';
 			for (let i = 0; i < lines.length; i++) {
@@ -8394,10 +8393,11 @@ main {
 			}
 			if (!r._fillSet) c.fillStyle = f;
 			ti = tg.get();
+			let pd = $.pixelDensity();
 			ti.width /= pd;
 			ti.height /= pd;
-			ti._ascent = _ascent / pd;
-			ti._descent = _descent / pd;
+			ti._ascent = _ascent;
+			ti._descent = _descent;
 			$._tic.set(k, ti);
 			$.textImage(ti, x, y);
 		};
