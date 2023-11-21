@@ -2942,14 +2942,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		move(distance, direction, speed) {
 			if (!distance) return;
 
-			let dirNameMode = isNaN(arguments[0]);
-			if (dirNameMode) {
+			let directionNamed = isNaN(arguments[0]);
+			if (directionNamed) {
+				distance = 1;
 				direction = arguments[0];
 				speed = arguments[1];
-				distance = 1;
 			}
 
 			if (typeof direction == 'string') {
+				directionNamed = true;
 				this._heading = direction;
 				direction = this._getDirectionAngle(direction);
 			}
@@ -2957,7 +2958,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let x = this.x + this.p.cos(direction) * distance;
 			let y = this.y + this.p.sin(direction) * distance;
-			if (direction % 45 == 0) {
+			if (directionNamed && this.tileSize != 1) {
+				// round to nearest 0.5
+				x = Math.round(x * 2) / 2;
+				y = Math.round(y * 2) / 2;
+			} else if (direction % 45 == 0) {
 				x = fixRound(x);
 				y = fixRound(y);
 			}
@@ -3436,8 +3441,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			if (l[target._uid] == cb) return;
 			l[target._uid] = cb;
-
-			if (this._uid == target._uid) return;
 
 			l = ledger[target._uid];
 			if (!l || !l[this._uid]) return;
@@ -5222,7 +5225,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			l = ledger[target._uid];
 			if (!l || !l[this._uid]) return;
-			delete l[this._uid];
+			if (this._uid != target._uid) delete l[this._uid];
 			for (let s of target) {
 				l = ledger[s._uid];
 				if (!l || !l[this._uid]) continue;
@@ -5245,8 +5248,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					// if this group is the same group as the target
 					if (this._uid == target._uid) {
 						for (let s2 of target) {
-							s._hasOverlap[s2._uid] = true;
-							s2._hasOverlap[s._uid] = true;
+							s._hasOverlap[s2._uid] = false;
+							s2._hasOverlap[s._uid] = false;
 						}
 					}
 				}
@@ -8314,11 +8317,15 @@ main {
 		function _genTextImageKey(str, w, h) {
 			const ctx = $.canvas.getContext('2d');
 			const r = $._renderer;
+			let font = r._textFont;
+			if (typeof font != 'string') {
+				font = font.font.names.fullName;
+			}
 			return (
 				str.slice(0, 200) +
-				r._textStyle +
+				(r._textStyle || 'normal') +
 				r._textSize +
-				r._textFont +
+				font +
 				(r._doFill ? ctx.fillStyle : '') +
 				'_' +
 				(r._doStroke && r._strokeSet ? ctx.lineWidth + ctx.strokeStyle + '_' : '') +
@@ -8371,7 +8378,12 @@ main {
 			}
 			let tg = $.createGraphics.call($, 1, 1);
 			c = tg.canvas.getContext('2d');
-			c.font = `${r._textStyle} ${r._textSize}px ${r._textFont}`;
+			let font = r._textFont;
+			if (typeof font != 'string') {
+				font = font.font.names.fullName;
+				font = font[Object.keys(font)[0]];
+			}
+			c.font = `${r._textStyle || ''} ${r._textSize}px ${font}`;
 			let lines = str.split('\n');
 			cX = 0;
 			cY = r._textLeading * lines.length;
