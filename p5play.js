@@ -8320,6 +8320,7 @@ main {
 			let font = r._textFont;
 			if (typeof font != 'string') {
 				font = font.font.names.fullName;
+				font = font[Object.keys(font)[0]];
 			}
 			return (
 				str.slice(0, 200) +
@@ -8377,13 +8378,10 @@ main {
 				return;
 			}
 			let tg = $.createGraphics.call($, 1, 1);
+			tg.textFont(r._textFont);
+			if (r._textStyle) tg.textStyle(r._textStyle);
+			tg.textSize(r._textSize);
 			c = tg.canvas.getContext('2d');
-			let font = r._textFont;
-			if (typeof font != 'string') {
-				font = font.font.names.fullName;
-				font = font[Object.keys(font)[0]];
-			}
-			c.font = `${r._textStyle || ''} ${r._textSize}px ${font}`;
 			let lines = str.split('\n');
 			cX = 0;
 			cY = r._textLeading * lines.length;
