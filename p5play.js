@@ -245,7 +245,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			// first arg is a SpriteAnimation, animation name, or p5.Image
 			if (
 				args[0] !== undefined &&
-				isNaN(args[0]) &&
 				(typeof args[0] == 'string' || args[0] instanceof this.p.SpriteAnimation || args[0] instanceof p5.Image)
 			) {
 				// shift
@@ -4212,6 +4211,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @return {SpriteAnimation} A copy of the animation.
 		 */
 		clone() {
+			if (!this.length) {
+				console.error(
+					`The animation named "${this.name}" must be loaded before it can be properly copied. Sprites need their own copy of a group's animation. Try loading the animation in the preload function and creating new group sprites in the setup function.`
+				);
+			}
 			let ani = new this.p.SpriteAnimation();
 			ani.spriteSheet = this.spriteSheet;
 			for (let i = 0; i < this.length; i++) {
