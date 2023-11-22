@@ -5189,14 +5189,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!target) {
 				throw new FriendlyError('Group.collide', 2);
 			}
-			if (target._isSprite) {
-				if (cb && !FriendlyError.warned0) {
-					console.warn(
-						'Deprecated use of a group.collide function with a sprite as input. Use sprite.collides, sprite.colliding, or sprite.collided instead.'
-					);
-					FriendlyError.warned0 = true;
-				}
-			} else if (!target._isGroup) {
+			if (!target._isGroup && !target._isSprite) {
 				throw new FriendlyError('Group.collide', 0, [target]);
 			}
 		}
@@ -5334,14 +5327,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!target) {
 				throw new FriendlyError('Group.overlap', 2);
 			}
-			if (target._isSprite) {
-				if (cb && !FriendlyError.warned1) {
-					console.warn(
-						'Deprecated use of a group.overlap function with a sprite as input. Use sprite.overlaps, sprite.overlapping, or sprite.overlapped instead.'
-					);
-					FriendlyError.warned1 = true;
-				}
-			} else if (!target._isGroup) {
+			if (!target._isGroup && !target._isSprite) {
 				throw new FriendlyError('Group.overlap', 0, [target]);
 			}
 		}
