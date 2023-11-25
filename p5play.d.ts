@@ -496,22 +496,30 @@ class Sprite {
     /**
      * Displays the sprite.
      *
-     * This function is called automatically at
-     * the end of each p5.js draw function call but it can also be run
-     * separately to customize the order sprites are drawn in relation
+     * This function is called automatically at the end of each
+     * p5.js draw function call but it can also be run
+     * by users to customize the order sprites are drawn in relation
      * to other stuff drawn to the p5.js canvas. Also see the sprite.layer
      * property.
      *
      * A sprite's draw function can be overridden with a
-     * custom draw function, in which the center of the sprite is
-     * at (0, 0).
+     * custom draw function, inside this function (0, 0) is the center of
+     * the sprite.
+     *
+     * Using this function actually calls the sprite's internal `_display`
+     * function, which sets up the canvas for drawing the sprite before
+     * calling the sprite's `_draw` function. See the example below for how to
+     * run the sprite's default `_draw` function inside your custom `draw` function.
+     *
      * @type {Function}
      * @example
-     * sprite.draw = function() {
-     *   // an oval
-     *   ellipse(0,0,20,10);
-     * }
+     * let defaultDraw = sprite._draw;
      *
+     * sprite.draw = function() {
+     *   // tint
+     *   tint(255, 127);
+     *   defaultDraw();
+     * }
      */
     get draw(): Function;
     set dynamic(arg: boolean);
@@ -1325,7 +1333,7 @@ class SpriteAnimation extends Array<p5.Image> {
 }
 /**
  * This SpriteAnimations class serves the same role that Group does
- * for Sprites. This class is used interally to create `sprite.anis`
+ * for Sprites. This class is used internally to create `sprite.anis`
  * and `group.anis`. It's not intended to be used directly by p5play users.
  *
  * In instance objects of this class, the keys are animation names,
@@ -1994,6 +2002,7 @@ class Camera {
      * @type {Object}
      */
     get position(): any;
+    moveTo(x: any, y: any, speed: any): Promise<boolean>;
     set zoom(arg: number);
     /**
      * Camera zoom.

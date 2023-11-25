@@ -353,6 +353,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._visible = true;
 			this._pixelPerfect = false;
 			this._aniChangeCount = 0;
+			this._draw = () => this.__draw();
 
 			this._hasOverlap = {};
 			this._collisions = {};
@@ -1649,22 +1650,30 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Displays the sprite.
 		 *
-		 * This function is called automatically at
-		 * the end of each p5.js draw function call but it can also be run
-		 * separately to customize the order sprites are drawn in relation
+		 * This function is called automatically at the end of each
+		 * p5.js draw function call but it can also be run
+		 * by users to customize the order sprites are drawn in relation
 		 * to other stuff drawn to the p5.js canvas. Also see the sprite.layer
 		 * property.
 		 *
 		 * A sprite's draw function can be overridden with a
-		 * custom draw function, in which the center of the sprite is
-		 * at (0, 0).
+		 * custom draw function, inside this function (0, 0) is the center of
+		 * the sprite.
+		 *
+		 * Using this function actually calls the sprite's internal `_display`
+		 * function, which sets up the canvas for drawing the sprite before
+		 * calling the sprite's `_draw` function. See the example below for how to
+		 * run the sprite's default `_draw` function inside your custom `draw` function.
+		 *
 		 * @type {Function}
 		 * @example
-		 * sprite.draw = function() {
-		 *   // an oval
-		 *   ellipse(0,0,20,10);
-		 * }
+		 * let defaultDraw = sprite._draw;
 		 *
+		 * sprite.draw = function() {
+		 *   // tint
+		 *   tint(255, 127);
+		 *   defaultDraw();
+		 * }
 		 */
 		get draw() {
 			return this._display;
@@ -1980,7 +1989,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set rotationLock(val) {
 			if (!this.body) return;
 			if (this.watch) this.mod[27] = true;
+			let mass = this.mass;
 			this.body.setFixedRotation(val);
+			this.mass = mass;
 		}
 		/**
 		 * The speed of the sprite's rotation.
@@ -2578,7 +2589,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/*
 		 * Default draw
 		 */
-		_draw() {
+		__draw() {
 			if (this._strokeWeight !== undefined) {
 				this.p.strokeWeight(this._strokeWeight);
 			}
@@ -2595,7 +2606,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 
 				if (this.__collider != 3) {
-					if (this._strokeWeight !== 0) {
+					if (!this.debug && this._strokeWeight !== 0) {
 						if (this.__shape == 2) this.p.stroke(this.stroke || this.color);
 						else if (this._stroke) this.p.stroke(this._stroke);
 					}
@@ -3759,6 +3770,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		'kinematic',
 		'resetAnimationsOnChange',
 		'speed',
+		'spriteSheet',
 		'static',
 		'width'
 	]);
@@ -3859,11 +3871,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @example
 			 * ani.offset.x = 16;
 			 */
-			this.offset = { x: owner.anis.offset.x || 0, y: owner.anis.offset.y || 0 };
+			this.offset = { x: owner.anis.offset.x ?? 0, y: owner.anis.offset.y ?? 0 };
 
 			this._frameDelay = owner.anis.frameDelay || 4;
 
-			this.demoMode = owner.anis.demoMode || false;
+			this.demoMode = owner.anis.demoMode ?? false;
 
 			/**
 			 * True if the animation is currently playing.
@@ -3884,8 +3896,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @type {Boolean}
 			 * @default true
 			 */
-			this.looping = owner.anis.looping;
-			this.looping ??= true;
+			this.looping = owner.anis.looping ?? true;
 
 			/**
 			 * Ends the loop on frame 0 instead of the last frame.
@@ -3895,7 +3906,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @type {Boolean}
 			 * @default false
 			 */
-			this.endOnFirstFrame = false;
+			this.endOnFirstFrame = owner.anis.endOnFirstFrame ?? false;
 
 			/**
 			 * True if frame changed during the last draw cycle
@@ -3906,7 +3917,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.onComplete = this.onChange = null;
 			this._onComplete = this._onChange = null;
 
-			this.rotation = owner.anis.rotation || 0;
+			this.rotation = owner.anis.rotation ?? 0;
 			this._scale = new Scale();
 
 			if (args.length == 0 || typeof args[0] == 'number') return;
@@ -3998,7 +4009,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			} // end sequence mode
 
-			// SpriteSheet mode
+			// spriteSheet mode
 			else if (typeof args[args.length - 1] != 'string' && !(args[args.length - 1] instanceof p5.Image)) {
 				let sheet = owner.spriteSheet;
 				let atlas;
@@ -4021,8 +4032,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					let url;
 					if (typeof sheet == 'string') url = sheet;
 					else url = sheet.url;
+					pInst._incrementPreload();
 					this.spriteSheet = this.p.loadImage(url, () => {
 						_generateSheetFrames();
+						pInst._decrementPreload();
 					});
 				}
 
@@ -4100,8 +4113,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						// sprites will be given default dimensions, but groups
 						// are not, _dimensionsUndef is only for sprites
 						if (!owner._dimensionsUndef && owner.w && owner.h) {
-							w = owner.w;
-							h = owner.h;
+							w = owner.w * tileSize;
+							h = owner.h * tileSize;
 						} else if (tileSize) {
 							w = h = tileSize;
 						} else if (frameCount) {
@@ -4148,6 +4161,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					else this.push(this.p.loadImage(args[i]));
 				}
 			}
+			// single frame animations don't need to play
+			if (this.length == 1) this.playing = false;
 		}
 
 		get frame() {
@@ -4158,6 +4173,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				throw new FriendlyError('SpriteAnimation.frame', [val, this.length]);
 			}
 			this._frame = val;
+			this._cycles = 0;
 		}
 
 		/**
@@ -4292,17 +4308,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		update() {
+			if (!this.playing) return;
+
 			this._cycles++;
-			let previousFrame = this._frame;
-			this.frameChanged = false;
 
-			//go to frame
-			if (this.length === 1) {
-				this.playing = false;
-				this._frame = 0;
-			}
-
-			if (this.playing && this._cycles % this.frameDelay === 0) {
+			if (this._cycles % this.frameDelay == 0) {
+				this._cycles = 0;
 				this.frameChanged = true;
 
 				if ((this.targetFrame == -1 && this._frame == this.lastFrame) || this._frame == this.targetFrame) {
@@ -4333,6 +4344,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					//if next frame is too high
 					if (this._frame < this.lastFrame) this._frame++;
 				}
+			} else {
+				this.frameChanged = false;
 			}
 		}
 
@@ -4343,7 +4356,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		play(frame) {
 			this.playing = true;
-			if (frame !== undefined) this._frame = frame;
+			if (frame !== undefined && this._frame != frame) {
+				this._frame = frame;
+				this._cycles = 0;
+			}
 			this.targetFrame = -1;
 			return new Promise((resolve) => {
 				this._onComplete = () => {
@@ -4405,6 +4421,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this.targetFrame = -1;
 			this.playing = false;
+			this._cycles = 0;
 		}
 
 		/**
@@ -4416,6 +4433,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			this.targetFrame = -1;
 			this.playing = false;
+			this._cycles = 0;
 		}
 
 		/**
@@ -4432,6 +4450,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			// targetFrame gets used by the update() method to decide what frame to
 			// select next.  When it's not being used it gets set to -1.
 			this.targetFrame = toFrame;
+			this._cycles = 0;
 
 			if (this.targetFrame !== this._frame) {
 				this.playing = true;
@@ -4524,11 +4543,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	this.SpriteAnimation.props = ['frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale', 'demoMode'];
+	this.SpriteAnimation.props = [
+		'demoMode',
+		'endOnFirstFrame',
+		'frameDelay',
+		'frameSize',
+		'looping',
+		'offset',
+		'rotation',
+		'scale'
+	];
 
 	/**
 	 * This SpriteAnimations class serves the same role that Group does
-	 * for Sprites. This class is used interally to create `sprite.anis`
+	 * for Sprites. This class is used internally to create `sprite.anis`
 	 * and `group.anis`. It's not intended to be used directly by p5play users.
 	 *
 	 * In instance objects of this class, the keys are animation names,
@@ -4960,8 +4988,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				};
 			}
 
-			let props = [...this.p.Sprite.propsAll, 'spriteSheet'];
-			for (let prop of props) {
+			for (let prop of this.p.Sprite.propsAll) {
 				if (prop == 'ani' || prop == 'velocity') continue;
 
 				Object.defineProperty(this, prop, {
@@ -6477,6 +6504,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._zoomIdx = -1;
 
 			this._zoom = 1;
+
+			this._destIdx = 0;
 		}
 
 		/**
@@ -6548,6 +6577,42 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this.__pos.rounded.y = Math.round(y);
 			}
 			this._calcBoundsY(val);
+		}
+
+		moveTo(x, y, speed) {
+			if (x === undefined) return;
+			if (isNaN(x)) {
+				speed = y;
+				y = x.y;
+				x = x.x;
+			}
+			speed ??= 1;
+			if (speed <= 0) {
+				console.warn('camera.moveTo: speed should be a positive number');
+				return Promise.resolve(false);
+			}
+			let a = y - this.y;
+			let b = x - this.x;
+			let c = Math.sqrt(a * a + b * b);
+			let percent = speed / c;
+			let velX = b * percent;
+			let velY = a * percent;
+
+			this._destIdx++;
+			let destIdx = this._destIdx;
+			let steps = Math.ceil(c / speed);
+
+			return (async () => {
+				for (let i = 0; i < steps; i++) {
+					this.x += velX;
+					this.y += velY;
+					await this.p.delay();
+					if (destIdx != this._destIdx) return false;
+				}
+				this.x = x;
+				this.y = y;
+				return true;
+			})();
 		}
 
 		/**
