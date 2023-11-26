@@ -8459,8 +8459,7 @@ main {
 			let f = c.fillStyle;
 			if (!r._fillSet) c.fillStyle = 'black';
 			for (let i = 0; i < lines.length; i++) {
-				if (r._doStroke && r._strokeSet) c.strokeText(lines[i], cX, cY);
-				if (r._doFill) c.fillText(lines[i], cX, cY);
+				tg.text(lines[i], cX, cY);
 				cY += r._textLeading;
 				if (cY > h) break;
 			}
