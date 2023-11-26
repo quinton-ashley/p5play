@@ -572,7 +572,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				set(val) {
 					if (val == this._x) return;
 					if (_this.watch) _this.mod[28] = true;
-					let scalarX = val / this._x;
+					let scalarX = Math.abs(val / this._x);
 					_this._w *= scalarX;
 					_this._hw *= scalarX;
 					_this._resizeColliders({ x: scalarX, y: 1 });
@@ -588,7 +588,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				set(val) {
 					if (val == this._y) return;
 					if (_this.watch) _this.mod[28] = true;
-					let scalarY = val / this._y;
+					let scalarY = Math.abs(val / this._y);
 					if (_this._h) {
 						this._h *= scalarY;
 						this._hh *= scalarY;
@@ -2023,7 +2023,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._scale;
 		}
 		set scale(val) {
-			if (val <= 0) val = 0.01;
+			if (val == 0) val = 0.01;
 			if (typeof val === 'number') {
 				val = { x: val, y: val };
 			} else {
@@ -2035,8 +2035,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.watch) this.mod[28] = true;
 
 			let scalars = {
-				x: val.x / this._scale._x,
-				y: val.y / this._scale._y
+				x: Math.abs(val.x / this._scale._x),
+				y: Math.abs(val.y / this._scale._y)
 			};
 
 			this._w *= scalars.x;
@@ -2966,15 +2966,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			direction ??= this.direction;
 
-			let x = this.x + this.p.cos(direction) * distance;
-			let y = this.y + this.p.sin(direction) * distance;
+			let x = null;
+			let y = null;
+			if (direction != 90 && direction != 270) {
+				x = this.x + this.p.cos(direction) * distance;
+			}
+			if (direction != 0 && direction != 180) {
+				y = this.y + this.p.sin(direction) * distance;
+			}
 			if (directionNamed && this.tileSize != 1) {
 				// round to nearest 0.5
-				x = Math.round(x * 2) / 2;
-				y = Math.round(y * 2) / 2;
+				if (x) x = Math.round(x * 2) / 2;
+				if (y) y = Math.round(y * 2) / 2;
 			} else if (direction % 45 == 0) {
-				x = fixRound(x);
-				y = fixRound(y);
+				if (x) x = fixRound(x);
+				if (y) y = fixRound(y);
 			}
 			return this.moveTo(x, y, speed);
 		}
@@ -2989,7 +2995,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * or to false if the sprite will not reach its destination
 		 */
 		moveTo(x, y, speed) {
-			if (typeof x != 'number') {
+			if (typeof x != 'number' && x) {
 				let obj = x;
 				if (obj == this.p.mouse && !this.p.mouse.active) return;
 				if (!obj || obj.x === undefined || obj.y === undefined) {
@@ -3003,12 +3009,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._dest.y = this.y;
 
 			if (x == this.x) x = false;
-			else {
+			else if (x || x === 0) {
 				this._dest.x = x;
 				x = true;
 			}
 			if (y == this.y) y = false;
-			else {
+			else if (y || y === 0) {
 				this._dest.y = y;
 				y = true;
 			}
@@ -3030,8 +3036,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let percent = speed / c;
 
-			this.vel.x = b * percent;
-			this.vel.y = a * percent;
+			if (x) this.vel.x = b * percent;
+			if (y) this.vel.y = a * percent;
 
 			// direction destination
 			let destD = this.direction;
@@ -3039,13 +3045,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let destDMin = destD - 0.1;
 			let destDMax = destD + 0.1;
 
+			let velThresh = this.p.world.velocityThreshold;
+
 			// proximity margin of error
-			let margin = speed + 0.01;
+			let margin = speed + velThresh;
+			velThresh = Math.max(velThresh, margin * 0.25);
+
+			// if x or y is null, we only care that the sprite
+			// reaches the destination along one axis
+			let checkDir = x && y;
 
 			let destIdx = this._destIdx;
-
-			let velThresh = Math.max(this.p.world.velocityThreshold, margin * 0.25) / this.tileSize;
-
 			return (async () => {
 				let distX = margin + margin;
 				let distY = margin + margin;
@@ -3057,10 +3067,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					// its speed has become slower than the world velocityThreshold
 					// or if its direction has changed significantly enough so that
 					// it will not reach its destination
-					let dir = this.direction;
 					if (
-						dir <= destDMin ||
-						dir >= destDMax ||
+						(checkDir && (this.direction <= destDMin || this.direction >= destDMax)) ||
 						(Math.abs(this.vel.x) <= velThresh && Math.abs(this.vel.y) <= velThresh)
 					) {
 						return false;
