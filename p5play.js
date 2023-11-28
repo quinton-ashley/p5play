@@ -1359,7 +1359,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			} else {
 				this.removeColliders();
 				if (this.fixture?.m_isSensor) this.body.m_gravityScale = 0;
-				else this.p.world.destroyBody(this.body);
+				else {
+					this.p.world.destroyBody(this.body);
+					this.body = null;
+				}
 			}
 		}
 
