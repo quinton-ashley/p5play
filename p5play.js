@@ -8094,6 +8094,9 @@ main {
 			style += `
 #${this.canvas.id} {
 	image-rendering: pixelated;
+	font-smooth: never;
+	-webkit-font-smoothing: none;
+	-moz-osx-font-smoothing: none;
 	width: ${w}px!important;
 	height: ${h}px!important;
 }`;
@@ -8432,11 +8435,12 @@ main {
 			str = str.toString();
 			const r = $._renderer;
 			if (!r._doFill && !r._doStroke) return;
-			let c, ti, k, cX, cY, _ascent, _descent;
 			const ctx = $.canvas.getContext('2d');
 			let t = ctx.getTransform();
 			let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
 			if (!useCache) return _text.call($, str, x, y, w, h);
+
+			let c, ti, k, cX, cY, _ascent, _descent;
 			k = _genTextImageKey(str, w, h);
 			ti = $._tic.get(k);
 			if (ti) {
