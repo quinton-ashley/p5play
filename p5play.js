@@ -1294,6 +1294,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * The center of mass of the sprite's physics body.
 		 * @type {p5.Vector}
+		 * @readonly
 		 */
 		get centerOfMass() {
 			let center = this.body.getWorldCenter();
@@ -4048,33 +4049,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						_generateSheetFrames();
 						pInst._decrementPreload();
 					});
+					if (typeof sheet == 'string') {
+						owner.spriteSheet = this.spriteSheet;
+					}
 				}
 
 				function _generateSheetFrames() {
-					if (Array.isArray(atlas) || Array.isArray(atlas.frames)) {
-						if (typeof atlas[0] == 'number') {
-							if (atlas.length == 4) {
-								atlas = { pos: atlas.slice(0, 2), size: atlas.slice(2) };
-							} else {
-								atlas = { pos: atlas };
-							}
+					if (Array.isArray(atlas)) {
+						if (atlas.length == 4) {
+							atlas = { pos: atlas.slice(0, 2), size: atlas.slice(2) };
 						} else {
-							let frames = atlas;
-							if (Array.isArray(atlas.frames)) {
-								frames = atlas.frames;
-								delete atlas.frames;
-								for (let i = 0; i < frames.length; i++) {
-									frames[i] = {
-										pos: frames[i]
-									};
-									Object.assign(frames[i], atlas);
-								}
-							}
-							for (let frame of frames) {
-								atlas = frame;
-								_generateSheetFrames();
-							}
-							return;
+							atlas = { pos: atlas };
 						}
 					}
 
@@ -4101,7 +4086,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (delay) _this.frameDelay = delay;
 					if (frameDelay) _this.frameDelay = frameDelay;
 					if (rotation) _this.rotation = rotation;
-					frameCount ??= frames || 1;
+					if (frames && Array.isArray(frames)) {
+						frameCount = frames.length;
+					} else frameCount ??= frames || 1;
 					w ??= width || owner.anis.w;
 					h ??= height || owner.anis.h;
 					x ??= col || 0;
@@ -4126,7 +4113,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						if (!owner._dimensionsUndef && owner.w && owner.h) {
 							w = owner.w * tileSize;
 							h = owner.h * tileSize;
-						} else if (tileSize) {
+						} else if (tileSize != 1) {
 							w = h = tileSize;
 						} else if (frameCount) {
 							w = _this.spriteSheet.width / frameCount;
@@ -4143,24 +4130,44 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						h *= tileSize;
 					}
 
-					// get the real dimensions and position of the frame
-					// in the sheet
-					if (tileSize != 1) {
-						x *= tileSize;
-						y *= tileSize;
-					} else if (line !== undefined || row !== undefined || col !== undefined) {
-						x *= w;
-						y *= h;
-					}
-
 					// add all the frames in the animation to the frames array
-					for (let i = 0; i < frameCount; i++) {
-						_this.push({ x, y, w, h });
-						x += w;
-						if (x >= _this.spriteSheet.width) {
-							x = 0;
-							y += h;
-							if (y >= _this.spriteSheet.height) y = 0;
+					if (!Array.isArray(frames)) {
+						if (tileSize != 1 || pos || line !== undefined || row !== undefined || col !== undefined) {
+							x *= w;
+							y *= h;
+						}
+						for (let i = 0; i < frameCount; i++) {
+							_this.push({ x, y, w, h });
+							x += w;
+							if (x >= _this.spriteSheet.width) {
+								x = 0;
+								y += h;
+								if (y >= _this.spriteSheet.height) y = 0;
+							}
+						}
+					} else {
+						let sw = Math.round(_this.spriteSheet.width / w);
+						for (let frame of frames) {
+							if (typeof frame == 'number') {
+								y = Math.floor(frame / sw) * h;
+								x = (frame % sw) * w;
+								_this.push({ x, y, w, h });
+							} else {
+								let f;
+								if (frame.length == 2) {
+									x = frame[0] * w;
+									y = frame[1] * h;
+									f = { x, y, w, h };
+								} else {
+									f = {
+										x: frame[0],
+										y: frame[1],
+										w: frame[2],
+										h: frame[3]
+									};
+								}
+								_this.push(f);
+							}
 						}
 					}
 				}
@@ -8096,7 +8103,6 @@ main {
 	image-rendering: pixelated;
 	font-smooth: never;
 	-webkit-font-smoothing: none;
-	-moz-osx-font-smoothing: none;
 	width: ${w}px!important;
 	height: ${h}px!important;
 }`;
@@ -8108,19 +8114,26 @@ main {
 		if (pixelated) {
 			pInst.pixelDensity(1);
 			pInst.noSmooth();
+			pInst.textFont('monospace');
+			this.canvas.getContext('2d').imageSmoothingEnabled = false;
 		}
 
 		let idx = navigator.userAgent.indexOf('iPhone OS');
 		if (idx > -1) {
 			let version = navigator.userAgent.substring(idx + 10, idx + 12);
-			this.p5play.version = version;
-			if (version < 16) {
-				pInst.pixelDensity(1);
-			}
+			if (version < 16) pInst.pixelDensity(1);
 			this.p5play.os.platform = 'iOS';
 			this.p5play.os.version = version;
-		} else if (navigator.userAgentData !== undefined) {
-			this.p5play.os.platform = navigator.userAgentData.platform;
+		} else {
+			// for Chromium based browsers
+			let pl = navigator.userAgentData?.platform;
+			if (!pl && navigator.platform) {
+				pl = navigator.platform.slice(3);
+				if (pl == 'Mac') pl = 'macOS';
+				else if (pl == 'Win') pl = 'Windows';
+				else if (pl == 'Lin') pl = 'Linux';
+			}
+			this.p5play.os.platform = pl;
 		}
 
 		return can;
