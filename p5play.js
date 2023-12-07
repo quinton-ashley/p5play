@@ -8461,9 +8461,9 @@ main {
 				return;
 			}
 			let tg = $.createGraphics.call($, 1, 1);
-			tg.textFont(r._textFont);
-			if (r._textStyle) tg.textStyle(r._textStyle);
-			tg.textSize(r._textSize);
+			tg.textFont($.textFont());
+			if ($.textStyle()) tg.textStyle($.textStyle());
+			tg.textSize($.textSize());
 			c = tg.canvas.getContext('2d');
 			let lines = str.split('\n');
 			cX = 0;
@@ -8473,17 +8473,16 @@ main {
 			_descent = m.fontBoundingBoxDescent;
 			h ??= cY + _descent;
 			tg.resizeCanvas(Math.ceil(tg.textWidth(str)), Math.ceil(h));
-			c.fillStyle = ctx.fillStyle;
-			c.strokeStyle = ctx.strokeStyle;
-			c.lineWidth = ctx.lineWidth;
-			let f = c.fillStyle;
-			if (!r._fillSet) c.fillStyle = 'black';
+			tg.fill(ctx.fillStyle);
+			if (r._doStroke) {
+				tg.stroke(ctx.strokeStyle);
+				tg.strokeWeight(ctx.lineWidth);
+			} else tg.noStroke();
 			for (let i = 0; i < lines.length; i++) {
 				tg.text(lines[i], cX, cY);
 				cY += r._textLeading;
 				if (cY > h) break;
 			}
-			if (!r._fillSet) c.fillStyle = f;
 			ti = tg.get();
 			let pd = $.pixelDensity();
 			ti.width /= pd;
