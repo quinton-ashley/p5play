@@ -234,13 +234,12 @@ class Sprite {
      * @default 0
      */
     get drag(): number;
-    set debug(arg: boolean);
     /**
-     * If true, an outline of the sprite's collider will be drawn.
-     * @type {Boolean}
-     * @default false
+     * Text displayed at the center of the sprite.
+     * @type {String}
+     * @default undefined
      */
-    get debug(): boolean;
+    text: string;
     /**
      * Adds a collider (fixture) to the sprite's physics body.
      *
@@ -374,7 +373,7 @@ class Sprite {
      */
     get bounciness(): number;
     /**
-     * The center of mass of the sprite's physics body.
+     * The center of mass of the sprite's physics body. Read only.
      * @type {p5.Vector}
      */
     get centerOfMass(): p5.Vector;
@@ -477,6 +476,13 @@ class Sprite {
      * sprite.applyForce(amount);
      */
     get bearing(): number;
+    set debug(arg: boolean);
+    /**
+     * If true, an outline of the sprite's collider will be drawn.
+     * @type {Boolean}
+     * @default false
+     */
+    get debug(): boolean;
     set density(arg: number);
     /**
      * The density of the sprite's physics body.
@@ -2430,6 +2436,7 @@ function stroke(...args: any[]): void;
 function loadImage(...args: any[]): any;
 function loadImg(...args: any[]): any;
 function image(...args: any[]): void;
+let enableTextCache: boolean;
 /**
  * Enables or disables text caching.
  * @param {Boolean} b

@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.17
+ * @version 3.18
  * @author quinton-ashley
  * @license gpl-v3-only
  */
@@ -32,7 +32,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_14');
+			gtag('event', 'p5play_v3_18');
 		};
 	}
 
@@ -662,17 +662,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._destIdx = 0;
 			this.drag = 0;
 
+			this._debug = false;
+
 			/**
-			 * When the sprite.debug property is set to true, the collider
-			 * shapes will be drawn as bright green outlines with crosshairs
-			 * at the center of the sprite.
-			 *
-			 * When the sprite.debug property is set to 'colliders', only the
-			 * collider shapes will be drawn.
-			 * @type {boolean|string}
-			 * @default false
+			 * Text displayed at the center of the sprite.
+			 * @type {String}
+			 * @default undefined
 			 */
-			this.debug = false;
+			this.text;
 
 			if (!group._isAllSpritesGroup) this.p.allSprites.push(this);
 			group.push(this);
@@ -1292,9 +1289,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The center of mass of the sprite's physics body.
+		 * The center of mass of the sprite's physics body. Read only.
 		 * @type {p5.Vector}
-		 * @readonly
 		 */
 		get centerOfMass() {
 			let center = this.body.getWorldCenter();
@@ -8343,9 +8339,15 @@ main {
 		_image.call(pInst, ...arguments);
 	};
 
-	// if the user isn't using q5.js
-	// add text caching to p5.js
+	let enableTextCache = false;
 	if (typeof this._textCache === 'undefined') {
+		// if the user isn't using q5.js
+		// add text caching to p5.js, only if the user is using p5.js v1.9.0 or later
+		try {
+			enableTextCache = Number(p5.VERSION.replaceAll('.', '')) >= 190;
+		} catch (e) {}
+	}
+	if (enableTextCache) {
 		const $ = this;
 		$._textCache = true;
 		$._TimedCache = class extends Map {
@@ -8484,9 +8486,6 @@ main {
 				if (cY > h) break;
 			}
 			ti = tg.get();
-			let pd = $.pixelDensity();
-			ti.width /= pd;
-			ti.height /= pd;
 			ti._ascent = _ascent;
 			ti._descent = _descent;
 			$._tic.set(k, ti);
