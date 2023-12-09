@@ -3046,10 +3046,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let destDMax = destD + 0.1;
 
 			let velThresh = this.p.world.velocityThreshold;
+			velThresh = Math.min(velThresh, speed * 0.1);
 
 			// proximity margin of error
-			let margin = speed + velThresh;
-			velThresh = Math.max(velThresh, margin * 0.25);
+			let margin = speed * 0.51;
 
 			// if x or y is null, we only care that the sprite
 			// reaches the destination along one axis
@@ -3057,8 +3057,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let destIdx = this._destIdx;
 			return (async () => {
-				let distX = margin + margin;
-				let distY = margin + margin;
+				let distX, distY;
 				do {
 					if (destIdx != this._destIdx) return false;
 					await pInst.delay();
@@ -3075,12 +3074,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 
 					// check if the sprite has reached its destination
-					distX = Math.abs(this.x - this._dest.x);
-					distY = Math.abs(this.y - this._dest.y);
-				} while ((x && distX > margin) || (y && distY > margin));
+					if (x) {
+						if (this.vel.x > 0) distX = this._dest.x - this.x;
+						else distX = this.x - this._dest.x;
+						if (distX < margin) break;
+					}
+					if (y) {
+						if (this.vel.y > 0) distY = this._dest.y - this.y;
+						else distY = this.y - this._dest.y;
+						if (distY < margin) break;
+					}
+				} while (true);
 				// stop moving the sprite, snap to destination
-				if (distX < margin) this.x = this._dest.x;
-				if (distY < margin) this.y = this._dest.y;
+				this.x = this._dest.x;
+				this.y = this._dest.y;
 				this.vel.x = 0;
 				this.vel.y = 0;
 				return true;
@@ -7843,7 +7850,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 */
 	this.delay = (millisecond) => {
 		if (!millisecond) {
-			return new Promise(requestAnimationFrame);
+			return new Promise((resolve) => {
+				addEventListener('p5play_post_draw', resolve);
+			});
 		} else {
 			// else it wraps setTimeout in a Promise
 			return new Promise((resolve) => {
@@ -9912,5 +9921,6 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.p5play._postDrawFrameTime = performance.now();
 		this.p5play._fps = Math.round(1000 / (this.p5play._postDrawFrameTime - this.p5play._preDrawFrameTime)) || 1;
 	}
+	dispatchEvent(new Event('p5play_post_draw'));
 	this.p5play._inPostDraw = false;
 });
