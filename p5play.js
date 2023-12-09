@@ -6239,6 +6239,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let s of sprites) s.___step();
 			for (let g of groups) g.___step();
 
+			dispatchEvent(new Event('p5play_world_step'));
 			if (this.autoStep) this.autoStep = null;
 		}
 
@@ -7849,7 +7850,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.delay = (millisecond) => {
 		if (!millisecond) {
 			return new Promise((resolve) => {
-				addEventListener('p5play_post_draw', resolve);
+				addEventListener('p5play_world_step', resolve);
 			});
 		} else {
 			// else it wraps setTimeout in a Promise
@@ -9919,6 +9920,5 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		this.p5play._postDrawFrameTime = performance.now();
 		this.p5play._fps = Math.round(1000 / (this.p5play._postDrawFrameTime - this.p5play._preDrawFrameTime)) || 1;
 	}
-	dispatchEvent(new Event('p5play_post_draw'));
 	this.p5play._inPostDraw = false;
 });
