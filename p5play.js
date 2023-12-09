@@ -7835,9 +7835,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	};
 
 	/**
-	 * Delay code execution in an async function for the specified time
-	 * or if no input parameter is given, it waits for the next possible
-	 * animation frame.
+	 * Delay code execution in an async function for the specified time.
+	 *
+	 * If no input is given, it waits until a new animation frame is ready
+	 * to be drawn using the `window.requestAnimationFrame` function.
 	 *
 	 * @param {Number} millisecond
 	 * @returns {Promise} A Promise that fulfills after the specified time.
@@ -7847,25 +7848,28 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *   await delay(3000);
 	 * }
 	 */
-	this.delay = (millisecond) => {
-		if (!millisecond) {
-			return new Promise((resolve) => {
-				addEventListener('p5play_world_step', resolve);
-			});
-		} else {
-			// else it wraps setTimeout in a Promise
-			return new Promise((resolve) => {
-				setTimeout(resolve, millisecond);
-			});
-		}
+	this.delay = (milliseconds) => {
+		if (!milliseconds) return new Promise(requestAnimationFrame);
+		// else it wraps setTimeout in a Promise
+		return new Promise((resolve) => {
+			setTimeout(resolve, milliseconds);
+		});
 	};
 
 	/**
-	 * Alternative to `delay`, which is preferred, but this name may be more
+	 * Alternative to `delay`, this name may be more
 	 * familiar to Processing Java users.
+	 *
+	 * If no input is given, it waits until after a
+	 * world step is completed.
 	 */
-	this.sleep = (millisecond) => {
-		return this.delay(millisecond);
+	this.sleep = (milliseconds) => {
+		if (!milliseconds) {
+			return new Promise((resolve) => {
+				addEventListener('p5play_world_step', resolve);
+			});
+		}
+		return this.delay(milliseconds);
 	};
 
 	/**
