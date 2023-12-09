@@ -3077,14 +3077,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (x) {
 						if (this.vel.x > 0) distX = this._dest.x - this.x;
 						else distX = this.x - this._dest.x;
-						if (distX < margin) break;
 					}
 					if (y) {
 						if (this.vel.y > 0) distY = this._dest.y - this.y;
 						else distY = this.y - this._dest.y;
-						if (distY < margin) break;
 					}
-				} while (true);
+				} while ((x && distX > margin) || (y && distY > margin));
 				// stop moving the sprite, snap to destination
 				this.x = this._dest.x;
 				this.y = this._dest.y;
