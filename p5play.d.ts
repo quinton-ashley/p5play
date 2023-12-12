@@ -1682,12 +1682,13 @@ class Group extends Array<Sprite> {
      * @type {p5.Image}
      */
     get image(): p5.Image;
+    set amount(arg: number);
     /**
      * Depending on the value that the amount property is set to, the group will
      * either add or remove sprites.
      * @type {Number}
      */
-    set amount(arg: any);
+    get amount(): number;
     set velocity(arg: p5.Vector);
     /**
      * The sprite's velocity vector {x, y}
@@ -2369,8 +2370,8 @@ function createGroup(...args: any[]): Group;
 function loadAnimation(...args: any[]): SpriteAnimation;
 function loadAni(...args: any[]): SpriteAnimation;
 function animation(ani: SpriteAnimation, x: number, y: number, r: number, sX: number, sY: number): void;
-function delay(millisecond: number): Promise<any>;
-function sleep(millisecond: any): Promise<any>;
+function delay(milliseconds: any): Promise<any>;
+function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
 let userDisabledP5Errors: boolean;
 var canvas: any;
