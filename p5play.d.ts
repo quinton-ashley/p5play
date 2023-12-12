@@ -926,7 +926,15 @@ class Sprite {
      */
     moveAway(x: number, y?: number, repel?: number, ...args: any[]): void;
     /**
-     * Move the sprite a certain distance from its current position.
+     * Move the sprite a distance from its current position.
+     *
+     * You can specify the `direction` and `speed` of movement as
+     * parameters or set these properties before using this function.
+     *
+     * When `tileSize` is not 1, distance is divisible by 0.5,
+     * and a direction name or cardinal direction angle is given,
+     * the distance the sprite moves will be rounded up to the
+     * nearest half tile.
      *
      * @param {Number} distance [optional]
      * @param {Number|String} direction [optional]

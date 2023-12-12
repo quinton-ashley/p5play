@@ -2934,7 +2934,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Move the sprite a certain distance from its current position.
+		 * Move the sprite a distance from its current position.
+		 *
+		 * You can specify the `direction` and `speed` of movement as
+		 * parameters or set these properties before using this function.
+		 *
+		 * When `tileSize` is not 1, distance is divisible by 0.5,
+		 * and a direction name or cardinal direction angle is given,
+		 * the distance the sprite moves will be rounded up to the
+		 * nearest half tile.
 		 *
 		 * @param {Number} distance [optional]
 		 * @param {Number|String} direction [optional]
@@ -2966,11 +2974,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			direction ??= this.direction;
 
-			let x = this.x + this.p.cos(direction) * distance;
-			let y = this.y + this.p.sin(direction) * distance;
-			if (direction % 45 == 0) {
-				x = fixRound(x);
-				y = fixRound(y);
+			let x = this.p.cos(direction) * distance;
+			let y = this.p.sin(direction) * distance;
+
+			if (this.tileSize != 1 && (directionNamed || direction % 90 == 0) && distance % 0.5 == 0) {
+				// snap movement to nearest half tile
+				x = Math.round((this.x + Math.round(x)) * 2) / 2;
+				y = Math.round((this.y + Math.round(y)) * 2) / 2;
+			} else if (direction % 45 == 0) {
+				x = fixRound(this.x + x);
+				y = fixRound(this.y + y);
 			}
 			return this.moveTo(x, y, speed);
 		}
