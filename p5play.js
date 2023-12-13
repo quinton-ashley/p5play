@@ -8031,8 +8031,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (rend[0] == 'fullscreen') isFullScreen = true;
 		}
-		let c = _createCanvas.call(pInst, ...args);
-		if (c.canvas) c = c.canvas;
+		let rend = _createCanvas.call(pInst, ...args);
+		let c = rend.canvas || rend;
 		c.tabIndex = 0;
 		c.w = args[0];
 		c.h = args[1];
@@ -8144,7 +8144,7 @@ main {
 			this.p5play.os.platform = pl;
 		}
 
-		return c;
+		return rend;
 	};
 
 	// this is only for jsdoc
