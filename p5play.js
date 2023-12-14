@@ -8106,7 +8106,7 @@ main {
 `;
 		}
 		if (isFullScreen) {
-			if (c.w > c.h) style += 'width: 100%!important; height: auto!important;';
+			if (c.w / c.h > window.innerWidth / window.innerHeight) style += 'width: 100%!important; height: auto!important;';
 			else style += 'height: 100%!important; width: auto!important;';
 		} else if (scale) {
 			style += `
