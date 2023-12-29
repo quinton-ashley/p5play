@@ -2836,7 +2836,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * sprite.attractTo({x, y}, force);
 		 */
 		attractTo(x, y, force, radius, easing) {
-			if (!this.body) return;
+			if (!this.body || this.__collider != 0) {
+				throw new Error('attractTo can only be used on sprites with dynamic colliders');
+			}
 			if (typeof x != 'number') {
 				let obj = x;
 				if (!obj || (obj == this.p.mouse && !this.p.mouse.active)) return;
@@ -2857,7 +2859,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		repelFrom(x, y, force, radius, easing) {
-			if (!this.body) return;
+			if (!this.body || this.__collider != 0) {
+				throw new Error('repelFrom can only be used on sprites with dynamic colliders');
+			}
 			if (typeof x != 'number') {
 				let obj = x;
 				if (!obj || (obj == this.p.mouse && !this.p.mouse.active)) return;
@@ -6310,7 +6314,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		getMouseSprites() {
 			let sprites = this.getSpritesAt(this.p.mouse.x, this.p.mouse.y);
 			if (this.p.camera._wasOff) {
-				let uiSprites = this.getSpritesAt(this.p.camera.mouse.x, this.p.camera.mouse.y, this.p.allSprites, false);
+				let uiSprites = this.getSpritesAt(this.p.canvas.mouse.x, this.p.canvas.mouse.y, this.p.allSprites, false);
 				if (uiSprites.length) sprites = [...uiSprites, ...sprites];
 			}
 			return sprites;
@@ -6481,38 +6485,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.__pos = { x: 0, y: 0, rounded: {} };
 
 			/**
-			 * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
-			 * @type {Object}
-			 * @property {Number} x
-			 * @property {Number} y
+			 * Use `canvas.mouse.x` and `canvas.mouse.y` instead.
+			 * @deprecated
 			 */
 			this.mouse = {
 				x: this.p.mouseX,
 				y: this.p.mouseY
 			};
-
-			/**
-			 * Vector of the absolute position of the mouse.
-			 * @type {p5.Vector}
-			 */
-			this.mouse.pos = this.p.createVector.call(this.p);
-
-			Object.defineProperty(this.mouse.pos, 'x', {
-				get() {
-					return _this.mouse.x;
-				},
-				set(val) {
-					_this.mouse.x = val;
-				}
-			});
-			Object.defineProperty(this.mouse.pos, 'y', {
-				get() {
-					return _this.mouse.y;
-				},
-				set(val) {
-					_this.mouse.y = val;
-				}
-			});
 
 			/**
 			 * Read only. True if the camera is active.
@@ -6606,6 +6585,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._calcBoundsY(val);
 		}
 
+		/**
+		 * Moves the camera to a position. Similar to `sprite.moveTo`.
+		 *
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @param {Number} speed
+		 * @returns {Promise} resolves true when the camera reaches the target position
+		 */
 		moveTo(x, y, speed) {
 			if (x === undefined) return;
 			if (isNaN(x)) {
@@ -8061,6 +8048,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		c.resize = this.resizeCanvas;
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
+		c.mouse = { x: pInst.mouseX, y: pInst.mouseY };
 		this.camera.x = c.hw;
 		this.camera.y = c.hh;
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
@@ -8162,7 +8150,15 @@ main {
 		 *
 		 * new Canvas('16:9');
 		 */
-		constructor(w, h, mode) {}
+		constructor(w, h, mode) {
+			/**
+			 * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
+			 * @type {Object}
+			 * @property {Number} x
+			 * @property {Number} y
+			 */
+			this.mouse;
+		}
 
 		/**
 		 * The width of the canvas.
@@ -8876,8 +8872,8 @@ main {
 			this.x = (pInst.mouseX - pInst.canvas.hw) / pInst.camera.zoom + pInst.camera.x;
 			this.y = (pInst.mouseY - pInst.canvas.hh) / pInst.camera.zoom + pInst.camera.y;
 
-			pInst.camera.mouse.x = pInst.mouseX;
-			pInst.camera.mouse.y = pInst.mouseY;
+			pInst.canvas.mouse.x = pInst.camera.mouse.x = pInst.mouseX;
+			pInst.canvas.mouse.y = pInst.camera.mouse.y = pInst.mouseY;
 		}
 
 		/**
@@ -9032,17 +9028,17 @@ main {
 		if (!this._setupDone) return;
 
 		_ontouchstart.call(this, e);
-		let touch = this.touches.at(-1);
-		touch.duration = 0;
-		touch.presses = function () {
-			return this.duration == 1 || this.duration == -3;
-		};
-		touch.pressing = function () {
-			return this.duration > 0 ? this.duration : 0;
-		};
-		touch.released = function () {
-			return this.duration <= -1;
-		};
+		// let touch = this.touches.at(-1);
+		// touch.duration = 1;
+		// touch.presses = function () {
+		// 	return this.duration == 1 || this.duration == -3;
+		// };
+		// touch.pressing = function () {
+		// 	return this.duration > 0 ? this.duration : 0;
+		// };
+		// touch.released = function () {
+		// 	return this.duration <= -1;
+		// };
 		if (this.touches.length == 1) {
 			this.mouse.update();
 			this.world.mouseSprites = this.world.getMouseSprites();

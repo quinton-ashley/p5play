@@ -1969,12 +1969,13 @@ class World {
 class Camera {
     p: any;
     /**
-     * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
-     * @type {Object}
-     * @property {Number} x
-     * @property {Number} y
+     * Use `canvas.mouse.x` and `canvas.mouse.y` instead.
+     * @deprecated
      */
-    mouse: any;
+    mouse: {
+        x: any;
+        y: any;
+    };
     /**
      * Read only. True if the camera is active.
      * Use the methods Camera.on() and Camera.off()
@@ -2017,7 +2018,15 @@ class Camera {
      * @type {Object}
      */
     get position(): any;
-    moveTo(x: any, y: any, speed: any): Promise<boolean>;
+    /**
+     * Moves the camera to a position. Similar to `sprite.moveTo`.
+     *
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Number} speed
+     * @returns {Promise} resolves true when the camera reaches the target position
+     */
+    moveTo(x: number, y: number, speed: number): Promise<any>;
     set zoom(arg: number);
     /**
      * Camera zoom.
@@ -2399,6 +2408,13 @@ class Canvas {
      * new Canvas('16:9');
      */
     constructor(w: number, h: number, mode?: string);
+    /**
+     * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
+     * @type {Object}
+     * @property {Number} x
+     * @property {Number} y
+     */
+    mouse: any;
     /**
      * The width of the canvas.
      * @type {Number}
