@@ -2,7 +2,7 @@
  * p5play
  * @version 3.18
  * @author quinton-ashley
- * @license gpl-v3-only
+ * @license AGPL-3.0
  */
 p5.prototype.registerMethod('init', function p5playInit() {
 	if (typeof window.planck == 'undefined') {

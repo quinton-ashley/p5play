@@ -8,15 +8,19 @@ Looking to turn your ideas into online games or interactive art? Check out p5pla
 
 ### Join the [p5play community Discord server][] to ask questions and meet other people making games with p5play! 👾
 
-p5play (v3) was created by Quinton Ashley [@quinton-ashley][]. p5.play (v1) was created by Paolo Pedercini [@molleindustria][]. If you have any questions or problems use the help channels on [Discord][] or make an [issue report][] on this GitHub repository or email <info@p5play.org>
+p5play (v3) was created by Quinton Ashley [@quinton-ashley][]. p5.play (v1) was created by Paolo Pedercini [@molleindustria][].
+
+If you have any questions or problems use the help channels on [Discord][] or make an [issue report][] on this GitHub repository or email <info@p5play.org>
 
 ## Support p5play 🤝
 
-p5play is an open source project and will always be available for free, but your support would be greatly appreciated. If you use p5play professionally, please consider becoming a Patreon member!
+p5play is open source and [multi-licensed](https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md). Under the terms of the AGPLv3, anyone can use p5play for free! 🎉
 
-[![Donate](https://img.shields.io/badge/PayPal-@qashto-green.svg)](https://paypal.me/qashto) [![Venmo](https://img.shields.io/badge/Venmo-@Quinton--Ashley-blue.svg)](https://venmo.com/Quinton-Ashley) [![Patreon](https://img.shields.io/badge/Patreon-@p5play-orange.svg)](https://www.patreon.com/p5play)
+But if you use p5play professionally, please support us on [GitHub Sponsors](https://github.com/sponsors/quinton-ashley) or [Patreon](https://www.patreon.com/p5play) to obtain the [p5play Professional License](https://github.com/quinton-ashley/p5play-web/blob/main/pro/LICENSE.md). Then you can publish your games on apps stores and use p5play in closed source commercial projects. 💸
 
-Only Patreon members can use p5play in closed source commercial projects. See [LICENSING.md](https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md) for more info.
+[![Patreon](https://img.shields.io/badge/Patreon-@p5play-orange.svg)](https://www.patreon.com/p5play)
+
+If you can't afford to pay, you can apply for the free [p5play Novice License](https://github.com/quinton-ashley/p5play-novice/blob/main/LICENSE.md). See [LICENSING.md](https://github.com/quinton-ashley/p5play-web/blob/main/LICENSING.md) for more info.
 
 ## Contributing to p5play ✍️
 

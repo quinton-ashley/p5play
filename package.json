@@ -8,6 +8,16 @@
 		"Paolo Pedercini <info@molleindustria.it>"
 	],
 	"description": "A JavaScript game engine that uses p5.js for graphics and Box2D for physics.",
+	"funding": [
+		{
+			"type": "patreon",
+			"url": "https://www.patreon.com/p5play"
+		},
+		{
+			"type": "github",
+			"url": "https://github.com/sponsors/quinton-ashley"
+		}
+	],
 	"keywords": [
 		"p5.play",
 		"p5.js",
@@ -25,7 +35,7 @@
 		"controller",
 		"gamepad"
 	],
-	"license": "GPL-3.0-only",
+	"license": "AGPL-3.0",
 	"main": "p5play.js",
 	"homepage": "https://p5play.org",
 	"repository": {
@@ -39,5 +49,5 @@
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "3.18.11"
+	"version": "3.18.12"
 }
