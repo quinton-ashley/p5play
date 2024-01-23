@@ -227,13 +227,6 @@ class Sprite {
      */
     prevPos: object;
     prevRotation: number;
-    set drag(arg: number);
-    /**
-     * The amount of resistance a sprite has to being moved.
-     * @type {Number}
-     * @default 0
-     */
-    get drag(): number;
     /**
      * Text displayed at the center of the sprite.
      * @type {String}
@@ -407,16 +400,18 @@ class Sprite {
     get fillColor(): p5.Color;
     set stroke(arg: p5.Color);
     /**
-     * Alias for sprite.strokeColor
+     * Overrides sprite's stroke color. By default the stroke of a sprite
+     * is determined by its collider type, which can also be overridden
+     * by the sketch's stroke color.
      * @type {p5.Color}
+     * @default undefined
      */
     get stroke(): p5.Color;
     set strokeColor(arg: p5.Color);
     /**
-     * Overrides sprite's stroke color. By default the stroke of a sprite
-     * is determined by its collider type, which can also be overridden by the
-     * sketch's stroke color.
+     * Alias for sprite.stroke
      * @type {p5.Color}
+     * @default undefined
      */
     get strokeColor(): p5.Color;
     set strokeWeight(arg: number);
@@ -498,6 +493,13 @@ class Sprite {
      * @default 0 ("right")
      */
     get direction(): number;
+    set drag(arg: number);
+    /**
+     * The amount of resistance a sprite has to being moved.
+     * @type {Number}
+     * @default 0
+     */
+    get drag(): number;
     set draw(arg: Function);
     /**
      * Displays the sprite.
@@ -522,8 +524,7 @@ class Sprite {
      * let defaultDraw = sprite._draw;
      *
      * sprite.draw = function() {
-     *   // tint
-     *   tint(255, 127);
+     *   // add custom code here
      *   defaultDraw();
      * }
      */
@@ -653,6 +654,13 @@ class Sprite {
      * @default {x: 0, y: 0}
      */
     get offset(): any;
+    set opacity(arg: number);
+    /**
+     * The sprite's opacity. 0 is transparent, 1 is opaque.
+     * @type {Number}
+     * @default 1
+     */
+    get opacity(): number;
     set previousPosition(arg: any);
     /**
      * Verbose alias for sprite.prevPos
@@ -675,6 +683,13 @@ class Sprite {
      * @default false
      */
     get pixelPerfect(): boolean;
+    set removed(arg: boolean);
+    /**
+     * If the sprite has been removed from the world.
+     * @type {Boolean}
+     * @default false
+     */
+    get removed(): boolean;
     set rotationDrag(arg: number);
     /**
      * The amount the sprite resists rotating.
@@ -738,13 +753,23 @@ class Sprite {
      * @default false
      */
     get static(): boolean;
-    set removed(arg: boolean);
+    set tint(arg: p5.Color);
     /**
-     * If the sprite has been removed from the world.
-     * @type {Boolean}
-     * @default false
+     * Tint color applied to the sprite when drawn.
+     *
+     * Note that this is not good for performance, you should probably
+     * pre-render the effect if you want to use it a lot.
+     * @type {p5.Color}
+     * @default undefined
      */
-    get removed(): boolean;
+    get tint(): p5.Color;
+    set tintColor(arg: p5.Color);
+    /**
+     * Alias for sprite.tint
+     * @type {p5.Color}
+     * @default undefined
+     */
+    get tintColor(): p5.Color;
     /**
      * The sprite's vertices, in vertex mode format.
      * @type {Array}
@@ -2391,54 +2416,83 @@ function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
 let userDisabledP5Errors: boolean;
-var canvas: any;
-function createCanvas(...args: any[]): any;
+function createCanvas(...args: any[]): p5.Renderer;
 class Canvas {
     /**
-     * Creates a p5.js canvas element. Includes some extra features such as
-     * a pixelated mode. It can also use ratios instead of setting width and
-     * height directly. See the Canvas learn page for more information.
+     * p5play adds some extra functionality to the p5.js `createCanvas`
+     * function. See the examples below.
      *
-     * @param {Number} w width of the canvas
-     * @param {Number} h height of the canvas
-     * @param {String} [mode] 'pixelated' or 'fullscreen'
+     * This function also disables the default keydown responses for
+     * the arrow keys, slash, and space. This is to prevent the
+     * browser from scrolling the page when the user is playing a game
+     * using common keyboard commands.
+     *
+     * Canvas options (context attributes) can only be utilized with
+     * q5.js.
+     *
+     * @param {Number} width
+     * @param {Number} height
+     * @param {String} [preset] 'fullscreen' or 'pixelated'
+     * @param {String} [renderer] '2d' (default) or 'webgl'
+     * @param {Object} [options] context attributes
+     * @returns HTML5 canvas element
      * @example
-     * new Canvas(400, 400);
-     *
+     * // fills the window
+     * new Canvas();
+     * // max 16:9 aspect ratio dimensions that will fit the window
      * new Canvas('16:9');
+     * // 800x600 pixels
+     * new Canvas(800, 600);
+     * // fullscreen scaling, fits window (no stretching)
+     * new Canvas(800, 600, 'fullscreen');
+     * // pixelated scaling, fits window (no stretching)
+     * new Canvas(256, 240, 'pixelated');
      */
-    constructor(w: number, h: number, mode?: string);
+    constructor(width: number, height: number, preset?: string, renderer?: string, options?: any);
     /**
-     * Absolute position of the mouse. Same values as p5.js `mouseX` and `mouseY`.
+     * The width of the canvas.
+     * @type {Number}
+     * @default 100
+     */
+    w: number;
+    /**
+     * The width of the canvas.
+     * @type {Number}
+     * @default 100
+     */
+    width: number;
+    /**
+     * The height of the canvas.
+     * @type {Number}
+     * @default 100
+     */
+    h: number;
+    /**
+     * The height of the canvas.
+     * @type {Number}
+     * @default 100
+     */
+    height: number;
+    /**
+     * Half the width of the canvas.
+     * @type {Number}
+     * @default 100
+     */
+    hw: number;
+    /**
+     * Half the height of the canvas.
+     * @type {Number}
+     * @default 100
+     */
+    hh: number;
+    /**
+     * Absolute position of the mouse on the canvas, not relative
+     * to the camera. Same values as p5.js `mouseX` and `mouseY`.
      * @type {Object}
      * @property {Number} x
      * @property {Number} y
      */
     mouse: any;
-    /**
-     * The width of the canvas.
-     * @type {Number}
-     * @default 100
-     */
-    get w(): number;
-    /**
-     * The width of the canvas.
-     * @type {Number}
-     * @default 100
-     */
-    get width(): number;
-    /**
-     * The height of the canvas.
-     * @type {Number}
-     * @default 100
-     */
-    get h(): number;
-    /**
-     * The height of the canvas.
-     * @type {Number}
-     * @default 100
-     */
-    get height(): number;
     /**
      * Resizes the canvas, the world, and centers the camera.
      *
@@ -2454,6 +2508,7 @@ class Canvas {
      */
     resize(): void;
 }
+var canvas: Canvas;
 function resizeCanvas(w: any, h: any): void;
 function background(...args: any[]): void;
 function fill(...args: any[]): void;
@@ -2597,7 +2652,6 @@ class _Mouse extends InputDevice {
      * @default false
      */
     active: boolean;
-    update(): void;
     /**
      * The mouse's position.
      * @type {object}
@@ -2624,17 +2678,17 @@ class _Mouse extends InputDevice {
     get visible(): boolean;
     /**
      * @param {string} inp
-     * @returns {boolean} true on the first frame that the user reaches the holdThreshold for holding the input and could start to drag
+     * @returns {boolean} true on the first frame that the user moves the mouse while pressing the input
      */
     drags(inp: string): boolean;
     /**
      * @param {string} inp
-     * @returns {number} the amount of frames the user has been dragging while pressing the input
+     * @returns {number} the amount of frames the user has been moving the mouse while pressing the input
      */
     dragging(inp: string): number;
     /**
      * @param {string} inp
-     * @returns {boolean} true on the first frame that the user releases the input after dragging
+     * @returns {boolean} true on the first frame that the user releases the input after dragging the mouse
      */
     dragged(inp: string): boolean;
 }
@@ -2653,6 +2707,16 @@ class _SpriteMouse extends _Mouse {
      * @returns {boolean} true on the first frame that the mouse is no longer over the sprite
      */
     hovered(): boolean;
+}
+class _Touch extends InputDevice {
+    constructor(touch: any);
+    id: any;
+    holdThreshold: any;
+    duration: number;
+    drag: number;
+    x: number;
+    y: number;
+    force: any;
 }
 class _KeyBoard extends InputDevice {
     alt: number;
