@@ -8053,6 +8053,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 		let rend = _createCanvas.call(pInst, ...args);
+		this.ctx ??= this.drawingContext;
 		let c = rend.canvas || rend;
 		c.tabIndex = 0;
 		c.w = args[0];
@@ -8145,7 +8146,7 @@ main {
 			pInst.pixelDensity(1);
 			pInst.noSmooth();
 			pInst.textFont('monospace');
-			ctx.imageSmoothingEnabled = false;
+			pInst.ctx.imageSmoothingEnabled = false;
 		}
 
 		let idx = navigator.userAgent.indexOf('iPhone OS');
