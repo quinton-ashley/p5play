@@ -9185,6 +9185,7 @@ main {
 				this.mouseX = this.touches[0].x;
 				this.mouseY = this.touches[0].y;
 				this.mouse._update();
+				this.world.mouseSprites = this.world.getMouseSprites();
 				__onmousedown.call(this, 'left');
 			}
 		}
