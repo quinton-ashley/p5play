@@ -2740,7 +2740,6 @@ class _KeyBoard extends InputDevice {
     get option(): number;
     get win(): number;
     get windows(): number;
-    #private;
 }
 var kb: _KeyBoard;
 var keyboard: _KeyBoard;

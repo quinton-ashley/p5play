@@ -9229,7 +9229,6 @@ main {
 	};
 
 	this._KeyBoard = class extends this.InputDevice {
-		#test;
 		/**
 		 * <a href="https://p5play.org/learn/input_devices.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -9967,7 +9966,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		} else if (t.drag < 0) {
 			t.drag = 0;
 		}
-		if (touch.duration <= 0) {
+		if (t.duration <= 0) {
 			this.touches.splice(i, 1);
 			i--;
 		}
