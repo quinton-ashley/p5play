@@ -3309,7 +3309,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						await pInst.sleep();
 					}
 				} else {
-					await pInst.sleep();
+					return;
 				}
 				if (this._rotateIdx != _rotateIdx) return false;
 				this.rotationSpeed = 0;
