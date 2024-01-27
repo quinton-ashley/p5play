@@ -113,6 +113,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			else this.hasMouse = true;
 			this.standardizeKeyboard = false;
 
+			let idx = navigator.userAgent.indexOf('iPhone OS');
+			if (idx > -1) {
+				let version = navigator.userAgent.substring(idx + 10, idx + 12);
+
+				this.os.platform = 'iOS';
+				this.os.version = version;
+			} else {
+				let pl = navigator.userAgentData?.platform;
+				if (!pl && navigator.platform) {
+					pl = navigator.platform.slice(3);
+					if (pl == 'Mac') pl = 'macOS';
+					else if (pl == 'Win') pl = 'Windows';
+					else if (pl == 'Lin') pl = 'Linux';
+				}
+				this.os.platform = pl;
+			}
+
 			this._renderStats = {};
 			/*
 			 * Ledgers for collision callback functions.
@@ -2998,7 +3015,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * sprite.move(directionName, speed);
 		 */
 		move(distance, direction, speed) {
-			if (!distance) return;
+			if (!distance) return Promise.resolve(false);
 
 			let directionNamed = isNaN(arguments[0]);
 			if (directionNamed) {
@@ -3021,9 +3038,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				// snap movement to nearest half tile
 				x = Math.round((this.x + Math.round(x)) * 2) / 2;
 				y = Math.round((this.y + Math.round(y)) * 2) / 2;
-			} else if (direction % 45 == 0) {
-				x = fixRound(this.x + x);
-				y = fixRound(this.y + y);
+			} else {
+				x += this.x;
+				y += this.y;
+				if (direction % 45 == 0) {
+					x = fixRound(x);
+					y = fixRound(y);
+				}
 			}
 			return this.moveTo(x, y, speed);
 		}
@@ -3202,8 +3223,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Finds the minimium amount the sprite would have to rotate to
-		 * "face" a position at a specified "facing" rotation.
+		 * Finds the minimum angle of rotation that the sprite would have
+		 * to rotate to "face" a position at a specified "facing" rotation.
 		 *
 		 * Used internally by `rotateTo` and `rotateTowards`.
 		 *
@@ -3219,7 +3240,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				x = x.x;
 			}
 			if (Math.abs(x - this.x) < 0.01 && Math.abs(y - this.y) < 0.01) {
-				return 0;
+				return this.rotation;
 			}
 			let ang = this.angleTo(x, y);
 			facing ??= 0;
@@ -3284,31 +3305,26 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let cw = angle > 0; // rotation is clockwise
 			this.rotationSpeed = speed * (cw ? 1 : -1);
 
-			let frames = Math.floor(absA / speed) - 1;
 			this._rotateIdx ??= 0;
 			this._rotateIdx++;
 			let _rotateIdx = this._rotateIdx;
 
 			return (async () => {
-				if (frames > 1) {
-					let limit = Math.abs(this.rotationSpeed) + 0.01;
-					do {
-						await pInst.sleep();
-						if (this._rotateIdx != _rotateIdx) return false;
+				let limit = Math.abs(this.rotationSpeed) + 0.01;
+				do {
+					await pInst.sleep();
+					if (this._rotateIdx != _rotateIdx) return false;
 
-						if ((cw && this.rotationSpeed < 0.01) || (!cw && this.rotationSpeed > -0.01)) {
-							return false;
-						}
-					} while (
-						((cw && ang > this.rotation) || (!cw && ang < this.rotation)) &&
-						limit < Math.abs(ang - this.rotation)
-					);
-
-					if (Math.abs(ang - this.rotation) > 0.01) {
-						this.rotationSpeed = ang - this.rotation;
-						await pInst.sleep();
+					if ((cw && this.rotationSpeed < 0.01) || (!cw && this.rotationSpeed > -0.01)) {
+						return false;
 					}
-				} else {
+				} while (
+					((cw && ang > this.rotation) || (!cw && ang < this.rotation)) &&
+					limit < Math.abs(ang - this.rotation)
+				);
+
+				if (Math.abs(ang - this.rotation) > 0.01) {
+					this.rotationSpeed = ang - this.rotation;
 					await pInst.sleep();
 				}
 				if (this._rotateIdx != _rotateIdx) return false;
@@ -3850,10 +3866,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		t._isTurtleSprite = true;
 		t._prevPos = { x: t.x, y: t.y };
 		let _move = t.move;
-		t.move = async function () {
+		t.move = function () {
 			this._prevPos.x = this.x;
 			this._prevPos.y = this.y;
-			await _move.call(this, ...arguments);
+			return _move.call(this, ...arguments);
 		};
 		return t;
 	};
@@ -8129,8 +8145,10 @@ main {
 `;
 		}
 		if (isFullScreen) {
-			if (c.w / c.h > window.innerWidth / window.innerHeight) style += 'width: 100%!important; height: auto!important;';
-			else style += 'height: 100%!important; width: auto!important;';
+			c.fullscreen = true;
+			if (c.w / c.h > window.innerWidth / window.innerHeight) {
+				style += 'width: 100%!important; height: auto!important;';
+			} else style += 'height: 100%!important; width: auto!important;';
 		} else if (scale) {
 			style += `
 	width: ${c.w * scale}px!important;
@@ -8147,24 +8165,6 @@ main {
 			pInst.noSmooth();
 			pInst.textFont('monospace');
 			pInst.ctx.imageSmoothingEnabled = false;
-		}
-
-		let idx = navigator.userAgent.indexOf('iPhone OS');
-		if (idx > -1) {
-			let version = navigator.userAgent.substring(idx + 10, idx + 12);
-			if (version < 16) pInst.pixelDensity(2);
-			this.p5play.os.platform = 'iOS';
-			this.p5play.os.version = version;
-		} else {
-			// for Chromium based browsers
-			let pl = navigator.userAgentData?.platform;
-			if (!pl && navigator.platform) {
-				pl = navigator.platform.slice(3);
-				if (pl == 'Mac') pl = 'macOS';
-				else if (pl == 'Win') pl = 'Windows';
-				else if (pl == 'Lin') pl = 'Linux';
-			}
-			this.p5play.os.platform = pl;
 		}
 
 		return rend;
@@ -8281,11 +8281,23 @@ main {
 	 * Use of `canvas.resize()` is preferred.
 	 */
 	this.resizeCanvas = (w, h) => {
+		w ??= window.innerWidth;
+		h ??= window.innerHeight;
 		_resizeCanvas.call(this, w, h);
-		this.canvas.hw = this.canvas.w * 0.5;
-		this.canvas.hh = this.canvas.h * 0.5;
-		this.camera._pos.x = this.canvas.hw;
-		this.camera._pos.y = this.canvas.hh;
+		let c = this.canvas;
+		c.w = c.width / this.pixelDensity();
+		c.h = c.height / this.pixelDensity();
+		c.hw = c.w * 0.5;
+		c.hh = c.h * 0.5;
+		if (c.fullscreen) {
+			if (c.w / c.h > window.innerWidth / window.innerHeight) {
+				c.style = 'width: 100%!important; height: auto!important;';
+			} else {
+				c.style = 'height: 100%!important; width: auto!important;';
+			}
+		}
+		this.camera.x = c.hw;
+		this.camera.y = c.hh;
 	};
 
 	const _background = this.background;
