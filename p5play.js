@@ -7,7 +7,7 @@
 p5.prototype.registerMethod('init', function p5playInit() {
 	if (!window.planck) throw 'planck.js must be loaded before p5play';
 
-	const pInst = this;
+	const $ = this; // the p5 or q5 instance that called p5playInit
 
 	const pl = planck;
 	const plScale = 60;
@@ -36,7 +36,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	}
 
 	// the p5play default angle mode is degrees
-	this.angleMode('degrees');
+	$.angleMode('degrees');
 
 	// scale to planck coordinates from p5 coordinates
 	const scaleTo = (x, y, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
@@ -57,7 +57,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	/**
 	 * @class
 	 */
-	this.P5Play = class {
+	$.P5Play = class {
 		/**
 		 * This class is deleted after it's used
 		 * to create the `p5play` object
@@ -165,8 +165,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * Contains information about the sketch.
 	 * @type {P5Play}
 	 */
-	this.p5play = new this.P5Play();
-	delete this.P5Play;
+	$.p5play = new $.P5Play();
+	delete $.P5Play;
 
 	/**
 	 * @typedef {Object} planck
@@ -183,12 +183,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @param {...any} args
 	 */
 	const log = console.log; // shortcut
-	this.log = console.log;
+	$.log = console.log;
 
 	/**
 	 * @class
 	 */
-	this.Sprite = class {
+	$.Sprite = class {
 		/**
 		 * <a href="https://p5play.org/learn/sprite.html">
 		 * Look at the Sprite reference pages before reading these docs.
@@ -233,8 +233,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * let line = new Sprite(x, y, [length, angle]);
 		 */
 		constructor(x, y, w, h, collider) {
-			this.p = pInst;
-
 			// using boolean flags is faster than instanceof checks
 			this._isSprite = true;
 
@@ -261,7 +259,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			// first arg is a SpriteAnimation, animation name, or p5.Image
 			if (
 				args[0] !== undefined &&
-				(typeof args[0] == 'string' || args[0] instanceof this.p.SpriteAnimation || args[0] instanceof p5.Image)
+				(typeof args[0] == 'string' || args[0] instanceof $.SpriteAnimation || args[0] instanceof p5.Image)
 			) {
 				// shift
 				ani = args[0];
@@ -314,10 +312,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				h = undefined;
 			}
 
-			this.idNum = this.p.p5play.spritesCreated;
+			this.idNum = $.p5play.spritesCreated;
 			this._uid = 1000 + this.idNum;
-			this.p.p5play.sprites[this._uid] = this;
-			this.p.p5play.spritesCreated++;
+			$.p5play.sprites[this._uid] = this;
+			$.p5play.spritesCreated++;
 
 			/**
 			 * Groups the sprite belongs to, including allSprites
@@ -330,7 +328,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Keys are the animation label, values are SpriteAnimation objects.
 			 * @type {SpriteAnimations}
 			 */
-			this.animations = new this.p.SpriteAnimations();
+			this.animations = new $.SpriteAnimations();
 
 			/**
 			 * Joints that the sprite is attached to
@@ -375,7 +373,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._collisions = {};
 			this._overlappers = {};
 
-			group ??= this.p.allSprites;
+			group ??= $.allSprites;
 
 			/**
 			 * The tile size is used to change the size of one unit of
@@ -397,7 +395,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				y: 0
 			};
 
-			this._pos = pInst.createVector.call(pInst);
+			this._pos = $.createVector.call($);
 
 			Object.defineProperty(this._pos, 'x', {
 				get() {
@@ -436,7 +434,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 
 			// this._vel extends p5.Vector
-			this._vel = pInst.createVector.call(pInst);
+			this._vel = $.createVector.call($);
 
 			Object.defineProperties(this._vel, {
 				x: {
@@ -495,7 +493,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._heading = 'right';
 
 			this._layer = group._layer;
-			this._layer ??= this.p.allSprites._getTopLayer() + 1;
+			this._layer ??= $.allSprites._getTopLayer() + 1;
 
 			if (group.dynamic) collider ??= 'dynamic';
 			if (group.kinematic) collider ??= 'kinematic';
@@ -509,12 +507,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			x ??= group.x;
 			if (x === undefined) {
-				x = this.p.width / this.tileSize / 2;
+				x = $.width / this.tileSize / 2;
 				if (w) this._vertexMode = true;
 			}
 			y ??= group.y;
 			if (y === undefined) {
-				y = this.p.height / this.tileSize / 2;
+				y = $.height / this.tileSize / 2;
 			}
 
 			let forcedBoxShape = false;
@@ -546,7 +544,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			// temporarily add all the groups the sprite belongs to,
 			// since the next section of code could potentially load an
 			// animation from one of the sprite's groups
-			for (let g = group; g; g = this.p.p5play.groups[g.parent]) {
+			for (let g = group; g; g = $.p5play.groups[g.parent]) {
 				this.groups.push(g);
 			}
 			this.groups.reverse();
@@ -573,7 +571,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Used to detect mouse events with the sprite.
 			 * @type {_SpriteMouse}
 			 */
-			this.mouse = new this.p._SpriteMouse();
+			this.mouse = new $._SpriteMouse();
 
 			this._angle = 0;
 			this._rotationSpeed = 0;
@@ -684,7 +682,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.text;
 
-			if (!group._isAllSpritesGroup) this.p.allSprites.push(this);
+			if (!group._isAllSpritesGroup) $.allSprites.push(this);
 			group.push(this);
 
 			let gvx = group.vel.x || 0;
@@ -714,7 +712,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			// inherit properties from group in the order they were added
 			// skip props that were already set above
-			for (let prop of this.p.Sprite.propsAll) {
+			for (let prop of $.Sprite.propsAll) {
 				if (skipProps.includes(prop)) continue;
 				let val = group[prop];
 				if (val === undefined) continue;
@@ -752,7 +750,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let g = this.groups[i];
 				let props = Object.keys(g);
 				for (let prop of props) {
-					if (!isNaN(prop) || prop[0] == '_' || skipProps.includes(prop) || this.p.Sprite.propsAll.includes(prop)) {
+					if (!isNaN(prop) || prop[0] == '_' || skipProps.includes(prop) || $.Sprite.propsAll.includes(prop)) {
 						continue;
 					}
 					let val = g[prop];
@@ -769,14 +767,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			// "random" color that's not too dark or too light
-			this.color ??= this.p.color(
-				Math.round(this.p.random(30, 245)),
-				Math.round(this.p.random(30, 245)),
-				Math.round(this.p.random(30, 245))
+			this.color ??= $.color(
+				Math.round($.random(30, 245)),
+				Math.round($.random(30, 245)),
+				Math.round($.random(30, 245))
 			);
 
-			this._textFill ??= this.p.color(0);
-			this._textSize ??= this.tileSize == 1 ? (this.p.canvas ? this.p.textSize() : 12) : 0.8;
+			this._textFill ??= $.color(0);
+			this._textSize ??= this.tileSize == 1 ? ($.canvas ? $.textSize() : 12) : 0.8;
 		}
 
 		/**
@@ -819,7 +817,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			props.restitution ??= this.bounciness || 0.2;
 
 			if (!this.body) {
-				this.body = this.p.world.createBody({
+				this.body = $.world.createBody({
 					position: scaleTo(this.x, this.y, this.tileSize),
 					type: this.collider
 				});
@@ -857,7 +855,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			let s = this._parseShape(...arguments);
 			if (!this.body) {
-				this.body = this.p.world.createBody({
+				this.body = $.world.createBody({
 					position: scaleTo(this.x, this.y, this.tileSize),
 					type: 'dynamic',
 					gravityScale: 0
@@ -983,8 +981,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						for (let j = 0; j < path.length - 1; j += 2) {
 							let len = path[j];
 							ang += path[j + 1];
-							vert.x += len * this.p.cos(ang);
-							vert.y += len * this.p.sin(ang);
+							vert.x += len * $.cos(ang);
+							vert.y += len * $.sin(ang);
 							vecs.push({ x: vert.x, y: vert.y });
 
 							checkVert();
@@ -1108,7 +1106,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				if (type === undefined || fxt.m_isSensor == type) {
 					let _fxt = fxt.m_next;
-					fxt.destroyProxies(this.p.world.m_broadPhase);
+					fxt.destroyProxies($.world.m_broadPhase);
 					if (!prevFxt) {
 						this.body.m_fixtureList = _fxt;
 					} else {
@@ -1134,7 +1132,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let con = ce.contact;
 				ce = ce.next;
 				if (type === undefined || con.m_fixtureA.m_isSensor == type) {
-					this.p.world.destroyContact(con);
+					$.world.destroyContact(con);
 				}
 			}
 		}
@@ -1308,7 +1306,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get centerOfMass() {
 			let center = this.body.getWorldCenter();
 			let v = scaleFrom(center.x, center.y, this.tileSize);
-			return this.p.createVector(v.x, v.y);
+			return $.createVector(v.x, v.y);
 		}
 
 		/**
@@ -1370,7 +1368,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this.removeColliders();
 				if (this.fixture?.m_isSensor) this.body.m_gravityScale = 0;
 				else {
-					this.p.world.destroyBody(this.body);
+					$.world.destroyBody(this.body);
 					this.body = null;
 				}
 			}
@@ -1382,12 +1380,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				return val;
 			} else if (typeof val != 'object') {
 				if (val.length == 1) {
-					return this.p.colorPal(val);
+					return $.colorPal(val);
 				} else {
-					return this.p.color(val);
+					return $.color(val);
 				}
 			}
-			return this.p.color(...val.levels);
+			return $.color(...val.levels);
 		}
 
 		/**
@@ -1614,8 +1612,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				backward: this.rotation + 180
 			};
 			let val = dirs[name];
-			if (this.p._angleMode == 'radians') {
-				val = this.p.radians(val);
+			if ($._angleMode == 'radians') {
+				val = $.radians(val);
 			}
 			return val;
 		}
@@ -1627,7 +1625,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		get direction() {
 			if (this.vel.x !== 0 || this.vel.y !== 0) {
-				return this.p.atan2(this.vel.y, this.vel.x);
+				return $.atan2(this.vel.y, this.vel.x);
 			}
 			if (this._direction === undefined) return this.rotation;
 			return this._direction;
@@ -1640,8 +1638,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			this._direction = val;
 			let speed = this.speed;
-			this.vel.x = this.p.cos(val) * speed;
-			this.vel.y = this.p.sin(val) * speed;
+			this.vel.x = $.cos(val) * speed;
+			this.vel.y = $.sin(val) * speed;
 		}
 
 		/**
@@ -1990,12 +1988,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get rotation() {
 			if (!this.body) return this._angle || 0;
 			let val = this.body.getAngle();
-			if (this.p._angleMode === 'degrees') return this.p.degrees(val);
+			if ($._angleMode === 'degrees') return $.degrees(val);
 			return val;
 		}
 		set rotation(val) {
 			if (this.body) {
-				if (this.p._angleMode === 'degrees') val = this.p.radians(val);
+				if ($._angleMode === 'degrees') val = $.radians(val);
 				this.body.setAngle(val);
 				this.body.synchronizeTransform();
 			} else {
@@ -2117,12 +2115,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default 0
 		 */
 		get speed() {
-			return this.p.createVector(this.vel.x, this.vel.y).mag();
+			return $.createVector(this.vel.x, this.vel.y).mag();
 		}
 		set speed(val) {
 			let angle = this.direction;
-			this.vel.x = this.p.cos(angle) * val;
-			this.vel.y = this.p.sin(angle) * val;
+			this.vel.x = $.cos(angle) * val;
+			this.vel.y = $.sin(angle) * val;
 		}
 
 		/**
@@ -2198,7 +2196,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let i = 0; i < v.length; i++) {
 				let arr = [fixRound((v[i].x / this.tileSize) * plScale + x), fixRound((v[i].y / this.tileSize) * plScale + y)];
 				if (internalUse) v[i] = arr;
-				else v[i] = this.p.createVector(arr[0], arr[1]);
+				else v[i] = $.createVector(arr[0], arr[1]);
 			}
 			return v;
 		}
@@ -2486,14 +2484,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val == this._shape) return;
 
 			// ['box', 'circle', 'chain', 'polygon']
-			let __shape = this.p.Sprite.shapeTypes.indexOf(val);
+			let __shape = $.Sprite.shapeTypes.indexOf(val);
 			if (__shape == -1) {
 				throw new Error(
-					'Invalid shape type: "' +
-						val +
-						'"\nThe valid shape types are: "' +
-						this.p.Sprite.shapeTypes.join('", "') +
-						'"'
+					'Invalid shape type: "' + val + '"\nThe valid shape types are: "' + $.Sprite.shapeTypes.join('", "') + '"'
 				);
 			}
 
@@ -2638,44 +2632,44 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		// default draw
 		__draw() {
-			if (this._ani && this.debug != 'colliders' && !this.p.p5play.disableImages) {
+			if (this._ani && this.debug != 'colliders' && !$.p5play.disableImages) {
 				this._ani.draw(this._offset._x, this._offset._y, 0, this._scale._x, this._scale._y);
 			}
-			if (!this._ani || this.debug || this.p.p5play.disableImages) {
+			if (!this._ani || this.debug || $.p5play.disableImages) {
 				if (this.debug && this.debug != 'colliders') {
-					this.p.noFill();
-					if (this.__collider != 3) this.p.stroke(0, 255, 0);
-					else this.p.stroke(120);
-					this.p.line(0, -2, 0, 2);
-					this.p.line(-2, 0, 2, 0);
+					$.noFill();
+					if (this.__collider != 3) $.stroke(0, 255, 0);
+					else $.stroke(120);
+					$.line(0, -2, 0, 2);
+					$.line(-2, 0, 2, 0);
 				}
 
 				if (this.__collider != 3) {
 					if (!this.debug && this._strokeWeight !== 0) {
-						if (this.__shape == 2) this.p.stroke(this.stroke || this.color);
-						else if (this._stroke) this.p.stroke(this._stroke);
+						if (this.__shape == 2) $.stroke(this.stroke || this.color);
+						else if (this._stroke) $.stroke(this._stroke);
 					}
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 						if (fxt.m_isSensor && !this.debug) continue;
 						this._drawFixture(fxt);
 					}
 				} else {
-					if (this._strokeWeight !== 0) this.p.stroke(this._stroke || 120);
+					if (this._strokeWeight !== 0) $.stroke(this._stroke || 120);
 					if (this.__shape == 0) {
-						this.p.rect(this._offset._x, this._offset._y, this.w * this.tileSize, this.h * this.tileSize);
+						$.rect(this._offset._x, this._offset._y, this.w * this.tileSize, this.h * this.tileSize);
 					} else if (this.__shape == 1) {
-						this.p.circle(this._offset._x, this._offset._y, this.d * this.tileSize);
+						$.circle(this._offset._x, this._offset._y, this.d * this.tileSize);
 					}
 				}
 			}
 			if (this.text !== undefined) {
-				this.p.textAlign(this.p.CENTER, this.p.CENTER);
-				this.p.fill(this._textFill);
-				if (this._textStrokeWeight) this.p.strokeWeight(this._textStrokeWeight);
-				if (this._textStroke) this.p.stroke(this._textStroke);
-				else this.p.noStroke();
-				this.p.textSize(this.textSize * this.tileSize);
-				this.p.text(this.text, 0, 0);
+				$.textAlign($.CENTER, $.CENTER);
+				$.fill(this._textFill);
+				if (this._textStrokeWeight) $.strokeWeight(this._textStrokeWeight);
+				if (this._textStroke) $.stroke(this._textStroke);
+				else $.noStroke();
+				$.textSize(this.textSize * this.tileSize);
+				$.text(this.text, 0, 0);
 			}
 		}
 
@@ -2689,32 +2683,32 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * unsophisticated and errors on the side of drawing the sprite.
 		 */
 		_display() {
-			let x = this.x * this.tileSize + this.p.world.origin.x;
-			let y = this.y * this.tileSize + this.p.world.origin.y;
+			let x = this.x * this.tileSize + $.world.origin.x;
+			let y = this.y * this.tileSize + $.world.origin.y;
 
 			let largestSide = Math.max(this._w, this._h);
 
 			if (
 				this.shape != 'chain' &&
-				this.p.camera.active &&
-				(x + largestSide < this.p.camera.bound.min.x ||
-					x - largestSide > this.p.camera.bound.max.x ||
-					y + largestSide < this.p.camera.bound.min.y ||
-					y - largestSide > this.p.camera.bound.max.y)
+				$.camera.isActive &&
+				(x + largestSide < $.camera.bound.min.x ||
+					x - largestSide > $.camera.bound.max.x ||
+					y + largestSide < $.camera.bound.min.y ||
+					y - largestSide > $.camera.bound.max.y)
 			) {
 				this._visible = null;
 				return;
 			}
 
 			this._visible = true;
-			this.p.p5play.spritesDrawn++;
+			$.p5play.spritesDrawn++;
 
 			if (!this._pixelPerfect) {
 				x = fixRound(x);
 				y = fixRound(y);
 			} else {
 				let w, h;
-				if (this.ani && !this.p.p5play.disableImages) {
+				if (this.ani && !$.p5play.disableImages) {
 					w = this.ani[this.ani._frame].w;
 					h = this.ani[this.ani._frame].h;
 				} else {
@@ -2743,27 +2737,27 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			if (this._opacity == 0) return;
 
-			this.p.push();
-			this.p.imageMode('center');
-			this.p.rectMode('center');
-			this.p.ellipseMode('center');
+			$.push();
+			$.imageMode('center');
+			$.rectMode('center');
+			$.ellipseMode('center');
 
-			this.p.translate(x, y);
-			if (this.rotation) this.p.rotate(this.rotation);
+			$.translate(x, y);
+			if (this.rotation) $.rotate(this.rotation);
 			if (this._mirror.x != 1 || this._mirror.y != 1) {
-				this.p.scale(this._mirror._x, this._mirror._y);
+				$.scale(this._mirror._x, this._mirror._y);
 			}
-			this.p.fill(this.color);
+			$.fill(this.color);
 			if (this._strokeWeight !== undefined) {
-				this.p.strokeWeight(this._strokeWeight);
+				$.strokeWeight(this._strokeWeight);
 			}
-			if (this._opacity) this.p.ctx.globalAlpha = this._opacity;
-			if (this._tint) this.p.tint(this._tint);
+			if (this._opacity) $.ctx.globalAlpha = this._opacity;
+			if (this._tint) $.tint(this._tint);
 
 			this._draw();
 
-			this.p.pop();
-			this._cameraActiveWhenDrawn = this.p.camera.active;
+			$.pop();
+			this._cameraActiveWhenDrawn = $.camera.isActive;
 
 			if (this.autoDraw) this.autoDraw = null;
 		}
@@ -2775,29 +2769,24 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			const sh = fxt.m_shape;
 			if (sh.m_type == 'polygon' || sh.m_type == 'chain') {
 				if (sh.m_type == 'chain') {
-					this.p.push();
-					this.p.noFill();
+					$.push();
+					$.noFill();
 				}
 				let v = sh.m_vertices;
-				this.p.beginShape();
+				$.beginShape();
 				for (let i = 0; i < v.length; i++) {
-					this.p.vertex(v[i].x * plScale, v[i].y * plScale);
+					$.vertex(v[i].x * plScale, v[i].y * plScale);
 				}
-				if (sh.m_type != 'chain') this.p.endShape('close');
+				if (sh.m_type != 'chain') $.endShape('close');
 				else {
-					this.p.endShape();
-					this.p.pop();
+					$.endShape();
+					$.pop();
 				}
 			} else if (sh.m_type == 'circle') {
 				const d = sh.m_radius * 2 * plScale;
-				this.p.ellipse(sh.m_p.x * plScale, sh.m_p.y * plScale, d, d);
+				$.ellipse(sh.m_p.x * plScale, sh.m_p.y * plScale, d, d);
 			} else if (sh.m_type == 'edge') {
-				this.p.line(
-					sh.m_vertex1.x * plScale,
-					sh.m_vertex1.y * plScale,
-					sh.m_vertex2.x * plScale,
-					sh.m_vertex2.y * plScale
-				);
+				$.line(sh.m_vertex1.x * plScale, sh.m_vertex1.y * plScale, sh.m_vertex2.x * plScale, sh.m_vertex2.y * plScale);
 			}
 		}
 
@@ -2816,8 +2805,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (typeof args[0] == 'number' && (args.length == 1 || typeof args[1] != 'number')) {
 				args[3] = args[2];
 				args[2] = args[1];
-				args[1] = this.p.sin(this._bearing) * args[0];
-				args[0] = this.p.cos(this._bearing) * args[0];
+				args[1] = $.sin(this._bearing) * args[0];
+				args[0] = $.cos(this._bearing) * args[0];
 			} else if (args.length == 2 && typeof args[1] != 'number') {
 				args[2] = args[1];
 				args[1] = undefined;
@@ -2894,7 +2883,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (typeof x != 'number') {
 				let obj = x;
-				if (!obj || (obj == this.p.mouse && !this.p.mouse.active)) return;
+				if (!obj || (obj == $.mouse && !$.mouse.isActive)) return;
 				force = y;
 				y = obj.y;
 				x = obj.x;
@@ -2917,7 +2906,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (typeof x != 'number') {
 				let obj = x;
-				if (!obj || (obj == this.p.mouse && !this.p.mouse.active)) return;
+				if (!obj || (obj == $.mouse && !$.mouse.isActive)) return;
 				force = y;
 				y = obj.y;
 				x = obj.x;
@@ -2953,7 +2942,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (x === undefined) return;
 			if (typeof x != 'number' && x !== null) {
 				let obj = x;
-				if (obj == this.p.mouse && !this.p.mouse.active) return;
+				if (obj == $.mouse && !$.mouse.isActive) return;
 				if (!obj || obj.x === undefined || obj.y === undefined) {
 					throw 'sprite.moveTowards/moveAway ERROR: movement destination not defined.';
 				}
@@ -3031,8 +3020,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			direction ??= this.direction;
 
-			let x = this.p.cos(direction) * distance;
-			let y = this.p.sin(direction) * distance;
+			let x = $.cos(direction) * distance;
+			let y = $.sin(direction) * distance;
 
 			if (this.tileSize != 1 && (directionNamed || direction % 90 == 0) && distance % 0.5 == 0) {
 				// snap movement to nearest half tile
@@ -3061,7 +3050,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		moveTo(x, y, speed) {
 			if (typeof x != 'number' && x) {
 				let obj = x;
-				if (obj == this.p.mouse && !this.p.mouse.active) return;
+				if (obj == $.mouse && !$.mouse.isActive) return;
 				if (!obj || obj.x === undefined || obj.y === undefined) {
 					throw 'sprite.moveTo ERROR: destination not defined.';
 				}
@@ -3109,7 +3098,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let destDMin = destD - 0.1;
 			let destDMax = destD + 0.1;
 
-			let velThresh = this.p.world.velocityThreshold;
+			let velThresh = $.world.velocityThreshold;
 			velThresh = Math.min(velThresh, speed * 0.1);
 
 			// proximity margin of error
@@ -3123,7 +3112,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return (async () => {
 				let distX, distY;
 				do {
-					await pInst.sleep();
+					await $.sleep();
 					if (destIdx != this._destIdx) return false;
 
 					// check if the sprite's movement has been impeded such that
@@ -3208,7 +3197,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		angleTo(x, y) {
 			if (typeof x == 'object') {
 				let obj = x;
-				if (obj == this.p.mouse && !this.p.mouse.active) return 0;
+				if (obj == $.mouse && !$.mouse.isActive) return 0;
 				if (obj.x === undefined || obj.y === undefined) {
 					console.error(
 						'sprite.angleTo ERROR: rotation destination not defined, object given with no x or y properties'
@@ -3219,7 +3208,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				x = obj.x;
 			}
 
-			return this.p.atan2(y - this.y, x - this.x);
+			return $.atan2(y - this.y, x - this.x);
 		}
 
 		/**
@@ -3312,7 +3301,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return (async () => {
 				let limit = Math.abs(this.rotationSpeed) + 0.01;
 				do {
-					await pInst.sleep();
+					await $.sleep();
 					if (this._rotateIdx != _rotateIdx) return false;
 
 					if ((cw && this.rotationSpeed < 0.01) || (!cw && this.rotationSpeed > -0.01)) {
@@ -3325,7 +3314,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 				if (Math.abs(ang - this.rotation) > 0.01) {
 					this.rotationSpeed = ang - this.rotation;
-					await pInst.sleep();
+					await $.sleep();
 				}
 				if (this._rotateIdx != _rotateIdx) return false;
 				this.rotationSpeed = 0;
@@ -3344,9 +3333,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * completes
 		 */
 		async changeAni(anis) {
-			if (this.p.p5play.disableImages) return;
+			if ($.p5play.disableImages) return;
 			if (arguments.length > 1) anis = [...arguments];
-			else if (anis instanceof this.p.SpriteAnimation) {
+			else if (anis instanceof $.SpriteAnimation) {
 				if (anis == this._ani) return;
 				anis = [anis];
 			} else if (!Array.isArray(anis)) {
@@ -3359,7 +3348,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let i = 0; i < anis.length; i++) {
 				let ani = anis[i];
 				if (
-					ani instanceof this.p.SpriteAnimation ||
+					ani instanceof $.SpriteAnimation ||
 					ani instanceof p5.Image ||
 					(typeof ani == 'string' && ani.length != 1 && ani.includes('.'))
 				) {
@@ -3465,7 +3454,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			}
 			if (!ani) {
-				this.p.noLoop();
+				$.noLoop();
 				throw new FriendlyError('Sprite.changeAnimation', [label]);
 			}
 			this._ani = ani;
@@ -3491,7 +3480,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_remove() {
-			if (this.body) this.p.world.destroyBody(this.body);
+			if (this.body) $.world.destroyBody(this.body);
 			this.body = null;
 
 			// when removed from the world also remove all the sprite
@@ -3517,7 +3506,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (contactType == 0) type = eventTypes._collisions[eventType];
 			else type = eventTypes._overlappers[eventType];
 
-			let ledger = this.p.p5play[type];
+			let ledger = $.p5play[type];
 
 			let l = (ledger[this._uid] ??= {});
 
@@ -3723,7 +3712,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let ce = this.body.getContactList(); ce; ce = ce.next) {
 				let c = ce.contact;
 				if (c.m_fixtureA.m_body.sprite._uid == o._uid || c.m_fixtureB.m_body.sprite._uid == o._uid) {
-					this.p.world.destroyContact(c);
+					$.world.destroyContact(c);
 				}
 			}
 		}
@@ -3783,7 +3772,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	// only used by the Netcode class to convert sprite data to binary
 	// this should not be changed, users should add custom properties to
 	// the sprite.customProperties object of individual sprites
-	this.Sprite.propTypes = {
+	$.Sprite.propTypes = {
 		x: 'Float64', // 0
 		y: 'Float64', // 1
 		vel: 'Vec2', // 2
@@ -3830,10 +3819,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		opacity: 'number' // 43
 	};
 
-	this.Sprite.props = Object.keys(this.Sprite.propTypes);
+	$.Sprite.props = Object.keys($.Sprite.propTypes);
 
 	// includes duplicates of some properties
-	this.Sprite.propsAll = this.Sprite.props.concat([
+	$.Sprite.propsAll = $.Sprite.props.concat([
 		'd',
 		'diameter',
 		'dynamic',
@@ -3848,16 +3837,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		'width'
 	]);
 
-	this.Sprite.colliderTypes = ['d', 's', 'k', 'n'];
-	this.Sprite.shapeTypes = ['box', 'circle', 'chain', 'polygon'];
+	$.Sprite.colliderTypes = ['d', 's', 'k', 'n'];
+	$.Sprite.shapeTypes = ['box', 'circle', 'chain', 'polygon'];
 
 	// TODO: draw lines when the Turtle moves
-	this.Turtle = function (size) {
-		if (pInst.allSprites.tileSize > 1) {
+	$.Turtle = function (size) {
+		if ($.allSprites.tileSize > 1) {
 			throw new Error(`Turtle can't be used when allSprites.tileSize is greater than 1.`);
 		}
 		size ??= 25;
-		let t = new pInst.Sprite(size, size, [
+		let t = new $.Sprite(size, size, [
 			[size, size * 0.4],
 			[-size, size * 0.4],
 			[0, -size * 0.8]
@@ -3878,9 +3867,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @class
 	 * @extends Array<p5.Image>
 	 */
-	this.SpriteAnimation = class extends Array {
+	$.SpriteAnimation = class extends Array {
 		/**
-		 * <a href="https://p5play.org/learn/sprite_animation.html">
+		 * <a href="https://p5play.org/learn/animation.html">
 		 * Look at the Animation reference pages before reading these docs.
 		 * </a>
 		 *
@@ -3904,7 +3893,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		constructor() {
 			super();
-			this.p = pInst;
 			let args = [...arguments];
 
 			/**
@@ -3920,7 +3908,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				args = args.slice(1);
 				this._addedToSpriteOrGroup = true;
 			}
-			owner ??= this.p.allSprites;
+			owner ??= $.allSprites;
 
 			if (typeof args[0] == 'string' && (args[0].length == 1 || !args[0].includes('.'))) {
 				this.name = args[0];
@@ -4044,8 +4032,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				// images don't belong to the same sequence
 				// they are just two separate images with numbers
 				if (to && prefix1 != prefix2) {
-					this.push(this.p.loadImage(from));
-					this.push(this.p.loadImage(to));
+					this.push($.loadImage(from));
+					this.push($.loadImage(to));
 				} else {
 					// Our numbers likely have leading zeroes, which means that some
 					// browsers (e.g., PhantomJS) will interpret them as base 8 (octal)
@@ -4068,15 +4056,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						for (let i = num1; i <= num2; i++) {
 							// Use nf() to number format 'i' into the amount of digits
 							// ex: 14 with 4 digits is 0014
-							fileName = prefix1 + this.p.nf(i, digits1) + '.png';
-							this.push(this.p.loadImage(fileName));
+							fileName = prefix1 + $.nf(i, digits1) + '.png';
+							this.push($.loadImage(fileName));
 						}
 					} // case: case img1, img2
 					else {
 						for (let i = num1; i <= num2; i++) {
 							// Use nf() to number format 'i' into four digits
 							fileName = prefix1 + i + '.png';
-							this.push(this.p.loadImage(fileName));
+							this.push($.loadImage(fileName));
 						}
 					}
 				}
@@ -4105,10 +4093,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					let url;
 					if (typeof sheet == 'string') url = sheet;
 					else url = sheet.url;
-					pInst._incrementPreload();
-					this.spriteSheet = this.p.loadImage(url, () => {
+					$._incrementPreload();
+					this.spriteSheet = $.loadImage(url, () => {
 						_generateSheetFrames();
-						pInst._decrementPreload();
+						$._decrementPreload();
 					});
 					if (typeof sheet == 'string') {
 						owner.spriteSheet = this.spriteSheet;
@@ -4237,7 +4225,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				// list of images
 				for (let i = 0; i < args.length; i++) {
 					if (args[i] instanceof p5.Image) this.push(args[i]);
-					else this.push(this.p.loadImage(args[i]));
+					else this.push($.loadImage(args[i]));
 				}
 			}
 			// single frame animations don't need to play
@@ -4311,7 +4299,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					`The animation named "${this.name}" must be loaded before it can be properly copied. Sprites need their own copy of a group's animation. Try loading the animation in the preload function and creating new group sprites in the setup function.`
 				);
 			}
-			let ani = new this.p.SpriteAnimation();
+			let ani = new $.SpriteAnimation();
 			ani.spriteSheet = this.spriteSheet;
 			for (let i = 0; i < this.length; i++) {
 				ani.push(this[i]);
@@ -4348,19 +4336,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			sx ??= 1;
 			sy ??= 1;
 
-			this.p.push();
-			this.p.imageMode('center');
-			this.p.translate(this.x, this.y);
-			this.p.rotate(r || this.rotation);
-			this.p.scale(sx * this._scale._x, sy * this._scale._y);
+			$.push();
+			$.imageMode('center');
+			$.translate(this.x, this.y);
+			$.rotate(r || this.rotation);
+			$.scale(sx * this._scale._x, sy * this._scale._y);
 			let img = this[this._frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
 					let { x, y, w, h } = img; // image info
 					if (!this.demoMode) {
-						this.p.image(this.spriteSheet, this.offset.x, this.offset.y, w, h, x, y, w, h);
+						$.image(this.spriteSheet, this.offset.x, this.offset.y, w, h, x, y, w, h);
 					} else {
-						this.p.image(
+						$.image(
 							this.spriteSheet,
 							this.offset.x,
 							this.offset.y,
@@ -4371,7 +4359,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						);
 					}
 				} else {
-					this.p.image(img, this.offset.x, this.offset.y);
+					$.image(img, this.offset.x, this.offset.y);
 				}
 			} else {
 				log(
@@ -4383,7 +4371,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				);
 			}
 
-			this.p.pop();
+			$.pop();
 		}
 
 		update() {
@@ -4561,7 +4549,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let { x, y, w, h } = img; // image info
 
-			let image = this.p.createImage(w, h);
+			let image = $.createImage(w, h);
 			image.copy(this.spriteSheet, this.offset.x, this.offset.y, w, h, x, y, w, h);
 			return image;
 		}
@@ -4622,7 +4610,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	this.SpriteAnimation.props = [
+	$.SpriteAnimation.props = [
 		'demoMode',
 		'endOnFirstFrame',
 		'frameDelay',
@@ -4648,12 +4636,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * @private
 	 */
-	this.SpriteAnimations = class {
+	$.SpriteAnimations = class {
 		#_ = {};
 		constructor() {
 			let _this = this;
 
-			let props = [...pInst.SpriteAnimation.props];
+			let props = [...$.SpriteAnimation.props];
 			let vecProps = ['offset', 'scale'];
 
 			for (let prop of props) {
@@ -4703,7 +4691,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @class
 	 * @extends Array<Sprite>
 	 */
-	this.Group = class extends Array {
+	$.Group = class extends Array {
 		/**
 		 * <a href="https://p5play.org/learn/group.html">
 		 * Look at the Group reference pages before reading these docs.
@@ -4730,16 +4718,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		constructor(...args) {
 			let parent;
-			if (args[0] instanceof pInst.Group) {
+			if (args[0] instanceof $.Group) {
 				parent = args[0];
 				args = args.slice(1);
 			}
 			super(...args);
-			this.p = pInst;
 
 			if (typeof args[0] == 'number') return;
 			for (let s of this) {
-				if (!(s instanceof this.p.Sprite)) {
+				if (!(s instanceof $.Sprite)) {
 					throw new Error('A group can only contain sprites');
 				}
 			}
@@ -4950,12 +4937,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.idNum;
 
-			if (this.p.p5play.groupsCreated < 999) {
-				this.idNum = this.p.p5play.groupsCreated;
+			if ($.p5play.groupsCreated < 999) {
+				this.idNum = $.p5play.groupsCreated;
 			} else {
 				// find the first empty slot in the groups array
-				for (let i = 1; i < this.p.p5play.groups.length; i++) {
-					if (!this.p.p5play.groups[i]?.removed) {
+				for (let i = 1; i < $.p5play.groups.length; i++) {
+					if (!$.p5play.groups[i]?.removed) {
 						this.idNum = i;
 						break;
 					}
@@ -4966,8 +4953,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					);
 					// if there are no empty slots, try to prevent a crash by
 					// finding the first slot that has a group with no sprites in it
-					for (let i = 1; i < this.p.p5play.groups.length; i++) {
-						if (!this.p.p5play.groups[i].length) {
+					for (let i = 1; i < $.p5play.groups.length; i++) {
+						if (!$.p5play.groups[i].length) {
 							this.idNum = i;
 							break;
 						}
@@ -4977,12 +4964,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			this._uid = this.idNum;
-			this.p.p5play.groups[this._uid] = this;
-			this.p.p5play.groupsCreated++;
+			$.p5play.groups[this._uid] = this;
+			$.p5play.groupsCreated++;
 
 			// if the allSprites group doesn't exist yet,
 			// this group must be the allSprites group!
-			if (!this.p.allSprites) this._isAllSpritesGroup = true;
+			if (!$.allSprites) this._isAllSpritesGroup = true;
 
 			/**
 			 * Groups can have subgroups, which inherit the properties
@@ -4997,16 +4984,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @type {Number}
 			 * @default undefined
 			 */
-			if (parent instanceof this.p.Group) {
+			if (parent instanceof $.Group) {
 				parent.subgroups.push(this);
 				let p = parent;
 				do {
-					p = this.p.p5play.groups[p.parent];
+					p = $.p5play.groups[p.parent];
 					p.subgroups.push(this);
 				} while (!p._isAllSpritesGroup);
 				this.parent = parent._uid;
 			} else if (!this._isAllSpritesGroup) {
-				this.p.allSprites.subgroups.push(this);
+				$.allSprites.subgroups.push(this);
 				this.parent = 0;
 			}
 
@@ -5014,7 +5001,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Keys are the animation label, values are SpriteAnimation objects.
 			 * @type {SpriteAnimations}
 			 */
-			this.animations = new this.p.SpriteAnimations();
+			this.animations = new $.SpriteAnimations();
 
 			this._hasOverlap = {};
 			this._collisions = {};
@@ -5022,7 +5009,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let _this = this;
 
-			this.Sprite = class extends this.p.Sprite {
+			this.Sprite = class extends $.Sprite {
 				constructor() {
 					super(_this, ...arguments);
 				}
@@ -5036,7 +5023,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			// but for typescript defs they should be typeof Sprite
 			// and get replaced as such by the p5play-types build.js script
 
-			this.Group = class extends this.p.Group {
+			this.Group = class extends $.Group {
 				constructor() {
 					super(_this, ...arguments);
 				}
@@ -5067,7 +5054,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				};
 			}
 
-			for (let prop of this.p.Sprite.propsAll) {
+			for (let prop of $.Sprite.propsAll) {
 				if (prop == 'ani' || prop == 'velocity') continue;
 
 				Object.defineProperty(this, prop, {
@@ -5075,7 +5062,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						let val = _this['_' + prop];
 						let i = _this.length - 1;
 						if (val === undefined && !_this._isAllSpritesGroup) {
-							let parent = this.p.p5play.groups[_this.parent];
+							let parent = $.p5play.groups[_this.parent];
 							if (parent) {
 								val = parent[prop];
 								i = parent.length - 1;
@@ -5101,7 +5088,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let vecProp of vecProps) {
 				vecProp = '_' + vecProp;
 				if (vecProp != 'vel') this[vecProp] = {};
-				else this[vecProp] = new this.p.Vector();
+				else this[vecProp] = new $.Vector();
 				this[vecProp]._x = 0;
 				this[vecProp]._y = 0;
 				for (let prop of ['x', 'y']) {
@@ -5110,7 +5097,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 							let val = _this[vecProp]['_' + prop];
 							let i = _this.length - 1;
 							if (val === undefined && !_this._isAllSpritesGroup) {
-								let parent = _this.p.p5play.groups[_this.parent];
+								let parent = $.p5play.groups[_this.parent];
 								if (parent) {
 									val = parent[vecProp][prop];
 									i = parent.length - 1;
@@ -5317,7 +5304,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (contactType == 0) type = eventTypes._collisions[eventType];
 			else type = eventTypes._overlappers[eventType];
 
-			let ledger = this.p.p5play[type];
+			let ledger = $.p5play[type];
 
 			let l = (ledger[this._uid] ??= {});
 
@@ -5597,7 +5584,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		moveTo(x, y, speed) {
 			if (typeof x != 'number') {
 				let obj = x;
-				if (obj == this.p.mouse && !this.p.mouse.active) return;
+				if (obj == $.mouse && !$.mouse.isActive) return;
 				speed = y;
 				y = obj.y;
 				x = obj.x;
@@ -5619,7 +5606,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		moveTowards(x, y, tracking) {
 			if (typeof x != 'number') {
 				let obj = x;
-				if (obj == this.p.mouse && !this.p.mouse.active) return;
+				if (obj == $.mouse && !$.mouse.isActive) return;
 				tracking = y;
 				y = obj.y;
 				x = obj.x;
@@ -5641,7 +5628,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		moveAway(x, y, repel) {
 			if (typeof x != 'number') {
 				let obj = x;
-				if (obj == this.p.mouse && !this.p.mouse.active) return;
+				if (obj == $.mouse && !$.mouse.isActive) return;
 				repel = y;
 				y = obj.y;
 				x = obj.x;
@@ -5675,11 +5662,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				console.warn(
 					"Adding a sprite to a group that was removed. Use `group.removeAll()` to remove all of a group's sprites without removing the group itself. Restoring the group in p5play's memory."
 				);
-				this.p.p5play.groups[this._uid] = this;
+				$.p5play.groups[this._uid] = this;
 				this.removed = false;
 			}
 			for (let s of sprites) {
-				if (!(s instanceof this.p.Sprite)) {
+				if (!(s instanceof $.Sprite)) {
 					throw new Error('You can only add sprites to a group, not ' + typeof s);
 				}
 				if (s.removed) {
@@ -5693,8 +5680,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (hasOverlap && !s._hasSensors) {
 						s.addDefaultSensors();
 					}
-					if (tuid >= 1000) b = this.p.p5play.sprites[tuid];
-					else b = this.p.p5play.groups[tuid];
+					if (tuid >= 1000) b = $.p5play.sprites[tuid];
+					else b = $.p5play.groups[tuid];
 
 					if (!b || b.removed) continue;
 
@@ -5704,7 +5691,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				for (let event in eventTypes) {
 					let contactTypes = eventTypes[event];
 					for (let contactType of contactTypes) {
-						let ledger = this.p.p5play[contactType];
+						let ledger = $.p5play[contactType];
 						let lg = ledger[this._uid];
 						if (!lg) continue;
 
@@ -5718,7 +5705,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				super.push(s);
 				// push to subgroups, excluding allSprites
 				// since sprites are automatically added to allSprites
-				if (this.parent) this.p.p5play.groups[this.parent].push(s);
+				if (this.parent) $.p5play.groups[this.parent].push(s);
 
 				s.groups.push(this);
 			}
@@ -5770,13 +5757,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				throw new TypeError('The callback to group.cull must be a function');
 			}
 
-			let cx = this.p.camera.x - this.p.canvas.hw / this.p.camera.zoom;
-			let cy = this.p.camera.y - this.p.canvas.hh / this.p.camera.zoom;
+			let cx = $.camera.x - $.canvas.hw / $.camera.zoom;
+			let cy = $.camera.y - $.canvas.hh / $.camera.zoom;
 
 			let minX = -left + cx;
 			let minY = -top + cy;
-			let maxX = this.p.width + right + cx;
-			let maxY = this.p.height + bottom + cy;
+			let maxX = $.width + right + cx;
+			let maxY = $.height + bottom + cy;
 
 			let culled = 0;
 			for (let i = 0; i < this.length; i++) {
@@ -5867,14 +5854,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			// loop through the groups that the sprite was removed from
 			for (let gID of gIDs) {
-				let a = this.p.p5play.groups[gID];
+				let a = $.p5play.groups[gID];
 				for (let eventType in eventTypes) {
 					// loop through group's contacts with other sprites and groups
 					for (let b_uid in a[eventType]) {
 						if (a[eventType][b_uid] == 0) continue;
 						let b;
-						if (b_uid >= 1000) b = this.p.p5play.sprites[b_uid];
-						else b = this.p.p5play.groups[b_uid];
+						if (b_uid >= 1000) b = $.p5play.sprites[b_uid];
+						else b = $.p5play.groups[b_uid];
 						// check if any group members are still in contact with the sprite
 						let inContact = false;
 						for (let s of a) {
@@ -5949,7 +5936,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					i--;
 					continue;
 				}
-				if (sprite._visible !== false && (!this.p.p5play._inPostDraw || sprite.autoDraw)) {
+				if (sprite._visible !== false && (!$.p5play._inPostDraw || sprite.autoDraw)) {
 					sprite.draw();
 				}
 			}
@@ -5965,7 +5952,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		update() {
 			for (let s of this) {
-				if (!this.p.p5play._inPostDraw || this.autoUpdate) {
+				if (!$.p5play._inPostDraw || this.autoUpdate) {
 					s.update();
 				}
 			}
@@ -5977,7 +5964,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	// sprite -> sprite
 	// sprite -> group
 	//  group -> group
-	this.Sprite.prototype.__step = this.Group.prototype.__step = function () {
+	$.Sprite.prototype.__step = $.Group.prototype.__step = function () {
 		// for each type of collision and overlap event
 		let a = this;
 		let b;
@@ -5986,11 +5973,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (k >= 1000) {
 					// if a is group or a is sprite and a._uid >= k
 					if (a._isGroup || a._uid >= k) continue;
-					b = this.p.p5play.sprites[k];
+					b = $.p5play.sprites[k];
 				} else {
 					// if a is group and a._uid >= k
 					if (a._isGroup && a._uid >= k) continue;
-					b = this.p.p5play.groups[k];
+					b = $.p5play.groups[k];
 				}
 
 				let v = a[event][k] + 1;
@@ -6005,7 +5992,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	this.Sprite.prototype.___step = this.Group.prototype.___step = function () {
+	$.Sprite.prototype.___step = $.Group.prototype.___step = function () {
 		let a = this;
 		let b, contactType, shouldOverlap, cb;
 		let checkCollisions = true;
@@ -6013,10 +6000,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let k in this[event]) {
 				if (k >= 1000) {
 					if (a._isGroup || a._uid >= k) continue;
-					b = this.p.p5play.sprites[k];
+					b = $.p5play.sprites[k];
 				} else {
 					if (a._isGroup && a._uid >= k) continue;
-					b = this.p.p5play.groups[k];
+					b = $.p5play.groups[k];
 				}
 
 				// contact callbacks can only be called between sprites
@@ -6035,7 +6022,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (i == 2 && v >= 1) continue;
 					contactType = eventTypes[event][i];
 
-					let la = this.p.p5play[contactType][a._uid];
+					let la = $.p5play[contactType][a._uid];
 					if (la) {
 						cb = la[b._uid];
 						if (cb) cb.call(a, a, b, v);
@@ -6045,7 +6032,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						}
 					}
 
-					let lb = this.p.p5play[contactType][b._uid];
+					let lb = $.p5play[contactType][b._uid];
 					if (lb) {
 						cb = lb[a._uid];
 						if (cb) cb.call(b, b, a, v);
@@ -6068,13 +6055,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		// and/or overlapped events are handled
 		if (this._removed) {
 			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
-				if (this._isSprite) delete this.p.p5play.sprites[this._uid];
-				else if (this.p.p5play.targetVersion >= 16) delete this.p.p5play.groups[this._uid];
+				if (this._isSprite) delete $.p5play.sprites[this._uid];
+				else if ($.p5play.targetVersion >= 16) delete $.p5play.groups[this._uid];
 
 				// remove contact events
 				for (let eventType in eventTypes) {
 					for (let contactType of eventTypes[eventType]) {
-						delete this.p.p5play[contactType][this._uid];
+						delete $.p5play[contactType][this._uid];
 					}
 				}
 			}
@@ -6100,33 +6087,33 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * sprite.addAni(name, frame1, frame2, frame3...);
 	 * sprite.addAni(name, atlas);
 	 */
-	this.Sprite.prototype.addAnimation =
-		this.Group.prototype.addAnimation =
-		this.Sprite.prototype.addAni =
-		this.Group.prototype.addAni =
-		this.Sprite.prototype.addImage =
-		this.Group.prototype.addImage =
-		this.Sprite.prototype.addImg =
-		this.Group.prototype.addImg =
+	$.Sprite.prototype.addAnimation =
+		$.Group.prototype.addAnimation =
+		$.Sprite.prototype.addAni =
+		$.Group.prototype.addAni =
+		$.Sprite.prototype.addImage =
+		$.Group.prototype.addImage =
+		$.Sprite.prototype.addImg =
+		$.Group.prototype.addImg =
 			function () {
-				if (this.p.p5play.disableImages) {
-					this._ani = new this.p.SpriteAnimation();
+				if ($.p5play.disableImages) {
+					this._ani = new $.SpriteAnimation();
 					return;
 				}
 				let args = [...arguments];
 				let name, ani;
-				if (args[0] instanceof this.p.SpriteAnimation) {
+				if (args[0] instanceof $.SpriteAnimation) {
 					ani = args[0];
 					if (ani._addedToSpriteOrGroup) ani = ani.clone();
 					name = ani.name || 'default';
 					ani.name = name;
-				} else if (args[1] instanceof this.p.SpriteAnimation) {
+				} else if (args[1] instanceof $.SpriteAnimation) {
 					name = args[0];
 					ani = args[1];
 					if (ani._addedToSpriteOrGroup) ani = ani.clone();
 					ani.name = name;
 				} else {
-					ani = new this.p.SpriteAnimation(this, ...args);
+					ani = new $.SpriteAnimation(this, ...args);
 					name = ani.name;
 				}
 				this.animations[name] = ani;
@@ -6147,14 +6134,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @memberof Sprite
 	 * @instance
 	 */
-	this.Sprite.prototype.addAnis =
-		this.Group.prototype.addAnis =
-		this.Sprite.prototype.addAnimations =
-		this.Group.prototype.addAnimations =
-		this.Sprite.prototype.addImages =
-		this.Group.prototype.addImages =
-		this.Sprite.prototype.addImgs =
-		this.Group.prototype.addImgs =
+	$.Sprite.prototype.addAnis =
+		$.Group.prototype.addAnis =
+		$.Sprite.prototype.addAnimations =
+		$.Group.prototype.addAnimations =
+		$.Sprite.prototype.addImages =
+		$.Group.prototype.addImages =
+		$.Sprite.prototype.addImgs =
+		$.Group.prototype.addImgs =
 			function () {
 				let args = arguments;
 				let atlases;
@@ -6170,7 +6157,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 
-	this.World = class extends pl.World {
+	$.World = class extends pl.World {
 		/**
 		 * <a href="https://p5play.org/learn/world.html">
 		 * Look at the World reference pages before reading these docs.
@@ -6184,7 +6171,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		constructor() {
 			super(new pl.Vec2(0, 0), true);
-			this.p = pInst;
 
 			this.mod = [];
 
@@ -6211,7 +6197,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					val = Math.round(val || 0);
 					if (val == _this.m_gravity.x) return;
 					_this.mod[0] = true;
-					for (let s of _this.p.allSprites) {
+					for (let s of $.allSprites) {
 						s.sleeping = false;
 					}
 					_this.m_gravity.x = val;
@@ -6223,7 +6209,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					val = Math.round(val || 0);
 					if (val == _this.m_gravity.y) return;
 					_this.mod[0] = true;
-					for (let s of _this.p.allSprites) {
+					for (let s of $.allSprites) {
 						s.sleeping = false;
 					}
 					_this.m_gravity.y = val;
@@ -6287,15 +6273,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Number} [positionIterations] - 3 by default
 		 */
 		step(timeStep, velocityIterations, positionIterations) {
-			for (let s of this.p.allSprites) {
+			for (let s of $.allSprites) {
 				s.prevPos.x = s.x;
 				s.prevPos.y = s.y;
 				s.prevRotation = s.rotation;
 			}
-			super.step(timeStep || 1 / (this.p._targetFrameRate || 60), velocityIterations || 8, positionIterations || 3);
+			super.step(timeStep || 1 / ($._targetFrameRate || 60), velocityIterations || 8, positionIterations || 3);
 
-			let sprites = Object.values(this.p.p5play.sprites);
-			let groups = Object.values(this.p.p5play.groups);
+			let sprites = Object.values($.p5play.sprites);
+			let groups = Object.values($.p5play.groups);
 
 			for (let s of sprites) s._step();
 			for (let g of groups) g._step();
@@ -6303,7 +6289,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let s of sprites) s.___step();
 			for (let g of groups) g.___step();
 
-			this.p.canvas.dispatchEvent(new Event('p5play_world_step'));
+			$.canvas.dispatchEvent(new Event('p5play_world_step'));
 			if (this.autoStep) this.autoStep = null;
 		}
 
@@ -6336,7 +6322,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			});
 			if (fxts.length == 0) return [];
 
-			group ??= this.p.allSprites;
+			group ??= $.allSprites;
 			let sprites = [];
 			for (let fxt of fxts) {
 				const s = fxt.m_body.sprite;
@@ -6365,9 +6351,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		getMouseSprites() {
-			let sprites = this.getSpritesAt(this.p.mouse.x, this.p.mouse.y);
-			if (this.p.camera._wasOff) {
-				let uiSprites = this.getSpritesAt(this.p.canvas.mouse.x, this.p.canvas.mouse.y, this.p.allSprites, false);
+			let sprites = this.getSpritesAt($.mouse.x, $.mouse.y);
+			if ($.camera._wasOff) {
+				let uiSprites = this.getSpritesAt($.mouse.canvasPos.x, $.mouse.canvasPos.y, $.allSprites, false);
 				if (uiSprites.length) sprites = [...uiSprites, ...sprites];
 			}
 			return sprites;
@@ -6509,7 +6495,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	this.Camera = class {
+	$.Camera = class {
 		/**
 		 * <a href="https://p5play.org/learn/camera.html">
 		 * Look at the Camera reference pages before reading these docs.
@@ -6528,32 +6514,28 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * cycle to draw interface elements in an absolute position.
 		 */
 		constructor() {
-			this.p = pInst;
-			let _this = this;
-
 			// camera position
-			this._pos = this.p.createVector.call(this.p);
+			this._pos = $.createVector.call($);
 
 			// camera translation
 			this.__pos = { x: 0, y: 0, rounded: {} };
 
 			/**
-			 * Use `canvas.mouse.x` and `canvas.mouse.y` instead.
+			 * Use `mouse.canvasPos.x` and `mouse.canvasPos.y` instead.
 			 * @deprecated
 			 */
 			this.mouse = {
-				x: this.p.mouseX,
-				y: this.p.mouseY
+				x: $.mouseX,
+				y: $.mouseY
 			};
 
 			/**
 			 * Read only. True if the camera is active.
-			 * Use the methods Camera.on() and Camera.off()
-			 * to enable or disable the camera.
+			 * Use camera.on() to activate the camera.
 			 * @type {Boolean}
 			 * @default false
 			 */
-			this.active = false;
+			this.isActive = false;
 
 			this.bound = {
 				min: { x: 0, y: 0 },
@@ -6591,13 +6573,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_calcBoundsX(val) {
-			let mod = this.p.canvas.hw / this._zoom;
+			let mod = $.canvas.hw / this._zoom;
 			this.bound.min.x = val - mod - 100;
 			this.bound.max.x = val + mod + 100;
 		}
 
 		_calcBoundsY(val) {
-			let mod = this.p.canvas.hh / this._zoom;
+			let mod = $.canvas.hh / this._zoom;
 			this.bound.min.y = val - mod - 100;
 			this.bound.max.y = val + mod + 100;
 		}
@@ -6612,9 +6594,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set x(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.x = val;
-			let x = -val + this.p.canvas.hw / this._zoom;
+			let x = -val + $.canvas.hw / this._zoom;
 			this.__pos.x = x;
-			if (this.p.allSprites.pixelPerfect) {
+			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.x = Math.round(x);
 			}
 			this._calcBoundsX(val);
@@ -6630,9 +6612,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set y(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.y = val;
-			let y = -val + this.p.canvas.hh / this._zoom;
+			let y = -val + $.canvas.hh / this._zoom;
 			this.__pos.y = y;
-			if (this.p.allSprites.pixelPerfect) {
+			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.y = Math.round(y);
 			}
 			this._calcBoundsY(val);
@@ -6673,7 +6655,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				for (let i = 0; i < steps; i++) {
 					this.x += velX;
 					this.y += velY;
-					await this.p.sleep();
+					await $.sleep();
 					if (destIdx != this._destIdx) return false;
 				}
 				this.x = x;
@@ -6697,11 +6679,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set zoom(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._zoom = val;
-			let x = -this._pos.x + this.p.canvas.hw / val;
-			let y = -this._pos.y + this.p.canvas.hh / val;
+			let x = -this._pos.x + $.canvas.hw / val;
+			let y = -this._pos.y + $.canvas.hh / val;
 			this.__pos.x = x;
 			this.__pos.y = y;
-			if (this.p.allSprites.pixelPerfect) {
+			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.x = Math.round(x);
 				this.__pos.rounded.y = Math.round(y);
 			}
@@ -6729,7 +6711,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				for (let i = 0; i < frames; i++) {
 					if (zoomIdx != this._zoomIdx) return false;
 					this.zoom += speed;
-					await this.p.sleep();
+					await $.sleep();
 				}
 				this.zoom = target;
 				return true;
@@ -6743,17 +6725,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 */
 		on() {
-			if (!this.active) {
-				this.p.push();
-				this.p.scale(this._zoom);
-				if (!this.p.allSprites.pixelPerfect) {
-					this.p.translate(this.__pos.x, this.__pos.y);
+			if (!this.isActive) {
+				$.push();
+				$.scale(this._zoom);
+				if (!$.allSprites.pixelPerfect) {
+					$.translate(this.__pos.x, this.__pos.y);
 				} else {
 					this.__pos.rounded.x ??= Math.round(this.__pos.x);
 					this.__pos.rounded.y ??= Math.round(this.__pos.y);
-					this.p.translate(this.__pos.rounded.x, this.__pos.rounded.y);
+					$.translate(this.__pos.rounded.x, this.__pos.rounded.y);
 				}
-				this.active = true;
+				this.isActive = true;
 			}
 		}
 
@@ -6764,9 +6746,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 */
 		off() {
-			if (this.active) {
-				this.p.pop();
-				this.active = false;
+			if (this.isActive) {
+				$.pop();
+				this.isActive = false;
 				this._wasOff = true;
 			}
 		}
@@ -6802,7 +6784,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		return true;
 	};
 
-	this.Tiles = class {
+	$.Tiles = class {
 		/**
 		 * <a href="https://p5play.org/learn/tiles.html">
 		 * Look at the Tiles reference pages before reading these docs.
@@ -6829,14 +6811,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			w ??= 1;
 			h ??= 1;
 
-			let sprites = new pInst.Group();
+			let sprites = new $.Group();
 
 			for (let row = 0; row < tiles.length; row++) {
 				for (let col = 0; col < tiles[row].length; col++) {
 					let t = tiles[row][col];
 					if (t == ' ' || t == '.') continue;
 					let ani, g;
-					let groups = Object.values(pInst.p5play.groups);
+					let groups = Object.values($.p5play.groups);
 					for (g of groups) {
 						ani = g.animations[t];
 						if (ani) break;
@@ -6857,7 +6839,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						continue;
 					}
 					let s;
-					for (s of pInst.allSprites) {
+					for (s of $.allSprites) {
 						if (s.tile == t) {
 							wasFound = true;
 							break;
@@ -6882,11 +6864,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @deprecated
 	 * @func createTiles
 	 */
-	this.createTiles = function (tiles, x, y, w, h) {
-		return new this.Tiles(tiles, x, y, w, h);
+	$.createTiles = function (tiles, x, y, w, h) {
+		return new $.Tiles(tiles, x, y, w, h);
 	};
 
-	this.Joint = class {
+	$.Joint = class {
 		/**
 		 * Using this Joint class directly is not recommended, but
 		 * if it is used a GlueJoint will be created.
@@ -6904,8 +6886,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {String} [type]
 		 */
 		constructor(spriteA, spriteB, type) {
-			this.p = pInst;
-
 			if (!spriteA?._isSprite || !spriteB?._isSprite) {
 				throw new Error('The Joint constructor requires two sprites as input.');
 			}
@@ -6948,7 +6928,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (l == 'A' && type == 'wheel') continue;
 
 					const prop = '_offset' + l;
-					this[prop] = pInst.createVector.call(pInst);
+					this[prop] = $.createVector.call($);
 
 					for (let axis of ['x', 'y']) {
 						Object.defineProperty(this[prop], axis, {
@@ -7005,7 +6985,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_createJoint(j) {
-			this._j = this.p.world.createJoint(j);
+			this._j = $.world.createJoint(j);
 		}
 
 		_display() {
@@ -7015,9 +6995,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		_draw(xA, yA, xB, yB) {
 			if (yB) {
-				this.p.line(xA, yA, xB, yB);
+				$.line(xA, yA, xB, yB);
 			} else {
-				this.p.point(xA, yA);
+				$.point(xA, yA);
 			}
 		}
 
@@ -7092,15 +7072,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set springiness(val) {
 			if (val > 0) {
 				if (val < 0.1) {
-					val = this.p.map(val, 0, 0.1, 30, 4);
+					val = $.map(val, 0, 0.1, 30, 4);
 				} else if (val < 0.5) {
-					val = this.p.map(val, 0.1, 0.5, 4, 2.5);
+					val = $.map(val, 0.1, 0.5, 4, 2.5);
 				} else if (val < 0.8) {
-					val = this.p.map(val, 0.5, 0.8, 2.5, 1);
+					val = $.map(val, 0.5, 0.8, 2.5, 1);
 				} else if (val < 0.9) {
-					val = this.p.map(val, 0.8, 0.9, 1, 0.5);
+					val = $.map(val, 0.8, 0.9, 1, 0.5);
 				} else {
-					val = this.p.map(val, 0.9, 1.0, 0.5, 0.2);
+					val = $.map(val, 0.9, 1.0, 0.5, 0.2);
 				}
 			}
 			this._springiness = val;
@@ -7219,12 +7199,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this._removed) return;
 			this.spriteA.joints.splice(this.spriteA.joints.indexOf(this), 1);
 			this.spriteB.joints.splice(this.spriteB.joints.indexOf(this), 1);
-			this.p.world.destroyJoint(this._j);
+			$.world.destroyJoint(this._j);
 			this._removed = true;
 		}
 	};
 
-	this.GlueJoint = class extends this.Joint {
+	$.GlueJoint = class extends $.Joint {
 		/**
 		 * Glue joints are used to glue two sprites together.
 		 *
@@ -7236,7 +7216,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	this.DistanceJoint = class extends this.Joint {
+	$.DistanceJoint = class extends $.Joint {
 		/**
 		 * Distance joints are used to constrain the distance
 		 * between two sprites.
@@ -7277,7 +7257,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	this.WheelJoint = class extends this.Joint {
+	$.WheelJoint = class extends $.Joint {
 		/**
 		 * Wheel joints can be used to create vehicles!
 		 *
@@ -7302,7 +7282,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				new pl.Vec2(0, 1)
 			);
 			this._createJoint(j);
-			this._angle = this.p._angleMode == 'degrees' ? 90 : 1.5707963267948966;
+			this._angle = $._angleMode == 'degrees' ? 90 : 1.5707963267948966;
 		}
 
 		_display() {
@@ -7321,8 +7301,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			// Calculate the slopes of the lines
-			let slopeA = this.p.tan(this.spriteA.rotation);
-			let slopeB = this.p.tan(this._angle + this.spriteA.rotation);
+			let slopeA = $.tan(this.spriteA.rotation);
+			let slopeB = $.tan(this._angle + this.spriteA.rotation);
 
 			// Calculate the intersection point
 			let xI = (yB - yA + slopeA * xA - slopeB * xB) / (slopeA - slopeB);
@@ -7345,13 +7325,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set angle(val) {
 			if (val == this._angle) return;
 			this._angle = val;
-			this._j.m_localXAxisA = new pl.Vec2(this.p.cos(val), this.p.sin(val));
+			this._j.m_localXAxisA = new pl.Vec2($.cos(val), $.sin(val));
 			this._j.m_localXAxisA.normalize();
 			this._j.m_localYAxisA = pl.Vec2.crossNumVec2(1.0, this._j.m_localXAxisA);
 		}
 	};
 
-	this.HingeJoint = class extends this.Joint {
+	$.HingeJoint = class extends $.Joint {
 		/**
 		 * Hinge joints attach two sprites together at a pivot point,
 		 * constraining them to rotate around this point, like a hinge.
@@ -7373,8 +7353,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			const offsetAy = this.offsetA.y;
 			const rotationA = this.spriteA.rotation;
 
-			const rotatedOffsetAx = offsetAx * this.p.cos(rotationA) - offsetAy * this.p.sin(rotationA);
-			const rotatedOffsetAy = offsetAx * this.p.sin(rotationA) + offsetAy * this.p.cos(rotationA);
+			const rotatedOffsetAx = offsetAx * $.cos(rotationA) - offsetAy * $.sin(rotationA);
+			const rotatedOffsetAy = offsetAx * $.sin(rotationA) + offsetAy * $.cos(rotationA);
 
 			this._draw(this.spriteA.x + rotatedOffsetAx, this.spriteA.y + rotatedOffsetAy);
 			this.visible = null;
@@ -7402,8 +7382,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		get lowerLimit() {
 			let val = this._j.getLowerLimit();
-			if (this.p._angleMode == 'radians') return val;
-			return this.p.degrees(val);
+			if ($._angleMode == 'radians') return val;
+			return $.degrees(val);
 		}
 		set lowerLimit(val) {
 			if (!this._j.isLimitEnabled()) {
@@ -7411,7 +7391,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			this.spriteA.body.setAwake(true);
 			this.spriteB.body.setAwake(true);
-			if (this.p._angleMode == 'degrees') val = this.p.radians(val);
+			if ($._angleMode == 'degrees') val = $.radians(val);
 			this._j.m_lowerAngle = val;
 		}
 
@@ -7422,8 +7402,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		get upperLimit() {
 			let val = this._j.getUpperLimit();
-			if (this.p._angleMode == 'radians') return val;
-			return this.p.degrees(val);
+			if ($._angleMode == 'radians') return val;
+			return $.degrees(val);
 		}
 		set upperLimit(val) {
 			if (!this._j.isLimitEnabled()) {
@@ -7431,7 +7411,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			this.spriteA.body.setAwake(true);
 			this.spriteB.body.setAwake(true);
-			if (this.p._angleMode == 'degrees') val = this.p.radians(val);
+			if ($._angleMode == 'degrees') val = $.radians(val);
 			this._j.m_upperAngle = val;
 		}
 
@@ -7442,13 +7422,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		get angle() {
 			let ang = this._j.getJointAngle();
-			if (this.p._angleMode == 'radians') return ang;
-			return pInst.radians(ang);
+			if ($._angleMode == 'radians') return ang;
+			return $.radians(ang);
 		}
 	};
-	this.RevoluteJoint = this.HingeJoint;
+	$.RevoluteJoint = $.HingeJoint;
 
-	this.SliderJoint = class extends this.Joint {
+	$.SliderJoint = class extends $.Joint {
 		/**
 		 * A slider joint constrains the motion of two sprites to sliding
 		 * along a common axis, without rotation.
@@ -7490,7 +7470,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set angle(val) {
 			if (val == this._angle) return;
 			this._angle = val;
-			this._j.m_localXAxisA = new pl.Vec2(this.p.cos(val), this.p.sin(val));
+			this._j.m_localXAxisA = new pl.Vec2($.cos(val), $.sin(val));
 			this._j.m_localXAxisA.normalize();
 			this._j.m_localYAxisA = pl.Vec2.crossNumVec2(1.0, this._j.m_localXAxisA);
 		}
@@ -7544,9 +7524,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._j.setLimits(this._j.getLowerLimit(), val);
 		}
 	};
-	this.PrismaticJoint = this.SliderJoint;
+	$.PrismaticJoint = $.SliderJoint;
 
-	this.RopeJoint = class extends this.Joint {
+	$.RopeJoint = class extends $.Joint {
 		/**
 		 * A Rope joint prevents two sprites from going further
 		 * than a certain distance from each other, which is
@@ -7715,7 +7695,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	}
 
 	// default color palettes
-	this.p5play.palettes = [
+	$.p5play.palettes = [
 		{
 			a: 'aqua',
 			b: 'black',
@@ -7755,19 +7735,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * in the system's palettes array.
 	 * @returns {String} a hex color string for use by p5.js functions
 	 */
-	this.colorPal = (c, palette) => {
+	$.colorPal = (c, palette) => {
 		if (c instanceof p5.Color) return c;
 		if (typeof palette == 'number') {
-			palette = pInst.p5play.palettes[palette];
+			palette = $.p5play.palettes[palette];
 		}
-		palette ??= pInst.p5play.palettes[0];
+		palette ??= $.p5play.palettes[0];
 		let clr;
 		if (palette) clr = palette[c];
 		// if transparent
 		if (clr === '' || c === '.' || c === ' ') {
-			return pInst.color(0, 0, 0, 0);
+			return $.color(0, 0, 0, 0);
 		}
-		return pInst.color(clr || c);
+		return $.color(clr || c);
 	};
 
 	/**
@@ -7792,12 +7772,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * let img = spriteArt(str);
 	 */
-	this.spriteArt = (txt, scale, palette) => {
+	$.spriteArt = (txt, scale, palette) => {
 		scale ??= 1;
 		if (typeof palette == 'number') {
-			palette = pInst.p5play.palettes[palette];
+			palette = $.p5play.palettes[palette];
 		}
-		palette ??= pInst.p5play.palettes[0];
+		palette ??= $.p5play.palettes[0];
 		let lines = txt; // accepts 2D arrays of characters
 		if (typeof txt == 'string') {
 			txt = txt.trim();
@@ -7810,7 +7790,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (line.length > w) w = line.length;
 		}
 		let h = lines.length;
-		let img = pInst.createImage(w * scale, h * scale);
+		let img = $.createImage(w * scale, h * scale);
 		img.loadPixels();
 
 		for (let i = 0; i < lines.length; i++) {
@@ -7826,7 +7806,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		img.updatePixels();
 		img.w = img.width;
 		img.h = img.height;
-		pInst.p5play.images.onLoad(img);
+		$.p5play.images.onLoad(img);
 		return img; // return the p5 graphics object
 	};
 
@@ -7838,8 +7818,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @deprecated
 	 * @returns {Sprite}
 	 */
-	this.createSprite = function () {
-		return new this.Sprite(...arguments);
+	$.createSprite = function () {
+		return new $.Sprite(...arguments);
 	};
 
 	/**
@@ -7850,8 +7830,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @deprecated
 	 * @returns {Group}
 	 */
-	this.createGroup = function () {
-		return new this.Group(...arguments);
+	$.createGroup = function () {
+		return new $.Group(...arguments);
 	};
 
 	/**
@@ -7862,8 +7842,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * @returns {SpriteAnimation}
 	 */
-	this.loadAnimation = this.loadAni = function () {
-		return new this.SpriteAnimation(...arguments);
+	$.loadAnimation = $.loadAni = function () {
+		return new $.SpriteAnimation(...arguments);
 	};
 
 	/**
@@ -7876,7 +7856,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @param {Number} sX scale of the animation in the x direction
 	 * @param {Number} sY scale of the animation in the y direction
 	 */
-	this.animation = function (ani, x, y, r, sX, sY) {
+	$.animation = function (ani, x, y, r, sX, sY) {
 		if (ani.visible) ani.update();
 		ani.draw(x, y, r, sX, sY);
 	};
@@ -7895,7 +7875,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *   await delay(3000);
 	 * }
 	 */
-	this.delay = (milliseconds) => {
+	$.delay = (milliseconds) => {
 		if (!milliseconds) return new Promise(requestAnimationFrame);
 		// else it wraps setTimeout in a Promise
 		return new Promise((resolve) => {
@@ -7917,13 +7897,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *   await sleep(3000);
 	 * }
 	 */
-	this.sleep = (milliseconds) => {
+	$.sleep = (milliseconds) => {
 		if (!milliseconds) {
 			return new Promise((resolve) => {
-				this.canvas.addEventListener('p5play_world_step', resolve);
+				$.canvas.addEventListener('p5play_world_step', resolve);
 			});
 		}
-		return this.delay(milliseconds);
+		return $.delay(milliseconds);
 	};
 
 	/**
@@ -7934,7 +7914,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @example
 	 * await play(sound);
 	 */
-	this.play = (sound) => {
+	$.play = (sound) => {
 		if (!sound?.play) {
 			throw new Error("Tried to play your sound but it wasn't a sound object.");
 		}
@@ -7946,7 +7926,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 	async function playIntro() {
 		if (document.getElementById('p5play-intro')) return;
-		pInst._incrementPreload();
+		$._incrementPreload();
 		let d = document.createElement('div');
 		d.id = 'p5play-intro';
 		d.style = 'position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1000; background-color: black;';
@@ -7970,16 +7950,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		await new Promise((r) => (logo.onload = r));
 		d.append(logo);
 		document.body.append(d);
-		await pInst.delay();
+		await $.delay();
 		logo.offsetHeight; // trigger css reflow
 		logo.style.scale = 1.2;
-		await pInst.delay(1100);
+		await $.delay(1100);
 		logo.style.opacity = 0;
-		await pInst.delay(400);
+		await $.delay(400);
 		d.style.display = 'none';
 		d.remove();
 		document.getElementById('p5play-intro')?.remove();
-		pInst._decrementPreload();
+		$._decrementPreload();
 	}
 
 	if (window.location) {
@@ -8018,7 +7998,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	let userDisabledP5Errors = p5.disableFriendlyErrors;
 	p5.disableFriendlyErrors = true;
 
-	const _createCanvas = this.createCanvas;
+	const _createCanvas = $.createCanvas;
 
 	/**
 	 * Use of `new Canvas()` is preferred. Check the Canvas constructor
@@ -8029,7 +8009,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * @returns {p5.Renderer} renderer object
 	 */
-	this.createCanvas = function () {
+	$.createCanvas = function () {
 		let args = [...arguments];
 		let isFullScreen, isPixelated, scale;
 		if (typeof args[0] == 'string') {
@@ -8068,7 +8048,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				args.splice(2, 1);
 			}
 		}
-		let rend = _createCanvas.call(pInst, ...args);
+		let rend = _createCanvas.call($, ...args);
 		this.ctx ??= this.drawingContext;
 		let c = rend.canvas || rend;
 		c.tabIndex = 0;
@@ -8088,7 +8068,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		});
 		c.addEventListener('mouseover', () => {
 			this.mouse.isOnCanvas = true;
-			this.mouse.active = true;
+			this.mouse.isActive = true;
 		});
 		c.addEventListener('mouseleave', () => {
 			this.mouse.isOnCanvas = false;
@@ -8099,7 +8079,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		c.resize = this.resizeCanvas;
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
-		c.mouse = { x: pInst.mouseX, y: pInst.mouseY };
+		c.mouse = { x: $.mouseX, y: $.mouseY };
 		this.camera.x = c.hw;
 		this.camera.y = c.hh;
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
@@ -8161,17 +8141,17 @@ main {
 		document.head.appendChild(styleElem);
 
 		if (isPixelated) {
-			pInst.pixelDensity(1);
-			pInst.noSmooth();
-			pInst.textFont('monospace');
-			pInst.ctx.imageSmoothingEnabled = false;
+			$.pixelDensity(1);
+			$.noSmooth();
+			$.textFont('monospace');
+			$.ctx.imageSmoothingEnabled = false;
 		}
 
 		return rend;
 	};
 
 	// this is only for jsdoc
-	this.Canvas = class {
+	$.Canvas = class {
 		/**
 		 * p5play adds some extra functionality to the p5.js `createCanvas`
 		 * function. See the examples below.
@@ -8269,97 +8249,95 @@ main {
 	 * HTML5 canvas element.
 	 * @type {Canvas}
 	 */
-	this.canvas;
+	$.canvas;
 
-	this.Canvas = function () {
-		return pInst.createCanvas(...arguments).canvas;
+	$.Canvas = function () {
+		return $.createCanvas(...arguments).canvas;
 	};
 
-	const _resizeCanvas = this.resizeCanvas;
+	const _resizeCanvas = $.resizeCanvas;
 
 	/**
 	 * Use of `canvas.resize()` is preferred.
 	 */
-	this.resizeCanvas = (w, h) => {
+	$.resizeCanvas = (w, h) => {
 		w ??= window.innerWidth;
 		h ??= window.innerHeight;
-		_resizeCanvas.call(this, w, h);
-		let c = this.canvas;
-		c.w = c.width / this.pixelDensity();
-		c.h = c.height / this.pixelDensity();
+		_resizeCanvas.call($, w, h);
+		let c = $.canvas;
+		c.w = c.width / $.pixelDensity();
+		c.h = c.height / $.pixelDensity();
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
 		if (c.fullscreen) {
 			if (c.w / c.h > window.innerWidth / window.innerHeight) {
-				c.style = 'width: 100%!important; height: auto!important;';
+				c.style.width = '100%!important';
+				c.style.height = 'auto!important';
 			} else {
-				c.style = 'height: 100%!important; width: auto!important;';
+				c.style.width = 'auto!important';
+				c.style.height = '100%!important';
 			}
 		}
-		this.camera.x = c.hw;
-		this.camera.y = c.hh;
+		$.camera.x = c.hw;
+		$.camera.y = c.hh;
 	};
 
-	const _background = this.background;
+	const _background = $.background;
 
 	/**
 	 * Just like the p5.js background function except it also accepts
 	 * a color palette code.
 	 */
-	this.background = function () {
+	$.background = function () {
 		let args = arguments;
 		let c;
 		if (args.length == 1 && (typeof args[0] == 'string' || args[0] instanceof p5.Color)) {
-			c = this.colorPal(args[0]);
+			c = $.colorPal(args[0]);
 		}
-		if (c !== undefined) _background.call(this, c);
-		else _background.call(this, ...args);
+		if (c !== undefined) _background.call($, c);
+		else _background.call($, ...args);
 	};
 
-	const _fill = this.fill;
+	const _fill = $.fill;
 
 	/**
 	 * Just like the p5.js fill function except it also accepts
 	 * a color palette code.
 	 */
-	this.fill = function () {
+	$.fill = function () {
 		let args = arguments;
 		let c;
-		if (args.length == 1) {
-			c = this.colorPal(args[0]);
-		}
-		if (c !== undefined) _fill.call(this, c);
-		else _fill.call(this, ...args);
+		if (args.length == 1) c = $.colorPal(args[0]);
+		if (c !== undefined) _fill.call($, c);
+		else _fill.call($, ...args);
 	};
 
-	const _stroke = this.stroke;
+	const _stroke = $.stroke;
 
 	/**
 	 * Just like the p5.js stroke function except it also accepts
 	 * a color palette code.
 	 */
-	this.stroke = function () {
+	$.stroke = function () {
 		let args = arguments;
 		let c;
-		if (args.length == 1) {
-			c = this.colorPal(args[0]);
-		}
-		if (c !== undefined) _stroke.call(this, c);
-		else _stroke.call(this, ...args);
+		if (args.length == 1) c = $.colorPal(args[0]);
+		if (c !== undefined) _stroke.call($, c);
+		else _stroke.call($, ...args);
 	};
 
 	// images is a cache of loaded/loading images, to prevent making
 	// the same loadImage fetch requests multiple times (inefficient)
-	this.p5play.images = {
+	$.p5play.images = {
 		onLoad: (img) => {} // called anytime an image is fully loaded
 	};
 
 	// This is a debugging tool that disables images from loading
 	// or displaying. Mainly used to test other people's projects without
 	// having to download their images.
-	this.p5play.disableImages = false;
+	$.p5play.disableImages = false;
 
-	const _loadImage = this.loadImage;
+	const _loadImage = $.loadImage;
 
 	/**
 	 * Just like the p5.js loadImage function except it also caches images
@@ -8372,15 +8350,15 @@ main {
 	 * @param {number} [height]
 	 * @param {function} [callback]
 	 */
-	this.loadImage = this.loadImg = function () {
-		if (this.p5play.disableImages) {
-			pInst._decrementPreload();
+	$.loadImage = $.loadImg = function () {
+		if ($.p5play.disableImages) {
+			$._decrementPreload();
 			// return a dummy image object to prevent errors
 			return { w: 16, width: 16, h: 16, height: 16, pixels: [] };
 		}
 		let args = arguments;
 		let url = args[0];
-		let img = pInst.p5play.images[url];
+		let img = $.p5play.images[url];
 		let cb;
 		if (typeof args[args.length - 1] == 'function') {
 			cb = args[args.length - 1];
@@ -8391,10 +8369,10 @@ main {
 				if (cb) {
 					img.cbs.push(cb);
 					img.calls++;
-				} else pInst._decrementPreload();
+				} else $._decrementPreload();
 			} else {
 				if (cb) cb(); // if already loaded, run the callback immediately
-				pInst._decrementPreload();
+				$._decrementPreload();
 			}
 			return img;
 		}
@@ -8405,29 +8383,29 @@ main {
 				cb(_img);
 			}
 			for (let i = 1; i < _img.calls; i++) {
-				pInst._decrementPreload();
+				$._decrementPreload();
 			}
 			_img.cbs = [];
-			pInst.p5play.images.onLoad(img);
+			$.p5play.images.onLoad(img);
 		};
-		img = _loadImage.call(pInst, url, _cb);
+		img = _loadImage.call($, url, _cb);
 		img.cbs = [];
 		img.calls = 1;
 		if (cb) img.cbs.push(cb);
 		img.url = url;
-		pInst.p5play.images[url] = img;
+		$.p5play.images[url] = img;
 		return img;
 	};
 
-	const _image = this.image;
+	const _image = $.image;
 
-	this.image = function () {
-		if (pInst.p5play.disableImages) return;
-		_image.call(pInst, ...arguments);
+	$.image = function () {
+		if ($.p5play.disableImages) return;
+		_image.call($, ...arguments);
 	};
 
 	let enableTextCache = false;
-	if (typeof this._textCache === 'undefined') {
+	if (typeof $._textCache === 'undefined') {
 		// if the user isn't using q5.js
 		// add text caching to p5.js, only if the user is using p5.js v1.9.0 or later
 		try {
@@ -8435,7 +8413,6 @@ main {
 		} catch (e) {}
 	}
 	if (enableTextCache) {
-		const $ = this;
 		$._textCache = true;
 		$._TimedCache = class extends Map {
 			constructor() {
@@ -8717,23 +8694,23 @@ main {
 	 * A group that includes all the sprites.
 	 * @type {Group}
 	 */
-	this.allSprites = new this.Group();
+	$.allSprites = new $.Group();
 
 	/**
 	 * The physics world.
 	 * @type {World}
 	 */
-	this.world = new this.World();
+	$.world = new $.World();
 
 	/**
 	 * The default camera.
 	 * @type {Camera}
 	 */
-	this.camera = new this.Camera();
+	$.camera = new $.Camera();
 
-	this.InputDevice = class {
+	$.InputDevice = class {
 		/**
-		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
 		 *
@@ -8850,9 +8827,9 @@ main {
 		}
 	};
 
-	this._Mouse = class extends this.InputDevice {
+	$._Mouse = class extends $.InputDevice {
 		/**
-		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
 		 *
@@ -8865,7 +8842,7 @@ main {
 			let _this = this;
 
 			// this.x and this.y store the actual position values of the mouse
-			this._pos = pInst.createVector.call(pInst);
+			this._pos = $.createVector.call($);
 
 			Object.defineProperty(this._pos, 'x', {
 				get() {
@@ -8886,15 +8863,22 @@ main {
 			});
 
 			/**
-			 * The mouse's x position.
+			 * The mouse's x position in the world.
 			 * @type {Number}
 			 */
 			this.x;
 			/**
-			 * The mouse's y position.
+			 * The mouse's y position in the world.
 			 * @type {Number}
 			 */
 			this.y;
+			/**
+			 * The mouse's absolute position on the canvas.
+			 * @type {object}
+			 * @property {Number} x
+			 * @property {Number} y
+			 */
+			this.canvasPos = {};
 			/**
 			 * The mouse's left button.
 			 * @type {Number}
@@ -8928,7 +8912,7 @@ main {
 				right: false
 			};
 			/**
-			 * Whether the mouse is currently on the canvas or not.
+			 * True if the mouse is currently on the canvas.
 			 * @type {boolean}
 			 * @default false
 			 */
@@ -8938,7 +8922,7 @@ main {
 			 * @type {boolean}
 			 * @default false
 			 */
-			this.active = false;
+			this.isActive = false;
 
 			this._visible = true;
 			this._cursor = 'default';
@@ -8953,11 +8937,16 @@ main {
 		}
 
 		_update() {
-			this.x = (pInst.mouseX - pInst.canvas.hw) / pInst.camera.zoom + pInst.camera.x;
-			this.y = (pInst.mouseY - pInst.canvas.hh) / pInst.camera.zoom + pInst.camera.y;
+			$.mouse.canvasPos.x = $.camera.mouse.x = $.mouseX;
+			$.mouse.canvasPos.y = $.camera.mouse.y = $.mouseY;
 
-			pInst.canvas.mouse.x = pInst.camera.mouse.x = pInst.mouseX;
-			pInst.canvas.mouse.y = pInst.camera.mouse.y = pInst.mouseY;
+			if ($.camera.x == $.canvas.hw && $.camera.y == $.canvas.hh && $.camera.zoom == 1) {
+				this.x = $.mouseX;
+				this.y = $.mouseY;
+			} else {
+				this.x = ($.mouseX - $.canvas.hw) / $.camera.zoom + $.camera.x;
+				this.y = ($.mouseY - $.canvas.hh) / $.camera.zoom + $.camera.y;
+			}
 		}
 
 		/**
@@ -8981,11 +8970,11 @@ main {
 		 * @default 'default'
 		 */
 		get cursor() {
-			return pInst.canvas.style.cursor;
+			return $.canvas.style.cursor;
 		}
 		set cursor(val) {
 			if (val != this._cursor) {
-				pInst.cursor(val);
+				$.cursor(val);
 				this._cursor = val;
 			}
 		}
@@ -9000,8 +8989,8 @@ main {
 		}
 		set visible(val) {
 			this._visible = val;
-			if (val) pInst.canvas.style.cursor = 'default';
-			else pInst.canvas.style.cursor = 'none';
+			if (val) $.canvas.style.cursor = 'default';
+			else $.canvas.style.cursor = 'none';
 		}
 
 		/**
@@ -9037,11 +9026,11 @@ main {
 	 * Stores the state of the left, center, or right mouse buttons.
 	 * @type {_Mouse}
 	 */
-	this.mouse = new this._Mouse();
+	$.mouse = new $._Mouse();
 
-	this._SpriteMouse = class extends this._Mouse {
+	$._SpriteMouse = class extends $._Mouse {
 		/**
-		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
 		 *
@@ -9049,6 +9038,7 @@ main {
 		 */
 		constructor() {
 			super();
+			delete this.canvasPos;
 			this.hover = 0;
 		}
 
@@ -9075,68 +9065,68 @@ main {
 	};
 
 	const __onmousedown = function (btn) {
-		this.mouse.active = true;
-		this.mouse[btn]++;
-		if (this.world.mouseSprites.length) {
-			let msm = this.world.mouseSprite?.mouse;
+		$.mouse.isActive = true;
+		$.mouse[btn]++;
+		if ($.world.mouseSprites.length) {
+			let msm = $.world.mouseSprite?.mouse;
 			// old mouse sprite didn't have the mouse released on it
 			if (msm) {
 				msm[btn] = 0;
 				msm.hover = 0;
 				msm.drag[btn] = 0;
 			}
-			ms = this.world.mouseSprites[0];
-			this.world.mouseSprite = ms;
+			ms = $.world.mouseSprites[0];
+			$.world.mouseSprite = ms;
 			msm = ms.mouse;
 			msm[btn] = 1;
 			if (msm.hover <= 0) msm.hover = 1;
 		}
 	};
 
-	const _onmousedown = pInst._onmousedown;
+	const _onmousedown = $._onmousedown;
 
-	pInst._onmousedown = function (e) {
-		if (!this._setupDone) return;
+	$._onmousedown = function (e) {
+		if (!$._setupDone) return;
 
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
 
-		__onmousedown.call(this, btn);
-		_onmousedown.call(this, e);
+		__onmousedown.call($, btn);
+		_onmousedown.call($, e);
 	};
 
 	const __onmousemove = function (btn) {
-		let m = this.mouse;
+		let m = $.mouse;
 		if (m[btn] > 0) m._dragFrame[btn] = true;
 	};
 
-	const _onmousemove = pInst._onmousemove;
+	const _onmousemove = $._onmousemove;
 
-	pInst._onmousemove = function (e) {
-		if (!this._setupDone) return;
+	$._onmousemove = function (e) {
+		if (!$._setupDone) return;
 
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
 
-		__onmousemove.call(this, btn);
-		_onmousemove.call(this, e);
+		__onmousemove.call($, btn);
+		_onmousemove.call($, e);
 	};
 
 	const __onmouseup = function (btn) {
-		let m = this.mouse;
+		let m = $.mouse;
 		if (m[btn] >= m.holdThreshold) m[btn] = -2;
 		else if (m[btn] > 1) m[btn] = -1;
 		else m[btn] = -3;
 
 		if (m.drag[btn] > 0) m.drag[btn] = -1;
 
-		let msm = this.world.mouseSprite?.mouse;
+		let msm = $.world.mouseSprite?.mouse;
 		if (!msm) return;
 
 		if (msm.hover > 1) {
-			if (msm[btn] >= this.mouse.holdThreshold) msm[btn] = -2;
+			if (msm[btn] >= $.mouse.holdThreshold) msm[btn] = -2;
 			else if (msm[btn] > 1) msm[btn] = -1;
 			else msm[btn] = -3;
 
@@ -9147,83 +9137,99 @@ main {
 		}
 	};
 
-	const _onmouseup = pInst._onmouseup;
+	const _onmouseup = $._onmouseup;
 
-	pInst._onmouseup = function (e) {
-		if (!this._setupDone) return;
+	$._onmouseup = function (e) {
+		if (!$._setupDone) return;
 
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
 
-		__onmouseup.call(this, btn);
-		_onmouseup.call(this, e);
+		__onmouseup.call($, btn);
+		_onmouseup.call($, e);
 	};
 
-	delete this._Mouse;
+	delete $._Mouse;
 
-	this.touches.holdThreshold = 12;
+	$.touches.holdThreshold = 12;
 
-	this._Touch = class extends this.InputDevice {
+	$._Touch = class extends $.InputDevice {
 		constructor(touch) {
 			super();
 			this.id = touch.identifier;
 			this._default = 'duration';
-			this.holdThreshold = pInst.touches.holdThreshold;
+			this.holdThreshold = $.touches.holdThreshold;
 			this.duration = 1;
 			this.drag = 0;
 			this._dragFrame = false;
+			/**
+			 * The touch's absolute position on the canvas.
+			 * @type {object}
+			 * @property {Number} x
+			 * @property {Number} y
+			 */
+			this.canvasPos = {};
 			this._update(touch);
 		}
 
 		_update(v) {
-			let c = pInst.canvas;
+			let c = $.canvas;
 			const rect = c.getBoundingClientRect();
 			const sx = c.scrollWidth / c.w || 1;
 			const sy = c.scrollHeight / c.h || 1;
-			this.x = (v.clientX - rect.left) / sx;
-			this.y = (v.clientY - rect.top) / sy;
+			const x = (this.canvasPos.x = (v.clientX - rect.left) / sx);
+			const y = (this.canvasPos.y = (v.clientY - rect.top) / sy);
+			if ($.camera.x == c.hw && $.camera.y == c.hh && $.camera.zoom == 1) {
+				this.x = x;
+				this.y = y;
+			} else {
+				this.x = (x - c.hw) / $.camera.zoom + $.camera.x;
+				this.y = (y - c.hh) / $.camera.zoom + $.camera.y;
+			}
 			this.force = v.force;
 		}
 	};
 
-	pInst._ontouchstart = function (e) {
-		if (!this._setupDone) return;
+	$._ontouchstart = function (e) {
+		if (!$._setupDone) return;
 
 		for (let touch of e.changedTouches) {
-			this.touches.push(new this._Touch(touch));
+			$.touches.push(new $._Touch(touch));
 
-			if (this.touches.length == 1) {
-				this.mouseX = this.touches[0].x;
-				this.mouseY = this.touches[0].y;
-				this.mouse._update();
-				this.world.mouseSprites = this.world.getMouseSprites();
-				__onmousedown.call(this, 'left');
+			if ($.touches.length == 1) {
+				$.mouseX = $.touches[0].x;
+				$.mouseY = $.touches[0].y;
+				$.mouse._update();
+				$.world.mouseSprites = $.world.getMouseSprites();
+				__onmousedown.call($, 'left');
 			}
 		}
+		if ($.touchStarted && !$.touchStarted(e)) e.preventDefault();
 	};
 
-	pInst._ontouchmove = function (e) {
-		if (!this._setupDone) return;
+	$._ontouchmove = function (e) {
+		if (!$._setupDone) return;
 
 		for (let touch of e.changedTouches) {
-			let t = this.touches.find((t) => t.id == touch.identifier);
+			let t = $.touches.find((t) => t.id == touch.identifier);
 			t._update(touch);
 			t._dragFrame = true;
-			if (t.id == this.touches[0].id) {
-				this.mouseX = this.touches[0].x;
-				this.mouseY = this.touches[0].y;
-				this.mouse._update();
-				__onmousemove.call(this, 'left');
+			if (t.id == $.touches[0].id) {
+				$.mouseX = $.touches[0].x;
+				$.mouseY = $.touches[0].y;
+				$.mouse._update();
+				__onmousemove.call($, 'left');
 			}
 		}
+		if ($.touchMoved && !$.touchMoved(e)) e.preventDefault();
 	};
 
-	pInst._ontouchend = function (e) {
-		if (!this._setupDone) return;
+	$._ontouchend = function (e) {
+		if (!$._setupDone) return;
 
 		for (let touch of e.changedTouches) {
-			let t = this.touches.find((t) => t.id == touch.identifier);
+			let t = $.touches.find((t) => t.id == touch.identifier);
 			t._update(touch);
 
 			if (t.duration >= t.holdThreshold) t.duration = -2;
@@ -9232,18 +9238,19 @@ main {
 
 			if (t.drag > 0) t.drag = -1;
 
-			if (t.id == this.touches[0].id) {
-				this.mouseX = this.touches[0].x;
-				this.mouseY = this.touches[0].y;
-				this.mouse._update();
-				__onmouseup.call(this, 'left');
+			if (t.id == $.touches[0].id) {
+				$.mouseX = $.touches[0].x;
+				$.mouseY = $.touches[0].y;
+				$.mouse._update();
+				__onmouseup.call($, 'left');
 			}
 		}
+		if ($.touchEnded && !$.touchEnded(e)) e.preventDefault();
 	};
 
-	this._KeyBoard = class extends this.InputDevice {
+	$._Keyboard = class extends $.InputDevice {
 		/**
-		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
 		 *
@@ -9285,6 +9292,21 @@ main {
 			k.k = k.K = 'down2';
 			k.j = k.J = 'left2';
 			k.l = k.L = 'right2';
+		}
+
+		get visible() {
+			return this._inp == document.activeElement;
+		}
+		set visible(v) {
+			if (!this._inp) {
+				this._inp = Object.assign(document.createElement('input'), {
+					type: 'text',
+					style: 'position: fixed; height: 0; padding: 0; border: none; opacity: 0.0001; pointer-events: none;'
+				});
+				document.body.appendChild(this._inp);
+			}
+			this._visible = v;
+			v ? this._inp.focus() : this._inp.blur();
 		}
 
 		_ac(inp) {
@@ -9355,31 +9377,31 @@ main {
 
 	/**
 	 * Get user input from the keyboard.
-	 * @type {_KeyBoard}
+	 * @type {_Keyboard}
 	 */
-	this.kb = new this._KeyBoard();
-	delete this._KeyBoard;
+	$.kb = new $._Keyboard();
+	delete $._Keyboard;
 
 	/**
 	 * Alias for kb.
-	 * @type {_KeyBoard}
+	 * @type {_Keyboard}
 	 */
-	this.keyboard = this.kb;
+	$.keyboard = $.kb;
 
 	if (navigator.keyboard) {
 		const keyboard = navigator.keyboard;
 		if (window == window.top) {
 			keyboard.getLayoutMap().then((keyboardLayoutMap) => {
 				const key = keyboardLayoutMap.get('KeyW');
-				if (key != 'w') this.p5play.standardizeKeyboard = true;
+				if (key != 'w') $.p5play.standardizeKeyboard = true;
 			});
 		} else {
-			this.p5play.standardizeKeyboard = true;
+			$.p5play.standardizeKeyboard = true;
 		}
 	} else {
 		// Firefox and Safari don't have navigator.keyboard
 		// so just make them use key codes
-		this.p5play.standardizeKeyboard = true;
+		$.p5play.standardizeKeyboard = true;
 	}
 
 	function _getKeyFromCode(e) {
@@ -9390,9 +9412,9 @@ main {
 		return e.key;
 	}
 
-	const _onkeydown = pInst._onkeydown;
+	const _onkeydown = $._onkeydown;
 
-	pInst._onkeydown = function (e) {
+	$._onkeydown = function (e) {
 		let key = e.key;
 		if (this.p5play.standardizeKeyboard) {
 			key = _getKeyFromCode(e);
@@ -9417,9 +9439,9 @@ main {
 		_onkeydown.call(this, e);
 	};
 
-	const _onkeyup = pInst._onkeyup;
+	const _onkeyup = $._onkeyup;
 
-	pInst._onkeyup = function (e) {
+	$._onkeyup = function (e) {
 		let key = e.key;
 		if (this.p5play.standardizeKeyboard) {
 			key = _getKeyFromCode(e);
@@ -9448,9 +9470,9 @@ main {
 		_onkeyup.call(this, e);
 	};
 
-	this._Contro = class extends this.InputDevice {
+	$._Contro = class extends $.InputDevice {
 		/**
-		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
 		 *
@@ -9610,9 +9632,9 @@ main {
 	 * @class
 	 * @extends Array<_Contro>
 	 */
-	this._Contros = class extends Array {
+	$._Contros = class extends Array {
 		/**
-		 * <a href="https://p5play.org/learn/input_devices.html">
+		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
 		 *
@@ -9787,7 +9809,7 @@ main {
 			}
 			log(gp);
 			log('contro[' + gp.index + '] connected: ' + gp.id);
-			let c = new pInst._Contro(gp);
+			let c = new $._Contro(gp);
 			this.push(c);
 		}
 
@@ -9816,16 +9838,16 @@ main {
 	 * Get user input from game controllers.
 	 * @type {_Contros}
 	 */
-	this.contro = new this._Contros();
-	delete this._Contros;
+	$.contro = new $._Contros();
+	delete $._Contros;
 
 	/**
 	 * Alias for contro
 	 * @type {_Contros}
 	 */
-	this.controllers = this.contro;
+	$.controllers = $.contro;
 
-	if (!this.getFPS) this.p5play._fps = 60;
+	if (!$.getFPS) $.p5play._fps = 60;
 
 	/**
 	 * FPS, amongst the gaming community, refers to how fast a computer
@@ -9839,9 +9861,9 @@ main {
 	 *
 	 * @returns {Number} The current FPS
 	 */
-	this.getFPS ??= () => this.p5play._fps;
+	$.getFPS ??= () => $.p5play._fps;
 
-	this.p5play._fpsArr = [60];
+	$.p5play._fpsArr = [60];
 
 	/**
 	 * Displays the number of sprites drawn, an inaccurate
@@ -9864,10 +9886,10 @@ main {
 	 * @param {Number} x
 	 * @param {Number} y
 	 */
-	this.renderStats = (x, y) => {
-		let rs = this.p5play._renderStats;
+	$.renderStats = (x, y) => {
+		let rs = $.p5play._renderStats;
 		if (rs.show === undefined) {
-			if (this.allSprites.tileSize == 1 || this.allSprites.tileSize > 16) {
+			if ($.allSprites.tileSize == 1 || $.allSprites.tileSize > 16) {
 				rs.fontSize = 16;
 			} else {
 				rs.fontSize = 10;
@@ -9884,94 +9906,96 @@ main {
 });
 
 p5.prototype.registerMethod('pre', function p5playPreDraw() {
+	const $ = this;
 	// called before each p5.js draw function call
-	if (this.p5play._fps) {
-		this.p5play._preDrawFrameTime = performance.now();
+	if ($.p5play._fps) {
+		$.p5play._preDrawFrameTime = performance.now();
 	}
-	this.p5play.spritesDrawn = 0;
-	if (!this.canvas.mouse) {
-		this.noLoop();
+	$.p5play.spritesDrawn = 0;
+	if (!$.canvas) {
+		$.noLoop();
 		throw new Error('You must create a canvas');
 	}
-	this.mouse._update();
-	this.contro._update();
+	$.mouse._update();
+	$.contro._update();
 });
 
 p5.prototype.registerMethod('post', function p5playPostDraw() {
+	const $ = this;
 	// called after each p5.js draw function call
-	this.p5play._inPostDraw = true;
+	$.p5play._inPostDraw = true;
 
-	if (this.allSprites.autoCull) {
-		this.allSprites.cull(10000);
+	if ($.allSprites.autoCull) {
+		$.allSprites.cull(10000);
 	}
 
-	if (this.allSprites._autoDraw) {
-		this.camera.on();
-		this.allSprites.draw();
-		this.camera.off();
+	if ($.allSprites._autoDraw) {
+		$.camera.on();
+		$.allSprites.draw();
+		$.camera.off();
 	}
-	this.allSprites._autoDraw ??= true;
+	$.allSprites._autoDraw ??= true;
 
-	let rs = this.p5play._renderStats;
+	let rs = $.p5play._renderStats;
 	if (rs.show) {
-		if (this.frameCount == 1 || this.frameCount % 60 === 0) {
-			let avg = this.p5play._fpsArr.reduce((a, b) => a + b);
-			avg = Math.round(avg / this.p5play._fpsArr.length);
-			this.p5play._fpsAvg = avg;
-			this.p5play._fpsMin = Math.min(...this.p5play._fpsArr);
-			this.p5play._fpsMax = Math.max(...this.p5play._fpsArr);
-			this.p5play._fpsArr = [];
+		if ($.frameCount == 1 || $.frameCount % 60 === 0) {
+			let avg = $.p5play._fpsArr.reduce((a, b) => a + b);
+			avg = Math.round(avg / $.p5play._fpsArr.length);
+			$.p5play._fpsAvg = avg;
+			$.p5play._fpsMin = Math.min(...$.p5play._fpsArr);
+			$.p5play._fpsMax = Math.max(...$.p5play._fpsArr);
+			$.p5play._fpsArr = [];
 
 			let c;
-			if (avg > 55) c = this.color(30, 255, 30);
-			else if (avg > 25) c = this.color(255, 100, 30);
-			else c = this.color(255, 30, 30);
-			this.p5play._statsColor = c;
+			if (avg > 55) c = $.color(30, 255, 30);
+			else if (avg > 25) c = $.color(255, 100, 30);
+			else c = $.color(255, 30, 30);
+			$.p5play._statsColor = c;
 		}
 
-		this.p5play._fpsArr.push(this.getFPS());
+		$.p5play._fpsArr.push($.getFPS());
 
-		this.push();
-		this.fill(0, 0, 0, 128);
-		this.rect(rs.x - 5, rs.y - rs.fontSize, rs.fontSize * 8.5, rs.gap * 4 + 5);
-		this.fill(this.p5play._statsColor);
-		this.textAlign('left');
-		this.textSize(rs.fontSize);
-		this.textFont('monospace');
+		$.push();
+		$.fill(0, 0, 0, 128);
+		$.rect(rs.x - 5, rs.y - rs.fontSize, rs.fontSize * 8.5, rs.gap * 4 + 5);
+		$.fill($.p5play._statsColor);
+		$.textAlign('left');
+		$.textSize(rs.fontSize);
+		$.textFont('monospace');
 
 		let x = rs.x;
 		let y = rs.y;
-		this.text('sprites: ' + this.p5play.spritesDrawn, x, y);
-		this.text('fps avg: ' + this.p5play._fpsAvg, x, y + rs.gap);
-		this.text('fps min: ' + this.p5play._fpsMin, x, y + rs.gap * 2);
-		this.text('fps max: ' + this.p5play._fpsMax, x, y + rs.gap * 3);
-		this.pop();
+		$.text('sprites: ' + $.p5play.spritesDrawn, x, y);
+		$.text('fps avg: ' + $.p5play._fpsAvg, x, y + rs.gap);
+		$.text('fps min: ' + $.p5play._fpsMin, x, y + rs.gap * 2);
+		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 3);
+		$.pop();
 		rs.show = false;
 	}
 
-	if (this.world.autoStep) {
-		this.world.step();
+	if ($.world.autoStep) {
+		$.world.step();
 	}
-	this.world.autoStep ??= true;
+	$.world.autoStep ??= true;
 
-	if (this.allSprites._autoUpdate) {
-		this.allSprites.update();
+	if ($.allSprites._autoUpdate) {
+		$.allSprites.update();
 	}
-	this.allSprites._autoUpdate ??= true;
+	$.allSprites._autoUpdate ??= true;
 
-	for (let s of this.allSprites) {
+	for (let s of $.allSprites) {
 		s.autoDraw ??= true;
 		s.autoUpdate ??= true;
 	}
 
-	for (let k in this.kb) {
+	for (let k in $.kb) {
 		if (k == 'holdThreshold') continue;
-		if (this.kb[k] < 0) this.kb[k] = 0;
-		else if (this.kb[k] > 0) this.kb[k]++;
+		if ($.kb[k] < 0) $.kb[k] = 0;
+		else if ($.kb[k] > 0) $.kb[k]++;
 	}
 
-	for (let i = 0; i < this.touches.length; i++) {
-		let t = this.touches[i];
+	for (let i = 0; i < $.touches.length; i++) {
+		let t = $.touches[i];
 		t.duration++;
 		if (t._dragFrame) {
 			t.drag++;
@@ -9980,13 +10004,13 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 			t.drag = 0;
 		}
 		if (t.duration <= 0) {
-			this.touches.splice(i, 1);
+			$.touches.splice(i, 1);
 			i--;
 		}
 	}
 
-	let m = this.mouse;
-	let msm = this.world.mouseSprite?.mouse;
+	let m = $.mouse;
+	let msm = $.world.mouseSprite?.mouse;
 
 	for (let btn of ['left', 'center', 'right']) {
 		if (m[btn] < 0) m[btn] = 0;
@@ -10003,8 +10027,8 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		}
 	}
 
-	if (this.world.mouseTracking) {
-		let sprites = this.world.getMouseSprites();
+	if ($.world.mouseTracking && $.mouse.isActive) {
+		let sprites = $.world.getMouseSprites();
 
 		for (let i = 0; i < sprites.length; i++) {
 			let s = sprites[i];
@@ -10015,14 +10039,14 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 
 		// if the user is not pressing any mouse buttons
 		if (m.left <= 0 && m.center <= 0 && m.right <= 0) {
-			this.world.mouseSprite = null;
+			$.world.mouseSprite = null;
 		}
 
-		let ms = this.world.mouseSprite;
+		let ms = $.world.mouseSprite;
 
 		let isDragging = m.drag.left > 0 || m.drag.center > 0 || m.drag.right > 0;
 
-		for (let s of this.world.mouseSprites) {
+		for (let s of $.world.mouseSprites) {
 			// if the mouse stopped hovering over the sprite
 			if (!sprites.includes(s)) {
 				let sm = s.mouse;
@@ -10031,7 +10055,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 					sm.left = sm.center = sm.right = 0;
 				}
 				// if mouse is not dragging and the sprite is the current mouse sprite
-				if (!isDragging && s == ms) this.world.mouseSprite = ms = null;
+				if (!isDragging && s == ms) $.world.mouseSprite = ms = null;
 			}
 		}
 		if (ms) {
@@ -10041,14 +10065,14 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 			msm.x = ms.x - m.x;
 			msm.y = ms.y - m.y;
 		}
-		this.world.mouseSprites = sprites;
+		$.world.mouseSprites = sprites;
 	}
 
-	this.camera.off();
+	$.camera.off();
 
-	if (this.p5play._fps) {
-		this.p5play._postDrawFrameTime = performance.now();
-		this.p5play._fps = Math.round(1000 / (this.p5play._postDrawFrameTime - this.p5play._preDrawFrameTime)) || 1;
+	if ($.p5play._fps) {
+		$.p5play._postDrawFrameTime = performance.now();
+		$.p5play._fps = Math.round(1000 / ($.p5play._postDrawFrameTime - $.p5play._preDrawFrameTime)) || 1;
 	}
-	this.p5play._inPostDraw = false;
+	$.p5play._inPostDraw = false;
 });
