@@ -57,7 +57,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	/**
 	 * @class
 	 */
-	$.P5Play = class {
+	this.P5Play = class {
 		/**
 		 * This class is deleted after it's used
 		 * to create the `p5play` object
@@ -165,7 +165,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * Contains information about the sketch.
 	 * @type {P5Play}
 	 */
-	$.p5play = new $.P5Play();
+	this.p5play = new $.P5Play();
 	delete $.P5Play;
 
 	/**
@@ -177,18 +177,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @typedef {Object} planck.Contact
 	 */
 
+	const log = console.log;
 	/**
 	 * Shortcut for console.log
 	 * @type {Function}
 	 * @param {...any} args
 	 */
-	const log = console.log; // shortcut
-	$.log = console.log;
+	this.log = console.log;
 
 	/**
 	 * @class
 	 */
-	$.Sprite = class {
+	this.Sprite = class {
 		/**
 		 * <a href="https://p5play.org/learn/sprite.html">
 		 * Look at the Sprite reference pages before reading these docs.
@@ -3867,7 +3867,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @class
 	 * @extends Array<p5.Image>
 	 */
-	$.SpriteAnimation = class extends Array {
+	this.SpriteAnimation = class extends Array {
 		/**
 		 * <a href="https://p5play.org/learn/animation.html">
 		 * Look at the Animation reference pages before reading these docs.
@@ -4622,6 +4622,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	];
 
 	/**
+	 * <a href="https://p5play.org/learn/animation.html">
+	 * Look at the Animation reference pages before reading these docs.
+	 * </a>
+	 *
 	 * This SpriteAnimations class serves the same role that Group does
 	 * for Sprites. This class is used internally to create `sprite.anis`
 	 * and `group.anis`. It's not intended to be used directly by p5play users.
@@ -4634,9 +4638,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * `#_` to store animation properties. Getters and setters are used to
 	 * access the private properties, enabling dynamic inheritance.
 	 *
-	 * @private
+	 * @class
 	 */
-	$.SpriteAnimations = class {
+	this.SpriteAnimations = class {
 		#_ = {};
 		constructor() {
 			let _this = this;
@@ -4691,7 +4695,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @class
 	 * @extends Array<Sprite>
 	 */
-	$.Group = class extends Array {
+	this.Group = class extends Array {
 		/**
 		 * <a href="https://p5play.org/learn/group.html">
 		 * Look at the Group reference pages before reading these docs.
@@ -6157,7 +6161,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 
-	$.World = class extends pl.World {
+	/**
+	 * @class
+	 * @extends planck.World
+	 */
+	this.World = class extends planck.World {
 		/**
 		 * <a href="https://p5play.org/learn/world.html">
 		 * Look at the World reference pages before reading these docs.
@@ -6495,7 +6503,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	$.Camera = class {
+	/**
+	 * @class
+	 */
+	this.Camera = class {
 		/**
 		 * <a href="https://p5play.org/learn/camera.html">
 		 * Look at the Camera reference pages before reading these docs.
@@ -6784,7 +6795,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		return true;
 	};
 
-	$.Tiles = class {
+	/**
+	 * @class
+	 */
+	this.Tiles = class {
 		/**
 		 * <a href="https://p5play.org/learn/tiles.html">
 		 * Look at the Tiles reference pages before reading these docs.
@@ -6864,11 +6878,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @deprecated
 	 * @func createTiles
 	 */
-	$.createTiles = function (tiles, x, y, w, h) {
+	this.createTiles = function (tiles, x, y, w, h) {
 		return new $.Tiles(tiles, x, y, w, h);
 	};
 
-	$.Joint = class {
+	/**
+	 * @class
+	 */
+	this.Joint = class {
 		/**
 		 * Using this Joint class directly is not recommended, but
 		 * if it is used a GlueJoint will be created.
@@ -7204,7 +7221,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	$.GlueJoint = class extends $.Joint {
+	/**
+	 * @class
+	 * @extends Joint
+	 */
+	this.GlueJoint = class extends $.Joint {
 		/**
 		 * Glue joints are used to glue two sprites together.
 		 *
@@ -7216,7 +7237,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	$.DistanceJoint = class extends $.Joint {
+	/**
+	 * @class
+	 * @extends Joint
+	 */
+	this.DistanceJoint = class extends $.Joint {
 		/**
 		 * Distance joints are used to constrain the distance
 		 * between two sprites.
@@ -7257,7 +7282,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	$.WheelJoint = class extends $.Joint {
+	/**
+	 * @class
+	 * @extends Joint
+	 */
+	this.WheelJoint = class extends $.Joint {
 		/**
 		 * Wheel joints can be used to create vehicles!
 		 *
@@ -7331,7 +7360,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	$.HingeJoint = class extends $.Joint {
+	/**
+	 * @class
+	 * @extends Joint
+	 */
+	this.HingeJoint = class extends $.Joint {
 		/**
 		 * Hinge joints attach two sprites together at a pivot point,
 		 * constraining them to rotate around this point, like a hinge.
@@ -7428,7 +7461,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	};
 	$.RevoluteJoint = $.HingeJoint;
 
-	$.SliderJoint = class extends $.Joint {
+	/**
+	 * @class
+	 * @extends Joint
+	 */
+	this.SliderJoint = class extends $.Joint {
 		/**
 		 * A slider joint constrains the motion of two sprites to sliding
 		 * along a common axis, without rotation.
@@ -7526,7 +7563,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	};
 	$.PrismaticJoint = $.SliderJoint;
 
-	$.RopeJoint = class extends $.Joint {
+	/**
+	 * @class
+	 * @extends Joint
+	 */
+	this.RopeJoint = class extends $.Joint {
 		/**
 		 * A Rope joint prevents two sprites from going further
 		 * than a certain distance from each other, which is
@@ -7735,7 +7776,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * in the system's palettes array.
 	 * @returns {String} a hex color string for use by p5.js functions
 	 */
-	$.colorPal = (c, palette) => {
+	this.colorPal = (c, palette) => {
 		if (c instanceof p5.Color) return c;
 		if (typeof palette == 'number') {
 			palette = $.p5play.palettes[palette];
@@ -7772,7 +7813,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * let img = spriteArt(str);
 	 */
-	$.spriteArt = (txt, scale, palette) => {
+	this.spriteArt = (txt, scale, palette) => {
 		scale ??= 1;
 		if (typeof palette == 'number') {
 			palette = $.p5play.palettes[palette];
@@ -7818,7 +7859,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @deprecated
 	 * @returns {Sprite}
 	 */
-	$.createSprite = function () {
+	this.createSprite = function () {
 		return new $.Sprite(...arguments);
 	};
 
@@ -7830,7 +7871,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @deprecated
 	 * @returns {Group}
 	 */
-	$.createGroup = function () {
+	this.createGroup = function () {
 		return new $.Group(...arguments);
 	};
 
@@ -7842,7 +7883,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * @returns {SpriteAnimation}
 	 */
-	$.loadAnimation = $.loadAni = function () {
+	this.loadAnimation = $.loadAni = function () {
 		return new $.SpriteAnimation(...arguments);
 	};
 
@@ -7856,7 +7897,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @param {Number} sX scale of the animation in the x direction
 	 * @param {Number} sY scale of the animation in the y direction
 	 */
-	$.animation = function (ani, x, y, r, sX, sY) {
+	this.animation = function (ani, x, y, r, sX, sY) {
 		if (ani.visible) ani.update();
 		ani.draw(x, y, r, sX, sY);
 	};
@@ -7875,7 +7916,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *   await delay(3000);
 	 * }
 	 */
-	$.delay = (milliseconds) => {
+	this.delay = (milliseconds) => {
 		if (!milliseconds) return new Promise(requestAnimationFrame);
 		// else it wraps setTimeout in a Promise
 		return new Promise((resolve) => {
@@ -7897,7 +7938,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *   await sleep(3000);
 	 * }
 	 */
-	$.sleep = (milliseconds) => {
+	this.sleep = (milliseconds) => {
 		if (!milliseconds) {
 			return new Promise((resolve) => {
 				$.canvas.addEventListener('p5play_world_step', resolve);
@@ -7914,7 +7955,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @example
 	 * await play(sound);
 	 */
-	$.play = (sound) => {
+	this.play = (sound) => {
 		if (!sound?.play) {
 			throw new Error("Tried to play your sound but it wasn't a sound object.");
 		}
@@ -8009,7 +8050,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * @returns {p5.Renderer} renderer object
 	 */
-	$.createCanvas = function () {
+	this.createCanvas = function () {
 		let args = [...arguments];
 		let isFullScreen, isPixelated, scale;
 		if (typeof args[0] == 'string') {
@@ -8151,7 +8192,10 @@ main {
 	};
 
 	// this is only for jsdoc
-	$.Canvas = class {
+	/**
+	 * @class
+	 */
+	this.Canvas = class {
 		/**
 		 * p5play adds some extra functionality to the p5.js `createCanvas`
 		 * function. See the examples below.
@@ -8260,7 +8304,7 @@ main {
 	/**
 	 * Use of `canvas.resize()` is preferred.
 	 */
-	$.resizeCanvas = (w, h) => {
+	this.resizeCanvas = (w, h) => {
 		w ??= window.innerWidth;
 		h ??= window.innerHeight;
 		_resizeCanvas.call($, w, h);
@@ -8288,7 +8332,7 @@ main {
 	 * Just like the p5.js background function except it also accepts
 	 * a color palette code.
 	 */
-	$.background = function () {
+	this.background = function () {
 		let args = arguments;
 		let c;
 		if (args.length == 1 && (typeof args[0] == 'string' || args[0] instanceof p5.Color)) {
@@ -8304,7 +8348,7 @@ main {
 	 * Just like the p5.js fill function except it also accepts
 	 * a color palette code.
 	 */
-	$.fill = function () {
+	this.fill = function () {
 		let args = arguments;
 		let c;
 		if (args.length == 1) c = $.colorPal(args[0]);
@@ -8318,7 +8362,7 @@ main {
 	 * Just like the p5.js stroke function except it also accepts
 	 * a color palette code.
 	 */
-	$.stroke = function () {
+	this.stroke = function () {
 		let args = arguments;
 		let c;
 		if (args.length == 1) c = $.colorPal(args[0]);
@@ -8350,7 +8394,7 @@ main {
 	 * @param {number} [height]
 	 * @param {function} [callback]
 	 */
-	$.loadImage = $.loadImg = function () {
+	this.loadImage = $.loadImg = function () {
 		if ($.p5play.disableImages) {
 			$._decrementPreload();
 			// return a dummy image object to prevent errors
@@ -8694,21 +8738,24 @@ main {
 	 * A group that includes all the sprites.
 	 * @type {Group}
 	 */
-	$.allSprites = new $.Group();
+	this.allSprites = new $.Group();
 
 	/**
 	 * The physics world.
 	 * @type {World}
 	 */
-	$.world = new $.World();
+	this.world = new $.World();
 
 	/**
 	 * The default camera.
 	 * @type {Camera}
 	 */
-	$.camera = new $.Camera();
+	this.camera = new $.Camera();
 
-	$.InputDevice = class {
+	/**
+	 * @class
+	 */
+	this.InputDevice = class {
 		/**
 		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -8827,7 +8874,11 @@ main {
 		}
 	};
 
-	$._Mouse = class extends $.InputDevice {
+	/**
+	 * @class
+	 * @extends InputDevice
+	 */
+	this._Mouse = class extends $.InputDevice {
 		/**
 		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -9026,9 +9077,13 @@ main {
 	 * Stores the state of the left, center, or right mouse buttons.
 	 * @type {_Mouse}
 	 */
-	$.mouse = new $._Mouse();
+	this.mouse = new $._Mouse();
 
-	$._SpriteMouse = class extends $._Mouse {
+	/**
+	 * @class
+	 * @extends _Mouse
+	 */
+	this._SpriteMouse = class extends $._Mouse {
 		/**
 		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -9152,20 +9207,57 @@ main {
 
 	delete $._Mouse;
 
-	$.touches.holdThreshold = 12;
-
-	$._Touch = class extends $.InputDevice {
+	/**
+	 * @class
+	 * @extends InputDevice
+	 */
+	this._Touch = class extends $.InputDevice {
+		/**
+		 * <a href="https://p5play.org/learn/input.html">
+		 * Look at the Input reference pages before reading these docs.
+		 * </a>
+		 *
+		 * Used internally to create touch input objects in the `touches` array.
+		 */
 		constructor(touch) {
 			super();
+			/**
+			 * The touch's x position in the world.
+			 * @type {Number}
+			 */
+			this.x;
+			/**
+			 * The touch's y position in the world.
+			 * @type {Number}
+			 */
+			this.y;
+			/**
+			 * The touch's unique identifier.
+			 * @type {Number}
+			 */
 			this.id = touch.identifier;
 			this._default = 'duration';
+			/**
+			 * The amount of frames a touch must be pressed to be
+			 * considered held.
+			 * @type {Number}
+			 * @default 12
+			 */
 			this.holdThreshold = $.touches.holdThreshold;
+			/**
+			 * The amount of frames the user has been touching the screen.
+			 * @type {Number}
+			 */
 			this.duration = 1;
+			/**
+			 * The amount of frames the user has been dragging on the screen.
+			 * @type {Number}
+			 */
 			this.drag = 0;
 			this._dragFrame = false;
 			/**
 			 * The touch's absolute position on the canvas.
-			 * @type {object}
+			 * @type {Object}
 			 * @property {Number} x
 			 * @property {Number} y
 			 */
@@ -9190,6 +9282,13 @@ main {
 			this.force = v.force;
 		}
 	};
+
+	/**
+	 * An array of touch objects.
+	 * @type {_Touch[]}
+	 */
+	this.touches = [];
+	$.touches.holdThreshold = 12;
 
 	$._ontouchstart = function (e) {
 		if (!$._setupDone) return;
@@ -9248,7 +9347,11 @@ main {
 		if ($.touchEnded && !$.touchEnded(e)) e.preventDefault();
 	};
 
-	$._Keyboard = class extends $.InputDevice {
+	/**
+	 * @class
+	 * @extends InputDevice
+	 */
+	this._Keyboard = class extends $.InputDevice {
 		/**
 		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -9379,14 +9482,14 @@ main {
 	 * Get user input from the keyboard.
 	 * @type {_Keyboard}
 	 */
-	$.kb = new $._Keyboard();
+	this.kb = new $._Keyboard();
 	delete $._Keyboard;
 
 	/**
 	 * Alias for kb.
 	 * @type {_Keyboard}
 	 */
-	$.keyboard = $.kb;
+	this.keyboard = $.kb;
 
 	if (navigator.keyboard) {
 		const keyboard = navigator.keyboard;
@@ -9470,7 +9573,11 @@ main {
 		_onkeyup.call(this, e);
 	};
 
-	$._Contro = class extends $.InputDevice {
+	/**
+	 * @class
+	 * @extends InputDevice
+	 */
+	this._Contro = class extends $.InputDevice {
 		/**
 		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -9632,7 +9739,7 @@ main {
 	 * @class
 	 * @extends Array<_Contro>
 	 */
-	$._Contros = class extends Array {
+	this._Contros = class extends Array {
 		/**
 		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
@@ -9838,14 +9945,14 @@ main {
 	 * Get user input from game controllers.
 	 * @type {_Contros}
 	 */
-	$.contro = new $._Contros();
+	this.contro = new $._Contros();
 	delete $._Contros;
 
 	/**
 	 * Alias for contro
 	 * @type {_Contros}
 	 */
-	$.controllers = $.contro;
+	this.controllers = $.contro;
 
 	if (!$.getFPS) $.p5play._fps = 60;
 
@@ -9861,7 +9968,7 @@ main {
 	 *
 	 * @returns {Number} The current FPS
 	 */
-	$.getFPS ??= () => $.p5play._fps;
+	this.getFPS ??= () => $.p5play._fps;
 
 	$.p5play._fpsArr = [60];
 
@@ -9886,7 +9993,7 @@ main {
 	 * @param {Number} x
 	 * @param {Number} y
 	 */
-	$.renderStats = (x, y) => {
+	this.renderStats = (x, y) => {
 		let rs = $.p5play._renderStats;
 		if (rs.show === undefined) {
 			if ($.allSprites.tileSize == 1 || $.allSprites.tileSize > 16) {
