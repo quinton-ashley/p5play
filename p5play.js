@@ -140,6 +140,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			this._renderStats = {};
+			this._fpsArr = [60];
 			/*
 			 * Ledgers for collision callback functions.
 			 *
@@ -10048,8 +10049,12 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	let rs = $.p5play._renderStats;
 	if (rs.show) {
 		if ($.frameCount == 1 || $.frameCount % 60 === 0) {
-			let avg = $.p5play._fpsArr.reduce((a, b) => a + b);
-			avg = Math.round(avg / $.p5play._fpsArr.length);
+			let avg = 0;
+			let len = $.p5play._fpsArr.length;
+			for (let i = 0; i < len; i++) {
+				avg += $.p5play._fpsArr[i];
+			}
+			avg = Math.round(avg / len);
 			$.p5play._fpsAvg = avg;
 			$.p5play._fpsMin = Math.min(...$.p5play._fpsArr);
 			$.p5play._fpsMax = Math.max(...$.p5play._fpsArr);
