@@ -4,19 +4,23 @@
  * @author quinton-ashley
  * @license AGPL-3.0
  */
+
+if (typeof planck != 'object') {
+	if (typeof process == 'object') {
+		global.planck = require('./planck.min.js');
+	} else throw 'planck.js must be loaded before p5play';
+}
+
 p5.prototype.registerMethod('init', function p5playInit() {
-	if (!window.planck) throw 'planck.js must be loaded before p5play';
-
 	const $ = this; // the p5 or q5 instance that called p5playInit
-
 	const pl = planck;
 	const plScale = 60;
 
 	// Google Analytics collects anonymous usage data to help make p5play better.
 	// To opt out, set window._p5play_gtagged to false before loading p5play.
 	if (
-		window._p5play_gtagged != false &&
-		typeof process == 'undefined' // don't track in node.js
+		typeof process != 'object' && // don't track in node.js
+		window._p5play_gtagged != false
 	) {
 		let script = document.createElement('script');
 		script.src = 'https://www.googletagmanager.com/gtag/js?id=G-EHXNCTSYLK';
@@ -82,6 +86,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.groupsCreated = 0;
 			this.spritesCreated = 0;
 			this.spritesDrawn = 0;
+
+			/**
+			 * Cache for loaded images.
+			 */
+			this.images = {};
 
 			/**
 			 * Used for debugging, set to true to make p5play
@@ -159,6 +168,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._overlapping = {};
 			this._overlapped = {};
 		}
+
+		/**
+		 * This function is called when an image is loaded. By default it
+		 * does nothing, but it can be overridden.
+		 */
+		onImageLoad() {}
 	};
 
 	/**
@@ -167,15 +182,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 */
 	this.p5play = new $.P5Play();
 	delete $.P5Play;
-
-	/**
-	 * @typedef {Object} planck
-	 * @typedef {Object} planck.Vec2
-	 * @typedef {Object} planck.Body
-	 * @typedef {Object} planck.Fixture
-	 * @typedef {Object} planck.World
-	 * @typedef {Object} planck.Contact
-	 */
 
 	const log = console.log;
 	/**
@@ -1379,11 +1385,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val instanceof p5.Color) {
 				return val;
 			} else if (typeof val != 'object') {
-				if (val.length == 1) {
-					return $.colorPal(val);
-				} else {
-					return $.color(val);
-				}
+				if (val.length == 1) return $.colorPal(val);
+				else return $.color(val);
 			}
 			return $.color(...val.levels);
 		}
@@ -3769,9 +3772,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	// only used by the Netcode class to convert sprite data to binary
-	// this should not be changed, users should add custom properties to
-	// the sprite.customProperties object of individual sprites
+	// only used by the p5play-pro Netcode class to convert sprite data to binary
 	$.Sprite.propTypes = {
 		x: 'Float64', // 0
 		y: 'Float64', // 1
@@ -4257,14 +4258,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val <= 0) val = 1;
 			this._frameDelay = val;
 		}
-		/**
-		 * TODO frameRate
-		 * Another way to set the animation's frame delay.
+		/*
+		 * TODO frameChange
+		 * Set the animation's frame delay in seconds.
 		 */
-		// get frameRate() {
+		// get frameChange() {
 
 		// }
-		// set frameRate(val) {
+		// set frameChange(val) {
 
 		// }
 
@@ -6180,7 +6181,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		constructor() {
 			super(new pl.Vec2(0, 0), true);
 
-			this.mod = [];
+			this.mod = {};
 
 			/**
 			 * Changes the world's origin point,
@@ -6297,7 +6298,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let s of sprites) s.___step();
 			for (let g of groups) g.___step();
 
-			$.canvas.dispatchEvent(new Event('p5play_world_step'));
+			if ($.canvas.dispatchEvent) {
+				$.canvas.dispatchEvent(new window.Event('p5play_world_step'));
+			}
 			if (this.autoStep) this.autoStep = null;
 		}
 
@@ -7768,9 +7771,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	];
 
 	/**
-	 * Gets a color from a color palette
-	 *
-	 * @func colorPal
+	 * Gets a color from a color palette.
 	 * @param {String} c A single character, a key found in the color palette object.
 	 * @param {Number|Object} palette Can be a palette object or number index
 	 * in the system's palettes array.
@@ -7782,13 +7783,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			palette = $.p5play.palettes[palette];
 		}
 		palette ??= $.p5play.palettes[0];
-		let clr;
-		if (palette) clr = palette[c];
-		// if transparent
-		if (clr === '' || c === '.' || c === ' ') {
-			return $.color(0, 0, 0, 0);
-		}
-		return $.color(clr || c);
+		let clr = palette[c];
+		if (!clr) return $.color(0, 0, 0, 0);
+		return $.color(clr);
 	};
 
 	/**
@@ -7847,7 +7844,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		img.updatePixels();
 		img.w = img.width;
 		img.h = img.height;
-		$.p5play.images.onLoad(img);
+		$.p5play.onImageLoad(img);
 		return img; // return the p5 graphics object
 	};
 
@@ -7883,7 +7880,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * @returns {SpriteAnimation}
 	 */
-	this.loadAnimation = $.loadAni = function () {
+	this.loadAnimation = this.loadAni = function () {
 		return new $.SpriteAnimation(...arguments);
 	};
 
@@ -8095,29 +8092,32 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		c.tabIndex = 0;
 		c.w = args[0];
 		c.h = args[1];
-		c.addEventListener('keydown', function (e) {
-			if (
-				e.key == ' ' ||
-				e.key == '/' ||
-				e.key == 'ArrowUp' ||
-				e.key == 'ArrowDown' ||
-				e.key == 'ArrowLeft' ||
-				e.key == 'ArrowRight'
-			) {
-				e.preventDefault();
-			}
-		});
-		c.addEventListener('mouseover', () => {
-			this.mouse.isOnCanvas = true;
-			this.mouse.isActive = true;
-		});
-		c.addEventListener('mouseleave', () => {
-			this.mouse.isOnCanvas = false;
-		});
-		c.addEventListener('touchstart', (e) => e.preventDefault());
-		// this stops the right click menu from appearing
-		c.addEventListener('contextmenu', (e) => e.preventDefault());
-		c.resize = this.resizeCanvas;
+		if (c.addEventListener) {
+			c.addEventListener('keydown', function (e) {
+				if (
+					e.key == ' ' ||
+					e.key == '/' ||
+					e.key == 'ArrowUp' ||
+					e.key == 'ArrowDown' ||
+					e.key == 'ArrowLeft' ||
+					e.key == 'ArrowRight'
+				) {
+					e.preventDefault();
+				}
+			});
+			c.addEventListener('mouseover', () => {
+				this.mouse.isOnCanvas = true;
+				this.mouse.isActive = true;
+			});
+			c.addEventListener('mouseleave', () => {
+				this.mouse.isOnCanvas = false;
+			});
+			c.addEventListener('touchstart', (e) => e.preventDefault());
+			// this stops the right click menu from appearing
+			c.addEventListener('contextmenu', (e) => e.preventDefault());
+		}
+		c.save ??= $.saveCanvas.bind($);
+		c.resize ??= $.resizeCanvas.bind($);
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
 		c.mouse = { x: $.mouseX, y: $.mouseY };
@@ -8283,17 +8283,23 @@ main {
 		 * you must manually adjust the camera position after calling this
 		 * function.
 		 *
-		 * @param {Number} w - The new width of the canvas.
-		 * @param {Number} h - The new height of the canvas.
+		 * @param {Number} w the new width of the canvas
+		 * @param {Number} h the new height of the canvas
 		 */
 		resize() {}
+
+		/**
+		 * Saves the current canvas as an image file.
+		 * @param {String} file the name of the image
+		 */
+		save() {}
 	};
 
 	/**
 	 * HTML5 canvas element.
 	 * @type {Canvas}
 	 */
-	$.canvas;
+	this.canvas = $.canvas;
 
 	$.Canvas = function () {
 		return $.createCanvas(...arguments).canvas;
@@ -8334,12 +8340,9 @@ main {
 	 */
 	this.background = function () {
 		let args = arguments;
-		let c;
-		if (args.length == 1 && (typeof args[0] == 'string' || args[0] instanceof p5.Color)) {
-			c = $.colorPal(args[0]);
-		}
-		if (c !== undefined) _background.call($, c);
-		else _background.call($, ...args);
+		if (args.length == 1 && args[0].length == 1) {
+			_background.call($, $.colorPal(args[0]));
+		} else _background.call($, ...args);
 	};
 
 	const _fill = $.fill;
@@ -8350,10 +8353,9 @@ main {
 	 */
 	this.fill = function () {
 		let args = arguments;
-		let c;
-		if (args.length == 1) c = $.colorPal(args[0]);
-		if (c !== undefined) _fill.call($, c);
-		else _fill.call($, ...args);
+		if (args.length == 1 && args[0].length == 1) {
+			_fill.call($, $.colorPal(args[0]));
+		} else _fill.call($, ...args);
 	};
 
 	const _stroke = $.stroke;
@@ -8364,22 +8366,10 @@ main {
 	 */
 	this.stroke = function () {
 		let args = arguments;
-		let c;
-		if (args.length == 1) c = $.colorPal(args[0]);
-		if (c !== undefined) _stroke.call($, c);
-		else _stroke.call($, ...args);
+		if (args.length == 1 && args[0].length == 1) {
+			_stroke.call($, $.colorPal(args[0]));
+		} else _stroke.call($, ...args);
 	};
-
-	// images is a cache of loaded/loading images, to prevent making
-	// the same loadImage fetch requests multiple times (inefficient)
-	$.p5play.images = {
-		onLoad: (img) => {} // called anytime an image is fully loaded
-	};
-
-	// This is a debugging tool that disables images from loading
-	// or displaying. Mainly used to test other people's projects without
-	// having to download their images.
-	$.p5play.disableImages = false;
 
 	const _loadImage = $.loadImage;
 
@@ -8393,8 +8383,9 @@ main {
 	 * @param {number} [width]
 	 * @param {number} [height]
 	 * @param {function} [callback]
+	 * @returns {p5.Image}
 	 */
-	this.loadImage = $.loadImg = function () {
+	this.loadImage = this.loadImg = function () {
 		if ($.p5play.disableImages) {
 			$._decrementPreload();
 			// return a dummy image object to prevent errors
@@ -8421,8 +8412,20 @@ main {
 			return img;
 		}
 		const _cb = (_img) => {
-			_img.w = _img.width;
-			_img.h = _img.height;
+			// in q5 these getters are already defined
+			if (!_img.w) {
+				Object.defineProperty(_img, 'w', {
+					get: function () {
+						return this.width;
+					}
+				});
+				Object.defineProperty(_img, 'h', {
+					get: function () {
+						return this.height;
+					}
+				});
+			}
+
 			for (let cb of _img.cbs) {
 				cb(_img);
 			}
@@ -8430,7 +8433,7 @@ main {
 				$._decrementPreload();
 			}
 			_img.cbs = [];
-			$.p5play.images.onLoad(img);
+			$.p5play.onImageLoad(img);
 		};
 		img = _loadImage.call($, url, _cb);
 		img.cbs = [];
@@ -8443,13 +8446,18 @@ main {
 
 	const _image = $.image;
 
+	/**
+	 * Just like the p5.js image function but if
+	 * `p5play.disableImages` is true, images will not be drawn.
+	 * @param {p5.Image} img
+	 */
 	$.image = function () {
 		if ($.p5play.disableImages) return;
 		_image.call($, ...arguments);
 	};
 
 	let enableTextCache = false;
-	if (typeof $._textCache === 'undefined') {
+	if (typeof $._textCache != 'object') {
 		// if the user isn't using q5.js
 		// add text caching to p5.js, only if the user is using p5.js v1.9.0 or later
 		try {
@@ -9301,7 +9309,7 @@ main {
 				$.mouseY = $.touches[0].y;
 				$.mouse._update();
 				$.world.mouseSprites = $.world.getMouseSprites();
-				__onmousedown.call($, 'left');
+				$._onmousedown(e);
 			}
 		}
 		if ($.touchStarted && !$.touchStarted(e)) e.preventDefault();
@@ -9318,7 +9326,7 @@ main {
 				$.mouseX = $.touches[0].x;
 				$.mouseY = $.touches[0].y;
 				$.mouse._update();
-				__onmousemove.call($, 'left');
+				$._onmousemove(e);
 			}
 		}
 		if ($.touchMoved && !$.touchMoved(e)) e.preventDefault();
@@ -9341,7 +9349,7 @@ main {
 				$.mouseX = $.touches[0].x;
 				$.mouseY = $.touches[0].y;
 				$.mouse._update();
-				__onmouseup.call($, 'left');
+				$._onmouseup(e);
 			}
 		}
 		if ($.touchEnded && !$.touchEnded(e)) e.preventDefault();
@@ -9752,13 +9760,14 @@ main {
 		constructor() {
 			super();
 			let _this = this;
-			window.addEventListener('gamepadconnected', (e) => {
-				_this._onConnect(e.gamepad);
-			});
-
-			window.addEventListener('gamepaddisconnected', (e) => {
-				_this._onDisconnect(e.gamepad);
-			});
+			if (window) {
+				window.addEventListener('gamepadconnected', (e) => {
+					_this._onConnect(e.gamepad);
+				});
+				window.addEventListener('gamepaddisconnected', (e) => {
+					_this._onDisconnect(e.gamepad);
+				});
+			}
 
 			/**
 			 * @type {Function}
@@ -9954,8 +9963,6 @@ main {
 	 */
 	this.controllers = $.contro;
 
-	if (!$.getFPS) $.p5play._fps = 60;
-
 	/**
 	 * FPS, amongst the gaming community, refers to how fast a computer
 	 * can generate frames per second, not including the delay between when
@@ -9969,8 +9976,6 @@ main {
 	 * @returns {Number} The current FPS
 	 */
 	this.getFPS ??= () => $.p5play._fps;
-
-	$.p5play._fpsArr = [60];
 
 	/**
 	 * Displays the number of sprites drawn, an inaccurate
@@ -10003,7 +10008,7 @@ main {
 			}
 			rs.gap = rs.fontSize * 1.25;
 			console.warn(
-				"renderStats() uses inaccurate FPS approximations. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. The only way to get accurate results is to use your web browser's performance testing tools."
+				"renderStats() uses inaccurate FPS approximations when used with p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js or your browser's performance testing tools for accurate results."
 			);
 		}
 		rs.x = x || 10;
@@ -10019,10 +10024,7 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 		$.p5play._preDrawFrameTime = performance.now();
 	}
 	$.p5play.spritesDrawn = 0;
-	if (!$.canvas) {
-		$.noLoop();
-		throw new Error('You must create a canvas');
-	}
+
 	$.mouse._update();
 	$.contro._update();
 });
@@ -10073,9 +10075,10 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		let x = rs.x;
 		let y = rs.y;
 		$.text('sprites: ' + $.p5play.spritesDrawn, x, y);
-		$.text('fps avg: ' + $.p5play._fpsAvg, x, y + rs.gap);
-		$.text('fps min: ' + $.p5play._fpsMin, x, y + rs.gap * 2);
-		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 3);
+		$.text('display: ' + Math.round($.frameRate()) + 'hz', x, y + rs.gap);
+		$.text('fps avg: ' + $.p5play._fpsAvg, x, y + rs.gap * 2);
+		$.text('fps min: ' + $.p5play._fpsMin, x, y + rs.gap * 3);
+		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 4);
 		$.pop();
 		rs.show = false;
 	}
