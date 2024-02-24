@@ -51,7 +51,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	const scaleXFrom = (x, tileSize) => (x / tileSize) * plScale;
 
 	const isSlop = (val) => Math.abs(val) <= pl.Settings.linearSlop;
-	const fixRound = (val) => (Math.abs(val - Math.round(val)) <= pl.Settings.linearSlop ? Math.round(val) : val);
+	const fixRound = (val, slop) =>
+		Math.abs(val - Math.round(val)) <= (slop || pl.Settings.linearSlop) ? Math.round(val) : val;
 
 	const eventTypes = {
 		_collisions: ['_collides', '_colliding', '_collided'],
@@ -1992,12 +1993,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get rotation() {
 			if (!this.body) return this._angle || 0;
 			let val = this.body.getAngle();
-			if ($._angleMode === 'degrees') return $.degrees(val);
-			return val;
+			if ($._angleMode == 'degrees') val = $.degrees(val);
+			return fixRound(val, pl.Settings.angularSlop);
 		}
 		set rotation(val) {
 			if (this.body) {
-				if ($._angleMode === 'degrees') val = $.radians(val);
+				if ($._angleMode == 'degrees') {
+					val = $.radians(((val + 180) % 360) - 180);
+				}
 				this.body.setAngle(val);
 				this.body.synchronizeTransform();
 			} else {
@@ -2033,17 +2036,24 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.mass = mass;
 		}
 		/**
-		 * The speed of the sprite's rotation.
+		 * The speed of the sprite's rotation in angles per frame.
 		 * @type {Number}
 		 * @default 0
 		 */
 		get rotationSpeed() {
-			if (this.body) return this.body.getAngularVelocity();
+			if (this.body) {
+				let val = this.body.getAngularVelocity() / 60;
+				if ($._angleMode == 'degrees') return $.degrees(val);
+				return val;
+			}
 			return this._rotationSpeed;
 		}
 		set rotationSpeed(val) {
-			if (this.body) this.body.setAngularVelocity(val);
-			else this._rotationSpeed = val;
+			if (this.body) {
+				val *= 60;
+				if ($._angleMode == 'degrees') val = $.radians(val);
+				this.body.setAngularVelocity(val);
+			} else this._rotationSpeed = val;
 		}
 
 		/**
@@ -3303,12 +3313,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let _rotateIdx = this._rotateIdx;
 
 			return (async () => {
-				let limit = Math.abs(this.rotationSpeed) + 0.01;
+				let slop = 0.01;
+				let limit = Math.abs(this.rotationSpeed) + slop;
 				do {
 					await $.sleep();
 					if (this._rotateIdx != _rotateIdx) return false;
 
-					if ((cw && this.rotationSpeed < 0.01) || (!cw && this.rotationSpeed > -0.01)) {
+					if ((cw && this.rotationSpeed < slop) || (!cw && this.rotationSpeed > -slop)) {
 						return false;
 					}
 				} while (
@@ -3316,7 +3327,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					limit < Math.abs(ang - this.rotation)
 				);
 
-				if (Math.abs(ang - this.rotation) > 0.01) {
+				if (Math.abs(ang - this.rotation) > slop) {
 					this.rotationSpeed = ang - this.rotation;
 					await $.sleep();
 				}
@@ -6054,11 +6065,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			checkCollisions = false;
 		}
 
-		// all of p5play's references to the sprite can be removed
-		// only if the sprite is not colliding or overlapping with anything
-		// otherwise the sprite will be removed from the world but
-		// and the reference to it will be removed after the collided
-		// and/or overlapped events are handled
+		// all of p5play's references to a removed sprite can be deleted
+		// only if the sprite was not colliding or overlapping with
+		// anything or its last collided and overlapped events were handled
 		if (this._removed) {
 			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
 				if (this._isSprite) delete $.p5play.sprites[this._uid];
@@ -8023,7 +8032,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					/^[\d\.]+$/.test(lh) ||
 					lh.endsWith('stackblitz.io') ||
 					lh.endsWith('glitch.me') ||
-					lh.endsWith('repl.co') ||
+					lh.endsWith('replit.dev') ||
 					lh.endsWith('codehs.com') ||
 					lh.endsWith('openprocessing.org') ||
 					location.origin.endsWith('preview.p5js.org')
@@ -10008,9 +10017,11 @@ main {
 				rs.fontSize = 10;
 			}
 			rs.gap = rs.fontSize * 1.25;
-			console.warn(
-				"renderStats() uses inaccurate FPS approximations when used with p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js or your browser's performance testing tools for accurate results."
-			);
+			if (!p5._q5) {
+				console.warn(
+					"renderStats() uses inaccurate FPS approximations when used with p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js or your browser's performance testing tools for accurate results."
+				);
+			}
 		}
 		rs.x = x || 10;
 		rs.y = y || 20;

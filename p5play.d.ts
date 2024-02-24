@@ -710,7 +710,7 @@ class Sprite {
     get rotationLock(): boolean;
     set rotationSpeed(val: number);
     /**
-     * The speed of the sprite's rotation.
+     * The speed of the sprite's rotation in angles per frame.
      * @type {Number}
      * @default 0
      */
