@@ -54,6 +54,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	const fixRound = (val, slop) =>
 		Math.abs(val - Math.round(val)) <= (slop || pl.Settings.linearSlop) ? Math.round(val) : val;
 
+	const minAngleDist = (ang, rot) => {
+		let full = $._angleMode == 'degrees' ? 360 : $.TWO_PI;
+		let dist1 = (ang - rot) % full;
+		let dist2 = (full - Math.abs(dist1)) * -Math.sign(dist1);
+		return Math.abs(dist1) < Math.abs(dist2) ? dist1 : dist2;
+	};
+
 	const eventTypes = {
 		_collisions: ['_collides', '_colliding', '_collided'],
 		_overlappers: ['_overlaps', '_overlapping', '_overlapped']
@@ -800,10 +807,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * type changed without losing every collider added to the
 		 * sprite besides the first.
 		 *
-		 * @param {Number} offsetX distance from the center of the sprite
-		 * @param {Number} offsetY distance from the center of the sprite
-		 * @param {Number} w width of the collider
-		 * @param {Number} h height of the collider
+		 * @param {Number} offsetX - distance from the center of the sprite
+		 * @param {Number} offsetY - distance from the center of the sprite
+		 * @param {Number} w - width of the collider
+		 * @param {Number} h - height of the collider
 		 */
 		addCollider(offsetX, offsetY, w, h) {
 			if (this._removed) {
@@ -851,10 +858,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * then internally it will be given a dynamic physics body that isn't
 		 * affected by gravity so that the sensor can be added to it.
 		 *
-		 * @param {Number} offsetX distance from the center of the sprite
-		 * @param {Number} offsetY distance from the center of the sprite
-		 * @param {Number} w width of the collider
-		 * @param {Number} h height of the collider
+		 * @param {Number} offsetX - distance from the center of the sprite
+		 * @param {Number} offsetY - distance from the center of the sprite
+		 * @param {Number} w - width of the collider
+		 * @param {Number} h - height of the collider
 		 */
 		addSensor(offsetX, offsetY, w, h) {
 			if (this._removed) {
@@ -1987,6 +1994,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The angle of the sprite's rotation, not the direction it's moving.
+		 *
+		 * If angleMode is set to "degrees", the value will be returned in
+		 * a range of -180 to 180.
 		 * @type {Number}
 		 * @default 0
 		 */
@@ -1999,7 +2009,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set rotation(val) {
 			if (this.body) {
 				if ($._angleMode == 'degrees') {
-					val = $.radians(((val + 180) % 360) - 180);
+					val = $.radians(val % 360);
 				}
 				this.body.setAngle(val);
 				this.body.synchronizeTransform();
@@ -2885,8 +2895,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} force
-		 * @param {Number} [radius] infinite if not given
-		 * @param {Number} [easing] solid if not given
+		 * @param {Number} [radius] - infinite if not given
+		 * @param {Number} [easing] - solid if not given
 		 * @example
 		 * sprite.attractTo(x, y, force);
 		 * sprite.attractTo({x, y}, force);
@@ -2937,7 +2947,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * This function is the rotational equivalent of applyForce().
 		 * It will not imperatively set the sprite's rotation.
 		 *
-		 * @param {Number} torque The amount of torque to apply.
+		 * @param {Number} torque - The amount of torque to apply.
 		 */
 		applyTorque(val) {
 			if (!this.body) return;
@@ -2948,9 +2958,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Moves a sprite towards a position at a percentage of the distance
 		 * between itself and the destination.
 		 *
-		 * @param {Number|Object} x destination x or any object with x and y properties
-		 * @param {Number} [y] destination y
-		 * @param {Number} [tracking] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
+		 * @param {Number|Object} x - destination x or an object with x and y properties
+		 * @param {Number} y - destination y
+		 * @param {Number} [tracking] - percent of the distance to move towards the destination as a 0-1 value, default is 0.1 (10% tracking)
 		 */
 		moveTowards(x, y, tracking) {
 			if (x === undefined) return;
@@ -2983,9 +2993,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Moves the sprite away from a position, the opposite of moveTowards,
 		 * at a percentage of the distance between itself and the position.
-		 * @param {Number} x
-		 * @param {Number} [y]
-		 * @param {Number} [repel] range from 0-1
+		 * @param {Number|Object} x - destination x or an object with x and y properties
+		 * @param {Number} y - destination y
+		 * @param {Number} [repel] - percent of the distance to the repel position as a 0-1 value, default is 0.1 (10% repel)
 		 */
 		moveAway(x, y, repel) {
 			this.moveTowards(...arguments);
@@ -3004,18 +3014,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * the distance the sprite moves will be rounded up to the
 		 * nearest half tile.
 		 *
-		 * @param {Number} distance [optional]
-		 * @param {Number|String} direction [optional]
-		 * @param {Number} speed [optional]
+		 * @param {Number} distance
+		 * @param {Number|String} [direction] - direction angle in degrees or a cardinal direction name, if not given the sprite's current direction is used
+		 * @param {Number} [speed] - if not given, the sprite's current `speed` is used, unless it's 0 then it's given a default speed of 1 or 0.1 if the sprite's tileSize is greater than 1
 		 * @returns {Promise} resolves when the movement is complete or cancelled
 		 *
 		 * @example
-		 * sprite.move(distance);
-		 * sprite.move(distance, direction);
-		 * sprite.move(distance, direction, speed);
-		 *
-		 * sprite.move(directionName);
-		 * sprite.move(directionName, speed);
+		 * sprite.direction = -90;
+		 * sprite.speed = 2;
+		 * sprite.move(1);
+		 * // or
+		 * sprite.move(1, -90, 2);
+		 * // or
+		 * sprite.move('up', 2);
 		 */
 		move(distance, direction, speed) {
 			if (!distance) return Promise.resolve(false);
@@ -3055,9 +3066,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Move the sprite to a position.
 		 *
-		 * @param {Number|Object} x|position destination x or any object with x and y properties
-		 * @param {Number} y destination y
-		 * @param {Number} speed [optional]
+		 * @param {Number|Object} x - destination x or an object with x and y properties
+		 * @param {Number} y - destination y
+		 * @param {Number} [speed] - if not given, the sprite's current speed is used, unless it is 0 then it is given a default speed of 1 or 0.1 if the sprite's tileSize is greater than 1
 		 * @returns {Promise} resolves to true when the movement is complete
 		 * or to false if the sprite will not reach its destination
 		 */
@@ -3089,9 +3100,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._destIdx++;
 			if (!x && !y) return Promise.resolve(true);
 
-			if (this.speed) speed ??= this.speed;
-			if (this.tileSize > 1) speed ??= 0.1;
-			speed ??= 1;
+			speed ??= this.speed || (this.tileSize <= 1 ? 1 : 0.1);
 			if (speed <= 0) {
 				console.warn('sprite.move: speed should be a positive number');
 				return Promise.resolve(false);
@@ -3163,9 +3172,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Rotates the sprite towards an angle or position
 		 * with x and y properties.
 		 *
-		 * @param {Number|Object} angle|position angle in degrees or an object with x and y properties
-		 * @param {Number} tracking percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
-		 * @param {Number} facing (only if position is given) rotation angle the sprite should be at when "facing" the position, default is 0
+		 * @param {Number|Object} angle - angle in degrees or an object with x and y properties
+		 * @param {Number} [tracking] - percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
+		 * @param {Number} [facing] - (only specify if position is given) rotation angle the sprite should be at when "facing" the position, default is 0
 		 */
 		rotateTowards(angle, tracking) {
 			if (this.__collider == 1) throw new FriendlyError(0);
@@ -3198,7 +3207,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * with x and y properties.
 		 *
 		 * Can be used to change the direction of a sprite so it moves
-		 * to a position or object.
+		 * to a position or object, as shown in the example.
 		 *
 		 * Used internally by `moveTo` and `moveTowards`.
 		 *
@@ -3221,92 +3230,119 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				y = obj.y;
 				x = obj.x;
 			}
-
 			return $.atan2(y - this.y, x - this.x);
+		}
+
+		_angleToFace(x, y, facing) {
+			if (typeof x == 'object') {
+				facing = y;
+				y = x.y;
+				x = x.x;
+			}
+			// if the sprite is too close to the position, don't rotate
+			if (Math.abs(x - this.x) < 0.01 && Math.abs(y - this.y) < 0.01) {
+				return 0;
+			}
+			return this.angleTo(x, y) + (facing || 0);
 		}
 
 		/**
 		 * Finds the minimum angle of rotation that the sprite would have
-		 * to rotate to "face" a position at a specified "facing" rotation.
+		 * to rotate to "face" a position at a specified facing rotation,
+		 * taking into account the current rotation of the sprite.
 		 *
 		 * Used internally by `rotateTo` and `rotateTowards`.
 		 *
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} facing - rotation angle the sprite should be at when "facing" the position, default is 0
-		 * @returns {Number} minimum angle of rotation to face the position
+		 * @returns {Number} the minimum angle of rotation to face the position
 		 */
 		angleToFace(x, y, facing) {
-			if (typeof x == 'object') {
-				facing = y;
-				y = x.y;
-				x = x.x;
-			}
-			if (Math.abs(x - this.x) < 0.01 && Math.abs(y - this.y) < 0.01) {
-				return this.rotation;
-			}
-			let ang = this.angleTo(x, y);
-			facing ??= 0;
-			ang += facing;
-			let dist1 = ang - (this.rotation % 360);
-			let dist2 = 360 - Math.abs(dist1);
-			dist2 *= dist1 < 0 ? 1 : -1;
-
-			return Math.abs(dist1) < Math.abs(dist2) ? dist1 : dist2;
+			let ang = this._angleToFace(x, y, facing);
+			return ang ? minAngleDist(ang, this.rotation) : 0;
 		}
 
 		/**
-		 * Rotates the sprite to an angle or to face a position.
+		 * Rotates the sprite to an angle or to face a position
+		 * at a given rotation speed.
 		 *
-		 * @param {Number|Object} angle|position
-		 * @param {Number} speed the amount of rotation per frame, default is 1
-		 * @param {Number} facing (only if position is given) the rotation angle the sprite should be at when "facing" the position, default is 0
+		 * @param {Number|Object} angle - angle or a position object with x and y properties
+		 * @param {Number} [speed] - the amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
+		 * @param {Number} [facing] - the rotation angle the sprite should be at when "facing" the given position, default is 0
 		 * @returns {Promise} a promise that resolves when the rotation is complete
+		 * @example
+		 * sprite.rotationSpeed = 2;
+		 * sprite.rotateTo(180);
+		 * // or
+		 * sprite.rotateTo(180, 2);
+		 * // or
+		 * sprite.rotateTo({x: 0, y: 100}, 2);
 		 */
-		rotateTo(angle, speed) {
+		rotateTo(angle, speed, facing) {
 			if (this.__collider == 1) throw new FriendlyError(0);
 
 			let args = arguments;
-			let x, y, facing;
 			if (typeof args[0] != 'number') {
-				x = args[0].x;
-				y = args[0].y;
-				speed = args[1];
-				facing = args[2];
-			} else if (arguments.length > 2) {
-				x = args[0];
-				y = args[1];
-				speed = args[2];
-				facing = args[3];
-			}
+				angle = this._angleToFace(args[0].x, args[0].y, facing);
+			} else if (angle == this.rotation) return;
 
-			if (x !== undefined) angle = this.angleToFace(x, y, facing);
-			else {
-				if (angle == this.rotation) return;
-				angle -= this.rotation;
-			}
+			let full = $._angleMode == 'degrees' ? 360 : $.TWO_PI;
+			angle = (angle - this.rotation) % full;
+			if (angle < 0 && speed > 0) angle += full;
+			if (angle > 0 && speed < 0) angle -= full;
 
+			speed ??= this.rotationSpeed || Math.sign(angle);
 			return this.rotate(angle, speed);
 		}
 
 		/**
-		 * Rotates the sprite by an amount at a specified angles per frame speed.
+		 * Rotates the sprite by the smallest angular distance
+		 * to an angle or to face a position at a given absolute
+		 * rotation speed.
 		 *
-		 * @param {Number} angle the amount to rotate the sprite
-		 * @param {Number} speed the amount of rotation per frame, default is 1
+		 * @param {Number|Object} angle - angle or a position object with x and y properties
+		 * @param {Number} speed - the absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used
+		 * @param {Number} facing - the rotation angle the sprite should be at when "facing" the given position, default is 0
+		 */
+		rotateMinTo(angle, speed, facing) {
+			if (this.__collider == 1) throw new FriendlyError(0);
+			let args = arguments;
+			if (typeof args[0] != 'number') {
+				angle = this.angleToFace(args[0].x, args[0].y, facing);
+			} else {
+				if (angle == this.rotation) return;
+				angle = minAngleDist(angle, this.rotation);
+			}
+			speed ??= this.rotationSpeed || Math.sign(angle);
+			speed = Math.abs(speed) * Math.sign(angle);
+			return this.rotate(angle, speed);
+		}
+
+		/**
+		 * Rotates the sprite by an angle amount at a given rotation speed.
+		 *
+		 * To achieve a clockwise rotation, use a positive angle and speed.
+		 * To achieve a counter-clockwise rotation, use a negative angle
+		 * or speed.
+		 *
+		 * @param {Number} angle - the amount to rotate the sprite
+		 * @param {Number} [speed] - the absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
 		 * @returns {Promise} a promise that resolves when the rotation is complete
 		 */
 		rotate(angle, speed) {
 			if (this.__collider == 1) throw new FriendlyError(0);
 			if (isNaN(angle)) throw new FriendlyError(1, [angle]);
 			if (angle == 0) return;
-			let absA = Math.abs(angle);
-			speed ??= 1;
-			if (speed > absA) speed = absA;
+			speed ??= this.rotationSpeed || 1;
 
-			let ang = this.rotation + angle;
-			let cw = angle > 0; // rotation is clockwise
-			this.rotationSpeed = speed * (cw ? 1 : -1);
+			let cw = angle > 0 && speed > 0; // rotation is clockwise
+			if (!cw) {
+				angle = -Math.abs(angle);
+				speed = -Math.abs(speed);
+			}
+			this.rotationSpeed = speed;
+			let ang = this.rotation + angle; // destination angle
 
 			this._rotateIdx ??= 0;
 			this._rotateIdx++;
@@ -3342,7 +3378,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Changes the sprite's animation. Use `addAni` to define the
 		 * animation(s) first.
 		 *
-		 * @param {...String} anis the names of one or many animations to be played in
+		 * @param {...String} anis - the names of one or many animations to be played in
 		 * sequence
 		 * @returns A promise that fulfills when the animation or sequence of animations
 		 * completes
@@ -3437,7 +3473,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Changes the sprite's animation. Use `addAni` to define the
 		 * animation(s) first. Alt for `changeAni`.
 		 *
-		 * @param {...String} anis the names of one or many animations to be played in
+		 * @param {...String} anis - the names of one or many animations to be played in
 		 * sequence
 		 * @returns A promise that fulfills when the animation or sequence of animations
 		 * completes
@@ -4173,13 +4209,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						// sprites will be given default dimensions, but groups
 						// are not, _dimensionsUndef is only for sprites
 						if (!owner._dimensionsUndef && owner.w && owner.h) {
-							w = owner.w * tileSize;
-							h = owner.h * tileSize;
+							w ??= owner.w * tileSize;
+							h ??= owner.h * tileSize;
 						} else if (tileSize != 1) {
-							w = h = tileSize;
+							w ??= tileSize;
+							h ??= tileSize;
 						} else if (frameCount) {
-							w = _this.spriteSheet.width / frameCount;
-							h = _this.spriteSheet.height;
+							w ??= _this.spriteSheet.width / frameCount;
+							h ??= _this.spriteSheet.height;
 						} else {
 							if (_this.spriteSheet.width < _this.spriteSheet.height) {
 								w = h = _this.spriteSheet.width;
@@ -4334,11 +4371,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Optional parameters effect the current draw cycle only and
 		 * are not saved between draw cycles.
 		 *
-		 * @param {Number} x horizontal position
-		 * @param {Number} y vertical position
-		 * @param {Number} [r] rotation
-		 * @param {Number} [sx] scale x
-		 * @param {Number} [sy] scale y
+		 * @param {Number} x - horizontal position
+		 * @param {Number} y - vertical position
+		 * @param {Number} [r] - rotation
+		 * @param {Number} [sx] - scale x
+		 * @param {Number} [sy] - scale y
 		 */
 		draw(x, y, r, sx, sy) {
 			this.x = x || 0;
@@ -4519,7 +4556,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Plays the animation forward or backward toward a target frame.
 		 *
-		 * @param {Number} toFrame Frame number destination (starts from 0)
+		 * @param {Number} toFrame - Frame number destination (starts from 0)
 		 * @returns [Promise] a promise that resolves when the animation completes
 		 */
 		goToFrame(toFrame) {
@@ -5671,7 +5708,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * already in the group or not, just like with the Array.push()
 		 * method. Only sprites can be added to a group.
 		 *
-		 * @param {...Sprite} sprites The sprite or sprites to be added
+		 * @param {...Sprite} sprites - The sprite or sprites to be added
 		 * @returns {Number} the new length of the group
 		 */
 		push(...sprites) {
@@ -5748,18 +5785,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Remove sprites that go outside the given culling boundary
-		 * relative to the camera.
+		 * relative to the camera. Sprites with chain colliders can not be culled.
 		 *
-		 * Sprites with chain colliders can not be culled.
+		 * Can also be used with a uniform size for all boundaries, see example.
 		 *
-		 * @param {Number} top|size The distance that sprites can move below the p5.js canvas before they are removed. *OR* The distance sprites can travel outside the screen on all sides before they get removed.
-		 * @param {Number} bottom|cb The distance that sprites can move below the p5.js canvas before they are removed.
-		 * @param {Number} [left] The distance that sprites can move beyond the left side of the p5.js canvas before they are removed.
-		 * @param {Number} [right] The distance that sprites can move beyond the right side of the p5.js canvas before they are removed.
-		 * @param {Function} [cb(sprite)] The callback is given the sprite that
-		 * passed the cull boundary, if no callback is given the sprite is
-		 * removed by default
-		 * @return {Number} The number of sprites culled
+		 * @param {Number} top - the distance that sprites can move below the canvas before they are removed
+		 * @param {Number} bottom - the distance that sprites can move below the canvas before they are removed
+		 * @param {Number} left - the distance that sprites can move beyond the left side of the canvas before they are removed
+		 * @param {Number} right - the distance that sprites can move beyond the right side of the canvas before they are removed
+		 * @param {Function} [cb] - the function to be run when a sprite is culled,
+		 * it's given the sprite being culled, if no callback is given then the
+		 * sprite is removed
+		 * @return {Number} the number of sprites culled
+		 * @example
+		 * // alternate uniform size syntax
+		 * group.cull(100, callback);
 		 */
 		cull(top, bottom, left, right, cb) {
 			if (left === undefined) {
@@ -5811,7 +5851,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * To remove a sprite from the world and every group it belongs to,
 		 * use `sprite.remove()` instead.
 		 *
-		 * @param {Sprite|Number} item The sprite to be removed or its index
+		 * @param {Sprite|Number} item - the sprite to be removed or its index
 		 * @return {Sprite} the removed sprite or undefined if the specified sprite was not found
 		 */
 		remove(item) {
@@ -5846,8 +5886,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * This function also removes the group and its super-groups from the
 		 * sprites' groups array.
 		 *
-		 * @param {Number} idx index
-		 * @param {Number} amount number of sprites to remove
+		 * @param {Number} idx - index
+		 * @param {Number} amount - number of sprites to remove
 		 * @return {Sprite[]} the removed sprites
 		 */
 		splice(idx, amount) {
@@ -6095,8 +6135,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @memberof Sprite
 	 * @instance
 	 * @func addAnimation
-	 * @param {String} name SpriteAnimation identifier
-	 * @param {SpriteAnimation} animation The preloaded animation
+	 * @param {String} name - SpriteAnimation identifier
+	 * @param {SpriteAnimation} animation - The preloaded animation
 	 * @example
 	 * sprite.addAni(name, animation);
 	 * sprite.addAni(name, frame1, frame2, frame3...);
@@ -6321,8 +6361,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * @param {Number} x
 		 * @param {Number} y
-		 * @param {Group} [group] the group to search
-		 * @param {Boolean} [cameraActiveWhenDrawn] if true, only sprites that
+		 * @param {Group} [group] - the group to search
+		 * @param {Boolean} [cameraActiveWhenDrawn] - if true, only sprites that
 		 * were drawn when the camera was active will be returned
 		 * @returns {Sprite[]} an array of sprites
 		 */
@@ -6363,7 +6403,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * @param {Number} x
 		 * @param {Number} y
-		 * @param {Group} [group] the group to search
+		 * @param {Group} [group] - the group to search
 		 * @returns {Sprite} a sprite
 		 */
 		getSpriteAt(x, y, group) {
@@ -6718,8 +6758,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Zoom the camera at a given speed.
 		 *
-		 * @param {Number} target The target zoom
-		 * @param {Number} speed The amount of zoom per frame
+		 * @param {Number} target - The target zoom
+		 * @param {Number} speed - The amount of zoom per frame
 		 * @returns {Promise} resolves true when the camera reaches the target zoom
 		 */
 		zoomTo(target, speed) {
@@ -7306,8 +7346,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * By default the motor is disabled, angle is 90 degrees,
 		 * maxPower is 1000, springiness is 0.1, and damping is 0.7.
 		 *
-		 * @param {Sprite} spriteA the vehicle body
-		 * @param {Sprite} spriteB the wheel
+		 * @param {Sprite} spriteA - the vehicle body
+		 * @param {Sprite} spriteB - the wheel
 		 */
 		constructor(spriteA, spriteB) {
 			super(...arguments, 'wheel');
@@ -7782,8 +7822,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 	/**
 	 * Gets a color from a color palette.
-	 * @param {String} c A single character, a key found in the color palette object.
-	 * @param {Number|Object} palette Can be a palette object or number index
+	 * @param {String} c - A single character, a key found in the color palette object.
+	 * @param {Number|Object} palette - can be a palette object or number index
 	 * in the system's palettes array.
 	 * @returns {String} a hex color string for use by p5.js functions
 	 */
@@ -7804,9 +7844,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * object.
 	 *
 	 * @func spriteArt
-	 * @param {String} txt Each character represents a pixel color value
-	 * @param {Number} scale The scale of the image
-	 * @param {Number|Object} palette Color palette
+	 * @param {String} txt - each character represents a pixel color value
+	 * @param {Number} scale - the scale of the image
+	 * @param {Number|Object} palette - color palette
 	 * @returns {p5.Image} A p5.Image object
 	 *
 	 * @example
@@ -7897,12 +7937,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	/**
 	 * Displays an animation. Similar to the p5.js image function.
 	 *
-	 * @param {SpriteAnimation} ani Animation to be displayed
-	 * @param {Number} x position of the animation on the canvas
-	 * @param {Number} y position of the animation on the canvas
-	 * @param {Number} r rotation of the animation
-	 * @param {Number} sX scale of the animation in the x direction
-	 * @param {Number} sY scale of the animation in the y direction
+	 * @param {SpriteAnimation} ani - Animation to be displayed
+	 * @param {Number} x - position of the animation on the canvas
+	 * @param {Number} y - position of the animation on the canvas
+	 * @param {Number} r - rotation of the animation
+	 * @param {Number} sX - scale of the animation in the x direction
+	 * @param {Number} sY - scale of the animation in the y direction
 	 */
 	this.animation = function (ani, x, y, r, sX, sY) {
 		if (ani.visible) ani.update();
@@ -8220,9 +8260,9 @@ main {
 		 *
 		 * @param {Number} width
 		 * @param {Number} height
-		 * @param {String} [preset] 'fullscreen' or 'pixelated'
-		 * @param {String} [renderer] '2d' (default) or 'webgl'
-		 * @param {Object} [options] context attributes
+		 * @param {String} [preset] - 'fullscreen' or 'pixelated'
+		 * @param {String} [renderer] - '2d' (default) or 'webgl'
+		 * @param {Object} [options] - context attributes
 		 * @returns HTML5 canvas element
 		 * @example
 		 * // fills the window
@@ -8293,14 +8333,14 @@ main {
 		 * you must manually adjust the camera position after calling this
 		 * function.
 		 *
-		 * @param {Number} w the new width of the canvas
-		 * @param {Number} h the new height of the canvas
+		 * @param {Number} w - the new width of the canvas
+		 * @param {Number} h - the new height of the canvas
 		 */
 		resize() {}
 
 		/**
 		 * Saves the current canvas as an image file.
-		 * @param {String} file the name of the image
+		 * @param {String} file - the name of the image
 		 */
 		save() {}
 	};
@@ -8547,8 +8587,8 @@ main {
 		/**
 		 * Creates an image from text.
 		 * @param {String} str
-		 * @param {Number} w line width limit
-		 * @param {Number} h height limit
+		 * @param {Number} w - line width limit
+		 * @param {Number} h - height limit
 		 * @returns {p5.Image}
 		 */
 		$.createTextImage = (str, w, h) => {
@@ -8565,11 +8605,11 @@ main {
 		/**
 		 * Displays text on the canvas.
 		 *
-		 * @param {String} str text to display
+		 * @param {String} str - text to display
 		 * @param {Number} x
 		 * @param {Number} y
-		 * @param {Number} w line width limit
-		 * @param {Number} h height limit
+		 * @param {Number} w - line width limit
+		 * @param {Number} h - height limit
 		 */
 		$.text = (str, x, y, w, h) => {
 			if (str === undefined) return;
@@ -8706,9 +8746,9 @@ main {
 	 * more helpful.
 	 *
 	 * @private
-	 * @param {String} func the name of the function the error was thrown in
-	 * @param {Number} errorNum the error's code number
-	 * @param {Array} e an array of values relevant to the error
+	 * @param {String} func - the name of the function the error was thrown in
+	 * @param {Number} errorNum - the error's code number
+	 * @param {Array} e - an array of values relevant to the error
 	 */
 	class FriendlyError extends Error {
 		constructor(func, errorNum, e) {
