@@ -252,10 +252,10 @@ class Sprite {
      * type changed without losing every collider added to the
      * sprite besides the first.
      *
-     * @param {Number} offsetX distance from the center of the sprite
-     * @param {Number} offsetY distance from the center of the sprite
-     * @param {Number} w width of the collider
-     * @param {Number} h height of the collider
+     * @param {Number} offsetX - distance from the center of the sprite
+     * @param {Number} offsetY - distance from the center of the sprite
+     * @param {Number} w - width of the collider
+     * @param {Number} h - height of the collider
      */
     addCollider(offsetX: number, offsetY: number, w: number, h: number, ...args: any[]): void;
     body: any;
@@ -275,10 +275,10 @@ class Sprite {
      * then internally it will be given a dynamic physics body that isn't
      * affected by gravity so that the sensor can be added to it.
      *
-     * @param {Number} offsetX distance from the center of the sprite
-     * @param {Number} offsetY distance from the center of the sprite
-     * @param {Number} w width of the collider
-     * @param {Number} h height of the collider
+     * @param {Number} offsetX - distance from the center of the sprite
+     * @param {Number} offsetY - distance from the center of the sprite
+     * @param {Number} w - width of the collider
+     * @param {Number} h - height of the collider
      */
     addSensor(offsetX: number, offsetY: number, w: number, h: number, ...args: any[]): void;
     set mass(val: number);
@@ -290,6 +290,9 @@ class Sprite {
     set rotation(val: number);
     /**
      * The angle of the sprite's rotation, not the direction it's moving.
+     *
+     * If angleMode is set to "degrees", the value will be returned in
+     * a range of -180 to 180.
      * @type {Number}
      * @default 0
      */
@@ -917,8 +920,8 @@ class Sprite {
      * @param {Number} x
      * @param {Number} y
      * @param {Number} force
-     * @param {Number} [radius] infinite if not given
-     * @param {Number} [easing] solid if not given
+     * @param {Number} [radius] - infinite if not given
+     * @param {Number} [easing] - solid if not given
      * @example
      * sprite.attractTo(x, y, force);
      * sprite.attractTo({x, y}, force);
@@ -934,26 +937,26 @@ class Sprite {
      * This function is the rotational equivalent of applyForce().
      * It will not imperatively set the sprite's rotation.
      *
-     * @param {Number} torque The amount of torque to apply.
+     * @param {Number} torque - The amount of torque to apply.
      */
     applyTorque(val: any): void;
     /**
      * Moves a sprite towards a position at a percentage of the distance
      * between itself and the destination.
      *
-     * @param {Number|Object} x destination x or any object with x and y properties
-     * @param {Number} [y] destination y
-     * @param {Number} [tracking] 1 represents 1:1 tracking, the mouse moves to the destination immediately, 0 represents no tracking. Default is 0.1 (10% tracking).
+     * @param {Number|Object} x - destination x or an object with x and y properties
+     * @param {Number} y - destination y
+     * @param {Number} [tracking] - percent of the distance to move towards the destination as a 0-1 value, default is 0.1 (10% tracking)
      */
-    moveTowards(x: number | any, y?: number, tracking?: number): void;
+    moveTowards(x: number | any, y: number, tracking?: number): void;
     /**
      * Moves the sprite away from a position, the opposite of moveTowards,
      * at a percentage of the distance between itself and the position.
-     * @param {Number} x
-     * @param {Number} [y]
-     * @param {Number} [repel] range from 0-1
+     * @param {Number|Object} x - destination x or an object with x and y properties
+     * @param {Number} y - destination y
+     * @param {Number} [repel] - percent of the distance to the repel position as a 0-1 value, default is 0.1 (10% repel)
      */
-    moveAway(x: number, y?: number, repel?: number, ...args: any[]): void;
+    moveAway(x: number | any, y: number, repel?: number, ...args: any[]): void;
     /**
      * Move the sprite a distance from its current position.
      *
@@ -965,45 +968,46 @@ class Sprite {
      * the distance the sprite moves will be rounded up to the
      * nearest half tile.
      *
-     * @param {Number} distance [optional]
-     * @param {Number|String} direction [optional]
-     * @param {Number} speed [optional]
+     * @param {Number} distance
+     * @param {Number|String} [direction] - direction angle in degrees or a cardinal direction name, if not given the sprite's current direction is used
+     * @param {Number} [speed] - if not given, the sprite's current `speed` is used, unless it's 0 then it's given a default speed of 1 or 0.1 if the sprite's tileSize is greater than 1
      * @returns {Promise} resolves when the movement is complete or cancelled
      *
      * @example
-     * sprite.move(distance);
-     * sprite.move(distance, direction);
-     * sprite.move(distance, direction, speed);
-     *
-     * sprite.move(directionName);
-     * sprite.move(directionName, speed);
+     * sprite.direction = -90;
+     * sprite.speed = 2;
+     * sprite.move(1);
+     * // or
+     * sprite.move(1, -90, 2);
+     * // or
+     * sprite.move('up', 2);
      */
-    move(distance: number, direction: number | string, speed: number, ...args: any[]): Promise<any>;
+    move(distance: number, direction?: number | string, speed?: number, ...args: any[]): Promise<any>;
     /**
      * Move the sprite to a position.
      *
-     * @param {Number|Object} x|position destination x or any object with x and y properties
-     * @param {Number} y destination y
-     * @param {Number} speed [optional]
+     * @param {Number|Object} x - destination x or an object with x and y properties
+     * @param {Number} y - destination y
+     * @param {Number} [speed] - if not given, the sprite's current speed is used, unless it is 0 then it is given a default speed of 1 or 0.1 if the sprite's tileSize is greater than 1
      * @returns {Promise} resolves to true when the movement is complete
      * or to false if the sprite will not reach its destination
      */
-    moveTo(x: number | any, y: number, speed: number): Promise<any>;
+    moveTo(x: number | any, y: number, speed?: number): Promise<any>;
     /**
      * Rotates the sprite towards an angle or position
      * with x and y properties.
      *
-     * @param {Number|Object} angle|position angle in degrees or an object with x and y properties
-     * @param {Number} tracking percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
-     * @param {Number} facing (only if position is given) rotation angle the sprite should be at when "facing" the position, default is 0
+     * @param {Number|Object} angle - angle in degrees or an object with x and y properties
+     * @param {Number} [tracking] - percent of the distance to rotate on each frame towards the target angle, default is 0.1 (10%)
+     * @param {Number} [facing] - (only specify if position is given) rotation angle the sprite should be at when "facing" the position, default is 0
      */
-    rotateTowards(angle: number | any, tracking: number, ...args: any[]): void;
+    rotateTowards(angle: number | any, tracking?: number, ...args: any[]): void;
     /**
      * Finds the angle from this sprite to the given position or object
      * with x and y properties.
      *
      * Can be used to change the direction of a sprite so it moves
-     * to a position or object.
+     * to a position or object, as shown in the example.
      *
      * Used internally by `moveTo` and `moveTowards`.
      *
@@ -1016,38 +1020,61 @@ class Sprite {
     angleTo(x: number, y: number): number;
     /**
      * Finds the minimum angle of rotation that the sprite would have
-     * to rotate to "face" a position at a specified "facing" rotation.
+     * to rotate to "face" a position at a specified facing rotation,
+     * taking into account the current rotation of the sprite.
      *
      * Used internally by `rotateTo` and `rotateTowards`.
      *
      * @param {Number} x
      * @param {Number} y
      * @param {Number} facing - rotation angle the sprite should be at when "facing" the position, default is 0
-     * @returns {Number} minimum angle of rotation to face the position
+     * @returns {Number} the minimum angle of rotation to face the position
      */
     angleToFace(x: number, y: number, facing: number): number;
     /**
-     * Rotates the sprite to an angle or to face a position.
+     * Rotates the sprite to an angle or to face a position
+     * at a given rotation speed.
      *
-     * @param {Number|Object} angle|position
-     * @param {Number} speed the amount of rotation per frame, default is 1
-     * @param {Number} facing (only if position is given) the rotation angle the sprite should be at when "facing" the position, default is 0
+     * @param {Number|Object} angle - angle or a position object with x and y properties
+     * @param {Number} [speed] - the amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
+     * @param {Number} [facing] - the rotation angle the sprite should be at when "facing" the given position, default is 0
      * @returns {Promise} a promise that resolves when the rotation is complete
+     * @example
+     * sprite.rotationSpeed = 2;
+     * sprite.rotateTo(180);
+     * // or
+     * sprite.rotateTo(180, 2);
+     * // or
+     * sprite.rotateTo({x: 0, y: 100}, 2);
      */
-    rotateTo(angle: number | any, speed: number, ...args: any[]): Promise<any>;
+    rotateTo(angle: number | any, speed?: number, facing?: number, ...args: any[]): Promise<any>;
     /**
-     * Rotates the sprite by an amount at a specified angles per frame speed.
+     * Rotates the sprite by the smallest angular distance
+     * to an angle or to face a position at a given absolute
+     * rotation speed.
      *
-     * @param {Number} angle the amount to rotate the sprite
-     * @param {Number} speed the amount of rotation per frame, default is 1
+     * @param {Number|Object} angle - angle or a position object with x and y properties
+     * @param {Number} speed - the absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used
+     * @param {Number} facing - the rotation angle the sprite should be at when "facing" the given position, default is 0
+     */
+    rotateMinTo(angle: number | any, speed: number, facing: number, ...args: any[]): Promise<any>;
+    /**
+     * Rotates the sprite by an angle amount at a given rotation speed.
+     *
+     * To achieve a clockwise rotation, use a positive angle and speed.
+     * To achieve a counter-clockwise rotation, use a negative angle
+     * or speed.
+     *
+     * @param {Number} angle - the amount to rotate the sprite
+     * @param {Number} [speed] - the absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
      * @returns {Promise} a promise that resolves when the rotation is complete
      */
-    rotate(angle: number, speed: number): Promise<any>;
+    rotate(angle: number, speed?: number): Promise<any>;
     /**
      * Changes the sprite's animation. Use `addAni` to define the
      * animation(s) first.
      *
-     * @param {...String} anis the names of one or many animations to be played in
+     * @param {...String} anis - the names of one or many animations to be played in
      * sequence
      * @returns A promise that fulfills when the animation or sequence of animations
      * completes
@@ -1057,7 +1084,7 @@ class Sprite {
      * Changes the sprite's animation. Use `addAni` to define the
      * animation(s) first. Alt for `changeAni`.
      *
-     * @param {...String} anis the names of one or many animations to be played in
+     * @param {...String} anis - the names of one or many animations to be played in
      * sequence
      * @returns A promise that fulfills when the animation or sequence of animations
      * completes
@@ -1274,11 +1301,11 @@ class SpriteAnimation extends Array<p5.Image> {
      * Optional parameters effect the current draw cycle only and
      * are not saved between draw cycles.
      *
-     * @param {Number} x horizontal position
-     * @param {Number} y vertical position
-     * @param {Number} [r] rotation
-     * @param {Number} [sx] scale x
-     * @param {Number} [sy] scale y
+     * @param {Number} x - horizontal position
+     * @param {Number} y - vertical position
+     * @param {Number} [r] - rotation
+     * @param {Number} [sx] - scale x
+     * @param {Number} [sy] - scale y
      */
     draw(x: number, y: number, r?: number, sx?: number, sy?: number): void;
     x: number;
@@ -1325,7 +1352,7 @@ class SpriteAnimation extends Array<p5.Image> {
     /**
      * Plays the animation forward or backward toward a target frame.
      *
-     * @param {Number} toFrame Frame number destination (starts from 0)
+     * @param {Number} toFrame - Frame number destination (starts from 0)
      * @returns [Promise] a promise that resolves when the animation completes
      */
     goToFrame(toFrame: number): Promise<any>;
@@ -1829,20 +1856,23 @@ class Group extends Array<Sprite> {
     size(): number;
     /**
      * Remove sprites that go outside the given culling boundary
-     * relative to the camera.
+     * relative to the camera. Sprites with chain colliders can not be culled.
      *
-     * Sprites with chain colliders can not be culled.
+     * Can also be used with a uniform size for all boundaries, see example.
      *
-     * @param {Number} top|size The distance that sprites can move below the p5.js canvas before they are removed. *OR* The distance sprites can travel outside the screen on all sides before they get removed.
-     * @param {Number} bottom|cb The distance that sprites can move below the p5.js canvas before they are removed.
-     * @param {Number} [left] The distance that sprites can move beyond the left side of the p5.js canvas before they are removed.
-     * @param {Number} [right] The distance that sprites can move beyond the right side of the p5.js canvas before they are removed.
-     * @param {Function} [cb(sprite)] The callback is given the sprite that
-     * passed the cull boundary, if no callback is given the sprite is
-     * removed by default
-     * @return {Number} The number of sprites culled
+     * @param {Number} top - the distance that sprites can move below the canvas before they are removed
+     * @param {Number} bottom - the distance that sprites can move below the canvas before they are removed
+     * @param {Number} left - the distance that sprites can move beyond the left side of the canvas before they are removed
+     * @param {Number} right - the distance that sprites can move beyond the right side of the canvas before they are removed
+     * @param {Function} [cb] - the function to be run when a sprite is culled,
+     * it's given the sprite being culled, if no callback is given then the
+     * sprite is removed
+     * @return {Number} the number of sprites culled
+     * @example
+     * // alternate uniform size syntax
+     * group.cull(100, callback);
      */
-    cull(top: number, bottom: number, left?: number, right?: number, cb?: Function): number;
+    cull(top: number, bottom: number, left: number, right: number, cb?: Function): number;
     /**
      * If no input is given to this function, the group itself will be
      * marked as removed and deleted from p5play's internal memory, the
@@ -1858,7 +1888,7 @@ class Group extends Array<Sprite> {
      * To remove a sprite from the world and every group it belongs to,
      * use `sprite.remove()` instead.
      *
-     * @param {Sprite|Number} item The sprite to be removed or its index
+     * @param {Sprite|Number} item - the sprite to be removed or its index
      * @return {Sprite} the removed sprite or undefined if the specified sprite was not found
      */
     remove(item: Sprite | number): Sprite;
@@ -1872,8 +1902,8 @@ class Group extends Array<Sprite> {
      * This function also removes the group and its super-groups from the
      * sprites' groups array.
      *
-     * @param {Number} idx index
-     * @param {Number} amount number of sprites to remove
+     * @param {Number} idx - index
+     * @param {Number} amount - number of sprites to remove
      * @return {Sprite[]} the removed sprites
      */
     splice(idx: number, amount: number): Sprite[];
@@ -1965,8 +1995,8 @@ class World {
      *
      * @param {Number} x
      * @param {Number} y
-     * @param {Group} [group] the group to search
-     * @param {Boolean} [cameraActiveWhenDrawn] if true, only sprites that
+     * @param {Group} [group] - the group to search
+     * @param {Boolean} [cameraActiveWhenDrawn] - if true, only sprites that
      * were drawn when the camera was active will be returned
      * @returns {Sprite[]} an array of sprites
      */
@@ -1979,7 +2009,7 @@ class World {
      *
      * @param {Number} x
      * @param {Number} y
-     * @param {Group} [group] the group to search
+     * @param {Group} [group] - the group to search
      * @returns {Sprite} a sprite
      */
     getSpriteAt(x: number, y: number, group?: Group): Sprite;
@@ -2073,8 +2103,8 @@ class Camera {
     /**
      * Zoom the camera at a given speed.
      *
-     * @param {Number} target The target zoom
-     * @param {Number} speed The amount of zoom per frame
+     * @param {Number} target - The target zoom
+     * @param {Number} speed - The amount of zoom per frame
      * @returns {Promise} resolves true when the camera reaches the target zoom
      */
     zoomTo(target: number, speed: number): Promise<any>;
@@ -2309,8 +2339,8 @@ class WheelJoint extends Joint {
      * By default the motor is disabled, angle is 90 degrees,
      * maxPower is 1000, springiness is 0.1, and damping is 0.7.
      *
-     * @param {Sprite} spriteA the vehicle body
-     * @param {Sprite} spriteB the wheel
+     * @param {Sprite} spriteA - the vehicle body
+     * @param {Sprite} spriteB - the wheel
      */
     constructor(spriteA: Sprite, spriteB: Sprite, ...args: any[]);
     set angle(val: number);
@@ -2469,9 +2499,9 @@ class Canvas {
      *
      * @param {Number} width
      * @param {Number} height
-     * @param {String} [preset] 'fullscreen' or 'pixelated'
-     * @param {String} [renderer] '2d' (default) or 'webgl'
-     * @param {Object} [options] context attributes
+     * @param {String} [preset] - 'fullscreen' or 'pixelated'
+     * @param {String} [renderer] - '2d' (default) or 'webgl'
+     * @param {Object} [options] - context attributes
      * @returns HTML5 canvas element
      * @example
      * // fills the window
@@ -2540,13 +2570,13 @@ class Canvas {
      * you must manually adjust the camera position after calling this
      * function.
      *
-     * @param {Number} w the new width of the canvas
-     * @param {Number} h the new height of the canvas
+     * @param {Number} w - the new width of the canvas
+     * @param {Number} h - the new height of the canvas
      */
     resize(): void;
     /**
      * Saves the current canvas as an image file.
-     * @param {String} file the name of the image
+     * @param {String} file - the name of the image
      */
     save(): void;
 }
@@ -2564,9 +2594,9 @@ let enableTextCache: boolean;
  * more helpful.
  *
  * @private
- * @param {String} func the name of the function the error was thrown in
- * @param {Number} errorNum the error's code number
- * @param {Array} e an array of values relevant to the error
+ * @param {String} func - the name of the function the error was thrown in
+ * @param {Number} errorNum - the error's code number
+ * @param {Array} e - an array of values relevant to the error
  */
 class FriendlyError extends Error {
     constructor(func: any, errorNum: any, e: any);
