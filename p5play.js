@@ -104,6 +104,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Used for debugging, set to true to make p5play
 			 * not load any images.
 			 * @type {Boolean}
+			 * @default false
 			 */
 			this.disableImages = false;
 			/**
@@ -114,6 +115,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.palettes = [];
 
 			/**
+			 * Friendly rounding eliminates some floating point errors.
+			 * @type {Boolean}
+			 * @default true
+			 */
+			this.friendlyRounding = true;
+
+			/**
 			 * Set to the latest version of p5play v3's
 			 * minor version number. For example to enable
 			 * v3.16 features, set this to 16.
@@ -121,11 +129,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * Some features are not backwards compatible
 			 * with older versions of p5play, so this
 			 * variable is used to enable them.
+			 * @type {Number}
+			 * @default 0
 			 */
 			this.targetVersion = 0;
 
+			/**
+			 * Information about the operating system being used to run
+			 * p5play, retrieved from the `navigator` object.
+			 */
 			this.os = {};
 			this.context = 'web';
+
 			if (window.matchMedia) this.hasMouse = window.matchMedia('(any-hover: none)').matches ? false : true;
 			else this.hasMouse = true;
 			this.standardizeKeyboard = false;
@@ -416,7 +431,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				get() {
 					if (!_this.body) return _this._position.x;
 					let x = (_this.body.getPosition().x / _this.tileSize) * plScale;
-					return fixRound(x);
+					return $.p5play.friendlyRounding ? fixRound(x) : x;
 				},
 				set(val) {
 					if (_this.body) {
@@ -431,7 +446,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				get() {
 					if (!_this.body) return _this._position.y;
 					let y = (_this.body.getPosition().y / _this.tileSize) * plScale;
-					return fixRound(y);
+					return $.p5play.friendlyRounding ? fixRound(y) : y;
 				},
 				set(val) {
 					if (_this.body) {
@@ -457,7 +472,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						let val;
 						if (_this.body) val = _this.body.getLinearVelocity().x;
 						else val = _this._velocity.x;
-						return fixRound(val / _this.tileSize);
+						val /= _this.tileSize;
+						return $.p5play.friendlyRounding ? fixRound(val) : val;
 					},
 					set(val) {
 						val *= _this.tileSize;
@@ -473,7 +489,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						let val;
 						if (_this.body) val = _this.body.getLinearVelocity().y;
 						else val = _this._velocity.y;
-						return fixRound(val / _this.tileSize);
+						val /= _this.tileSize;
+						return $.p5play.friendlyRounding ? fixRound(val) : val;
 					},
 					set(val) {
 						val *= _this.tileSize;
@@ -2004,7 +2021,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.body) return this._angle || 0;
 			let val = this.body.getAngle();
 			if ($._angleMode == 'degrees') val = $.degrees(val);
-			return fixRound(val, pl.Settings.angularSlop);
+			return $.p5play.friendlyRounding ? fixRound(val, pl.Settings.angularSlop) : val;
 		}
 		set rotation(val) {
 			if (this.body) {
@@ -2218,7 +2235,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let x = this.x;
 			let y = this.y;
 			for (let i = 0; i < v.length; i++) {
-				let arr = [fixRound((v[i].x / this.tileSize) * plScale + x), fixRound((v[i].y / this.tileSize) * plScale + y)];
+				let arr = [(v[i].x / this.tileSize) * plScale + x, (v[i].y / this.tileSize) * plScale + y];
+				if ($.p5play.friendlyRounding) {
+					arr[0] = fixRound(arr[0]);
+					arr[1] = fixRound(arr[1]);
+				}
 				if (internalUse) v[i] = arr;
 				else v[i] = $.createVector(arr[0], arr[1]);
 			}
@@ -6275,12 +6296,55 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 
+			/**
+			 * @type {Number}
+			 * @default 1.0
+			 */
+			this.timeScale = 1.0;
+			/**
+			 * @type {Number}
+			 * @default 8
+			 */
+			this.velocityIterations = 8;
+			/**
+			 * @type {Number}
+			 * @default 3
+			 */
+			this.positionIterations = 3;
+
+			/**
+			 * @type {Number}
+			 * @default 0.19
+			 */
 			this.velocityThreshold = 0.19;
 
+			/**
+			 * @type {Boolean}
+			 * @default true
+			 */
 			this.mouseTracking ??= true;
+
+			/**
+			 * The sprite the mouse is hovering over.
+			 *
+			 * If the mouse is hovering over several sprites, the mouse
+			 * sprite will be the one with the highest layer value.
+			 * @type {Sprite}
+			 * @default null
+			 */
 			this.mouseSprite = null;
+
+			/**
+			 * The sprite(s) that the mouse is hovering over.
+			 * @type {Sprite[]}
+			 * @default []
+			 */
 			this.mouseSprites = [];
 
+			/**
+			 * @type {Boolean}
+			 * @default true
+			 */
 			this.autoStep = true;
 		}
 
@@ -6337,7 +6401,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				s.prevPos.y = s.y;
 				s.prevRotation = s.rotation;
 			}
-			super.step(timeStep || 1 / ($._targetFrameRate || 60), velocityIterations || 8, positionIterations || 3);
+			super.step(
+				(timeStep || 1 / ($._targetFrameRate || 60)) * this.timeScale,
+				velocityIterations || this.velocityIterations,
+				positionIterations || this.positionIterations
+			);
 
 			let sprites = Object.values($.p5play.sprites);
 			let groups = Object.values($.p5play.groups);
@@ -7004,7 +7072,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						Object.defineProperty(this[prop], axis, {
 							get() {
 								let val = (_this._j['m_localAnchor' + l][axis] / _this['sprite' + l].tileSize) * plScale;
-								return fixRound(val);
+								return $.p5play.friendlyRounding ? fixRound(val) : val;
 							},
 							set(val) {
 								_this._j['m_localAnchor' + l][axis] = (val / plScale) * _this['sprite' + l].tileSize;
@@ -8065,7 +8133,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			case 'replit.com':
 			case 'stackblitz.com':
 			case 'jsfiddle.net':
-			case 'aijs-code-editor.web.app':
+			case 'aijs.io':
 			case 'preview-aijs.web.app':
 				break;
 			default:
@@ -10140,7 +10208,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		rs.show = false;
 	}
 
-	if ($.world.autoStep) {
+	if ($.world.autoStep && $.world.timeScale > 0) {
 		$.world.step();
 	}
 	$.world.autoStep ??= true;
