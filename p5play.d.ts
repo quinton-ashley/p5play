@@ -33,6 +33,7 @@ class P5Play {
      * Used for debugging, set to true to make p5play
      * not load any images.
      * @type {Boolean}
+     * @default false
      */
     disableImages: boolean;
     /**
@@ -42,6 +43,12 @@ class P5Play {
      */
     palettes: any[];
     /**
+     * Friendly rounding eliminates some floating point errors.
+     * @type {Boolean}
+     * @default true
+     */
+    friendlyRounding: boolean;
+    /**
      * Set to the latest version of p5play v3's
      * minor version number. For example to enable
      * v3.16 features, set this to 16.
@@ -49,8 +56,14 @@ class P5Play {
      * Some features are not backwards compatible
      * with older versions of p5play, so this
      * variable is used to enable them.
+     * @type {Number}
+     * @default 0
      */
     targetVersion: number;
+    /**
+     * Information about the operating system being used to run
+     * p5play, retrieved from the `navigator` object.
+     */
     os: {};
     context: string;
     hasMouse: boolean;
@@ -1019,16 +1032,28 @@ class Sprite {
      */
     angleTo(x: number, y: number): number;
     /**
-     * Finds the minimum angle of rotation that the sprite would have
-     * to rotate to "face" a position at a specified facing rotation,
-     * taking into account the current rotation of the sprite.
+     * Finds the rotation angle the sprite should be at when "facing"
+     * a position.
      *
-     * Used internally by `rotateTo` and `rotateTowards`.
+     * Used internally by `rotateTo`.
      *
      * @param {Number} x
      * @param {Number} y
-     * @param {Number} facing - rotation angle the sprite should be at when "facing" the position, default is 0
-     * @returns {Number} the minimum angle of rotation to face the position
+     * @param {Number} [facing] - relative angle the sprite should be at when "facing" the position, default is 0
+     * @returns {Number} the rotation angle the sprite should be at when "facing" the position
+     */
+    rotationToFace(x: number, y: number, facing?: number): number;
+    /**
+     * Finds the minimum angle distance that the sprite would have
+     * to rotate to "face" a position at a specified facing rotation,
+     * taking into account the current rotation of the sprite.
+     *
+     * Used internally by `rotateMinTo` and `rotateTowards`.
+     *
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Number} facing - relative angle the sprite should be at when "facing" the position, default is 0
+     * @returns {Number} the minimum angle distance to face the position
      */
     angleToFace(x: number, y: number, facing: number): number;
     /**
@@ -1036,14 +1061,17 @@ class Sprite {
      * at a given rotation speed.
      *
      * @param {Number|Object} angle - angle or a position object with x and y properties
-     * @param {Number} [speed] - the amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
-     * @param {Number} [facing] - the rotation angle the sprite should be at when "facing" the given position, default is 0
+     * @param {Number} [speed] - amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
+     * @param {Number} [facing] - relative angle the sprite should be at when "facing" the given position, default is 0
      * @returns {Promise} a promise that resolves when the rotation is complete
      * @example
      * sprite.rotationSpeed = 2;
      * sprite.rotateTo(180);
      * // or
      * sprite.rotateTo(180, 2);
+     * // or
+     * //             (x, y, speed)
+     * sprite.rotateTo(0, 100, 2);
      * // or
      * sprite.rotateTo({x: 0, y: 100}, 2);
      */
@@ -1054,8 +1082,8 @@ class Sprite {
      * rotation speed.
      *
      * @param {Number|Object} angle - angle or a position object with x and y properties
-     * @param {Number} speed - the absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used
-     * @param {Number} facing - the rotation angle the sprite should be at when "facing" the given position, default is 0
+     * @param {Number} speed - absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used
+     * @param {Number} facing - relative angle the sprite should be at when "facing" the given position, default is 0
      */
     rotateMinTo(angle: number | any, speed: number, facing: number, ...args: any[]): Promise<any>;
     /**
@@ -1948,6 +1976,21 @@ class World {
      */
     origin: any;
     contacts: any[];
+    /**
+     * @type {Number}
+     * @default 1.0
+     */
+    timeScale: number;
+    /**
+     * @type {Number}
+     * @default 8
+     */
+    velocityIterations: number;
+    /**
+     * @type {Number}
+     * @default 3
+     */
+    positionIterations: number;
     set velocityThreshold(val: number);
     /**
      * The lowest velocity an object can have before it is considered
@@ -1961,8 +2004,25 @@ class World {
      * @default 0.19
      */
     get velocityThreshold(): number;
-    mouseSprite: any;
-    mouseSprites: any[];
+    /**
+     * The sprite the mouse is hovering over.
+     *
+     * If the mouse is hovering over several sprites, the mouse
+     * sprite will be the one with the highest layer value.
+     * @type {Sprite}
+     * @default null
+     */
+    mouseSprite: Sprite;
+    /**
+     * The sprite(s) that the mouse is hovering over.
+     * @type {Sprite[]}
+     * @default []
+     */
+    mouseSprites: Sprite[];
+    /**
+     * @type {Boolean}
+     * @default true
+     */
     autoStep: boolean;
     set gravity(val: any);
     /**

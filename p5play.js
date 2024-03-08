@@ -58,7 +58,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		let full = $._angleMode == 'degrees' ? 360 : $.TWO_PI;
 		let dist1 = (ang - rot) % full;
 		let dist2 = (full - Math.abs(dist1)) * -Math.sign(dist1);
-		return Math.abs(dist1) < Math.abs(dist2) ? dist1 : dist2;
+		return (Math.abs(dist1) < Math.abs(dist2) ? dist1 : dist2) || 0;
 	};
 
 	const eventTypes = {
@@ -3254,7 +3254,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return $.atan2(y - this.y, x - this.x);
 		}
 
-		_angleToFace(x, y, facing) {
+		/**
+		 * The rotation angle the sprite should be at when "facing"
+		 * a position.
+		 *
+		 * Used internally by `rotateTo`.
+		 *
+		 * @param {Number} x
+		 * @param {Number} y
+		 * @param {Number} [facing] - relative angle the sprite should be at when "facing" the position, default is 0
+		 * @returns
+		 */
+		rotationToFace(x, y, facing) {
 			if (typeof x == 'object') {
 				facing = y;
 				y = x.y;
@@ -3268,20 +3279,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Finds the minimum angle of rotation that the sprite would have
+		 * Finds the minimum angle distance that the sprite would have
 		 * to rotate to "face" a position at a specified facing rotation,
 		 * taking into account the current rotation of the sprite.
 		 *
-		 * Used internally by `rotateTo` and `rotateTowards`.
+		 * Used internally by `rotateMinTo` and `rotateTowards`.
 		 *
 		 * @param {Number} x
 		 * @param {Number} y
-		 * @param {Number} facing - rotation angle the sprite should be at when "facing" the position, default is 0
-		 * @returns {Number} the minimum angle of rotation to face the position
+		 * @param {Number} facing - relative angle the sprite should be at when "facing" the position, default is 0
+		 * @returns {Number} the minimum angle distance to face the position
 		 */
 		angleToFace(x, y, facing) {
-			let ang = this._angleToFace(x, y, facing);
-			return ang ? minAngleDist(ang, this.rotation) : 0;
+			let ang = this.rotationToFace(x, y, facing);
+			return minAngleDist(ang, this.rotation);
 		}
 
 		/**
@@ -3289,14 +3300,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * at a given rotation speed.
 		 *
 		 * @param {Number|Object} angle - angle or a position object with x and y properties
-		 * @param {Number} [speed] - the amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
-		 * @param {Number} [facing] - the rotation angle the sprite should be at when "facing" the given position, default is 0
+		 * @param {Number} [speed] - amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
+		 * @param {Number} [facing] - relative angle the sprite should be at when "facing" the given position, default is 0
 		 * @returns {Promise} a promise that resolves when the rotation is complete
 		 * @example
 		 * sprite.rotationSpeed = 2;
 		 * sprite.rotateTo(180);
 		 * // or
 		 * sprite.rotateTo(180, 2);
+		 * // or
+		 * //             (x, y, speed)
+		 * sprite.rotateTo(0, 100, 2);
 		 * // or
 		 * sprite.rotateTo({x: 0, y: 100}, 2);
 		 */
@@ -3305,8 +3319,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			let args = arguments;
 			if (typeof args[0] != 'number') {
-				angle = this._angleToFace(args[0].x, args[0].y, facing);
-			} else if (angle == this.rotation) return;
+				angle = this.rotationToFace(args[0].x, args[0].y, facing);
+			} else {
+				if (args.length > 2) {
+					facing = args[3];
+					speed = args[2];
+					angle = this.rotationToFace(args[0], args[1], facing);
+				}
+			}
+			if (angle == this.rotation) return;
 
 			let full = $._angleMode == 'degrees' ? 360 : $.TWO_PI;
 			angle = (angle - this.rotation) % full;
@@ -3323,18 +3344,24 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * rotation speed.
 		 *
 		 * @param {Number|Object} angle - angle or a position object with x and y properties
-		 * @param {Number} speed - the absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used
-		 * @param {Number} facing - the rotation angle the sprite should be at when "facing" the given position, default is 0
+		 * @param {Number} speed - absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used
+		 * @param {Number} facing - relative angle the sprite should be at when "facing" the given position, default is 0
 		 */
 		rotateMinTo(angle, speed, facing) {
 			if (this.__collider == 1) throw new FriendlyError(0);
 			let args = arguments;
 			if (typeof args[0] != 'number') {
-				angle = this.angleToFace(args[0].x, args[0].y, facing);
+				angle = this.rotationToFace(args[0].x, args[0].y, facing);
 			} else {
-				if (angle == this.rotation) return;
-				angle = minAngleDist(angle, this.rotation);
+				if (args.length > 2) {
+					facing = args[3];
+					speed = args[2];
+					angle = this.rotationToFace(args[0], args[1], facing);
+				}
 			}
+			if (angle == this.rotation) return;
+
+			angle = minAngleDist(angle, this.rotation);
 			speed ??= this.rotationSpeed || Math.sign(angle);
 			speed = Math.abs(speed) * Math.sign(angle);
 			return this.rotate(angle, speed);
@@ -3383,11 +3410,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					((cw && ang > this.rotation) || (!cw && ang < this.rotation)) &&
 					limit < Math.abs(ang - this.rotation)
 				);
-
-				if (Math.abs(ang - this.rotation) > slop) {
-					this.rotationSpeed = ang - this.rotation;
-					await $.sleep();
-				}
 				if (this._rotateIdx != _rotateIdx) return false;
 				this.rotationSpeed = 0;
 				this.rotation = ang;
