@@ -627,11 +627,11 @@ class Sprite {
     get layer(): number;
     set life(val: number);
     /**
-     * The number of frame cycles before the sprite is removed.
+     * When the physics simulation is progressed in `world.step`,
+     * each sprite's life is decreased by `world.timeScale`.
      *
-     * Set it to initiate a countdown, every draw cycle the value is
-     * reduced by 1 unit. If it becomes less than or equal to 0, the
-     * sprite will be removed.
+     * If life becomes less than or equal to 0, the sprite will
+     * be removed.
      *
      * It must be set to a positive integer lower than the max value of
      * a 32 bit signed integer, 2147483647, which is the default value
@@ -1977,6 +1977,8 @@ class World {
     origin: any;
     contacts: any[];
     /**
+     * A time scale of 1.0 represents real time.
+     * Accepts decimal values between 0 and 2.
      * @type {Number}
      * @default 1.0
      */

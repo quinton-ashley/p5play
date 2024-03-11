@@ -163,6 +163,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			this._renderStats = {};
+			this._fps = 60;
 			this._fpsArr = [60];
 			/*
 			 * Ledgers for collision callback functions.
@@ -1850,11 +1851,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._layer = val;
 		}
 		/**
-		 * The number of frame cycles before the sprite is removed.
+		 * When the physics simulation is progressed in `world.step`,
+		 * each sprite's life is decreased by `world.timeScale`.
 		 *
-		 * Set it to initiate a countdown, every draw cycle the value is
-		 * reduced by 1 unit. If it becomes less than or equal to 0, the
-		 * sprite will be removed.
+		 * If life becomes less than or equal to 0, the sprite will
+		 * be removed.
 		 *
 		 * It must be set to a positive integer lower than the max value of
 		 * a 32 bit signed integer, 2147483647, which is the default value
@@ -2656,6 +2657,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_step() {
+			this.life -= $.world.timeScale;
+			if (this._life != 2147483647 && this._life <= 0) {
+				this.remove();
+			}
+
 			if (!this.body && !this._removed) {
 				this.rotation += this._rotationSpeed;
 				this.x += this.vel.x;
@@ -2681,10 +2687,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this._ani.draw(this._offset._x, this._offset._y, 0, this._scale._x, this._scale._y);
 			}
 			if (!this._ani || this.debug || $.p5play.disableImages) {
-				if (this.debug && this.debug != 'colliders') {
+				if (this.debug) {
 					$.noFill();
-					if (this.__collider != 3) $.stroke(0, 255, 0);
-					else $.stroke(120);
+					$.stroke(0, 255, 0);
 					$.line(0, -2, 0, 2);
 					$.line(-2, 0, 2, 0);
 				}
@@ -2695,7 +2700,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						else if (this._stroke) $.stroke(this._stroke);
 					}
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
-						if (fxt.m_isSensor && !this.debug) continue;
+						if (this.debug) {
+							if (!fxt.m_isSensor) $.stroke(0, 255, 0);
+							else $.stroke(255, 255, 0);
+						} else if (fxt.m_isSensor) continue;
 						this._drawFixture(fxt);
 					}
 				} else {
@@ -3255,7 +3263,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The rotation angle the sprite should be at when "facing"
+		 * Finds the rotation angle the sprite should be at when "facing"
 		 * a position.
 		 *
 		 * Used internally by `rotateTo`.
@@ -3263,7 +3271,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Number} [facing] - relative angle the sprite should be at when "facing" the position, default is 0
-		 * @returns
+		 * @returns {Number} the rotation angle the sprite should be at when "facing" the position
 		 */
 		rotationToFace(x, y, facing) {
 			if (typeof x == 'object') {
@@ -6030,12 +6038,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			g.sort((a, b) => a._layer - b._layer);
 			for (let i = 0; i < g.length; i++) {
 				let sprite = g[i];
-				if (sprite._life != 2147483647 && sprite._life-- < 0) {
-					sprite.remove();
-					g.splice(i, 1);
-					i--;
-					continue;
-				}
 				if (sprite._visible !== false && (!$.p5play._inPostDraw || sprite.autoDraw)) {
 					sprite.draw();
 				}
@@ -6319,10 +6321,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 
 			/**
+			 * A time scale of 1.0 represents real time.
+			 * Accepts decimal values between 0 and 2.
 			 * @type {Number}
 			 * @default 1.0
 			 */
-			this.timeScale = 1.0;
+			this.timeScale = 1;
 			/**
 			 * @type {Number}
 			 * @default 8
@@ -10148,9 +10152,9 @@ main {
 				rs.fontSize = 10;
 			}
 			rs.gap = rs.fontSize * 1.25;
-			if (!p5._q5) {
+			if (!$._q5) {
 				console.warn(
-					"renderStats() uses inaccurate FPS approximations when used with p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js or your browser's performance testing tools for accurate results."
+					"renderStats() produces inaccurate FPS approximations because deltaTime is calculated incorrectly in p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js or your browser's performance testing tools for accurate results."
 				);
 			}
 		}
@@ -10163,7 +10167,7 @@ main {
 p5.prototype.registerMethod('pre', function p5playPreDraw() {
 	const $ = this;
 	// called before each p5.js draw function call
-	if ($.p5play._fps) {
+	if (!$._q5) {
 		$.p5play._preDrawFrameTime = performance.now();
 	}
 	$.p5play.spritesDrawn = 0;
@@ -10213,7 +10217,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 
 		$.push();
 		$.fill(0, 0, 0, 128);
-		$.rect(rs.x - 5, rs.y - rs.fontSize, rs.fontSize * 8.5, rs.gap * 4 + 5);
+		$.rect(rs.x - 5, rs.y - rs.fontSize, rs.fontSize * 8.5, rs.gap * 5 + 5);
 		$.fill($.p5play._statsColor);
 		$.textAlign('left');
 		$.textSize(rs.fontSize);
@@ -10327,7 +10331,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 
 	$.camera.off();
 
-	if ($.p5play._fps) {
+	if (!$._q5) {
 		$.p5play._postDrawFrameTime = performance.now();
 		$.p5play._fps = Math.round(1000 / ($.p5play._postDrawFrameTime - $.p5play._preDrawFrameTime)) || 1;
 	}
