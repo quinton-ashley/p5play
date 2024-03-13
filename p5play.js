@@ -1038,9 +1038,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 
 				w = max.x - min.x;
-				this._hw = w * 0.5;
 				h = max.y - min.y;
-				this._hh = h * 0.5;
 
 				if (this._originMode == 'start') {
 					for (let i = 0; i < vecs.length; i++) {
@@ -1098,12 +1096,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			}
 			this.shape ??= shape;
-			this._w = w;
-			this._hw = w * 0.5;
-			if (this.__shape != 1) {
-				this._h = h;
-				this._hh = h * 0.5;
+
+			if (!this.fixtureList) {
+				this._w = w;
+				this._hw = w * 0.5;
+				if (this.__shape != 1) {
+					this._h = h;
+					this._hh = h * 0.5;
+				}
 			}
+
 			return s;
 		}
 
@@ -6022,7 +6024,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		removeAll() {
 			while (this.length > 0) {
-				this[0].remove();
+				this.at(-1).remove();
 			}
 		}
 
