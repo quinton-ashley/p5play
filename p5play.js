@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.19
+ * @version 3.20
  * @author quinton-ashley
  * @license AGPL-3.0
  */
@@ -35,7 +35,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_19');
+			gtag('event', 'p5play_v3_20');
 		};
 	}
 
@@ -10196,7 +10196,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 
 	let rs = $.p5play._renderStats;
 	if (rs.show) {
-		if ($.frameCount == 1 || $.frameCount % 60 === 0) {
+		if (!$.p5play._fpsAvg || $.frameCount % 60 === 0) {
 			let avg = 0;
 			let len = $.p5play._fpsArr.length;
 			for (let i = 0; i < len; i++) {
