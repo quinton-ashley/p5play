@@ -1937,7 +1937,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set mass(val) {
 			if (!this.body) return;
 			if (this.watch) this.mod[21] = true;
-			let t = this.massData;
+			const com = new pl.Vec2(this.body.getLocalCenter());
+			const t = { I: 0, center: com, mass: 0 };
+			this.body.getMassData(t);
 			t.mass = val > 0 ? val : 0.00000001;
 			this.body.setMassData(t);
 			delete this._massUndef;
@@ -1946,11 +1948,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Recalculates the sprite's mass based on its current
 		 * density and size.
+		 *
+		 * Does not change the sprite's center of mass, to do so
+		 * use the `resetCenterOfMass` function.
 		 */
 		resetMass() {
 			if (!this.body) return;
+			let com = new pl.Vec2(this.body.getLocalCenter());
+
 			if (this.watch) this.mod[21] = true;
 			this.body.resetMassData();
+
+			// reset the center of mass to the sprite's center
+			this.body.setMassData({
+				mass: this.body.getMass(),
+				center: com,
+				I: this.body.getInertia()
+			});
 		}
 
 		/**
@@ -1963,6 +1977,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * center of mass and center of rotation.
 		 */
 		resetCenterOfMass() {
+			if (this.watch) this.mod[21] = true;
 			this.body.resetMassData();
 
 			let { x, y } = this.body.getLocalCenter();
@@ -2590,6 +2605,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
+		 *
+		 * If a sprite with a circle shape has its shape type changed to
+		 * chain or polygon, the circle will be turned into a dodecagon.
 		 * @type {String}
 		 * @default box
 		 */
@@ -2611,11 +2629,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				console.error(
 					'Cannot set the collider shape to chain or polygon if the sprite has a collider type of "none". To achieve the same effect, use .overlaps(allSprites) to have your sprite overlap with the allSprites group.'
 				);
-				return;
-			}
-
-			if (this.__shape == 1 && __shape != 0) {
-				console.error('Cannot change a circle collider into a chain or polygon shape.');
 				return;
 			}
 
@@ -2650,11 +2663,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					this._originMode ??= 'center';
 					this.addCollider(v);
 				}
-				// turn circle into dodecagon chain/polygon?
-				// else if (prevShape == 1) {
-				// 	this.addCollider(0, 0, [this._w, -30, 12]);
-				// }
-				else {
+				// turn circle into dodecagon chain/polygon
+				else if (prevShape == 1) {
+					let side = this._w * Math.sin(Math.PI / 12);
+					this.addCollider(0, 0, [side, -30, 12]);
+				} else {
 					this.addCollider();
 				}
 			}
