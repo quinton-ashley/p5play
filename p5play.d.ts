@@ -69,6 +69,29 @@ class P5Play {
     hasMouse: boolean;
     standardizeKeyboard: boolean;
     /**
+     * Displays the number of sprites drawn, the current FPS
+     * as well as the average, minimum, and maximum FPS achieved
+     * during the previous second.
+     *
+     * FPS in this context refers to how many frames per second your
+     * computer can generate, based on the physics calculations and any
+     * other processes necessary to generate a frame, but not
+     * including the delay between when frames are actually shown on
+     * the screen. The higher the FPS, the better your game is
+     * performing.
+     *
+     * You can use this function for approximate performance testing.
+     * But for the most accurate results, use your web browser's
+     * performance testing tools.
+     *
+     * Generally having less sprites and using a smaller canvas will
+     * make your game perform better. Also drawing images is faster
+     * than drawing shapes.
+     * @type {Boolean}
+     * @default false
+     */
+    renderStats: boolean;
+    /**
      * This function is called when an image is loaded. By default it
      * does nothing, but it can be overridden.
      */
@@ -257,8 +280,13 @@ class Sprite {
      * constructor except the first two parameters are x and y offsets,
      * the distance new collider should be from the center of the sprite.
      *
-     * This function also recalculates the sprite's mass based on its
-     * new size.
+     * This function also recalculates the sprite's mass based on the
+     * size of the new collider added to it. However, it does not move
+     * the sprite's center of mass, which makes adding multiple colliders
+     * to a sprite easier.
+     *
+     * For better physics simulation results, run the `resetCenterOfMass`
+     * function after you finish adding colliders to a sprite.
      *
      * One limitation of the current implementation is that sprites
      * with multiple colliders can't have their collider
@@ -385,11 +413,6 @@ class Sprite {
      * @default 0.2
      */
     get bounciness(): number;
-    /**
-     * The center of mass of the sprite's physics body. Read only.
-     * @type {p5.Vector}
-     */
-    get centerOfMass(): p5.Vector;
     set color(val: p5.Color);
     /**
      * The sprite's current color. By default sprites get a random color.
@@ -642,16 +665,21 @@ class Sprite {
      * @default 2147483647
      */
     get life(): number;
-    get massData(): {
-        I: number;
-        center: any;
-        mass: number;
-    };
     /**
      * Recalculates the sprite's mass based on its current
      * density and size.
      */
     resetMass(): void;
+    /**
+     * Recalculates the sprite's center of mass based on the masses of
+     * its fixtures and their positions. Moves the sprite's center to
+     * the new center of mass, but doesn't actually change the positions
+     * of its fixtures relative to the world.
+     *
+     * In p5play a sprite's center (position) is always the same as its
+     * center of mass and center of rotation.
+     */
+    resetCenterOfMass(): void;
     set mirror(val: any);
     /**
      * The sprite's mirror states.
@@ -1093,6 +1121,12 @@ class Sprite {
      * To achieve a counter-clockwise rotation, use a negative angle
      * or speed.
      *
+     * When the rotation is complete, the sprite's rotation speed is
+     * set to 0 and sprite's rotation is set to the exact destination angle.
+     *
+     * If the angle amount is not evenly divisible by the rotation speed,
+     * the sprite's rotation speed will be decreased as it approaches the
+     * destination angle.
      * @param {Number} angle - the amount to rotate the sprite
      * @param {Number} [speed] - the absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
      * @returns {Promise} a promise that resolves when the rotation is complete
@@ -1245,10 +1279,6 @@ class SpriteAnimation extends Array<p5.Image> {
      * @type {String}
      */
     name: string;
-    /**
-     * The index of the current frame that the animation is on.
-     * @type {Number}
-     */
     targetFrame: number;
     /**
      * The offset is how far the animation should be placed from
@@ -1296,6 +1326,10 @@ class SpriteAnimation extends Array<p5.Image> {
     rotation: any;
     spriteSheet: any;
     set frame(val: number);
+    /**
+     * The index of the current frame that the animation is on.
+     * @type {Number}
+     */
     get frame(): number;
     set frameDelay(val: number);
     /**
@@ -1395,22 +1429,22 @@ class SpriteAnimation extends Array<p5.Image> {
      */
     get frameImage(): p5.Image;
     /**
-     * Width of the animation.
+     * Width of the animation's current frame.
      * @type {Number}
      */
     get w(): number;
     /**
-     * Width of the animation.
+     * Width of the animation's current frame.
      * @type {Number}
      */
     get width(): number;
     /**
-     * Height of the animation.
+     * Height of the animation's current frame.
      * @type {Number}
      */
     get h(): number;
     /**
-     * Height of the animation.
+     * Height of the animation's current frame.
      * @type {Number}
      */
     get height(): number;
@@ -1977,13 +2011,6 @@ class World {
     origin: any;
     contacts: any[];
     /**
-     * A time scale of 1.0 represents real time.
-     * Accepts decimal values between 0 and 2.
-     * @type {Number}
-     * @default 1.0
-     */
-    timeScale: number;
-    /**
      * @type {Number}
      * @default 8
      */
@@ -2035,6 +2062,14 @@ class World {
      * @default { x: 0, y: 0 }
      */
     get gravity(): any;
+    set timeScale(val: number);
+    /**
+     * A time scale of 1.0 represents real time.
+     * Accepts decimal values between 0 and 2.
+     * @type {Number}
+     * @default 1.0
+     */
+    get timeScale(): number;
     /**
      * Performs a physics simulation step that advances all sprites'
      * forward in time by 1/60th of a second if no timeStep is given.
@@ -2358,6 +2393,14 @@ class Joint {
      */
     get collideConnected(): boolean;
     /**
+     * Read only. The joint's reaction force.
+     */
+    get reactionForce(): any;
+    /**
+     * Read only. The joint's reaction torque.
+     */
+    get reactionTorque(): any;
+    /**
      * Removes the joint from the world and from each of the
      * sprites' joints arrays.
      */
@@ -2644,6 +2687,7 @@ class Canvas {
 }
 var canvas: Canvas;
 function resizeCanvas(w: any, h: any): void;
+function frameRate(hz: any): any;
 function background(...args: any[]): void;
 function fill(...args: any[]): void;
 function stroke(...args: any[]): void;

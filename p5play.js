@@ -162,9 +162,36 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this.os.platform = pl;
 			}
 
-			this._renderStats = {};
+			/**
+			 * Displays the number of sprites drawn, the current FPS
+			 * as well as the average, minimum, and maximum FPS achieved
+			 * during the previous second.
+			 *
+			 * FPS in this context refers to how many frames per second your
+			 * computer can generate, based on the physics calculations and any
+			 * other processes necessary to generate a frame, but not
+			 * including the delay between when frames are actually shown on
+			 * the screen. The higher the FPS, the better your game is
+			 * performing.
+			 *
+			 * You can use this function for approximate performance testing.
+			 * But for the most accurate results, use your web browser's
+			 * performance testing tools.
+			 *
+			 * Generally having less sprites and using a smaller canvas will
+			 * make your game perform better. Also drawing images is faster
+			 * than drawing shapes.
+			 * @type {Boolean}
+			 * @default false
+			 */
+			this.renderStats = false;
+			this._renderStats = {
+				x: 10,
+				y: 20
+			};
 			this._fps = 60;
 			this._fpsArr = [60];
+
 			/*
 			 * Ledgers for collision callback functions.
 			 *
@@ -817,8 +844,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * constructor except the first two parameters are x and y offsets,
 		 * the distance new collider should be from the center of the sprite.
 		 *
-		 * This function also recalculates the sprite's mass based on its
-		 * new size.
+		 * This function also recalculates the sprite's mass based on the
+		 * size of the new collider added to it. However, it does not move
+		 * the sprite's center of mass, which makes adding multiple colliders
+		 * to a sprite easier.
+		 *
+		 * For better physics simulation results, run the `resetCenterOfMass`
+		 * function after you finish adding colliders to a sprite.
 		 *
 		 * One limitation of the current implementation is that sprites
 		 * with multiple colliders can't have their collider
@@ -848,7 +880,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			props.density ??= this.density || 5;
 			props.friction ??= this.friction || 0.5;
 			props.restitution ??= this.bounciness || 0.2;
-
 			if (!this.body) {
 				this.body = $.world.createBody({
 					position: scaleTo(this.x, this.y, this.tileSize),
@@ -856,8 +887,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				});
 				this.body.sprite = this;
 			} else this.body.m_gravityScale ||= 1;
+
+			let com = new pl.Vec2(this.body.getLocalCenter());
+
+			// mass is recalculated in createFixture
 			this.body.createFixture(props);
-			this.resetMass();
+			if (this.watch) this.mod[21] = true;
+
+			// reset the center of mass to the sprite's center
+			this.body.setMassData({
+				mass: this.body.getMass(),
+				center: com,
+				I: this.body.getInertia()
+			});
 		}
 
 		/**
@@ -1104,6 +1146,22 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					this._h = h;
 					this._hh = h * 0.5;
 				}
+			} else {
+				// top, bottom, left, right
+				this._extents ??= { t: this.hh, b: this.hh, l: this._hw, r: this._hw };
+				let ex = this._extents;
+				let l = offsetX - w * 0.5;
+				let r = offsetX + w * 0.5;
+				let t = offsetY - h * 0.5;
+				let b = offsetY + h * 0.5;
+				if (l < ex.l) ex.l = l;
+				if (r > ex.r) ex.r = r;
+				if (t < ex.t) ex.t = t;
+				if (b > ex.b) ex.b = b;
+				this._totalWidth = ex.r - ex.l;
+				this._totalHeight = ex.b - ex.t;
+				let abs = Math.abs;
+				this._largestExtent = Math.max(abs(ex.l), abs(ex.r), abs(ex.t), abs(ex.b));
 			}
 
 			return s;
@@ -1181,17 +1239,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.body) return;
 
 			let off = scaleTo(x, y, this.tileSize);
+			this.__offsetCenterBy(off.x, off.y);
+		}
+
+		__offsetCenterBy(x, y) {
 			for (let fxt = this.body.m_fixtureList; fxt; fxt = fxt.m_next) {
 				let shape = fxt.m_shape;
 				if (shape.m_type != 'circle') {
 					let vertices = shape.m_vertices;
 					for (let v of vertices) {
-						v.x += off.x;
-						v.y += off.y;
+						v.x += x;
+						v.y += y;
 					}
 				} else {
-					shape.m_p.x += off.x;
-					shape.m_p.y += off.y;
+					shape.m_p.x += x;
+					shape.m_p.y += y;
 				}
 			}
 		}
@@ -1332,16 +1394,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setRestitution(val);
 			}
-		}
-
-		/**
-		 * The center of mass of the sprite's physics body. Read only.
-		 * @type {p5.Vector}
-		 */
-		get centerOfMass() {
-			let center = this.body.getWorldCenter();
-			let v = scaleFrom(center.x, center.y, this.tileSize);
-			return $.createVector(v.x, v.y);
 		}
 
 		/**
@@ -1891,13 +1943,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			delete this._massUndef;
 		}
 
-		get massData() {
-			const t = { I: 0, center: new pl.Vec2(0, 0), mass: 0 };
-			this.body.getMassData(t);
-			t.center = scaleFrom(t.center.x, t.center.y, this.tileSize);
-			return t;
-		}
-
 		/**
 		 * Recalculates the sprite's mass based on its current
 		 * density and size.
@@ -1906,6 +1951,29 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.body) return;
 			if (this.watch) this.mod[21] = true;
 			this.body.resetMassData();
+		}
+
+		/**
+		 * Recalculates the sprite's center of mass based on the masses of
+		 * its fixtures and their positions. Moves the sprite's center to
+		 * the new center of mass, but doesn't actually change the positions
+		 * of its fixtures relative to the world.
+		 *
+		 * In p5play a sprite's center (position) is always the same as its
+		 * center of mass and center of rotation.
+		 */
+		resetCenterOfMass() {
+			this.body.resetMassData();
+
+			let { x, y } = this.body.getLocalCenter();
+			if (x == 0 && y == 0) return;
+			this.__offsetCenterBy(-x, -y);
+
+			// again? yes, to set local center to (0, 0)
+			this.body.resetMassData();
+
+			let pos = this.body.getPosition();
+			this.body.setPosition({ x: pos.x + x, y: pos.y + y });
 		}
 
 		/**
@@ -2734,14 +2802,24 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * If the sprite is off screen according to the camera's bounds,
 		 * `camera.bound`, then the sprite doesn't get drawn.
-		 * The algorithm for checking if a sprite is on screen is
-		 * unsophisticated and errors on the side of drawing the sprite.
 		 */
 		_display() {
 			let x = this.x * this.tileSize + $.world.origin.x;
 			let y = this.y * this.tileSize + $.world.origin.y;
 
-			let largestSide = Math.max(this._w, this._h);
+			// For best performance, the sprite will not be drawn if it's offscreen
+			// according to the camera's bounds. The largest side of the sprite
+			// is used to determine if it's offscreen, since the sprite may be rotated.
+			let largestSide;
+			if (!this._totalWidth) {
+				largestSide = this._h !== undefined ? Math.max(this._w, this._h) : this._w;
+			} else {
+				largestSide = Math.max(this._totalWidth, this._totalHeight);
+			}
+			// the sprite may be visually bigger than its collider(s)
+			if (this.ani && !$.p5play.disableImages) {
+				largestSide = Math.max(largestSide, this.ani.w, this.ani.h);
+			}
 
 			if (
 				this.shape != 'chain' &&
@@ -3384,6 +3462,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * To achieve a counter-clockwise rotation, use a negative angle
 		 * or speed.
 		 *
+		 * When the rotation is complete, the sprite's rotation speed is
+		 * set to 0 and sprite's rotation is set to the exact destination angle.
+		 *
+		 * If the angle amount is not evenly divisible by the rotation speed,
+		 * the sprite's rotation speed will be decreased as it approaches the
+		 * destination angle.
 		 * @param {Number} angle - the amount to rotate the sprite
 		 * @param {Number} [speed] - the absolute amount of rotation per frame, if not given the sprite's current `rotationSpeed` is used, if 0 it defaults to 1
 		 * @returns {Promise} a promise that resolves when the rotation is complete
@@ -3400,6 +3484,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				speed = -Math.abs(speed);
 			}
 			this.rotationSpeed = speed;
+			let absSpeed = Math.abs(speed);
 			let ang = this.rotation + angle; // destination angle
 
 			this._rotateIdx ??= 0;
@@ -3408,19 +3493,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			return (async () => {
 				let slop = 0.01;
-				let limit = Math.abs(this.rotationSpeed) + slop;
 				do {
+					// remaining angular distance to destination
+					let remaining = Math.abs(ang - this.rotation);
+					if (absSpeed > remaining) {
+						this.rotationSpeed = remaining * Math.sign(speed);
+					}
 					await $.sleep();
 					if (this._rotateIdx != _rotateIdx) return false;
 
 					if ((cw && this.rotationSpeed < slop) || (!cw && this.rotationSpeed > -slop)) {
 						return false;
 					}
-				} while (
-					((cw && ang > this.rotation) || (!cw && ang < this.rotation)) &&
-					limit < Math.abs(ang - this.rotation)
-				);
-				if (this._rotateIdx != _rotateIdx) return false;
+				} while (((cw && ang > this.rotation) || (!cw && ang < this.rotation)) && slop < Math.abs(ang - this.rotation));
+
 				this.rotationSpeed = 0;
 				this.rotation = ang;
 				return true;
@@ -4017,14 +4103,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				args = args.slice(1);
 			}
 
-			/**
-			 * The index of the current frame that the animation is on.
-			 * @type {Number}
-			 */
 			this._frame = 0;
-
 			this._cycles = 0;
-
 			this.targetFrame = -1;
 
 			/**
@@ -4335,6 +4415,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.length == 1) this.playing = false;
 		}
 
+		/**
+		 * The index of the current frame that the animation is on.
+		 * @type {Number}
+		 */
 		get frame() {
 			return this._frame;
 		}
@@ -4658,42 +4742,38 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Width of the animation.
+		 * Width of the animation's current frame.
 		 * @type {Number}
 		 */
 		get w() {
 			return this.width;
 		}
 		/**
-		 * Width of the animation.
+		 * Width of the animation's current frame.
 		 * @type {Number}
 		 */
 		get width() {
-			if (this[this._frame] instanceof p5.Image) {
-				return this[this._frame].width;
-			} else if (this[this._frame]) {
-				return this[this._frame].w;
-			}
+			let frameInfo = this[this._frame];
+			if (frameInfo instanceof p5.Image) return frameInfo.width;
+			else if (frameInfo) return frameInfo.w;
 			return 1;
 		}
 
 		/**
-		 * Height of the animation.
+		 * Height of the animation's current frame.
 		 * @type {Number}
 		 */
 		get h() {
 			return this.height;
 		}
 		/**
-		 * Height of the animation.
+		 * Height of the animation's current frame.
 		 * @type {Number}
 		 */
 		get height() {
-			if (this[this._frame] instanceof p5.Image) {
-				return this[this._frame].height;
-			} else if (this[this._frame]) {
-				return this[this._frame].h;
-			}
+			let frameInfo = this[this._frame];
+			if (frameInfo instanceof p5.Image) return frameInfo.height;
+			else if (frameInfo) return frameInfo.h;
 			return 1;
 		}
 
@@ -6322,13 +6402,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			};
 
-			/**
-			 * A time scale of 1.0 represents real time.
-			 * Accepts decimal values between 0 and 2.
-			 * @type {Number}
-			 * @default 1.0
-			 */
-			this.timeScale = 1;
+			this._timeScale = 1;
+			this._updateTimeStep();
+
 			/**
 			 * @type {Number}
 			 * @default 8
@@ -6392,6 +6468,28 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
+		 * A time scale of 1.0 represents real time.
+		 * Accepts decimal values between 0 and 2.
+		 * @type {Number}
+		 * @default 1.0
+		 */
+		get timeScale() {
+			return this._timeScale;
+		}
+		set timeScale(val) {
+			if (val < 0 || val > 2) {
+				return console.error('world.timeScale must be between 0 and 2');
+			}
+			if (this._timeScale == val) return;
+			this._timeScale = val;
+			this._updateTimeStep();
+		}
+
+		_updateTimeStep() {
+			this._timeStep = (1 / ($._targetFrameRate || 60)) * this._timeScale;
+		}
+
+		/**
 		 * The lowest velocity an object can have before it is considered
 		 * to be at rest.
 		 *
@@ -6430,7 +6528,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				s.prevRotation = s.rotation;
 			}
 			super.step(
-				(timeStep || 1 / ($._targetFrameRate || 60)) * this.timeScale,
+				timeStep || this._timeStep,
 				velocityIterations || this.velocityIterations,
 				positionIterations || this.positionIterations
 			);
@@ -6734,14 +6832,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		_calcBoundsX(val) {
 			let mod = $.canvas.hw / this._zoom;
-			this.bound.min.x = val - mod - 100;
-			this.bound.max.x = val + mod + 100;
+			this.bound.min.x = val - mod;
+			this.bound.max.x = val + mod;
 		}
 
 		_calcBoundsY(val) {
 			let mod = $.canvas.hh / this._zoom;
-			this.bound.min.y = val - mod - 100;
-			this.bound.max.y = val + mod + 100;
+			this.bound.min.y = val - mod;
+			this.bound.max.y = val + mod;
 		}
 
 		/**
@@ -7355,6 +7453,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set collideConnected(val) {
 			this._j.m_collideConnected = val;
+		}
+
+		/**
+		 * Read only. The joint's reaction force.
+		 */
+		get reactionForce() {
+			return this._j.getReactionForce($.world._timeStep);
+		}
+
+		/**
+		 * Read only. The joint's reaction torque.
+		 */
+		get reactionTorque() {
+			return this._j.getReactionTorque($.world._timeStep);
 		}
 
 		/**
@@ -8156,6 +8268,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			case 'editor.p5js.org':
 			case 'codepen.io':
 			case 'codera.app':
+			case 'aug4th.com':
 			case 'cdpn.io':
 			case 'glitch.com':
 			case 'replit.com':
@@ -8477,6 +8590,14 @@ main {
 		}
 		$.camera.x = c.hw;
 		$.camera.y = c.hh;
+	};
+
+	const _frameRate = $.frameRate;
+
+	this.frameRate = function (hz) {
+		let ret = _frameRate(hz);
+		if (hz) $.world._updateTimeStep();
+		return ret;
 	};
 
 	const _background = $.background;
@@ -10125,44 +10246,14 @@ main {
 	this.getFPS ??= () => $.p5play._fps;
 
 	/**
-	 * Displays the number of sprites drawn, an inaccurate
-	 * approximation of the current FPS as well as the average, minimum,
-	 * and maximum FPS achieved during the previous second.
+	 * Deprecated. Use `p5play.renderStats = true` instead.
 	 *
-	 * FPS in this context refers to how many frames per second your
-	 * computer can generate, including physics calculations and any other
-	 * processes necessary to generate a frame, but not including the delay
-	 * between when frames are actually shown on the screen. The higher the
-	 * FPS, the better your game is performing.
-	 *
-	 * You can use this function for approximate performance testing. But
-	 * the only way to get accurate results, is to use your web browser's
-	 * performance testing tools.
-	 *
-	 * Generally having less sprites and using a smaller canvas will make
-	 * your game perform better.
-	 *
+	 * @deprecated
 	 * @param {Number} x
 	 * @param {Number} y
 	 */
 	this.renderStats = (x, y) => {
-		let rs = $.p5play._renderStats;
-		if (rs.show === undefined) {
-			if ($.allSprites.tileSize == 1 || $.allSprites.tileSize > 16) {
-				rs.fontSize = 16;
-			} else {
-				rs.fontSize = 10;
-			}
-			rs.gap = rs.fontSize * 1.25;
-			if (!$._q5) {
-				console.warn(
-					"renderStats() produces inaccurate FPS approximations because deltaTime is calculated incorrectly in p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js or your browser's performance testing tools for accurate results."
-				);
-			}
-		}
-		rs.x = x || 10;
-		rs.y = y || 20;
-		rs.show = true;
+		console.warn('p5play: renderStats() function is deprecated. Use `p5play.renderStats = true` instead.');
 	};
 });
 
@@ -10194,23 +10285,38 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	}
 	$.allSprites._autoDraw ??= true;
 
-	let rs = $.p5play._renderStats;
-	if (rs.show) {
-		if (!$.p5play._fpsAvg || $.frameCount % 60 === 0) {
+	if ($.p5play.renderStats) {
+		let rs = $.p5play._renderStats;
+		if (!rs.fontSize) {
+			if ($.allSprites.tileSize == 1 || $.allSprites.tileSize > 16) {
+				rs.fontSize = 16;
+			} else {
+				rs.fontSize = 10;
+			}
+			rs.gap = rs.fontSize * 1.25;
+			if (!$._q5) {
+				console.warn(
+					"renderStats() produces inaccurate FPS approximations because deltaTime is calculated incorrectly in p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js or your browser's performance testing tools for accurate results."
+				);
+			}
+		}
+
+		if (!$.p5play._fpsAvg || $.frameCount % 20 === 0) {
 			let avg = 0;
 			let len = $.p5play._fpsArr.length;
 			for (let i = 0; i < len; i++) {
 				avg += $.p5play._fpsArr[i];
 			}
 			avg = Math.round(avg / len);
+			let min = Math.min(...$.p5play._fpsArr);
 			$.p5play._fpsAvg = avg;
-			$.p5play._fpsMin = Math.min(...$.p5play._fpsArr);
+			$.p5play._fpsMin = min;
 			$.p5play._fpsMax = Math.max(...$.p5play._fpsArr);
 			$.p5play._fpsArr = [];
 
 			let c;
-			if (avg > 55) c = $.color(30, 255, 30);
-			else if (avg > 25) c = $.color(255, 100, 30);
+			if (min > 55) c = $.color(30, 255, 30);
+			else if (min > 25) c = $.color(255, 100, 30);
 			else c = $.color(255, 30, 30);
 			$.p5play._statsColor = c;
 		}
