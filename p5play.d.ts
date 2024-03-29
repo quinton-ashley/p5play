@@ -245,6 +245,9 @@ class Sprite {
     set shape(val: string);
     /**
      * The kind of shape: 'box', 'circle', 'chain', or 'polygon'.
+     *
+     * If a sprite with a circle shape has its shape type changed to
+     * chain or polygon, the circle will be turned into a dodecagon.
      * @type {String}
      * @default box
      */
@@ -668,6 +671,9 @@ class Sprite {
     /**
      * Recalculates the sprite's mass based on its current
      * density and size.
+     *
+     * Does not change the sprite's center of mass, to do so
+     * use the `resetCenterOfMass` function.
      */
     resetMass(): void;
     /**

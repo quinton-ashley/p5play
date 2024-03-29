@@ -8608,7 +8608,7 @@ main {
 	const _frameRate = $.frameRate;
 
 	this.frameRate = function (hz) {
-		let ret = _frameRate(hz);
+		let ret = _frameRate.call($, hz);
 		if (hz) $.world._updateTimeStep();
 		return ret;
 	};
