@@ -6797,7 +6797,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				result = {
 					hit: true,
 					sprite: body.sprite,
-					point,
+					point: createVector(
+						point.x * plScale,
+						point.y * plScale
+					),
 					normal
 				}
 
