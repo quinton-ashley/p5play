@@ -3970,6 +3970,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			this._hasSensors = true;
 		}
+
+		/**
+		 * Returns the distance to another Sprite
+		 * @param {Sprite} otherSprite
+		 * @returns {Number} distance
+		 */
+		distance(otherSprite){
+			return $.dist(this.x, this.y, otherSprite.x, otherSprite.y)
+		}
 	};
 
 	// only used by the p5play-pro Netcode class to convert sprite data to binary
@@ -6760,6 +6769,56 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set allowSleeping(val) {
 			this.setAllowSleeping(val);
+		}
+
+		/**
+		 * Raycasting implementation, wrapper of existing "world.rayCast" function in Planck
+		 * 
+		 * @param {Number} startX - Start X position of raycast
+		 * @param {Number} startY - Start Y position of raycast
+		 * @param {Number} distance - How many pixels ahead of the direction the raycast should search. This is a radius, not diameter.
+		 * @param {Number} direction - Direction of the raycast
+		 * @param {Function} excludeFunction - Planck's way of getting the closest raycast is tricky, and returning all found casts then determining the closest one is a hassle I haven't yet solved.
+		 * 									   To attempt and fix this, raycast() will only return the closest result. This "excludeFunction" helps remedy this limitation.
+		 * 									   The excludeFunction will be called with a sprite, and if it returns TRUE, the sprite will be skipped in the raycast simulation.
+		 * @returns {Promise}
+		 */
+		raycast(startX, startY, distance, direction, excludeFunction){
+			let result = {
+				hit: false
+			},
+			rayCallback = function(fixture, point, normal, fraction) { // Define the callback function
+				let body = fixture.getBody();
+
+				if(excludeFunction && excludeFunction(body.sprite)){
+					return -1.0; // Exclude this
+				}
+
+				result = {
+					hit: true,
+					sprite: body.sprite,
+					point,
+					normal
+				}
+
+				return fraction;
+			},
+			startVector = pl.Vec2( // Turn start coords into a Planck vector
+				startX / plScale,
+				startY / plScale
+			),
+			endVector = pl.Vec2( // Planck uses an end vector instead of distance and direction.
+				startVector.x + (
+					(distance / plScale) * Math.cos(direction * Math.PI / 180)
+				),
+				startVector.y + (
+					(distance / plScale) * Math.sin(direction * Math.PI / 180)
+				)
+			);
+
+			this.rayCast(startVector, endVector, rayCallback)
+
+			return result;
 		}
 	};
 
