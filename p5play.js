@@ -3976,7 +3976,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Sprite} otherSprite
 		 * @returns {Number} distance
 		 */
-		distance(otherSprite){
+		distanceTo(otherSprite){
 			return $.dist(this.x, this.y, otherSprite.x, otherSprite.y)
 		}
 	};
