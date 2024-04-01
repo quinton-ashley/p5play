@@ -780,7 +780,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					val = val(group.length - 1);
 				}
 				if (typeof val == 'object') {
-					this[prop] = Object.assign({}, val);
+					if (val instanceof p5.Color) {
+						this[prop] = $.color(...val.levels);
+					} else {
+						this[prop] = Object.assign({}, val);
+					}
 				} else {
 					this[prop] = val;
 				}
@@ -3972,12 +3976,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Returns the distance to another Sprite
-		 * @param {Sprite} otherSprite
+		 * Returns the distance to another sprite, the mouse, a touch,
+		 * or any other object with x and y properties. Uses p5's `dist`
+		 * function.
+		 * @param {Sprite} o object with x and y properties
 		 * @returns {Number} distance
 		 */
-		distanceTo(otherSprite){
-			return $.dist(this.x, this.y, otherSprite.x, otherSprite.y)
+		distanceTo(o) {
+			return $.dist(this.x, this.y, o.x, o.y);
 		}
 	};
 
@@ -6437,19 +6443,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @default 3
 			 */
 			this.positionIterations = 3;
-
 			/**
 			 * @type {Number}
 			 * @default 0.19
 			 */
 			this.velocityThreshold = 0.19;
-
+			/**
+			 * The time elapsed in the physics simulation in seconds.
+			 * @type {Number}
+			 */
+			this.physicsTime = 0;
 			/**
 			 * @type {Boolean}
 			 * @default true
 			 */
 			this.mouseTracking ??= true;
-
 			/**
 			 * The sprite the mouse is hovering over.
 			 *
@@ -6459,14 +6467,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @default null
 			 */
 			this.mouseSprite = null;
-
 			/**
 			 * The sprite(s) that the mouse is hovering over.
 			 * @type {Sprite[]}
 			 * @default []
 			 */
 			this.mouseSprites = [];
-
 			/**
 			 * @type {Boolean}
 			 * @default true
@@ -6554,6 +6560,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				velocityIterations || this.velocityIterations,
 				positionIterations || this.positionIterations
 			);
+			this.physicsTime += timeStep || this._timeStep;
 
 			let sprites = Object.values($.p5play.sprites);
 			let groups = Object.values($.p5play.groups);
@@ -6568,6 +6575,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				$.canvas.dispatchEvent(new window.Event('p5play_world_step'));
 			}
 			if (this.autoStep) this.autoStep = null;
+		}
+
+		/**
+		 * The real time in seconds since the world was created, including
+		 * time spent paused.
+		 * @type {Number}
+		 */
+		get realTime() {
+			return $.millis() / 1000;
 		}
 
 		/**
@@ -6772,56 +6788,82 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Raycasting implementation, wrapper of existing "world.rayCast" function in Planck
-		 * 
-		 * @param {Number} startX - Start X position of raycast
-		 * @param {Number} startY - Start Y position of raycast
-		 * @param {Number} distance - How many pixels ahead of the direction the raycast should search. This is a radius, not diameter.
-		 * @param {Number} direction - Direction of the raycast
-		 * @param {Function} excludeFunction - Planck's way of getting the closest raycast is tricky, and returning all found casts then determining the closest one is a hassle I haven't yet solved.
-		 * 									   To attempt and fix this, raycast() will only return the closest result. This "excludeFunction" helps remedy this limitation.
-		 * 									   The excludeFunction will be called with a sprite, and if it returns TRUE, the sprite will be skipped in the raycast simulation.
-		 * @returns {Promise}
+		 * Finds the first sprite that intersects a ray (line),
+		 * excluding any sprites that intersect with the starting point.
+		 *
+		 * Can also be given a starting position and a maximum end position.
+		 * @param {Object} startPos - starting position of the ray cast
+		 * @param {Number} direction - direction of the ray
+		 * @param {Number} maxDistance - max distance the ray should check
+		 * @returns {Sprite} The first sprite the ray hits or undefined
 		 */
-		raycast(startX, startY, distance, direction, excludeFunction){
-			let result = {
-				hit: false
-			},
-			rayCallback = function(fixture, point, normal, fraction) { // Define the callback function
-				let body = fixture.getBody();
+		rayCast(startPos, direction, maxDistance) {
+			let sprites = this.rayCastAll(startPos, direction, maxDistance, () => true);
+			return sprites[0];
+		}
 
-				if(excludeFunction && excludeFunction(body.sprite)){
-					return -1.0; // Exclude this
+		/**
+		 * Finds sprites that intersect a line (ray), excluding any sprites
+		 * that intersect the starting point.
+		 *
+		 * Can also be given a starting position and a maximum end position.
+		 * @param {Object} startPos - starting position of the ray cast
+		 * @param {Number} direction - direction of the ray
+		 * @param {Number} maxDistance - max distance the ray should check
+		 * @param {Function} [limiter] - limiter function that's run each time the ray intersects a sprite, return true to stop the ray
+		 * @returns {Sprite[]} An array of sprites that the ray cast hit, sorted by distance. The sprite closest to the starting point will be at index 0.
+		 */
+		rayCastAll(startPos, direction, maxDistance, limiter) {
+			let ts = $.allSprites.tileSize;
+			let start = scaleTo(startPos.x, startPos.y, ts);
+
+			let end;
+			if (typeof arguments[1] == 'number') {
+				end = scaleTo(startPos.x + maxDistance * $.cos(direction), startPos.y + maxDistance * $.sin(direction), ts);
+			} else {
+				let endPos = arguments[1];
+				limiter ??= arguments[2];
+				end = scaleTo(endPos.x, endPos.y, ts);
+			}
+
+			let results = [];
+			let maxFraction = 1;
+
+			super.rayCast(start, end, function (fixture, point, normal, fraction) {
+				let sprite = fixture.getBody().sprite;
+
+				let shouldLimit = limiter && limiter(sprite);
+
+				// TODO provide advanced info: point and angle of intersection
+				results.push({
+					sprite,
+					// point,
+					// normal,
+					fraction
+				});
+
+				// limit the ray cast so it can't go beyond this sprite
+				if (shouldLimit) {
+					if (fraction < maxFraction) {
+						maxFraction = fraction;
+					}
+					return fraction;
 				}
+				return 1; // keep casting the full length of the ray
+			});
 
-				result = {
-					hit: true,
-					sprite: body.sprite,
-					point: createVector(
-						point.x * plScale,
-						point.y * plScale
-					),
-					normal
+			// sort results by the distance from the starting position
+			results.sort((a, b) => a.fraction - b.fraction);
+
+			let sprites = [];
+
+			for (let res of results) {
+				if (res.fraction <= maxFraction) {
+					sprites.push(res.sprite);
 				}
+			}
 
-				return fraction;
-			},
-			startVector = pl.Vec2( // Turn start coords into a Planck vector
-				startX / plScale,
-				startY / plScale
-			),
-			endVector = pl.Vec2( // Planck uses an end vector instead of distance and direction.
-				startVector.x + (
-					(distance / plScale) * Math.cos(direction * Math.PI / 180)
-				),
-				startVector.y + (
-					(distance / plScale) * Math.sin(direction * Math.PI / 180)
-				)
-			);
-
-			this.rayCast(startVector, endVector, rayCallback)
-
-			return result;
+			return sprites;
 		}
 	};
 
@@ -8317,7 +8359,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		} else {
 			logo.src = 'https://p5play.org/assets/made_with_p5play.webp';
 		}
-
 		await new Promise((r) => (logo.onload = r));
 		d.append(logo);
 		document.body.append(d);
@@ -8351,6 +8392,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			case 'jsfiddle.net':
 			case 'aijs.io':
 			case 'preview-aijs.web.app':
+			case 'quinton-ashley.github.io':
 				break;
 			default:
 				if (

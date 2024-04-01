@@ -1250,6 +1250,14 @@ class Sprite {
      * addSensor function.
      */
     addDefaultSensors(): void;
+    /**
+     * Returns the distance to another sprite, the mouse, a touch,
+     * or any other object with x and y properties. Uses p5's `dist`
+     * function.
+     * @param {Sprite} o object with x and y properties
+     * @returns {Number} distance
+     */
+    distanceTo(o: Sprite): number;
 }
 /**
  * @class
@@ -2040,6 +2048,11 @@ class World {
      */
     get velocityThreshold(): number;
     /**
+     * The time elapsed in the physics simulation in seconds.
+     * @type {Number}
+     */
+    physicsTime: number;
+    /**
      * The sprite the mouse is hovering over.
      *
      * If the mouse is hovering over several sprites, the mouse
@@ -2092,6 +2105,12 @@ class World {
      */
     step(timeStep?: number, velocityIterations?: number, positionIterations?: number): void;
     /**
+     * The real time in seconds since the world was created, including
+     * time spent paused.
+     * @type {Number}
+     */
+    get realTime(): number;
+    /**
      * Returns the sprites at a position, ordered by layer.
      *
      * Optionally you can specify a group to search.
@@ -2129,6 +2148,29 @@ class World {
      * @default true
      */
     get allowSleeping(): boolean;
+    /**
+     * Finds the first sprite that intersects a ray (line),
+     * excluding any sprites that intersect with the starting point.
+     *
+     * Can also be given a starting position and a maximum end position.
+     * @param {Object} startPos - starting position of the ray cast
+     * @param {Number} direction - direction of the ray
+     * @param {Number} maxDistance - max distance the ray should check
+     * @returns {Sprite} The first sprite the ray hits or undefined
+     */
+    rayCast(startPos: any, direction: number, maxDistance: number): Sprite;
+    /**
+     * Finds sprites that intersect a line (ray), excluding any sprites
+     * that intersect the starting point.
+     *
+     * Can also be given a starting position and a maximum end position.
+     * @param {Object} startPos - starting position of the ray cast
+     * @param {Number} direction - direction of the ray
+     * @param {Number} maxDistance - max distance the ray should check
+     * @param {Function} [limiter] - limiter function that's run each time the ray intersects a sprite, return true to stop the ray
+     * @returns {Sprite[]} An array of sprites that the ray cast hit, sorted by distance. The sprite closest to the starting point will be at index 0.
+     */
+    rayCastAll(startPos: any, direction: number, maxDistance: number, limiter?: Function, ...args: any[]): Sprite[];
 }
 /**
  * @class
