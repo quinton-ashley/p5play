@@ -2639,7 +2639,7 @@ function createCanvas(...args: any[]): p5.Renderer;
  */
 class Canvas {
     /**
-     * p5play adds some extra functionality to the p5.js `createCanvas`
+     * p5play adds some extra functionality to the `createCanvas`
      * function. See the examples below.
      *
      * This function also disables the default keydown responses for
@@ -2647,8 +2647,9 @@ class Canvas {
      * browser from scrolling the page when the user is playing a game
      * using common keyboard commands.
      *
-     * Canvas options (context attributes) can only be utilized with
-     * q5.js.
+     * Supports p5.js' '2d' and 'webgl' renderers.
+     *
+     * Only q5.js has support for canvas options (context attributes).
      *
      * @param {Number} width
      * @param {Number} height
@@ -2696,13 +2697,13 @@ class Canvas {
     /**
      * Half the width of the canvas.
      * @type {Number}
-     * @default 100
+     * @default 50
      */
     hw: number;
     /**
      * Half the height of the canvas.
      * @type {Number}
-     * @default 100
+     * @default 50
      */
     hh: number;
     /**

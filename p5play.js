@@ -187,7 +187,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.renderStats = false;
 			this._renderStats = {
 				x: 10,
-				y: 20
+				y: 20,
+				font: 'monospace'
 			};
 			this._fps = 60;
 			this._fpsArr = [60];
@@ -2785,7 +2786,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (!this.debug && this._strokeWeight !== 0) {
 						if (this.__shape == 2) $.stroke(this.stroke || this.color);
 						else if (this._stroke) $.stroke(this._stroke);
-					}
+					} else $.noStroke();
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 						if (this.debug) {
 							if (!fxt.m_isSensor) $.stroke(0, 255, 0);
@@ -2919,6 +2920,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			const sh = fxt.m_shape;
 			if (sh.m_type == 'polygon' || sh.m_type == 'chain') {
 				if (sh.m_type == 'chain') {
+					if ($._strokeWeight == 0) return;
 					$.push();
 					$.noFill();
 				}
@@ -6969,7 +6971,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set x(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.x = val;
-			let x = -val + $.canvas.hw / this._zoom;
+			let x = -val;
+			if ($.canvas.renderer == '2d') x += $.canvas.hw;
+			x /= this._zoom;
 			this.__pos.x = x;
 			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.x = Math.round(x);
@@ -6987,7 +6991,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set y(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.y = val;
-			let y = -val + $.canvas.hh / this._zoom;
+			let y = -val;
+			if ($.canvas.renderer == '2d') y += $.canvas.hh;
+			y /= this._zoom;
 			this.__pos.y = y;
 			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.y = Math.round(y);
@@ -7054,8 +7060,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set zoom(val) {
 			if (val === undefined || isNaN(val)) return;
 			this._zoom = val;
-			let x = -this._pos.x + $.canvas.hw / val;
-			let y = -this._pos.y + $.canvas.hh / val;
+			let x = -this._pos.x;
+			if ($.canvas.renderer == '2d') x += $.canvas.hw;
+			x /= val;
+			let y = -this._pos.y;
+			if ($.canvas.renderer == '2d') y += $.canvas.hh;
+			y /= val;
 			this.__pos.x = x;
 			this.__pos.y = y;
 			if ($.allSprites.pixelPerfect) {
@@ -8464,8 +8474,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 		}
 		let rend = _createCanvas.call($, ...args);
-		this.ctx ??= this.drawingContext;
+		$.ctx = $.drawingContext;
 		let c = rend.canvas || rend;
+		c.renderer = rend.GL ? 'webgl' : '2d';
 		c.tabIndex = 0;
 		c.w = args[0];
 		c.h = args[1];
@@ -8498,8 +8509,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
 		c.mouse = { x: $.mouseX, y: $.mouseY };
-		this.camera.x = c.hw;
-		this.camera.y = c.hh;
+		if (c.renderer == '2d') {
+			$.camera.x = c.hw;
+			$.camera.y = c.hh;
+		} else {
+			$.camera.x = 0;
+			$.camera.y = 0;
+			$._textCache = false;
+			$.p5play._renderStats = {
+				x: -c.hw + 10,
+				y: -c.hh + 20
+			};
+		}
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 
 		/* prevent callout to copy image, etc when tap to hold */
@@ -8574,7 +8595,7 @@ main {
 	 */
 	this.Canvas = class {
 		/**
-		 * p5play adds some extra functionality to the p5.js `createCanvas`
+		 * p5play adds some extra functionality to the `createCanvas`
 		 * function. See the examples below.
 		 *
 		 * This function also disables the default keydown responses for
@@ -8582,8 +8603,9 @@ main {
 		 * browser from scrolling the page when the user is playing a game
 		 * using common keyboard commands.
 		 *
-		 * Canvas options (context attributes) can only be utilized with
-		 * q5.js.
+		 * Supports p5.js' '2d' and 'webgl' renderers.
+		 *
+		 * Only q5.js has support for canvas options (context attributes).
 		 *
 		 * @param {Number} width
 		 * @param {Number} height
@@ -8631,13 +8653,13 @@ main {
 			/**
 			 * Half the width of the canvas.
 			 * @type {Number}
-			 * @default 100
+			 * @default 50
 			 */
 			this.hw;
 			/**
 			 * Half the height of the canvas.
 			 * @type {Number}
-			 * @default 100
+			 * @default 50
 			 */
 			this.hh;
 			/**
@@ -8705,8 +8727,13 @@ main {
 				c.style.height = '100%!important';
 			}
 		}
-		$.camera.x = c.hw;
-		$.camera.y = c.hh;
+		if (c.renderer == '2d') {
+			$.camera.x = c.hw;
+			$.camera.y = c.hh;
+		} else {
+			$.camera.x = 0;
+			$.camera.y = 0;
+		}
 	};
 
 	const _frameRate = $.frameRate;
@@ -8900,7 +8927,6 @@ main {
 			return $._textCache;
 		};
 		function _genTextImageKey(str, w, h) {
-			const ctx = $.canvas.getContext('2d');
 			const r = $._renderer;
 			let font = r._textFont;
 			if (typeof font != 'string') {
@@ -8912,9 +8938,9 @@ main {
 				(r._textStyle || 'normal') +
 				r._textSize +
 				font +
-				(r._doFill ? ctx.fillStyle : '') +
+				(r._doFill ? $.ctx.fillStyle : '') +
 				'_' +
-				(r._doStroke && r._strokeSet ? ctx.lineWidth + ctx.strokeStyle + '_' : '') +
+				(r._doStroke && r._strokeSet ? $.ctx.lineWidth + $.ctx.strokeStyle + '_' : '') +
 				(w || '') +
 				(h ? 'x' + h : '')
 			);
@@ -8951,9 +8977,12 @@ main {
 			str = str.toString();
 			const r = $._renderer;
 			if (!r._doFill && !r._doStroke) return;
-			const ctx = $.canvas.getContext('2d');
-			let t = ctx.getTransform();
-			let useCache = $._useCache || ($._textCache && (t.b != 0 || t.c != 0));
+			let ctx = $.ctx;
+			let useCache = $._useCache;
+			if (!useCache && $._textCache) {
+				let t = ctx.getTransform();
+				useCache = t.b != 0 || t.c != 0;
+			}
 			if (!useCache) return _text.call($, str, x, y, w, h);
 
 			let c, ti, k, cX, cY, _ascent, _descent;
@@ -10446,7 +10475,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		$.fill($.p5play._statsColor);
 		$.textAlign('left');
 		$.textSize(rs.fontSize);
-		$.textFont('monospace');
+		if (rs.font) $.textFont(rs.font);
 
 		let x = rs.x;
 		let y = rs.y;
