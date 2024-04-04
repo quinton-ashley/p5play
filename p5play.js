@@ -7062,11 +7062,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._zoom = val;
 			let x = -this._pos.x;
-			if ($.canvas.renderer == '2d') x += $.canvas.hw;
-			x /= val;
+			if ($.canvas.renderer == '2d') x += $.canvas.hw / val;
 			let y = -this._pos.y;
-			if ($.canvas.renderer == '2d') y += $.canvas.hh;
-			y /= val;
+			if ($.canvas.renderer == '2d') y += $.canvas.hh / val;
 			this.__pos.x = x;
 			this.__pos.y = y;
 			if ($.allSprites.pixelPerfect) {
