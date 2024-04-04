@@ -1775,6 +1775,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._display;
 		}
 		set draw(val) {
+			this._userDefinedDraw = true;
 			this._draw = val;
 		}
 
@@ -2825,30 +2826,32 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let x = this.x * this.tileSize + $.world.origin.x;
 			let y = this.y * this.tileSize + $.world.origin.y;
 
-			// For best performance, the sprite will not be drawn if it's offscreen
-			// according to the camera's bounds. The largest side of the sprite
-			// is used to determine if it's offscreen, since the sprite may be rotated.
-			let largestSide;
-			if (!this._totalWidth) {
-				largestSide = this._h !== undefined ? Math.max(this._w, this._h) : this._w;
-			} else {
-				largestSide = Math.max(this._totalWidth, this._totalHeight);
-			}
-			// the sprite may be visually bigger than its collider(s)
-			if (this.ani && !$.p5play.disableImages) {
-				largestSide = Math.max(largestSide, this.ani.w, this.ani.h);
-			}
+			if (!this._userDefinedDraw) {
+				// For best performance, the sprite will not be drawn if it's offscreen
+				// according to the camera's bounds. The largest side of the sprite
+				// is used to determine if it's offscreen, since the sprite may be rotated.
+				let largestSide;
+				if (!this._totalWidth) {
+					largestSide = this._h !== undefined ? Math.max(this._w, this._h) : this._w;
+				} else {
+					largestSide = Math.max(this._totalWidth, this._totalHeight);
+				}
+				// the sprite may be visually bigger than its collider(s)
+				if (this.ani && !$.p5play.disableImages) {
+					largestSide = Math.max(largestSide, this.ani.w, this.ani.h);
+				}
 
-			if (
-				this.shape != 'chain' &&
-				$.camera.isActive &&
-				(x + largestSide < $.camera.bound.min.x ||
-					x - largestSide > $.camera.bound.max.x ||
-					y + largestSide < $.camera.bound.min.y ||
-					y - largestSide > $.camera.bound.max.y)
-			) {
-				this._visible = null;
-				return;
+				if (
+					this.shape != 'chain' &&
+					$.camera.isActive &&
+					(x + largestSide < $.camera.bound.min.x ||
+						x - largestSide > $.camera.bound.max.x ||
+						y + largestSide < $.camera.bound.min.y ||
+						y - largestSide > $.camera.bound.max.y)
+				) {
+					this._visible = null;
+					return;
+				}
 			}
 
 			this._visible = true;
@@ -6972,8 +6975,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.x = val;
 			let x = -val;
-			if ($.canvas.renderer == '2d') x += $.canvas.hw;
-			x /= this._zoom;
+			if ($.canvas.renderer == '2d') x += $.canvas.hw / this._zoom;
 			this.__pos.x = x;
 			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.x = Math.round(x);
@@ -6992,8 +6994,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.y = val;
 			let y = -val;
-			if ($.canvas.renderer == '2d') y += $.canvas.hh;
-			y /= this._zoom;
+			if ($.canvas.renderer == '2d') y += $.canvas.hh / this._zoom;
 			this.__pos.y = y;
 			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.y = Math.round(y);
@@ -9205,15 +9206,6 @@ main {
 		}
 
 		/*
-		 * Initializes the input's values to zero.
-		 */
-		_init(inputs) {
-			for (let inp of inputs) {
-				this[inp] = 0;
-			}
-		}
-
-		/*
 		 * Attempt to auto-correct the user's input. Inheriting classes
 		 * override this method.
 		 */
@@ -9339,12 +9331,12 @@ main {
 			 * The mouse's x position in the world.
 			 * @type {Number}
 			 */
-			this.x;
+			this.x = 0;
 			/**
 			 * The mouse's y position in the world.
 			 * @type {Number}
 			 */
-			this.y;
+			this.y = 0;
 			/**
 			 * The mouse's absolute position on the canvas.
 			 * @type {object}
@@ -9356,20 +9348,18 @@ main {
 			 * The mouse's left button.
 			 * @type {Number}
 			 */
-			this.left;
+			this.left = 0;
 			/**
 			 * The mouse's center button.
 			 * @type {Number}
 			 */
-			this.center;
+			this.center = 0;
 			/**
 			 * The mouse's right button.
 			 * @type {Number}
 			 */
-			this.right;
+			this.right = 0;
 
-			let inputs = ['x', 'y', 'left', 'center', 'right'];
-			this._init(inputs);
 			/**
 			 * Contains the drag status of each of the mouse's buttons.
 			 * @type {object}
@@ -9999,54 +9989,78 @@ main {
 	 * @class
 	 * @extends InputDevice
 	 */
-	this._Contro = class extends $.InputDevice {
+	this.Contro = class extends $.InputDevice {
 		/**
 		 * <a href="https://p5play.org/learn/input.html">
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
 		 *
-		 * Used to create controller objects in the `controllers` array
-		 * (aka `contro`), these objects store the input status of buttons,
-		 * triggers, and sticks on game controllers.
+		 * Stores the input status of buttons, triggers, and sticks on
+		 * game controllers. Used internally to create controller objects
+		 * for the `contros` array (aka `controllers`).
 		 */
 		constructor(gp) {
 			super();
 			this._default = 'a';
 			this.connected = true;
 
-			let inputs = [
-				'a',
-				'b',
-				'x',
-				'y',
-				'l',
-				'r',
-				'lt',
-				'rt',
-				'select',
-				'start',
-				'lsb',
-				'rsb',
-				'up',
-				'down',
-				'left',
-				'right',
-				'leftTrigger',
-				'rightTrigger'
-			];
-			this._init(inputs);
+			this.a = 0;
+			this.b = 0;
+			this.x = 0;
+			this.y = 0;
+			this.l = 0;
+			this.r = 0;
+			this.lt = 0;
+			this.rt = 0;
+			this.select = 0;
+			this.start = 0;
+			this.lsb = 0;
+			this.rsb = 0;
+			this.up = 0;
+			this.down = 0;
+			this.left = 0;
+			this.right = 0;
 
+			/**
+			 * Has x and y properties with -1 to 1 values which
+			 * represent the position of the left analog stick.
+			 *
+			 * {x: 0, y: 0} is the center position.
+			 * @type {Object}
+			 */
 			this.leftStick = {
 				x: 0,
 				y: 0
 			};
 
+			/**
+			 * Has x and y properties with -1 to 1 values which
+			 * represent the position of the right analog stick.
+			 *
+			 * {x: 0, y: 0} is the center position.
+			 * @type {Object}
+			 */
 			this.rightStick = {
 				x: 0,
 				y: 0
 			};
 
-			this._btns = {
+			/**
+			 * Analog value 0-1 of the left trigger.
+			 * @default 0
+			 */
+			this.leftTrigger = 0;
+			/**
+			 * Analog value 0-1 of the right trigger.
+			 * @default 0
+			 */
+			this.rightTrigger = 0;
+
+			/**
+			 * Button names are mapped to `gamepad.buttons` indices.
+			 * @type {Object}
+			 */
+			this.buttonMapping = {
 				a: 0,
 				b: 1,
 				x: 2,
@@ -10064,7 +10078,11 @@ main {
 				left: 14,
 				right: 15
 			};
-			this._axes = {
+			/**
+			 * Sticks and triggers are mapped to `gamepad.axes` indices.
+			 * @type {Object}
+			 */
+			this.axeMapping = {
 				leftStick: {
 					x: 0,
 					y: 1
@@ -10077,19 +10095,17 @@ main {
 				rightTrigger: 5
 			};
 
-			// log(gp);
-
 			this.gamepad = gp;
 			this.id = gp.id;
 
-			// corrects button mapping for GuliKit gamepads
+			// corrects button mapping for GuliKit KingKong 2 Pro controllers
 			// which have a Nintendo Switch style button layout
 			// https://www.aliexpress.com/item/1005003624801819.html
 			if (this.id.includes('GuliKit')) {
-				this._btns.a = 1;
-				this._btns.b = 0;
-				this._btns.x = 3;
-				this._btns.y = 2;
+				this.buttonMapping.a = 1;
+				this.buttonMapping.b = 0;
+				this.buttonMapping.x = 3;
+				this.buttonMapping.y = 2;
 			}
 		}
 
@@ -10111,8 +10127,8 @@ main {
 			let pad = this.gamepad;
 
 			// buttons
-			for (let name in this._btns) {
-				let idx = this._btns[name];
+			for (let name in this.buttonMapping) {
+				let idx = this.buttonMapping[name];
 				let b = pad.buttons[idx];
 				if (!b) continue;
 				if (b.pressed) this[name]++;
@@ -10120,38 +10136,75 @@ main {
 			}
 
 			// sticks
-			this.leftStick.x = pad.axes[this._axes.leftStick.x];
-			this.leftStick.y = pad.axes[this._axes.leftStick.y];
+			this.leftStick.x = pad.axes[this.axeMapping.leftStick.x];
+			this.leftStick.y = pad.axes[this.axeMapping.leftStick.y];
 
-			this.rightStick.x = pad.axes[this._axes.rightStick.x];
-			this.rightStick.y = pad.axes[this._axes.rightStick.y];
+			this.rightStick.x = pad.axes[this.axeMapping.rightStick.x];
+			this.rightStick.y = pad.axes[this.axeMapping.rightStick.y];
 
 			// triggers
-			if (pad.axes[this._axes.leftTrigger] !== undefined) {
-				this.leftTrigger = pad.axes[this._axes.leftTrigger];
-				this.rightTrigger = pad.axes[this._axes.rightTrigger];
+			if (this.hasAnalogTriggers) {
+				this.leftTrigger = pad.axes[this.axeMapping.leftTrigger];
+				this.rightTrigger = pad.axes[this.axeMapping.rightTrigger];
 			} else {
-				this.leftTrigger = pad.buttons[this._btns.lt].value;
-				this.rightTrigger = pad.buttons[this._btns.rt].value;
+				this.leftTrigger = pad.buttons[this.buttonMapping.lt].value;
+				this.rightTrigger = pad.buttons[this.buttonMapping.rt].value;
 			}
-
 			return true; // update completed
 		}
+
+		_reset() {
+			for (let name in this.buttonMapping) {
+				this[name] = 0;
+			}
+			this.leftStick.x = 0;
+			this.leftStick.y = 0;
+			this.rightStick.x = 0;
+			this.rightStick.y = 0;
+			this.leftTrigger = 0;
+			this.rightTrigger = 0;
+		}
+		/**
+		 * True if the controller has analog triggers.
+		 * False if the controller has digital (button) triggers.
+		 * @type {boolean}
+		 */
+		get hasAnalogTriggers() {
+			return this.gamepad.axes && this.gamepad.axes[this.axeMapping.leftTrigger] !== undefined;
+		}
+		/**
+		 * Alias for `leftStick`.
+		 */
 		get ls() {
 			return this.leftStick;
 		}
+		/**
+		 * Alias for `rightStick`.
+		 */
 		get rs() {
 			return this.rightStick;
 		}
+		/**
+		 * Alias for `l` (left button).
+		 */
 		get lb() {
 			return this.l;
 		}
+		/**
+		 * Alias for `r` (right button).
+		 */
 		get rb() {
 			return this.r;
 		}
+		/**
+		 * Alias for `lsb`.
+		 */
 		get leftStickButton() {
 			return this.lsb;
 		}
+		/**
+		 * Alias for `rsb`.
+		 */
 		get rightStickButton() {
 			return this.rsb;
 		}
@@ -10159,7 +10212,7 @@ main {
 
 	/**
 	 * @class
-	 * @extends Array<_Contro>
+	 * @extends Array<Contro>
 	 */
 	this._Contros = class extends Array {
 		/**
@@ -10167,8 +10220,8 @@ main {
 		 * Look at the Input reference pages before reading these docs.
 		 * </a>
 		 *
-		 * Used to create `controllers` (aka `contro`) an array
-		 * of `_Contro` objects, which store the input status of buttons,
+		 * Used internally to create the `contros` array (aka `controllers`)
+		 * of `Contro` objects, which store the input status of buttons,
 		 * triggers, and sticks on game controllers.
 		 */
 		constructor() {
@@ -10184,137 +10237,34 @@ main {
 			}
 
 			/**
-			 * @type {Function}
-			 */
-			this.presses;
-			/**
-			 * @type {Function}
-			 */
-			this.pressing;
-			/**
-			 * @type {Function}
-			 */
-			this.pressed;
-			/**
-			 * @type {Function}
-			 */
-			this.holds;
-			/**
-			 * @type {Function}
-			 */
-			this.holding;
-			/**
-			 * @type {Function}
-			 */
-			this.held;
-			/**
-			 * @type {Function}
-			 */
-			this.released;
-
-			let methods = ['presses', 'pressing', 'pressed', 'holds', 'holding', 'held', 'released'];
-			for (let m of methods) {
-				this[m] = (inp) => {
-					if (this[0]) return this[0][m](inp);
-				};
-			}
-
-			this.a = 0;
-			this.b = 0;
-			this.x = 0;
-			this.y = 0;
-			this.l = 0;
-			this.r = 0;
-			this.lt = 0;
-			this.rt = 0;
-			this.select = 0;
-			this.start = 0;
-			this.lsb = 0;
-			this.rsb = 0;
-			this.up = 0;
-			this.down = 0;
-			this.left = 0;
-			this.right = 0;
-			/**
-			 * Analog value 0-1 of the left trigger.
-			 */
-			this.leftTrigger = 0;
-			/**
-			 * Analog value 0-1 of the right trigger.
-			 */
-			this.rightTrigger = 0;
-			// aliases
-			this.lb = 0;
-			this.rb = 0;
-			this.leftStickButton = 0;
-			this.rightStickButton = 0;
-
-			let props = [
-				'connected',
-				'a',
-				'b',
-				'x',
-				'y',
-				'l',
-				'r',
-				'lt',
-				'rt',
-				'select',
-				'start',
-				'lsb',
-				'rsb',
-				'up',
-				'down',
-				'left',
-				'right',
-				'leftTrigger',
-				'rightTrigger',
-				// aliases
-				'lb',
-				'rb',
-				'leftStickButton',
-				'rightStickButton'
-			];
-			for (let prop of props) {
-				Object.defineProperty(this, prop, {
-					get() {
-						if (_this[0]) return _this[0][prop];
-						return 0;
-					}
-				});
-			}
-
-			/**
-			 * Has x and y properties with -1 to 1 values which
-			 * represent the position of the left stick.
+			 * Runs when a controller is connected. By default
+			 * it always returns true. Can be overwritten by users.
 			 *
-			 * {x: 0, y: 0} is the center position.
-			 * @type {Object}
-			 */
-			this.leftStick;
-			/**
-			 * Has x and y properties with -1 to 1 values which
-			 * represent the position of the right stick.
+			 * For example, it could be customized to filter
+			 * controllers based on their model info.
 			 *
-			 * {x: 0, y: 0} is the center position.
-			 * @type {Object}
+			 * Doesn't run if a controller in this controllers array
+			 * is reconnected.
+			 * @type {Function}
+			 * @param {Gamepad} gamepad
+			 * @returns {Boolean} true if the controller should be added to this p5play controllers array
 			 */
-			this.rightStick;
+			this.onConnect = () => true;
 
-			props = ['leftStick', 'rightStick'];
-			for (let prop of props) {
-				this[prop] = {};
-				for (let axis of ['x', 'y']) {
-					Object.defineProperty(this[prop], axis, {
-						get() {
-							if (_this[0]) return _this[0][prop][axis];
-							return 0;
-						}
-					});
-				}
-			}
+			/**
+			 * Runs when a controller is disconnected. Always returns
+			 * false by default. Can be overwritten by users.
+			 *
+			 * Removing a controller from this controllers array is
+			 * usually not desirable, because the controller could be
+			 * reconnected later.
+			 * @type {Function}
+			 * @param {Gamepad} gamepad
+			 * @returns {Boolean} true if the controllers should be removed from this p5play controllers array
+			 */
+			this.onDisconnect = () => false;
 
-			// test if the broswer supports the HTML5 Gamepad API
+			// test if the browser supports the HTML5 Gamepad API
 			// all modern browsers do, this is really just to prevent
 			// p5play's Jest tests from failing
 			if (!navigator?.getGamepads) return;
@@ -10328,6 +10278,30 @@ main {
 			}
 		}
 
+		/**
+		 * Swap controller positions in this controllers array.
+		 * @param {Number} indexA
+		 * @param {Number} indexB
+		 * @example
+		 * contros.swap(0, 3); // swap the first controller with the fourth
+		 */
+		swap(indexA, indexB) {
+			let tmp = this[indexA];
+			this[indexA] = this[indexB];
+			this[indexB] = tmp;
+		}
+
+		/**
+		 * Removes a controller from this controllers array
+		 * by setting `contro[index] = null`.
+		 *
+		 * Newly connected controllers fill the first empty slot.
+		 * @param {Number} index
+		 */
+		remove(index) {
+			this[index] = null;
+		}
+
 		_onConnect(gp) {
 			if (!gp) return;
 			for (let i = 0; i < this.length; i++) {
@@ -10338,9 +10312,19 @@ main {
 				}
 			}
 			log(gp);
-			log('contro[' + gp.index + '] connected: ' + gp.id);
-			let c = new $._Contro(gp);
-			this.push(c);
+			if (this.onConnect(gp)) {
+				let c = new $.Contro(gp);
+
+				let index = 0;
+				for (let i = 0; i < this.length; i++) {
+					if (!this[i]) {
+						index = i;
+						break;
+					}
+				}
+				log('contro[' + index + '] connected: ' + gp.id);
+				this[index] = c;
+			}
 		}
 
 		_onDisconnect(gp) {
@@ -10348,7 +10332,11 @@ main {
 			for (let i = 0; i < this.length; i++) {
 				if (this[i].gamepad?.index === gp.index) {
 					this[i].connected = false;
+					this[i]._reset();
 					log('contro[' + i + '] disconnected: ' + gp.id);
+					if (this.onDisconnect(gp)) {
+						this.remove(i);
+					}
 					return;
 				}
 			}
@@ -10365,17 +10353,35 @@ main {
 	};
 
 	/**
-	 * Get user input from game controllers.
+	 * Array of game controllers.
 	 * @type {_Contros}
 	 */
-	this.contro = new $._Contros();
+	this.contros = new $._Contros();
 	delete $._Contros;
 
 	/**
-	 * Alias for contro
+	 * Alias for contros
 	 * @type {_Contros}
 	 */
-	this.controllers = $.contro;
+	this.controllers = $.contros;
+
+	/**
+	 * For convenience, `contro` can be used to attempt to check the
+	 * input states of `contro[0]` and won't throw errors if a controller
+	 * isn't connected yet. It will get a mock controller object.
+	 * You can set the properties of the mock controller object to
+	 * test your game's input handling.
+	 * @type {Contro}
+	 */
+	this.contro = {};
+	this._controMock = new $.Contro({ id: 'mock0' });
+	this._controMock.connected = false;
+
+	Object.defineProperty($, 'contro', {
+		get() {
+			return $.contros[0] || this._controMock;
+		}
+	});
 
 	/**
 	 * FPS, amongst the gaming community, refers to how fast a computer
@@ -10412,7 +10418,7 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 	$.p5play.spritesDrawn = 0;
 
 	$.mouse._update();
-	$.contro._update();
+	$.contros._update();
 });
 
 p5.prototype.registerMethod('post', function p5playPostDraw() {

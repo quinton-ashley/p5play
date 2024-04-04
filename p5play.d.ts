@@ -3004,86 +3004,18 @@ var keyboard: _Keyboard;
  * @class
  * @extends InputDevice
  */
-class _Contro extends InputDevice {
+class Contro extends InputDevice {
     /**
      * <a href="https://p5play.org/learn/input.html">
      * Look at the Input reference pages before reading these docs.
      * </a>
      *
-     * Used to create controller objects in the `controllers` array
-     * (aka `contro`), these objects store the input status of buttons,
-     * triggers, and sticks on game controllers.
+     * Stores the input status of buttons, triggers, and sticks on
+     * game controllers. Used internally to create controller objects
+     * for the `contros` array (aka `controllers`).
      */
     constructor(gp: any);
     connected: boolean;
-    leftStick: {
-        x: number;
-        y: number;
-    };
-    rightStick: {
-        x: number;
-        y: number;
-    };
-    gamepad: any;
-    id: any;
-    leftTrigger: any;
-    rightTrigger: any;
-    get ls(): {
-        x: number;
-        y: number;
-    };
-    get rs(): {
-        x: number;
-        y: number;
-    };
-    get lb(): any;
-    get rb(): any;
-    get leftStickButton(): any;
-    get rightStickButton(): any;
-}
-/**
- * @class
- * @extends Array<_Contro>
- */
-class _Contros extends Array<_Contro> {
-    /**
-     * <a href="https://p5play.org/learn/input.html">
-     * Look at the Input reference pages before reading these docs.
-     * </a>
-     *
-     * Used to create `controllers` (aka `contro`) an array
-     * of `_Contro` objects, which store the input status of buttons,
-     * triggers, and sticks on game controllers.
-     */
-    constructor();
-    /**
-     * @type {Function}
-     */
-    presses: Function;
-    /**
-     * @type {Function}
-     */
-    pressing: Function;
-    /**
-     * @type {Function}
-     */
-    pressed: Function;
-    /**
-     * @type {Function}
-     */
-    holds: Function;
-    /**
-     * @type {Function}
-     */
-    holding: Function;
-    /**
-     * @type {Function}
-     */
-    held: Function;
-    /**
-     * @type {Function}
-     */
-    released: Function;
     a: number;
     b: number;
     x: number;
@@ -3101,20 +3033,8 @@ class _Contros extends Array<_Contro> {
     left: number;
     right: number;
     /**
-     * Analog value 0-1 of the left trigger.
-     */
-    leftTrigger: number;
-    /**
-     * Analog value 0-1 of the right trigger.
-     */
-    rightTrigger: number;
-    lb: number;
-    rb: number;
-    leftStickButton: number;
-    rightStickButton: number;
-    /**
      * Has x and y properties with -1 to 1 values which
-     * represent the position of the left stick.
+     * represent the position of the left analog stick.
      *
      * {x: 0, y: 0} is the center position.
      * @type {Object}
@@ -3122,15 +3042,126 @@ class _Contros extends Array<_Contro> {
     leftStick: any;
     /**
      * Has x and y properties with -1 to 1 values which
-     * represent the position of the right stick.
+     * represent the position of the right analog stick.
      *
      * {x: 0, y: 0} is the center position.
      * @type {Object}
      */
     rightStick: any;
+    /**
+     * Analog value 0-1 of the left trigger.
+     * @default 0
+     */
+    leftTrigger: number;
+    /**
+     * Analog value 0-1 of the right trigger.
+     * @default 0
+     */
+    rightTrigger: number;
+    /**
+     * Button names are mapped to `gamepad.buttons` indices.
+     * @type {Object}
+     */
+    buttonMapping: any;
+    /**
+     * Sticks and triggers are mapped to `gamepad.axes` indices.
+     * @type {Object}
+     */
+    axeMapping: any;
+    gamepad: any;
+    id: any;
+    /**
+     * True if the controller has analog triggers.
+     * False if the controller has digital (button) triggers.
+     * @type {boolean}
+     */
+    get hasAnalogTriggers(): boolean;
+    /**
+     * Alias for `leftStick`.
+     */
+    get ls(): any;
+    /**
+     * Alias for `rightStick`.
+     */
+    get rs(): any;
+    /**
+     * Alias for `l` (left button).
+     */
+    get lb(): number;
+    /**
+     * Alias for `r` (right button).
+     */
+    get rb(): number;
+    /**
+     * Alias for `lsb`.
+     */
+    get leftStickButton(): number;
+    /**
+     * Alias for `rsb`.
+     */
+    get rightStickButton(): number;
 }
-var contro: _Contros;
+/**
+ * @class
+ * @extends Array<Contro>
+ */
+class _Contros extends Array<Contro> {
+    /**
+     * <a href="https://p5play.org/learn/input.html">
+     * Look at the Input reference pages before reading these docs.
+     * </a>
+     *
+     * Used internally to create the `contros` array (aka `controllers`)
+     * of `Contro` objects, which store the input status of buttons,
+     * triggers, and sticks on game controllers.
+     */
+    constructor();
+    /**
+     * Runs when a controller is connected. By default
+     * it always returns true. Can be overwritten by users.
+     *
+     * For example, it could be customized to filter
+     * controllers based on their model info.
+     *
+     * Doesn't run if a controller in this controllers array
+     * is reconnected.
+     * @type {Function}
+     * @param {Gamepad} gamepad
+     * @returns {Boolean} true if the controller should be added to this p5play controllers array
+     */
+    onConnect: Function;
+    /**
+     * Runs when a controller is disconnected. Always returns
+     * false by default. Can be overwritten by users.
+     *
+     * Removing a controller from this controllers array is
+     * usually not desirable, because the controller could be
+     * reconnected later.
+     * @type {Function}
+     * @param {Gamepad} gamepad
+     * @returns {Boolean} true if the controllers should be removed from this p5play controllers array
+     */
+    onDisconnect: Function;
+    /**
+     * Swap controller positions in this controllers array.
+     * @param {Number} indexA
+     * @param {Number} indexB
+     * @example
+     * contros.swap(0, 3); // swap the first controller with the fourth
+     */
+    swap(indexA: number, indexB: number): void;
+    /**
+     * Removes a controller from this controllers array
+     * by setting `contro[index] = null`.
+     *
+     * Newly connected controllers fill the first empty slot.
+     * @param {Number} index
+     */
+    remove(index: number): void;
+}
+var contros: _Contros;
 var controllers: _Contros;
+var contro: Contro;
 function renderStats(x: number, y: number): void;
 
 }
