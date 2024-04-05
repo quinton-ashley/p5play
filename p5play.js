@@ -10277,6 +10277,12 @@ main {
 			let tmp = this[indexA];
 			this[indexA] = this[indexB];
 			this[indexB] = tmp;
+			if (indexA == 0 || indexB == 0) {
+				$.contro = this[0];
+				if (!$._q5 && $._isGlobal) {
+					window.contro = this[0];
+				}
+			}
 		}
 
 		/**
@@ -10349,7 +10355,7 @@ main {
 				this[index] = c;
 				if (index == 0) {
 					$.contro = c;
-					if ($._isGlobal) window.contro = c;
+					if (!$._q5 && $._isGlobal) window.contro = c;
 				}
 			}
 		}
