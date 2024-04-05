@@ -1462,14 +1462,6 @@ class SpriteAnimation extends Array<p5.Image> {
      * @type {Number}
      */
     get height(): number;
-    /**
-     * Deprecated. Use the animation object itself, which is an array of frames.
-     *
-     * The frames of the animation. Read only.
-     * @deprecated
-     * @type {p5.Image[]}
-     */
-    get frames(): p5.Image[];
 }
 /**
  * <a href="https://p5play.org/learn/animation.html">
@@ -2053,6 +2045,19 @@ class World {
      */
     physicsTime: number;
     /**
+     * Represents the size of a meter in pixels.
+     *
+     * Adjusting this property changes the simulated scale of the physics world.
+     * For optimal results, it should be set such that sprites are between
+     * 0.1 and 10 meters in size in the physics simulation.
+     *
+     * The default value is 60, which means that your sprites should optimally
+     * be between 6 and 600 pixels in size.
+     * @type {Number}
+     * @default 60
+     */
+    meterSize: number;
+    /**
      * The sprite the mouse is hovering over.
      *
      * If the mouse is hovering over several sprites, the mouse
@@ -2176,14 +2181,6 @@ class World {
  * @class
  */
 class Camera {
-    /**
-     * Use `mouse.canvasPos.x` and `mouse.canvasPos.y` instead.
-     * @deprecated
-     */
-    mouse: {
-        x: any;
-        y: any;
-    };
     /**
      * Read only. True if the camera is active.
      * Use camera.on() to activate the camera.
@@ -3013,6 +3010,9 @@ class Contro extends InputDevice {
      * Stores the input status of buttons, triggers, and sticks on
      * game controllers. Used internally to create controller objects
      * for the `contros` array (aka `controllers`).
+     *
+     * Can also be used to create a mock controller object.
+     * @param {Gamepad} gamepad - gamepad object or id string for a mock controller
      */
     constructor(gp: any);
     connected: boolean;
@@ -3068,6 +3068,11 @@ class Contro extends InputDevice {
      * @type {Object}
      */
     axeMapping: any;
+    /**
+     * If the controller is a mock controller.
+     * @type {Boolean}
+     */
+    isMock: boolean;
     gamepad: any;
     id: any;
     /**

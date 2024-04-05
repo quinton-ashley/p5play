@@ -14,7 +14,6 @@ if (typeof planck != 'object') {
 p5.prototype.registerMethod('init', function p5playInit() {
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
-	const plScale = 60;
 
 	// Google Analytics collects anonymous usage data to help make p5play better.
 	// To opt out, set window._p5play_gtagged to false before loading p5play.
@@ -43,12 +42,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	$.angleMode('degrees');
 
 	// scale to planck coordinates from p5 coordinates
-	const scaleTo = (x, y, tileSize) => new pl.Vec2((x * tileSize) / plScale, (y * tileSize) / plScale);
-	const scaleXTo = (x, tileSize) => (x * tileSize) / plScale;
+	const scaleTo = (x, y, tileSize) =>
+		new pl.Vec2((x * tileSize) / $.world.meterSize, (y * tileSize) / $.world.meterSize);
+	const scaleXTo = (x, tileSize) => (x * tileSize) / $.world.meterSize;
 
 	// scale from planck coordinates to p5 coordinates
-	const scaleFrom = (x, y, tileSize) => new pl.Vec2((x / tileSize) * plScale, (y / tileSize) * plScale);
-	const scaleXFrom = (x, tileSize) => (x / tileSize) * plScale;
+	const scaleFrom = (x, y, tileSize) =>
+		new pl.Vec2((x / tileSize) * $.world.meterSize, (y / tileSize) * $.world.meterSize);
+	const scaleXFrom = (x, tileSize) => (x / tileSize) * $.world.meterSize;
 
 	const isSlop = (val) => Math.abs(val) <= pl.Settings.linearSlop;
 	const fixRound = (val, slop) =>
@@ -459,12 +460,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			Object.defineProperty(this._pos, 'x', {
 				get() {
 					if (!_this.body) return _this._position.x;
-					let x = (_this.body.getPosition().x / _this.tileSize) * plScale;
+					let x = (_this.body.getPosition().x / _this.tileSize) * $.world.meterSize;
 					return $.p5play.friendlyRounding ? fixRound(x) : x;
 				},
 				set(val) {
 					if (_this.body) {
-						let pos = new pl.Vec2((val * _this.tileSize) / plScale, _this.body.getPosition().y);
+						let pos = new pl.Vec2((val * _this.tileSize) / $.world.meterSize, _this.body.getPosition().y);
 						_this.body.setPosition(pos);
 					}
 					_this._position.x = val;
@@ -474,12 +475,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			Object.defineProperty(this._pos, 'y', {
 				get() {
 					if (!_this.body) return _this._position.y;
-					let y = (_this.body.getPosition().y / _this.tileSize) * plScale;
+					let y = (_this.body.getPosition().y / _this.tileSize) * $.world.meterSize;
 					return $.p5play.friendlyRounding ? fixRound(y) : y;
 				},
 				set(val) {
 					if (_this.body) {
-						let pos = new pl.Vec2(_this.body.getPosition().x, (val * _this.tileSize) / plScale);
+						let pos = new pl.Vec2(_this.body.getPosition().x, (val * _this.tileSize) / $.world.meterSize);
 						_this.body.setPosition(pos);
 					}
 					_this._position.y = val;
@@ -568,12 +569,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			x ??= group.x;
 			if (x === undefined) {
-				x = $.width / this.tileSize / 2;
+				if ($.canvas.renderer == '2d') x = $.canvas.hw / this.tileSize;
+				else x = 0;
 				if (w) this._vertexMode = true;
 			}
 			y ??= group.y;
 			if (y === undefined) {
-				y = $.height / this.tileSize / 2;
+				if ($.canvas.renderer == '2d') y = $.canvas.hh / this.tileSize;
+				else y = 0;
 			}
 
 			let forcedBoxShape = false;
@@ -2327,7 +2330,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let x = this.x;
 			let y = this.y;
 			for (let i = 0; i < v.length; i++) {
-				let arr = [(v[i].x / this.tileSize) * plScale + x, (v[i].y / this.tileSize) * plScale + y];
+				let arr = [(v[i].x / this.tileSize) * $.world.meterSize + x, (v[i].y / this.tileSize) * $.world.meterSize + y];
 				if ($.p5play.friendlyRounding) {
 					arr[0] = fixRound(arr[0]);
 					arr[1] = fixRound(arr[1]);
@@ -2383,7 +2386,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set pos(val) {
 			if (this.body) {
-				let pos = new pl.Vec2((val.x * this.tileSize) / plScale, (val.y * this.tileSize) / plScale);
+				let pos = new pl.Vec2((val.x * this.tileSize) / $.world.meterSize, (val.y * this.tileSize) / $.world.meterSize);
 				this.body.setPosition(pos);
 			}
 			this._position.x = val.x;
@@ -2930,7 +2933,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let v = sh.m_vertices;
 				$.beginShape();
 				for (let i = 0; i < v.length; i++) {
-					$.vertex(v[i].x * plScale, v[i].y * plScale);
+					$.vertex(v[i].x * $.world.meterSize, v[i].y * $.world.meterSize);
 				}
 				if (sh.m_type != 'chain') $.endShape('close');
 				else {
@@ -2938,10 +2941,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					$.pop();
 				}
 			} else if (sh.m_type == 'circle') {
-				const d = sh.m_radius * 2 * plScale;
-				$.ellipse(sh.m_p.x * plScale, sh.m_p.y * plScale, d, d);
+				const d = sh.m_radius * 2 * $.world.meterSize;
+				$.ellipse(sh.m_p.x * $.world.meterSize, sh.m_p.y * $.world.meterSize, d, d);
 			} else if (sh.m_type == 'edge') {
-				$.line(sh.m_vertex1.x * plScale, sh.m_vertex1.y * plScale, sh.m_vertex2.x * plScale, sh.m_vertex2.y * plScale);
+				$.line(
+					sh.m_vertex1.x * $.world.meterSize,
+					sh.m_vertex1.y * $.world.meterSize,
+					sh.m_vertex2.x * $.world.meterSize,
+					sh.m_vertex2.y * $.world.meterSize
+				);
 			}
 		}
 
@@ -4809,21 +4817,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			else if (frameInfo) return frameInfo.h;
 			return 1;
 		}
-
-		/**
-		 * Deprecated. Use the animation object itself, which is an array of frames.
-		 *
-		 * The frames of the animation. Read only.
-		 * @deprecated
-		 * @type {p5.Image[]}
-		 */
-		get frames() {
-			let frames = [];
-			for (let i = 0; i < this.length; i++) {
-				frames.push(this[i]);
-			}
-			return frames;
-		}
 	};
 
 	$.SpriteAnimation.props = [
@@ -6459,6 +6452,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.physicsTime = 0;
 			/**
+			 * Represents the size of a meter in pixels.
+			 *
+			 * Adjusting this property changes the simulated scale of the physics world.
+			 * For optimal results, it should be set such that sprites are between
+			 * 0.1 and 10 meters in size in the physics simulation.
+			 *
+			 * The default value is 60, which means that your sprites should optimally
+			 * be between 6 and 600 pixels in size.
+			 * @type {Number}
+			 * @default 60
+			 */
+			this.meterSize = 60;
+			/**
 			 * @type {Boolean}
 			 * @default true
 			 */
@@ -6605,7 +6611,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn) {
 			cameraActiveWhenDrawn ??= true;
-			const convertedPoint = new pl.Vec2(x / plScale, y / plScale);
+			const convertedPoint = new pl.Vec2(x / $.world.meterSize, y / $.world.meterSize);
 			const aabb = new pl.AABB();
 			aabb.lowerBound = new pl.Vec2(convertedPoint.x - 0.001, convertedPoint.y - 0.001);
 			aabb.upperBound = new pl.Vec2(convertedPoint.x + 0.001, convertedPoint.y + 0.001);
@@ -6899,15 +6905,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			// camera translation
 			this.__pos = { x: 0, y: 0, rounded: {} };
-
-			/**
-			 * Use `mouse.canvasPos.x` and `mouse.canvasPos.y` instead.
-			 * @deprecated
-			 */
-			this.mouse = {
-				x: $.mouseX,
-				y: $.mouseY
-			};
 
 			/**
 			 * Read only. True if the camera is active.
@@ -7323,11 +7320,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					for (let axis of ['x', 'y']) {
 						Object.defineProperty(this[prop], axis, {
 							get() {
-								let val = (_this._j['m_localAnchor' + l][axis] / _this['sprite' + l].tileSize) * plScale;
+								let val = (_this._j['m_localAnchor' + l][axis] / _this['sprite' + l].tileSize) * $.world.meterSize;
 								return $.p5play.friendlyRounding ? fixRound(val) : val;
 							},
 							set(val) {
-								_this._j['m_localAnchor' + l][axis] = (val / plScale) * _this['sprite' + l].tileSize;
+								_this._j['m_localAnchor' + l][axis] = (val / $.world.meterSize) * _this['sprite' + l].tileSize;
 								if (_this.type == 'distance' || _this.type == 'rope') {
 									_this._j.m_length = pl.Vec2.distance(
 										_this._j.m_bodyA.getWorldPoint(_this._j.m_localAnchorA),
@@ -7921,13 +7918,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default undefined
 		 */
 		get lowerLimit() {
-			return (this._j.getLowerLimit() / this.spriteA.tileSize) * plScale;
+			return (this._j.getLowerLimit() / this.spriteA.tileSize) * $.world.meterSize;
 		}
 		set lowerLimit(val) {
 			if (!this._j.isLimitEnabled()) {
 				this._j.enableLimit(true);
 			}
-			val = (val * this.spriteA.tileSize) / plScale;
+			val = (val * this.spriteA.tileSize) / $.world.meterSize;
 			this._j.setLimits(val, this._j.getUpperLimit());
 		}
 
@@ -7938,13 +7935,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default undefined
 		 */
 		get upperLimit() {
-			return (this._j.getUpperLimit() / this.spriteA.tileSize) * plScale;
+			return (this._j.getUpperLimit() / this.spriteA.tileSize) * $.world.meterSize;
 		}
 		set upperLimit(val) {
 			if (!this._j.isLimitEnabled()) {
 				this._j.enableLimit(true);
 			}
-			val = (val * this.spriteA.tileSize) / plScale;
+			val = (val * this.spriteA.tileSize) / $.world.meterSize;
 			this._j.setLimits(this._j.getLowerLimit(), val);
 		}
 	};
@@ -9398,8 +9395,8 @@ main {
 		}
 
 		_update() {
-			$.mouse.canvasPos.x = $.camera.mouse.x = $.mouseX;
-			$.mouse.canvasPos.y = $.camera.mouse.y = $.mouseY;
+			$.mouse.canvasPos.x = $.mouseX;
+			$.mouse.canvasPos.y = $.mouseY;
 
 			if ($.camera.x == $.canvas.hw && $.camera.y == $.canvas.hh && $.camera.zoom == 1) {
 				this.x = $.mouseX;
@@ -9996,6 +9993,9 @@ main {
 		 * Stores the input status of buttons, triggers, and sticks on
 		 * game controllers. Used internally to create controller objects
 		 * for the `contros` array (aka `controllers`).
+		 *
+		 * Can also be used to create a mock controller object.
+		 * @param {Gamepad} gamepad - gamepad object or id string for a mock controller
 		 */
 		constructor(gp) {
 			super();
@@ -10093,8 +10093,20 @@ main {
 				rightTrigger: 5
 			};
 
-			this.gamepad = gp;
-			this.id = gp.id;
+			/**
+			 * If the controller is a mock controller.
+			 * @type {Boolean}
+			 */
+			this.isMock = false;
+
+			if (typeof gp != 'string') {
+				this.gamepad = gp;
+				this.id = gp.id;
+			} else {
+				this.gamepad = {};
+				this.id = gp;
+				this.isMock = true;
+			}
 
 			// corrects button mapping for GuliKit KingKong 2 Pro controllers
 			// which have a Nintendo Switch style button layout
@@ -10117,7 +10129,7 @@ main {
 		}
 
 		_update() {
-			if (!this.connected) return;
+			if (this.isMock) return;
 
 			this.gamepad = navigator.getGamepads()[this.gamepad.index];
 			if (!this.gamepad?.connected) return;
@@ -10345,7 +10357,7 @@ main {
 		 */
 		_update() {
 			for (let c of this) {
-				c._update();
+				if (c.connected) c._update();
 			}
 		}
 	};
@@ -10372,8 +10384,7 @@ main {
 	 * @type {Contro}
 	 */
 	this.contro = {};
-	this._controMock = new $.Contro({ id: 'mock0' });
-	this._controMock.connected = false;
+	$._controMock = new $.Contro('mock0');
 
 	Object.defineProperty($, 'contro', {
 		get() {
@@ -10403,7 +10414,7 @@ main {
 	 * @param {Number} y
 	 */
 	this.renderStats = (x, y) => {
-		console.warn('p5play: renderStats() function is deprecated. Use `p5play.renderStats = true` instead.');
+		console.error('p5play: renderStats() function is deprecated. Use `p5play.renderStats = true` instead.');
 	};
 });
 
