@@ -10246,34 +10246,6 @@ main {
 				});
 			}
 
-			/**
-			 * Runs when a controller is connected. By default
-			 * it always returns true. Can be overwritten by users.
-			 *
-			 * For example, it could be customized to filter
-			 * controllers based on their model info.
-			 *
-			 * Doesn't run if a controller in this controllers array
-			 * is reconnected.
-			 * @type {Function}
-			 * @param {Gamepad} gamepad
-			 * @returns {Boolean} true if the controller should be added to this p5play controllers array
-			 */
-			this.onConnect = () => true;
-
-			/**
-			 * Runs when a controller is disconnected. Always returns
-			 * false by default. Can be overwritten by users.
-			 *
-			 * Removing a controller from this controllers array is
-			 * usually not desirable, because the controller could be
-			 * reconnected later.
-			 * @type {Function}
-			 * @param {Gamepad} gamepad
-			 * @returns {Boolean} true if the controllers should be removed from this p5play controllers array
-			 */
-			this.onDisconnect = () => false;
-
 			// test if the browser supports the HTML5 Gamepad API
 			// all modern browsers do, this is really just to prevent
 			// p5play's Jest tests from failing
@@ -10312,6 +10284,41 @@ main {
 			this[index] = null;
 		}
 
+		/**
+		 * Runs when a controller is connected. By default it
+		 * always returns true. Overwrite this function to customize
+		 * the behavior.
+		 *
+		 * For example, it could be customized to filter
+		 * controllers based on their model info.
+		 *
+		 * Doesn't run if a controller in the `controllers` array
+		 * is reconnected.
+		 * @type {Function}
+		 * @param {Gamepad} gamepad
+		 * @returns {Boolean} true if the controller should be added to this p5play controllers array
+		 */
+		onConnect(gamepad) {
+			return true;
+		}
+
+		/**
+		 * Runs when a controller is disconnected. by default it
+		 * always returns false. Overwrite this function to customize
+		 * the behavior.
+		 *
+		 * Removing a controller from the `controllers` array
+		 * usually is not desirable, because the controller could be
+		 * reconnected later. By default, the controller is kept in
+		 * the array and its state is reset.
+		 * @type {Function}
+		 * @param {Gamepad} gamepad
+		 * @returns {Boolean} true if the controllers should be removed from this p5play controllers array
+		 */
+		onDisconnect(gamepad) {
+			return false;
+		}
+
 		_onConnect(gp) {
 			if (!gp) return;
 			for (let i = 0; i < this.length; i++) {
@@ -10332,8 +10339,12 @@ main {
 						break;
 					}
 				}
-				log('contro[' + index + '] connected: ' + gp.id);
+				log('contros[' + index + '] connected: ' + gp.id);
 				this[index] = c;
+				if (index == 0) {
+					$.contro = c;
+					if ($._isGlobal) window.contro = c;
+				}
 			}
 		}
 
@@ -10342,11 +10353,9 @@ main {
 			for (let i = 0; i < this.length; i++) {
 				if (this[i].gamepad?.index === gp.index) {
 					this[i].connected = false;
-					this[i]._reset();
-					log('contro[' + i + '] disconnected: ' + gp.id);
-					if (this.onDisconnect(gp)) {
-						this.remove(i);
-					}
+					log('contros[' + i + '] disconnected: ' + gp.id);
+					if (this.onDisconnect(gp)) this.remove(i);
+					else this[i]._reset();
 					return;
 				}
 			}
@@ -10378,19 +10387,11 @@ main {
 	/**
 	 * For convenience, `contro` can be used to attempt to check the
 	 * input states of `contro[0]` and won't throw errors if a controller
-	 * isn't connected yet. It will get a mock controller object.
-	 * You can set the properties of the mock controller object to
-	 * test your game's input handling.
+	 * isn't connected yet. By default it is set to a mock controller
+	 * object which you can edit to test your game's input handling.
 	 * @type {Contro}
 	 */
-	this.contro = {};
-	$._controMock = new $.Contro('mock0');
-
-	Object.defineProperty($, 'contro', {
-		get() {
-			return $.contros[0] || this._controMock;
-		}
-	});
+	this.contro = new $.Contro('mock0');
 
 	/**
 	 * FPS, amongst the gaming community, refers to how fast a computer

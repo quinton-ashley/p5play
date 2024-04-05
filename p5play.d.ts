@@ -3122,32 +3122,6 @@ class _Contros extends Array<Contro> {
      */
     constructor();
     /**
-     * Runs when a controller is connected. By default
-     * it always returns true. Can be overwritten by users.
-     *
-     * For example, it could be customized to filter
-     * controllers based on their model info.
-     *
-     * Doesn't run if a controller in this controllers array
-     * is reconnected.
-     * @type {Function}
-     * @param {Gamepad} gamepad
-     * @returns {Boolean} true if the controller should be added to this p5play controllers array
-     */
-    onConnect: Function;
-    /**
-     * Runs when a controller is disconnected. Always returns
-     * false by default. Can be overwritten by users.
-     *
-     * Removing a controller from this controllers array is
-     * usually not desirable, because the controller could be
-     * reconnected later.
-     * @type {Function}
-     * @param {Gamepad} gamepad
-     * @returns {Boolean} true if the controllers should be removed from this p5play controllers array
-     */
-    onDisconnect: Function;
-    /**
      * Swap controller positions in this controllers array.
      * @param {Number} indexA
      * @param {Number} indexB
@@ -3163,6 +3137,35 @@ class _Contros extends Array<Contro> {
      * @param {Number} index
      */
     remove(index: number): void;
+    /**
+     * Runs when a controller is connected. By default it
+     * always returns true. Overwrite this function to customize
+     * the behavior.
+     *
+     * For example, it could be customized to filter
+     * controllers based on their model info.
+     *
+     * Doesn't run if a controller in the `controllers` array
+     * is reconnected.
+     * @type {Function}
+     * @param {Gamepad} gamepad
+     * @returns {Boolean} true if the controller should be added to this p5play controllers array
+     */
+    onConnect(gamepad: Gamepad): boolean;
+    /**
+     * Runs when a controller is disconnected. by default it
+     * always returns false. Overwrite this function to customize
+     * the behavior.
+     *
+     * Removing a controller from the `controllers` array
+     * usually is not desirable, because the controller could be
+     * reconnected later. By default, the controller is kept in
+     * the array and its state is reset.
+     * @type {Function}
+     * @param {Gamepad} gamepad
+     * @returns {Boolean} true if the controllers should be removed from this p5play controllers array
+     */
+    onDisconnect(gamepad: Gamepad): boolean;
 }
 var contros: _Contros;
 var controllers: _Contros;
