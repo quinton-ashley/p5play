@@ -10108,6 +10108,15 @@ main {
 				this.isMock = true;
 			}
 
+			this._axeTriggers = this.gamepad.axes && this.gamepad.axes[this.axeMapping.leftTrigger] !== undefined;
+
+			/**
+			 * True if the controller has analog triggers.
+			 * False if the controller has digital (button) triggers.
+			 * @type {boolean}
+			 */
+			this.hasAnalogTriggers = this._axeTriggers || undefined;
+
 			// corrects button mapping for GuliKit KingKong 2 Pro controllers
 			// which have a Nintendo Switch style button layout
 			// https://www.aliexpress.com/item/1005003624801819.html
@@ -10153,12 +10162,17 @@ main {
 			this.rightStick.y = pad.axes[this.axeMapping.rightStick.y];
 
 			// triggers
-			if (this.hasAnalogTriggers) {
+			if (this._axeTriggers) {
 				this.leftTrigger = pad.axes[this.axeMapping.leftTrigger];
 				this.rightTrigger = pad.axes[this.axeMapping.rightTrigger];
 			} else {
 				this.leftTrigger = pad.buttons[this.buttonMapping.lt].value;
 				this.rightTrigger = pad.buttons[this.buttonMapping.rt].value;
+
+				// only needs to be checked once
+				if (this.hasAnalogTriggers === undefined && (this.leftTrigger || this.rightTrigger)) {
+					this.hasAnalogTriggers = !Number.isInteger(this.leftTrigger) || !Number.isInteger(this.rightTrigger);
+				}
 			}
 			return true; // update completed
 		}
@@ -10173,14 +10187,6 @@ main {
 			this.rightStick.y = 0;
 			this.leftTrigger = 0;
 			this.rightTrigger = 0;
-		}
-		/**
-		 * True if the controller has analog triggers.
-		 * False if the controller has digital (button) triggers.
-		 * @type {boolean}
-		 */
-		get hasAnalogTriggers() {
-			return this.gamepad.axes && this.gamepad.axes[this.axeMapping.leftTrigger] !== undefined;
 		}
 		/**
 		 * Alias for `leftStick`.
@@ -10275,7 +10281,7 @@ main {
 
 		/**
 		 * Removes a controller from this controllers array
-		 * by setting `contro[index] = null`.
+		 * by setting `contros[index] = null`.
 		 *
 		 * Newly connected controllers fill the first empty slot.
 		 * @param {Number} index
@@ -10324,7 +10330,7 @@ main {
 			for (let i = 0; i < this.length; i++) {
 				if (this[i].gamepad?.index === gp.index) {
 					this[i].connected = true;
-					log('contro[' + i + '] reconnected: ' + gp.id);
+					log('contros[' + i + '] reconnected: ' + gp.id);
 					return;
 				}
 			}
@@ -10386,7 +10392,7 @@ main {
 
 	/**
 	 * For convenience, `contro` can be used to attempt to check the
-	 * input states of `contro[0]` and won't throw errors if a controller
+	 * input states of `contros[0]` and won't throw errors if a controller
 	 * isn't connected yet. By default it is set to a mock controller
 	 * object which you can edit to test your game's input handling.
 	 * @type {Contro}

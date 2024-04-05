@@ -3080,7 +3080,7 @@ class Contro extends InputDevice {
      * False if the controller has digital (button) triggers.
      * @type {boolean}
      */
-    get hasAnalogTriggers(): boolean;
+    hasAnalogTriggers: boolean;
     /**
      * Alias for `leftStick`.
      */
@@ -3131,7 +3131,7 @@ class _Contros extends Array<Contro> {
     swap(indexA: number, indexB: number): void;
     /**
      * Removes a controller from this controllers array
-     * by setting `contro[index] = null`.
+     * by setting `contros[index] = null`.
      *
      * Newly connected controllers fill the first empty slot.
      * @param {Number} index
