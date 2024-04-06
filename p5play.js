@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.20
+ * @version 3.21
  * @author quinton-ashley
  * @license AGPL-3.0
  */
@@ -34,7 +34,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_20');
+			gtag('event', 'p5play_v3_21');
 		};
 	}
 
