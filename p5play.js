@@ -569,13 +569,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			x ??= group.x;
 			if (x === undefined) {
-				if ($.canvas.renderer == '2d') x = $.canvas.hw / this.tileSize;
+				if ($.canvas?.renderer == '2d') x = $.canvas.hw / this.tileSize;
 				else x = 0;
 				if (w) this._vertexMode = true;
 			}
 			y ??= group.y;
 			if (y === undefined) {
-				if ($.canvas.renderer == '2d') y = $.canvas.hh / this.tileSize;
+				if ($.canvas?.renderer == '2d') y = $.canvas.hh / this.tileSize;
 				else y = 0;
 			}
 
