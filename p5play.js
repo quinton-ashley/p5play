@@ -2759,6 +2759,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.vel = val;
 		}
 
+		/**
+		 * A ratio that defines how much the sprite is affected by gravity.
+		 * @type {Number}
+		 * @default 1
+		 */
+		get gravityScale() {
+			return this.body?.getGravityScale();
+		}
+		set gravityScale(val) {
+			if (!this.body) return;
+			if (this.watch) this.mod[44] = true;
+			this.body.setGravityScale(val);
+		}
+
 		_update() {
 			if (this._ani?.update) this._ani.update();
 
@@ -4068,7 +4082,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		textSize: 'number', // 40
 		textStroke: 'color', // 41
 		textStrokeWeight: 'number', // 42
-		opacity: 'number' // 43
+		opacity: 'number', // 43,
+		gravityScale: 'number' // 44
 	};
 
 	$.Sprite.props = Object.keys($.Sprite.propTypes);

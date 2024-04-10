@@ -939,6 +939,13 @@ class Sprite {
      * @default {x: 0, y: 0}
      */
     get velocity(): p5.Vector;
+    set gravityScale(val: number);
+    /**
+     * A ratio that defines how much the sprite is affected by gravity.
+     * @type {Number}
+     * @default 1
+     */
+    get gravityScale(): number;
     /**
      * If this function is given a force amount, the force is applied
      * at the angle of the sprite's current bearing. Force can
