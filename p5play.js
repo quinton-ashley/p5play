@@ -1410,6 +1410,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * The collider type can be one of the following strings:
 		 * "dynamic", "static", "kinematic", "none".
 		 *
+		 * The letters "d", "s", "k", "n" can be used as shorthand.
+		 *
+		 * When a sprite with a collider type of "d", "s", or "k" is
+		 * changed to "none", or vice versa, the sprite will
+		 * maintain its current position, velocity, rotation, and
+		 * rotation speed.
+		 *
 		 * Sprites can't have their collider type
 		 * set to "none" if they have a polygon or chain collider,
 		 * multiple colliders, or multiple sensors.
@@ -1458,11 +1465,26 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			if (this.__collider != 3) {
 				if (this.body) this.body.setType(val);
-				if (oldCollider == 3) this.addCollider();
+				if (oldCollider == 3) {
+					this.addCollider();
+					this.x = this._position.x;
+					this.y = this._position.y;
+					this.vel.x = this._velocity.x;
+					this.vel.y = this._velocity.y;
+					this.rotation = this._angle;
+					this.rotationSpeed = this._rotationSpeed;
+				}
 			} else {
 				this.removeColliders();
 				if (this.fixture?.m_isSensor) this.body.m_gravityScale = 0;
 				else {
+					this._position.x = this.x;
+					this._position.y = this.y;
+					this._velocity.x = this.vel.x;
+					this._velocity.y = this.vel.y;
+					this._angle = this.rotation;
+					this._rotationSpeed = this.rotationSpeed;
+
 					$.world.destroyBody(this.body);
 					this.body = null;
 				}
@@ -2717,7 +2739,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default {x: 0, y: 0}
 		 */
 		get vel() {
-			return this._vel;
+			if (this.body) return this._vel;
+			return this._velocity;
 		}
 		set vel(val) {
 			this.vel.x = val.x;
@@ -2729,11 +2752,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @type {p5.Vector}
 		 * @default {x: 0, y: 0}
 		 */
+		get velocity() {
+			return this.vel;
+		}
 		set velocity(val) {
 			this.vel = val;
-		}
-		get velocity() {
-			return this._vel;
 		}
 
 		_update() {

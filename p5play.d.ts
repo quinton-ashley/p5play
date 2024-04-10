@@ -213,6 +213,13 @@ class Sprite {
      * The collider type can be one of the following strings:
      * "dynamic", "static", "kinematic", "none".
      *
+     * The letters "d", "s", "k", "n" can be used as shorthand.
+     *
+     * When a sprite with a collider type of "d", "s", or "k" is
+     * changed to "none", or vice versa, the sprite will
+     * maintain its current position, velocity, rotation, and
+     * rotation speed.
+     *
      * Sprites can't have their collider type
      * set to "none" if they have a polygon or chain collider,
      * multiple colliders, or multiple sensors.
@@ -416,6 +423,13 @@ class Sprite {
      * @default 0.2
      */
     get bounciness(): number;
+    set rotationSpeed(val: number);
+    /**
+     * The speed of the sprite's rotation in angles per frame.
+     * @type {Number}
+     * @default 0
+     */
+    get rotationSpeed(): number;
     set color(val: p5.Color);
     /**
      * The sprite's current color. By default sprites get a random color.
@@ -758,13 +772,6 @@ class Sprite {
      * @default false
      */
     get rotationLock(): boolean;
-    set rotationSpeed(val: number);
-    /**
-     * The speed of the sprite's rotation in angles per frame.
-     * @type {Number}
-     * @default 0
-     */
-    get rotationSpeed(): number;
     set scale(val: any);
     /**
      * Scale of the sprite's physics body. Default is {x: 1, y: 1}
@@ -925,13 +932,13 @@ class Sprite {
      * @type {Function}
      */
     get update(): Function;
+    set velocity(val: p5.Vector);
     /**
      * The sprite's velocity vector {x, y}
      * @type {p5.Vector}
      * @default {x: 0, y: 0}
      */
-    set velocity(val: any);
-    get velocity(): any;
+    get velocity(): p5.Vector;
     /**
      * If this function is given a force amount, the force is applied
      * at the angle of the sprite's current bearing. Force can
