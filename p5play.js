@@ -4248,13 +4248,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (!isNaN(args[1])) num2 = Number(args[1]);
 				else to = args[1];
 
-				// print("sequence mode "+from+" -> "+to);
-
-				// make sure the extensions are fine
-				if (from.slice(-4) != '.png' || (to && to.slice(-4) != '.png')) {
-					throw new FriendlyError('SpriteAnimation', 0, [from]);
-				}
-
 				let digits1 = 0;
 				let digits2 = 0;
 
@@ -9108,7 +9101,6 @@ main {
 		SpriteAnimation: {
 			constructor: {
 				base: "Hey so, I tried to make a new SpriteAnimation but couldn't",
-				0: `I don't know how to display this type of image: "$0". I can only use ".png" image files.`,
 				1: 'The name of the animation must be the first input parameter.'
 			},
 			frame: 'Index $0 out of bounds. That means there is no frame $0 in this animation. It only has $1 frames!'
