@@ -196,6 +196,7 @@ class Sprite {
      * @type {Object}
      */
     mod: any;
+    set tileSize(val: number);
     /**
      * The tile size is used to change the size of one unit of
      * measurement for the sprite.
@@ -205,7 +206,7 @@ class Sprite {
      * @type {Number}
      * @default 1
      */
-    tileSize: number;
+    get tileSize(): number;
     set collider(val: string);
     /**
      * The sprite's collider type. Default is "dynamic".
@@ -519,6 +520,12 @@ class Sprite {
      * @default undefined
      */
     get textStrokeWeight(): number;
+    set tile(val: string);
+    /**
+     * The tile string represents the sprite in a tile map.
+     * @type {String}
+     */
+    get tile(): string;
     set bearing(val: number);
     /**
      * A bearing indicates the direction that needs to be followed to

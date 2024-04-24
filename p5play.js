@@ -146,21 +146,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			else this.hasMouse = true;
 			this.standardizeKeyboard = false;
 
-			let idx = navigator.userAgent.indexOf('iPhone OS');
-			if (idx > -1) {
-				let version = navigator.userAgent.substring(idx + 10, idx + 12);
+			if (typeof navigator == 'object') {
+				let idx = navigator.userAgent.indexOf('iPhone OS');
+				if (idx > -1) {
+					let version = navigator.userAgent.substring(idx + 10, idx + 12);
 
-				this.os.platform = 'iOS';
-				this.os.version = version;
-			} else {
-				let pl = navigator.userAgentData?.platform;
-				if (!pl && navigator.platform) {
-					pl = navigator.platform.slice(3);
-					if (pl == 'Mac') pl = 'macOS';
-					else if (pl == 'Win') pl = 'Windows';
-					else if (pl == 'Lin') pl = 'Linux';
+					this.os.platform = 'iOS';
+					this.os.version = version;
+				} else {
+					let pl = navigator.userAgentData?.platform;
+					if (!pl && navigator.platform) {
+						pl = navigator.platform.slice(3);
+						if (pl == 'Mac') pl = 'macOS';
+						else if (pl == 'Win') pl = 'Windows';
+						else if (pl == 'Lin') pl = 'Linux';
+					}
+					this.os.platform = pl;
 				}
-				this.os.platform = pl;
 			}
 
 			/**
@@ -435,15 +437,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			group ??= $.allSprites;
 
-			/**
-			 * The tile size is used to change the size of one unit of
-			 * measurement for the sprite.
-			 *
-			 * For example, if the tile size is 16, then a sprite with
-			 * x=1 and y=1 will be drawn at position (16, 16) on the canvas.
-			 * @type {Number}
-			 * @default 1
-			 */
+			this._tile = '';
 			this.tileSize = group.tileSize || 1;
 
 			let _this = this;
@@ -512,6 +506,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						} else {
 							_this._velocity.x = val;
 						}
+						if (val || this.y) _this._direction = this.heading();
 					}
 				},
 				y: {
@@ -529,6 +524,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						} else {
 							_this._velocity.y = val;
 						}
+						if (val || this.x) _this._direction = this.heading();
 					}
 				}
 			});
@@ -540,14 +536,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					return this._x < 0;
 				},
 				set x(val) {
-					if (_this.watch) _this.mod[22] = true;
+					if (_this.watch) _this.mod[20] = true;
 					this._x = val ? -1 : 1;
 				},
 				get y() {
 					return this._y < 0;
 				},
 				set y(val) {
-					if (_this.watch) _this.mod[22] = true;
+					if (_this.watch) _this.mod[20] = true;
 					this._y = val ? -1 : 1;
 				}
 			};
@@ -649,7 +645,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				},
 				set(val) {
 					if (val == this._x) return;
-					if (_this.watch) _this.mod[28] = true;
+					if (_this.watch) _this.mod[26] = true;
 					let scalarX = Math.abs(val / this._x);
 					_this._w *= scalarX;
 					_this._hw *= scalarX;
@@ -665,7 +661,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				},
 				set(val) {
 					if (val == this._y) return;
-					if (_this.watch) _this.mod[28] = true;
+					if (_this.watch) _this.mod[26] = true;
 					let scalarY = Math.abs(val / this._y);
 					if (_this._h) {
 						this._h *= scalarY;
@@ -685,7 +681,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				},
 				set x(val) {
 					if (val == this._x) return;
-					if (_this.watch) _this.mod[23] = true;
+					if (_this.watch) _this.mod[21] = true;
 					_this._offsetCenterBy(val - this._x, 0);
 				},
 				get y() {
@@ -693,7 +689,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				},
 				set y(val) {
 					if (val == this._y) return;
-					if (_this.watch) _this.mod[23] = true;
+					if (_this.watch) _this.mod[21] = true;
 					_this._offsetCenterBy(0, val - this._y);
 				}
 			};
@@ -900,7 +896,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			// mass is recalculated in createFixture
 			this.body.createFixture(props);
-			if (this.watch) this.mod[21] = true;
+			if (this.watch) this.mod[19] = true;
 
 			// reset the center of mass to the sprite's center
 			this.body.setMassData({
@@ -1348,7 +1344,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._autoDraw;
 		}
 		set autoDraw(val) {
-			if (this.watch) this.mod[6] = true;
 			this._autoDraw = val;
 		}
 
@@ -1366,7 +1361,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		set allowSleeping(val) {
-			if (this.watch) this.mod[7] = true;
+			if (this.watch) this.mod[5] = true;
 			if (this.body) this.body.setSleepingAllowed(val);
 		}
 
@@ -1384,7 +1379,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._autoUpdate;
 		}
 		set autoUpdate(val) {
-			if (this.watch) this.mod[8] = true;
 			this._autoUpdate = val;
 		}
 
@@ -1398,7 +1392,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this.fixture.getRestitution();
 		}
 		set bounciness(val) {
-			if (this.watch) this.mod[9] = true;
+			if (this.watch) this.mod[7] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setRestitution(val);
 			}
@@ -1459,7 +1453,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._collider = val;
 			this.__collider = ['d', 's', 'k', 'n'].indexOf(c);
 
-			if (this.watch) this.mod[10] = true;
+			if (this.watch) this.mod[8] = true;
 
 			if (oldCollider === undefined) return;
 
@@ -1512,7 +1506,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set color(val) {
 			// TODO: check if the color is the same as the current color
-			if (this.watch) this.mod[11] = true;
+			if (this.watch) this.mod[9] = true;
 			this._color = this._parseColor(val);
 		}
 		/**
@@ -1562,7 +1556,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._stroke;
 		}
 		set stroke(val) {
-			if (this.watch) this.mod[31] = true;
+			if (this.watch) this.mod[29] = true;
 			this._stroke = this._parseColor(val);
 		}
 		/**
@@ -1586,7 +1580,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._strokeWeight;
 		}
 		set strokeWeight(val) {
-			if (this.watch) this.mod[32] = true;
+			if (this.watch) this.mod[30] = true;
 			this._strokeWeight = val;
 		}
 
@@ -1599,7 +1593,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._textFill;
 		}
 		set textColor(val) {
-			if (this.watch) this.mod[34] = true;
+			if (this.watch) this.mod[32] = true;
 			this._textFill = this._parseColor(val);
 		}
 		get textColour() {
@@ -1628,7 +1622,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._textSize;
 		}
 		set textSize(val) {
-			if (this.watch) this.mod[40] = true;
+			if (this.watch) this.mod[33] = true;
 			this._textSize = val;
 		}
 
@@ -1642,7 +1636,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._textStroke;
 		}
 		set textStroke(val) {
-			if (this.watch) this.mod[41] = true;
+			if (this.watch) this.mod[34] = true;
 			this._textStroke = this._parseColor(val);
 		}
 
@@ -1656,8 +1650,37 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._textStrokeWeight;
 		}
 		set textStrokeWeight(val) {
-			if (this.watch) this.mod[42] = true;
+			if (this.watch) this.mod[35] = true;
 			this._textStrokeWeight = val;
+		}
+
+		/**
+		 * The tile string represents the sprite in a tile map.
+		 * @type {String}
+		 */
+		get tile() {
+			return this._tile;
+		}
+		set tile(val) {
+			if (this.watch) this.mod[36] = true;
+			this._tile = val;
+		}
+
+		/**
+		 * The tile size is used to change the size of one unit of
+		 * measurement for the sprite.
+		 *
+		 * For example, if the tile size is 16, then a sprite with
+		 * x=1 and y=1 will be drawn at position (16, 16) on the canvas.
+		 * @type {Number}
+		 * @default 1
+		 */
+		get tileSize() {
+			return this._tileSize;
+		}
+		set tileSize(val) {
+			if (this.watch) this.mod[37] = true;
+			this._tileSize = val;
 		}
 
 		/**
@@ -1674,7 +1697,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._bearing;
 		}
 		set bearing(val) {
-			if (this.watch) this.mod[39] = true;
+			if (this.watch) this.mod[6] = true;
 			this._bearing = val;
 		}
 
@@ -1687,7 +1710,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._debug;
 		}
 		set debug(val) {
-			if (this.watch) this.mod[12] = true;
+			if (this.watch) this.mod[10] = true;
 			this._debug = val;
 		}
 
@@ -1701,7 +1724,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this.fixture.getDensity();
 		}
 		set density(val) {
-			if (this.watch) this.mod[13] = true;
+			if (this.watch) this.mod[11] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setDensity(val);
 			}
@@ -1741,11 +1764,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.vel.x !== 0 || this.vel.y !== 0) {
 				return $.atan2(this.vel.y, this.vel.x);
 			}
-			if (this._direction === undefined) return this.rotation;
-			return this._direction;
+			return this._direction ?? this.rotation;
 		}
 		set direction(val) {
-			if (this.watch) this.mod[14] = true;
+			if (this.watch) this.mod[12] = true;
 			if (typeof val == 'string') {
 				this._heading = val;
 				val = this._getDirectionAngle(val);
@@ -1765,7 +1787,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this.body?.getLinearDamping();
 		}
 		set drag(val) {
-			if (this.watch) this.mod[15] = true;
+			if (this.watch) this.mod[13] = true;
 			if (this.body) this.body.setLinearDamping(val);
 		}
 
@@ -1844,7 +1866,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this.fixture.getFriction();
 		}
 		set friction(val) {
-			if (this.watch) this.mod[16] = true;
+			if (this.watch) this.mod[14] = true;
 			for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 				fxt.setFriction(val);
 			}
@@ -1906,7 +1928,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this.body?.isBullet();
 		}
 		set isSuperFast(val) {
-			if (this.watch) this.mod[18] = true;
+			if (this.watch) this.mod[16] = true;
 			if (this.body) this.body.setBullet(val);
 		}
 
@@ -1932,7 +1954,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._layer;
 		}
 		set layer(val) {
-			if (this.watch) this.mod[19] = true;
+			if (this.watch) this.mod[17] = true;
 			this._layer = val;
 		}
 		/**
@@ -1954,7 +1976,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._life;
 		}
 		set life(val) {
-			if (this.watch) this.mod[20] = true;
+			if (this.watch) this.mod[18] = true;
 			this._life = val;
 		}
 
@@ -1967,7 +1989,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set mass(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[21] = true;
+			if (this.watch) this.mod[19] = true;
 			const com = new pl.Vec2(this.body.getLocalCenter());
 			const t = { I: 0, center: com, mass: 0 };
 			this.body.getMassData(t);
@@ -1987,7 +2009,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.body) return;
 			let com = new pl.Vec2(this.body.getLocalCenter());
 
-			if (this.watch) this.mod[21] = true;
+			if (this.watch) this.mod[19] = true;
 			this.body.resetMassData();
 
 			// reset the center of mass to the sprite's center
@@ -2008,7 +2030,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * center of mass and center of rotation.
 		 */
 		resetCenterOfMass() {
-			if (this.watch) this.mod[21] = true;
+			if (this.watch) this.mod[19] = true;
 			this.body.resetMassData();
 
 			let { x, y } = this.body.getLocalCenter();
@@ -2033,7 +2055,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._mirror;
 		}
 		set mirror(val) {
-			if (this.watch) this.mod[22] = true;
+			if (this.watch) this.mod[20] = true;
 			if (val.x !== undefined) this._mirror.x = val.x;
 			if (val.y !== undefined) this._mirror.y = val.y;
 		}
@@ -2056,7 +2078,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			val.x ??= this._offset._x;
 			val.y ??= this._offset._y;
 			if (val.x == this._offset._x && val.y == this._offset._y) return;
-			if (this.watch) this.mod[23] = true;
+			if (this.watch) this.mod[21] = true;
 			this._offsetCenterBy(val.x - this._offset._x, val.y - this._offset._y);
 		}
 
@@ -2069,7 +2091,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._opacity ?? 1;
 		}
 		set opacity(val) {
-			if (this.watch) this.mod[43] = true;
+			if (this.watch) this.mod[41] = true;
 			this._opacity = val;
 		}
 
@@ -2107,7 +2129,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._pixelPerfect;
 		}
 		set pixelPerfect(val) {
-			if (this.watch) this.mod[24] = true;
+			if (this.watch) this.mod[22] = true;
 			this._pixelPerfect = val;
 		}
 
@@ -2121,7 +2143,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set removed(val) {
 			if (!val || this._removed) return;
-			if (this.watch) this.mod[25] = true;
+			if (this.watch) this.mod[23] = true;
 			this._removed = true;
 			this._remove();
 		}
@@ -2161,7 +2183,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set rotationDrag(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[26] = true;
+			if (this.watch) this.mod[24] = true;
 			this.body.setAngularDamping(val);
 		}
 		/**
@@ -2174,7 +2196,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set rotationLock(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[27] = true;
+			if (this.watch) this.mod[25] = true;
 			let mass = this.mass;
 			this.body.setFixedRotation(val);
 			this.mass = mass;
@@ -2225,7 +2247,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (val.x == this._scale._x && val.y == this._scale._y) return;
 
-			if (this.watch) this.mod[28] = true;
+			if (this.watch) this.mod[26] = true;
 
 			let scalars = {
 				x: Math.abs(val.x / this._scale._x),
@@ -2260,7 +2282,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set sleeping(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[30] = true;
+			if (this.watch) this.mod[28] = true;
 			this.body.setAwake(!val);
 		}
 
@@ -2306,7 +2328,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._tint;
 		}
 		set tint(val) {
-			if (this.watch) this.mod[44] = true;
+			if (this.watch) this.mod[42] = true;
 			this._tint = this._parseColor(val);
 		}
 
@@ -2330,7 +2352,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.__collider == 3) {
 				throw new Error('Cannot set vertices of a sprite with collider type of "none".');
 			}
-			if (this.watch) this.mod[29] = true;
+			if (this.watch) this.mod[27] = true;
 
 			this._removeFixtures();
 
@@ -2375,7 +2397,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._visible;
 		}
 		set visible(val) {
-			if (this.watch) this.mod[37] = true;
+			if (this.watch) this.mod[39] = true;
 			this._visible = val;
 		}
 
@@ -2434,7 +2456,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set w(val) {
 			if (val < 0) val = 0.01;
 			if (val == this._w) return;
-			if (this.watch) this.mod[38] = true;
+			if (this.watch) this.mod[40] = true;
 
 			let scalarX = val / this._w;
 			this._w = val;
@@ -2487,7 +2509,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				return;
 			}
 			if (val == this._h) return;
-			if (this.watch) this.mod[17] = true;
+			if (this.watch) this.mod[15] = true;
 			let scalarY = val / this._h;
 			this._h = val;
 			this._hh = val * 0.5;
@@ -2537,7 +2559,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let shapeChange = this.__shape != 1;
 			if (!shapeChange && this._w == val) return;
 
-			if (this.watch) this.mod[38] = true;
+			if (this.watch) this.mod[40] = true;
 
 			if (!shapeChange) {
 				let scalar = val / this._w;
@@ -2667,7 +2689,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.__shape = __shape;
 			this._shape = val;
 
-			if (this.watch) this.mod[29] = true;
+			if (this.watch) this.mod[27] = true;
 			if (prevShape === undefined) return;
 
 			if (this.__shape == 0) {
@@ -2739,8 +2761,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default {x: 0, y: 0}
 		 */
 		get vel() {
-			if (this.body) return this._vel;
-			return this._velocity;
+			return this._vel;
 		}
 		set vel(val) {
 			this.vel.x = val.x;
@@ -2753,7 +2774,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default {x: 0, y: 0}
 		 */
 		get velocity() {
-			return this.vel;
+			return this._vel;
 		}
 		set velocity(val) {
 			this.vel = val;
@@ -2769,7 +2790,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set gravityScale(val) {
 			if (!this.body) return;
-			if (this.watch) this.mod[44] = true;
+			if (this.watch) this.mod[42] = true;
 			this.body.setGravityScale(val);
 		}
 
@@ -4044,52 +4065,52 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		vel: 'Vec2', // 2
 		rotation: 'number', // 3
 		rotationSpeed: 'number', // 4
-		ani: 'string', // 5
-		autoDraw: 'boolean', // 6
-		allowSleeping: 'boolean', // 7
-		autoUpdate: 'boolean', // 8
-		bounciness: 'number', // 9
-		collider: 'Uint8', // 10
-		color: 'color', // 11
-		debug: 'boolean', // 12
-		density: 'number', // 13
-		direction: 'number', // 14
-		drag: 'number', // 15
-		friction: 'number', // 16
-		h: 'number', // 17 (height)
-		isSuperFast: 'boolean', // 18
-		layer: 'number', // 19
-		life: 'Int32', // 20
-		mass: 'number', // 21
-		mirror: 'Vec2_boolean', // 22
-		offset: 'Vec2', // 23
-		pixelPerfect: 'boolean', // 24
-		removed: 'boolean', // 25
-		rotationDrag: 'number', // 26
-		rotationLock: 'boolean', // 27
-		scale: 'Vec2', // 28
-		shape: 'Uint8', // 29
-		sleeping: 'boolean', // 30
-		stroke: 'color', // 31
-		strokeWeight: 'number', // 32
-		text: 'string', // 33
-		textColor: 'color', // 34
-		tile: 'string', // 35
-		tileSize: 'number', // 36
-		visible: 'boolean', // 37
-		w: 'number', // 38 (width)
-		bearing: 'number', // 39
-		textSize: 'number', // 40
-		textStroke: 'color', // 41
-		textStrokeWeight: 'number', // 42
-		opacity: 'number', // 43,
-		gravityScale: 'number' // 44
+		allowSleeping: 'boolean', // 5
+		bearing: 'number', // 6
+		bounciness: 'number', // 7
+		collider: 'Uint8', // 8
+		color: 'color', // 9
+		debug: 'boolean', // 10
+		density: 'number', // 11
+		direction: 'number', // 12
+		drag: 'number', // 13
+		friction: 'number', // 14
+		h: 'number', // 15 (height)
+		isSuperFast: 'boolean', // 16
+		layer: 'number', // 17
+		life: 'Int32', // 18
+		mass: 'number', // 19
+		mirror: 'Vec2_boolean', // 20
+		offset: 'Vec2', // 21
+		pixelPerfect: 'boolean', // 22
+		removed: 'boolean', // 23
+		rotationDrag: 'number', // 24
+		rotationLock: 'boolean', // 25
+		scale: 'Vec2', // 26
+		shape: 'Uint8', // 27
+		sleeping: 'boolean', // 28
+		stroke: 'color', // 29
+		strokeWeight: 'number', // 30
+		text: 'string', // 31
+		textColor: 'color', // 32
+		textSize: 'number', // 33
+		textStroke: 'color', // 34
+		textStrokeWeight: 'number', // 35
+		tile: 'string', // 36
+		tileSize: 'number', // 37
+		tint: 'color', // 38
+		visible: 'boolean', // 39
+		w: 'number', // 40 (width)
+		opacity: 'number', // 41
+		gravityScale: 'number' // 42
 	};
 
 	$.Sprite.props = Object.keys($.Sprite.propTypes);
 
 	// includes duplicates of some properties
 	$.Sprite.propsAll = $.Sprite.props.concat([
+		'autoDraw',
+		'autoUpdate',
 		'd',
 		'diameter',
 		'dynamic',
@@ -9928,7 +9949,7 @@ main {
 	 */
 	this.keyboard = $.kb;
 
-	if (navigator.keyboard) {
+	if (typeof navigator == 'object' && navigator.keyboard) {
 		const keyboard = navigator.keyboard;
 		if (window == window.top) {
 			keyboard.getLayoutMap().then((keyboardLayoutMap) => {
@@ -10285,7 +10306,7 @@ main {
 			// test if the browser supports the HTML5 Gamepad API
 			// all modern browsers do, this is really just to prevent
 			// p5play's Jest tests from failing
-			if (!navigator?.getGamepads) return;
+			if (typeof navigator != 'object' || !navigator.getGamepads) return;
 
 			// if the page was not reloaded, but p5play sketch was,
 			// then gamepads could be already connected
