@@ -9763,6 +9763,9 @@ main {
 			}
 		}
 		if ($.touchStarted && !$.touchStarted(e)) e.preventDefault();
+
+		let ac = $.getAudioContext();
+		if (ac && ac.state != 'running') $.userStartAudio();
 	};
 
 	$._ontouchmove = function (e) {
