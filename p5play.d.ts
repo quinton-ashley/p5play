@@ -554,8 +554,7 @@ class Sprite {
     get density(): number;
     set direction(val: number);
     /**
-     * The angle of the sprite's movement or it's rotation angle if the
-     * sprite is not moving.
+     * The angle of the sprite's movement.
      * @type {Number}
      * @default 0 ("right")
      */
@@ -2098,6 +2097,7 @@ class World {
      * @default true
      */
     autoStep: boolean;
+    steppedEvent: Event;
     set gravity(val: any);
     /**
      * Gravity force vector that affects all dynamic physics colliders.

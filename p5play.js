@@ -486,6 +486,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				x: 0,
 				y: 0
 			};
+			this._direction = 0;
 
 			// this._vel extends p5.Vector
 			this._vel = $.createVector.call($);
@@ -633,7 +634,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.mouse = new $._SpriteMouse();
 
-			this._angle = 0;
+			this._rotation = 0;
 			this._rotationSpeed = 0;
 			this._bearing = 0;
 
@@ -942,7 +943,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this.body.sprite = this;
 				this.mass = 0;
 				this._massUndef = true;
-				this.rotation = this._angle;
+				this.rotation = this._rotation;
 				this.vel = this._velocity;
 			}
 			this.body.createFixture({
@@ -1465,7 +1466,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					this.y = this._position.y;
 					this.vel.x = this._velocity.x;
 					this.vel.y = this._velocity.y;
-					this.rotation = this._angle;
+					this.rotation = this._rotation;
 					this.rotationSpeed = this._rotationSpeed;
 				}
 			} else {
@@ -1476,7 +1477,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					this._position.y = this.y;
 					this._velocity.x = this.vel.x;
 					this._velocity.y = this.vel.y;
-					this._angle = this.rotation;
+					this._rotation = this.rotation;
 					this._rotationSpeed = this.rotationSpeed;
 
 					$.world.destroyBody(this.body);
@@ -1755,8 +1756,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return val;
 		}
 		/**
-		 * The angle of the sprite's movement or it's rotation angle if the
-		 * sprite is not moving.
+		 * The angle of the sprite's movement.
 		 * @type {Number}
 		 * @default 0 ("right")
 		 */
@@ -1764,7 +1764,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.vel.x !== 0 || this.vel.y !== 0) {
 				return $.atan2(this.vel.y, this.vel.x);
 			}
-			return this._direction ?? this.rotation;
+			if (this._isTurtleSprite) return this.rotation;
+			return this._direction;
 		}
 		set direction(val) {
 			if (this.watch) this.mod[12] = true;
@@ -1773,6 +1774,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				val = this._getDirectionAngle(val);
 			}
 			this._direction = val;
+			if (this._isTurtleSprite) this.rotation = val;
 			let speed = this.speed;
 			this.vel.x = $.cos(val) * speed;
 			this.vel.y = $.sin(val) * speed;
@@ -2157,7 +2159,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default 0
 		 */
 		get rotation() {
-			if (!this.body) return this._angle || 0;
+			if (!this.body) return this._rotation || 0;
 			let val = this.body.getAngle();
 			if ($._angleMode == 'degrees') val = $.degrees(val);
 			return $.p5play.friendlyRounding ? fixRound(val, pl.Settings.angularSlop) : val;
@@ -2170,7 +2172,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this.body.setAngle(val);
 				this.body.synchronizeTransform();
 			} else {
-				this._angle = val;
+				this._rotation = val;
 			}
 		}
 		/**
@@ -6541,6 +6543,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @default true
 			 */
 			this.autoStep = true;
+
+			if (window.Event) {
+				this.steppedEvent = new window.Event('p5play_worldStepped');
+			}
 		}
 
 		/**
@@ -6635,7 +6641,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let g of groups) g.___step();
 
 			if ($.canvas.dispatchEvent) {
-				$.canvas.dispatchEvent(new window.Event('p5play_world_step'));
+				$.canvas.dispatchEvent(this.steppedEvent);
 			}
 			if (this.autoStep) this.autoStep = null;
 		}
@@ -8371,7 +8377,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.sleep = (milliseconds) => {
 		if (!milliseconds) {
 			return new Promise((resolve) => {
-				$.canvas.addEventListener('p5play_world_step', resolve);
+				if ($.canvas.dispatchEvent) {
+					function handler() {
+						$.canvas.removeEventListener('p5play_worldStepped', handler);
+						resolve();
+					}
+					$.canvas.addEventListener('p5play_worldStepped', handler);
+				} else {
+					setTimeout(resolve, $.world._timeStep * 1000);
+				}
 			});
 		}
 		return $.delay(milliseconds);
@@ -9663,8 +9677,6 @@ main {
 		_onmouseup.call($, e);
 	};
 
-	delete $._Mouse;
-
 	/**
 	 * @class
 	 * @extends InputDevice
@@ -9944,7 +9956,6 @@ main {
 	 * @type {_Keyboard}
 	 */
 	this.kb = new $._Keyboard();
-	delete $._Keyboard;
 
 	/**
 	 * Alias for kb.
@@ -10442,7 +10453,6 @@ main {
 	 * @type {_Contros}
 	 */
 	this.contros = new $._Contros();
-	delete $._Contros;
 
 	/**
 	 * Alias for contros
