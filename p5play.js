@@ -1940,11 +1940,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get image() {
 			return this._img || this._ani?.frameImage;
 		}
-		set image(val) {
-			let img;
-			if (val.length <= 4) img = new $.EmojiImage(val, this.w);
-			else img = typeof val == 'string' ? $.loadImage(val) : val;
-
+		set image(img) {
+			if (typeof img == 'string') {
+				if (!img.includes('.')) {
+					img = new $.EmojiImage(img, this.w);
+				} else img = $.loadImage(img);
+			}
 			this._img = this._extendImage(img);
 		}
 
@@ -5751,11 +5752,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get image() {
 			return this._img;
 		}
-		set image(val) {
-			let img;
-			if (val.length <= 4) img = new $.EmojiImage(val, this.w || this.width || this.d || this.diameter);
-			else img = typeof val == 'string' ? $.loadImage(val) : val;
-
+		set image(img) {
+			if (typeof img == 'string') {
+				if (!img.includes('.')) {
+					img = new $.EmojiImage(img, this.w || this.width || this.d || this.diameter);
+				} else img = $.loadImage(img);
+			}
 			this._img = $.Sprite.prototype._extendImage(img);
 		}
 

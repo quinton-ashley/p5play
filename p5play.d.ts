@@ -245,7 +245,7 @@ class Sprite {
      * @type {Number}
      */
     get y(): number;
-    set image(val: p5.Image);
+    set image(img: p5.Image);
     /**
      * The sprite's image or current frame of animation.
      *
@@ -1870,7 +1870,7 @@ class Group extends Array<Sprite> {
      * @type {p5.Image}
      */
     get img(): p5.Image;
-    set image(val: p5.Image);
+    set image(img: p5.Image);
     /**
      * The group's image.
      * @type {p5.Image}
