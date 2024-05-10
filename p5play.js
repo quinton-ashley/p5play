@@ -616,7 +616,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						ani = _ani;
 						break;
 					}
-					if (!ani) ani = group._img;
+					if (!ani) {
+						ani = group._img;
+						if (typeof ani == 'function') {
+							ani = ani(group.length);
+						}
+						if (ani) this._img = true;
+					}
 				}
 			}
 
@@ -631,8 +637,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (ani) {
 				let ts = this.tileSize;
 
-				if (ani instanceof p5.Image) {
-					this.image = ani;
+				if (this._img || ani instanceof p5.Image) {
+					this.image = new $.EmojiImage(ani, w);
 
 					if (!w && (this._img.w != 1 || this._img.h != 1)) {
 						w = this._img.w / ts;
@@ -5753,6 +5759,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._img;
 		}
 		set image(img) {
+			if (typeof img == 'function') {
+				this._img = img;
+				return;
+			}
 			if (typeof img == 'string') {
 				if (!img.includes('.')) {
 					img = new $.EmojiImage(img, this.w || this.width || this.d || this.diameter);
@@ -8357,6 +8367,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			img = img.get(left, top, right - left + 1, bottom - top + 1);
 		}
 		$.pop();
+		img.url = emoji;
 		return img;
 	};
 
