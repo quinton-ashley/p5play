@@ -616,6 +616,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						ani = _ani;
 						break;
 					}
+					if (!ani) ani = group._img;
 				}
 			}
 
@@ -628,16 +629,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.groups.reverse();
 
 			if (ani) {
+				let ts = this.tileSize;
+
 				if (ani instanceof p5.Image) {
 					this.image = ani;
+
+					if (!w && (this._img.w != 1 || this._img.h != 1)) {
+						w = this._img.w / ts;
+						h ??= this._img.h / ts;
+					}
 				} else {
 					if (typeof ani == 'string') this._changeAni(ani);
 					else this._ani = ani.clone();
-				}
-				let ts = this.tileSize;
-				if (!w && (this._ani.w != 1 || this._ani.h != 1)) {
-					w = this._ani.w / ts;
-					h ??= this._ani.h / ts;
+
+					if (!w && (this._ani.w != 1 || this._ani.h != 1)) {
+						w = this._ani.w / ts;
+						h ??= this._ani.h / ts;
+					}
 				}
 			}
 
@@ -1908,7 +1916,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Alias for sprite.image
+		 * Alias for `sprite.image`.
 		 * @type {p5.Image}
 		 */
 		get img() {
@@ -1937,6 +1945,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val.length <= 4) img = new $.EmojiImage(val, this.w);
 			else img = typeof val == 'string' ? $.loadImage(val) : val;
 
+			this._img = this._extendImage(img);
+		}
+
+		_extendImage(img) {
 			img.offset ??= { x: 0, y: 0 };
 			img._scale ??= { x: 1, y: 1 };
 			if (!img.scale) {
@@ -1948,7 +1960,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 				});
 			}
-			this._img = img;
+			return img;
 		}
 
 		/**
@@ -5723,24 +5735,28 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this.animations;
 		}
 		/**
-		 * Reference to the group's current image.
+		 * Alias for `group.image`.
 		 * @type {p5.Image}
 		 */
 		get img() {
-			return this._ani.frameImage;
+			return this._img;
 		}
 		set img(val) {
-			this.ani = val;
+			this.image = val;
 		}
 		/**
-		 * Reference to the group's current image.
+		 * The group's image.
 		 * @type {p5.Image}
 		 */
 		get image() {
-			return this._ani.frameImage;
+			return this._img;
 		}
 		set image(val) {
-			this.ani = val;
+			let img;
+			if (val.length <= 4) img = new $.EmojiImage(val, this.w || this.width || this.d || this.diameter);
+			else img = typeof val == 'string' ? $.loadImage(val) : val;
+
+			this._img = $.Sprite.prototype._extendImage(img);
 		}
 
 		/**

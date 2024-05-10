@@ -646,7 +646,7 @@ class Sprite {
     get heading(): string;
     set img(val: p5.Image);
     /**
-     * Alias for sprite.image
+     * Alias for `sprite.image`.
      * @type {p5.Image}
      */
     get img(): p5.Image;
@@ -1866,13 +1866,13 @@ class Group extends Array<Sprite> {
     get anis(): SpriteAnimations;
     set img(val: p5.Image);
     /**
-     * Reference to the group's current image.
+     * Alias for `group.image`.
      * @type {p5.Image}
      */
     get img(): p5.Image;
     set image(val: p5.Image);
     /**
-     * Reference to the group's current image.
+     * The group's image.
      * @type {p5.Image}
      */
     get image(): p5.Image;
