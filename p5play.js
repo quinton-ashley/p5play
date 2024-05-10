@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.21
+ * @version 3.22
  * @author quinton-ashley
  * @license AGPL-3.0
  */
@@ -34,7 +34,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_21');
+			gtag('event', 'p5play_v3_22');
 		};
 	}
 
@@ -481,6 +481,24 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			});
 
+			this._canvasPos = $.createVector.call($);
+
+			Object.defineProperty(this._canvasPos, 'x', {
+				get() {
+					let x = _this._pos.x - $.camera.x;
+					if ($.canvas.renderer == '2d') x += $.canvas.hw / $.camera._zoom;
+					return x;
+				}
+			});
+
+			Object.defineProperty(this._canvasPos, 'y', {
+				get() {
+					let y = _this._pos.y - $.camera.y;
+					if ($.canvas.renderer == '2d') y += $.canvas.hh / $.camera._zoom;
+					return y;
+				}
+			});
+
 			// used by this._vel if the Sprite has no physics body
 			this._velocity = {
 				x: 0,
@@ -488,7 +506,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			this._direction = 0;
 
-			// this._vel extends p5.Vector
 			this._vel = $.createVector.call($);
 
 			Object.defineProperties(this._vel, {
@@ -612,7 +629,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			if (ani) {
 				if (ani instanceof p5.Image) {
-					this.addAni(ani);
+					this.image = ani;
 				} else {
 					if (typeof ani == 'string') this._changeAni(ani);
 					else this._ani = ani.clone();
@@ -1891,25 +1908,47 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * A reference to the sprite's current image.
+		 * Alias for sprite.image
 		 * @type {p5.Image}
 		 */
 		get img() {
-			return this._ani?.frameImage;
+			return this._img || this._ani?.frameImage;
 		}
 		set img(val) {
-			this.changeAni(val);
+			this.image = val;
 		}
 
 		/**
-		 * A reference to the sprite's current image.
+		 * The sprite's image or current frame of animation.
+		 *
+		 * When `sprite.image` is set, two properties are added:
+		 *
+		 * `sprite.image.offset` determines the x and y position the image
+		 * should be drawn at relative to the sprite's center.
+		 *
+		 * `sprite.image.scale` determines the x and y scale of the image.
 		 * @type {p5.Image}
 		 */
 		get image() {
-			return this._ani?.frameImage;
+			return this._img || this._ani?.frameImage;
 		}
 		set image(val) {
-			this.changeAni(val);
+			let img;
+			if (val.length <= 4) img = new $.EmojiImage(val, this.w);
+			else img = typeof val == 'string' ? $.loadImage(val) : val;
+
+			img.offset ??= { x: 0, y: 0 };
+			img._scale ??= { x: 1, y: 1 };
+			if (!img.scale) {
+				Object.defineProperty(img, 'scale', {
+					get: () => img._scale,
+					set: (val) => {
+						if (typeof val == 'number') val = { x: val, y: val };
+						img._scale = val;
+					}
+				});
+			}
+			this._img = img;
 		}
 
 		/**
@@ -2098,7 +2137,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Verbose alias for sprite.prevPos
+		 * Alias for sprite.prevPos
 		 * @type {Object}
 		 */
 		get previousPosition() {
@@ -2109,7 +2148,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Verbose alias for sprite.prevRotation
+		 * Alias for sprite.prevRotation
 		 * @type {Number}
 		 */
 		get previousRotation() {
@@ -2447,6 +2486,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set position(val) {
 			this.pos = val;
+		}
+		/**
+		 * The sprite's absolute position on the canvas.
+		 * @readonly
+		 */
+		get canvasPos() {
+			return this._canvasPos;
 		}
 		/**
 		 * The width of the sprite.
@@ -2833,12 +2879,129 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.__step();
 		}
 
+		//      a -> b
+		// sprite -> sprite
+		// sprite -> group
+		//  group -> group
+		__step() {
+			// for each type of collision and overlap event
+			let a = this;
+			let b;
+			for (let event in eventTypes) {
+				for (let k in this[event]) {
+					if (k >= 1000) {
+						// if a is group or a is sprite and a._uid >= k
+						if (a._isGroup || a._uid >= k) continue;
+						b = $.p5play.sprites[k];
+					} else {
+						// if a is group and a._uid >= k
+						if (a._isGroup && a._uid >= k) continue;
+						b = $.p5play.groups[k];
+					}
+
+					let v = a[event][k] + 1;
+					if (!b || v == 0 || v == -2) {
+						delete a[event][k];
+						if (b) delete b[event][a._uid];
+						continue;
+					}
+					this[event][k] = v;
+					b[event][a._uid] = v;
+				}
+			}
+		}
+
+		___step() {
+			let a = this;
+			let b, contactType, shouldOverlap, cb;
+			let checkCollisions = true;
+			for (let event in eventTypes) {
+				for (let k in this[event]) {
+					if (k >= 1000) {
+						if (a._isGroup || a._uid >= k) continue;
+						b = $.p5play.sprites[k];
+					} else {
+						if (a._isGroup && a._uid >= k) continue;
+						b = $.p5play.groups[k];
+					}
+
+					// contact callbacks can only be called between sprites
+					if (a._isGroup || b?._isGroup) continue;
+
+					// is there even a chance that a contact callback exists?
+					shouldOverlap = a._hasOverlap[b._uid] ?? b._hasOverlap[a._uid];
+					if ((checkCollisions && shouldOverlap !== false) || (!checkCollisions && shouldOverlap !== true)) {
+						continue;
+					}
+
+					let v = a[event][k];
+					for (let i = 0; i < 3; i++) {
+						if (i == 0 && v != 1 && v != -3) continue;
+						if (i == 1 && v == -1) continue;
+						if (i == 2 && v >= 1) continue;
+						contactType = eventTypes[event][i];
+
+						let la = $.p5play[contactType][a._uid];
+						if (la) {
+							cb = la[b._uid];
+							if (cb) cb.call(a, a, b, v);
+							for (let g of b.groups) {
+								cb = la[g._uid];
+								if (cb) cb.call(a, a, b, v);
+							}
+						}
+
+						let lb = $.p5play[contactType][b._uid];
+						if (lb) {
+							cb = lb[a._uid];
+							if (cb) cb.call(b, b, a, v);
+							for (let g of a.groups) {
+								cb = lb[g._uid];
+								if (cb && (!la || cb != la[g._uid])) {
+									cb.call(b, b, a, v);
+								}
+							}
+						}
+					}
+				}
+				checkCollisions = false;
+			}
+
+			// all of p5play's references to a removed sprite can be deleted
+			// only if the sprite was not colliding or overlapping with
+			// anything or its last collided and overlapped events were handled
+			if (this._removed) {
+				if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
+					if (this._isSprite) delete $.p5play.sprites[this._uid];
+					else if ($.p5play.targetVersion >= 16) delete $.p5play.groups[this._uid];
+
+					// remove contact events
+					for (let eventType in eventTypes) {
+						for (let contactType of eventTypes[eventType]) {
+							delete $.p5play[contactType][this._uid];
+						}
+					}
+				}
+			}
+		}
+
 		// default draw
 		__draw() {
-			if (this._ani && this.debug != 'colliders' && !$.p5play.disableImages) {
-				this._ani.draw(this._offset._x, this._offset._y, 0, this._scale._x, this._scale._y);
+			if (!$.p5play.disableImages) {
+				if (this._ani) {
+					this._ani.draw(this._offset._x, this._offset._y, 0, this._scale._x, this._scale._y);
+				} else if (this._img) {
+					let img = this._img;
+					let shouldScale = this._scale._x != 1 || this._scale._y != 1 || img.scale.x != 1 || img.scale.y != 1;
+					if (shouldScale) {
+						$.push();
+						$.scale(this._scale._x * img.scale.x, this._scale._y * img.scale.y);
+					}
+					$.image(img, this._offset._x + img.offset.x, this._offset._y + img.offset.y);
+					if (shouldScale) $.pop();
+				}
 			}
-			if (!this._ani || this.debug || $.p5play.disableImages) {
+			if (!(this._ani || this._img) || this.debug || $.p5play.disableImages) {
 				if (this.debug) {
 					$.noFill();
 					$.stroke(0, 255, 0);
@@ -2961,7 +3124,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			$.translate(x, y);
 			if (this.rotation) $.rotate(this.rotation);
-			if (this._mirror.x != 1 || this._mirror.y != 1) {
+			if (this._mirror._x != 1 || this._mirror._y != 1) {
 				$.scale(this._mirror._x, this._mirror._y);
 			}
 			$.fill(this.color);
@@ -3601,6 +3764,102 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this.rotation = ang;
 				return true;
 			})();
+		}
+
+		/**
+		 * Adds an animation to the sprite. Use this function in the preload p5.js
+		 * function. You don't need to name the animation if the sprite will only
+		 * use one animation. See SpriteAnimation for more information.
+		 *
+		 * If an animation was already added to a different sprite or group,
+		 * it can not be added to another sprite or group. A clone (copy) of
+		 * the animation will be automatically created and added instead.
+		 *
+		 * @param {String} name - SpriteAnimation identifier
+		 * @param {SpriteAnimation} animation - The preloaded animation
+		 * @example
+		 * sprite.addAni(name, animation);
+		 * sprite.addAni(name, frame1, frame2, frame3...);
+		 * sprite.addAni(name, atlas);
+		 */
+		addAni() {
+			if ($.p5play.disableImages) {
+				this._ani = new $.SpriteAnimation();
+				return;
+			}
+			let args = [...arguments];
+			let name, ani;
+			if (args[0] instanceof $.SpriteAnimation) {
+				ani = args[0];
+				if (ani._addedToSpriteOrGroup) ani = ani.clone();
+				name = ani.name || 'default';
+				ani.name = name;
+			} else if (args[1] instanceof $.SpriteAnimation) {
+				name = args[0];
+				ani = args[1];
+				if (ani._addedToSpriteOrGroup) ani = ani.clone();
+				ani.name = name;
+			} else {
+				ani = new $.SpriteAnimation(this, ...args);
+				name = ani.name;
+			}
+			this.animations[name] = ani;
+			this._ani = ani;
+			ani._addedToSpriteOrGroup = true;
+
+			// only works if the animation was loaded in preload
+			if (this._dimensionsUndef && (ani.w != 1 || ani.h != 1)) {
+				this.w = ani.w;
+				this.h = ani.h;
+			}
+			return ani;
+		}
+
+		/**
+		 * Alias for `addAni`.
+		 *
+		 * Deprecated because it's unclear that the image is
+		 * being added as a single frame animation.
+		 * @deprecated
+		 */
+		addImage() {
+			return this.addAni(...arguments);
+		}
+
+		/**
+		 * Add multiple animations to the sprite.
+		 * @param {Object} atlases - an object with animation names as keys and
+		 * an animation or animation atlas as values
+		 * @example
+		 * sprite.addAnis({
+		 *  name0: atlas0,
+		 * 	name1: atlas1
+		 * });
+		 */
+		addAnis() {
+			let args = arguments;
+			let atlases;
+			if (args.length == 1) {
+				atlases = args[0];
+			} else {
+				this.spriteSheet = args[0];
+				atlases = args[1];
+			}
+			for (let name in atlases) {
+				let atlas = atlases[name];
+				this.addAni(name, atlas);
+			}
+		}
+
+		/**
+		 * Alias for `addAnis`.
+		 *
+		 * Deprecated because it's unclear that the images are
+		 * being added as single frame animations.
+		 * @deprecated
+		 */
+		addImage() {
+			return this.addAnis(...arguments);
 		}
 
 		/**
@@ -5327,12 +5586,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				Object.defineProperty(this, prop, {
 					get() {
 						let val = _this['_' + prop];
-						let i = _this.length - 1;
 						if (val === undefined && !_this._isAllSpritesGroup) {
 							let parent = $.p5play.groups[_this.parent];
 							if (parent) {
 								val = parent[prop];
-								i = parent.length - 1;
 							}
 						}
 						return val;
@@ -5340,7 +5597,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					set(val) {
 						_this['_' + prop] = val;
 
-						// change the prop in all the sprite of this group
+						// propagate the change to all of this group's subgroups
+						for (let g of _this.subgroups) {
+							g['_' + prop] = val;
+						}
+
+						// change the prop in all the sprites in this group
 						for (let i = 0; i < _this.length; i++) {
 							let s = _this[i];
 							let v = val;
@@ -5404,31 +5666,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			/**
+			 * Alias for `push`.
+			 *
 			 * Adds a sprite to the end of the group.
-			 *
-			 * Alias for `push`, the standard JS Array function for
-			 * adding to an array.
-			 *
-			 * @memberof Group
-			 * @instance
-			 * @func add
-			 * @param {...Sprite} sprites
-			 * @return {Number} The new length of the group
 			 */
 			this.add = this.push;
 
 			/**
-			 * Check if a sprite is in the group.
-			 *
-			 * @memberof Group
-			 * @instance
-			 * @func includes
-			 * @param {Sprite} sprite
-			 * @return {Number} index of the sprite or -1 if not found
-			 */
-
-			/**
 			 * Alias for group.includes
+			 *
+			 * Check if a sprite is in the group.
 			 */
 			this.contains = this.includes;
 		}
@@ -6224,200 +6471,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	//      a -> b
-	// sprite -> sprite
-	// sprite -> group
-	//  group -> group
-	$.Sprite.prototype.__step = $.Group.prototype.__step = function () {
-		// for each type of collision and overlap event
-		let a = this;
-		let b;
-		for (let event in eventTypes) {
-			for (let k in this[event]) {
-				if (k >= 1000) {
-					// if a is group or a is sprite and a._uid >= k
-					if (a._isGroup || a._uid >= k) continue;
-					b = $.p5play.sprites[k];
-				} else {
-					// if a is group and a._uid >= k
-					if (a._isGroup && a._uid >= k) continue;
-					b = $.p5play.groups[k];
-				}
-
-				let v = a[event][k] + 1;
-				if (!b || v == 0 || v == -2) {
-					delete a[event][k];
-					if (b) delete b[event][a._uid];
-					continue;
-				}
-				this[event][k] = v;
-				b[event][a._uid] = v;
-			}
-		}
-	};
-
-	$.Sprite.prototype.___step = $.Group.prototype.___step = function () {
-		let a = this;
-		let b, contactType, shouldOverlap, cb;
-		let checkCollisions = true;
-		for (let event in eventTypes) {
-			for (let k in this[event]) {
-				if (k >= 1000) {
-					if (a._isGroup || a._uid >= k) continue;
-					b = $.p5play.sprites[k];
-				} else {
-					if (a._isGroup && a._uid >= k) continue;
-					b = $.p5play.groups[k];
-				}
-
-				// contact callbacks can only be called between sprites
-				if (a._isGroup || b?._isGroup) continue;
-
-				// is there even a chance that a contact callback exists?
-				shouldOverlap = a._hasOverlap[b._uid] ?? b._hasOverlap[a._uid];
-				if ((checkCollisions && shouldOverlap !== false) || (!checkCollisions && shouldOverlap !== true)) {
-					continue;
-				}
-
-				let v = a[event][k];
-				for (let i = 0; i < 3; i++) {
-					if (i == 0 && v != 1 && v != -3) continue;
-					if (i == 1 && v == -1) continue;
-					if (i == 2 && v >= 1) continue;
-					contactType = eventTypes[event][i];
-
-					let la = $.p5play[contactType][a._uid];
-					if (la) {
-						cb = la[b._uid];
-						if (cb) cb.call(a, a, b, v);
-						for (let g of b.groups) {
-							cb = la[g._uid];
-							if (cb) cb.call(a, a, b, v);
-						}
-					}
-
-					let lb = $.p5play[contactType][b._uid];
-					if (lb) {
-						cb = lb[a._uid];
-						if (cb) cb.call(b, b, a, v);
-						for (let g of a.groups) {
-							cb = lb[g._uid];
-							if (cb && (!la || cb != la[g._uid])) {
-								cb.call(b, b, a, v);
-							}
-						}
-					}
-				}
-			}
-			checkCollisions = false;
-		}
-
-		// all of p5play's references to a removed sprite can be deleted
-		// only if the sprite was not colliding or overlapping with
-		// anything or its last collided and overlapped events were handled
-		if (this._removed) {
-			if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
-				if (this._isSprite) delete $.p5play.sprites[this._uid];
-				else if ($.p5play.targetVersion >= 16) delete $.p5play.groups[this._uid];
-
-				// remove contact events
-				for (let eventType in eventTypes) {
-					for (let contactType of eventTypes[eventType]) {
-						delete $.p5play[contactType][this._uid];
-					}
-				}
-			}
-		}
-	};
-
-	/**
-	 * Adds an animation to the sprite. Use this function in the preload p5.js
-	 * function. You don't need to name the animation if the sprite will only
-	 * use one animation. See SpriteAnimation for more information.
-	 *
-	 * If an animation was already added to a different sprite or group,
-	 * it can not be added to another sprite or group. A clone (copy) of
-	 * the animation will be automatically created and added instead.
-	 *
-	 * @memberof Sprite
-	 * @instance
-	 * @func addAnimation
-	 * @param {String} name - SpriteAnimation identifier
-	 * @param {SpriteAnimation} animation - The preloaded animation
-	 * @example
-	 * sprite.addAni(name, animation);
-	 * sprite.addAni(name, frame1, frame2, frame3...);
-	 * sprite.addAni(name, atlas);
-	 */
-	$.Sprite.prototype.addAnimation =
+	$.Group.prototype.addAni =
 		$.Group.prototype.addAnimation =
-		$.Sprite.prototype.addAni =
-		$.Group.prototype.addAni =
-		$.Sprite.prototype.addImage =
-		$.Group.prototype.addImage =
-		$.Sprite.prototype.addImg =
-		$.Group.prototype.addImg =
-			function () {
-				if ($.p5play.disableImages) {
-					this._ani = new $.SpriteAnimation();
-					return;
-				}
-				let args = [...arguments];
-				let name, ani;
-				if (args[0] instanceof $.SpriteAnimation) {
-					ani = args[0];
-					if (ani._addedToSpriteOrGroup) ani = ani.clone();
-					name = ani.name || 'default';
-					ani.name = name;
-				} else if (args[1] instanceof $.SpriteAnimation) {
-					name = args[0];
-					ani = args[1];
-					if (ani._addedToSpriteOrGroup) ani = ani.clone();
-					ani.name = name;
-				} else {
-					ani = new $.SpriteAnimation(this, ...args);
-					name = ani.name;
-				}
-				this.animations[name] = ani;
-				this._ani = ani;
-				ani._addedToSpriteOrGroup = true;
+		$.Sprite.prototype.addAnimation =
+			$.Sprite.prototype.addAni;
 
-				// only works if the animation was loaded in preload
-				if (this._dimensionsUndef && (ani.w != 1 || ani.h != 1)) {
-					this.w = ani.w;
-					this.h = ani.h;
-				}
-				return ani;
-			};
-
-	/**
-	 * Add multiple animations
-	 *
-	 * @memberof Sprite
-	 * @instance
-	 */
-	$.Sprite.prototype.addAnis =
-		$.Group.prototype.addAnis =
-		$.Sprite.prototype.addAnimations =
+	$.Group.prototype.addAnis =
 		$.Group.prototype.addAnimations =
-		$.Sprite.prototype.addImages =
-		$.Group.prototype.addImages =
-		$.Sprite.prototype.addImgs =
-		$.Group.prototype.addImgs =
-			function () {
-				let args = arguments;
-				let atlases;
-				if (args.length == 1) {
-					atlases = args[0];
-				} else {
-					this.spriteSheet = args[0];
-					atlases = args[1];
-				}
-				for (let name in atlases) {
-					let atlas = atlases[name];
-					this.addAni(name, atlas);
-				}
-			};
+		$.Sprite.prototype.addAnimations =
+			$.Sprite.prototype.addAnis;
+
+	$.Group.prototype.__step = $.Sprite.prototype.__step;
+	$.Group.prototype.___step = $.Sprite.prototype.___step;
 
 	/**
 	 * @class
@@ -8228,6 +8293,50 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	};
 
 	/**
+	 * Creates a new image of an emoji, trimmed to the emoji's dimensions.
+	 * @param {String} emoji
+	 * @param {Number} textSize
+	 * @returns {p5.Image} emojiImage
+	 * @example
+	 * let img = new EmojiImage('🏀', 32);
+	 */
+	this.EmojiImage = function (emoji, textSize) {
+		$.push();
+		$.textSize(textSize);
+		let img = $.createTextImage(emoji);
+		if (img.trim) img = img.trim();
+		else {
+			let ctx = img.drawingContext;
+			let pd = img._pixelDensity || 1;
+			let imgData = ctx.getImageData(0, 0, img.width * pd, img.height * pd);
+			let data = imgData.data;
+			let left = img.width,
+				right = 0,
+				top = img.height,
+				bottom = 0;
+
+			for (let y = 0; y < img.height * pd; y++) {
+				for (let x = 0; x < img.width * pd; x++) {
+					let index = (y * img.width * pd + x) * 4;
+					if (data[index + 3] !== 0) {
+						if (x < left) left = x;
+						if (x > right) right = x;
+						if (y < top) top = y;
+						if (y > bottom) bottom = y;
+					}
+				}
+			}
+			top = Math.floor(top / pd);
+			bottom = Math.floor(bottom / pd);
+			left = Math.floor(left / pd);
+			right = Math.floor(right / pd);
+			img = img.get(left, top, right - left + 1, bottom - top + 1);
+		}
+		$.pop();
+		return img;
+	};
+
+	/**
 	 * Create pixel art images from a string. Each character in the
 	 * input string represents a color value defined in the palette
 	 * object.
@@ -8988,7 +9097,7 @@ main {
 			if (b !== undefined) $._textCache = b;
 			return $._textCache;
 		};
-		function _genTextImageKey(str, w, h) {
+		$._genTextImageKey = (str, w, h) => {
 			const r = $._renderer;
 			let font = r._textFont;
 			if (typeof font != 'string') {
@@ -9006,21 +9115,14 @@ main {
 				(w || '') +
 				(h ? 'x' + h : '')
 			);
-		}
-		/**
-		 * Creates an image from text.
-		 * @param {String} str
-		 * @param {Number} w - line width limit
-		 * @param {Number} h - height limit
-		 * @returns {p5.Image}
-		 */
+		};
 		$.createTextImage = (str, w, h) => {
 			let og = $._textCache;
 			$._textCache = true;
-			$._useCache = true;
+			$._genTextImage = true;
 			$.text(str, 0, 0, w, h);
-			$._useCache = false;
-			let k = _genTextImageKey(str, w, h);
+			$._genTextImage = false;
+			let k = $._genTextImageKey(str, w, h);
 			$._textCache = og;
 			return $._tic.get(k);
 		};
@@ -9040,7 +9142,7 @@ main {
 			const r = $._renderer;
 			if (!r._doFill && !r._doStroke) return;
 			let ctx = $.ctx;
-			let useCache = $._useCache;
+			let useCache = $._genTextImage;
 			if (!useCache && $._textCache) {
 				let t = ctx.getTransform();
 				useCache = t.b != 0 || t.c != 0;
@@ -9048,9 +9150,9 @@ main {
 			if (!useCache) return _text.call($, str, x, y, w, h);
 
 			let c, ti, k, cX, cY, _ascent, _descent;
-			k = _genTextImageKey(str, w, h);
+			k = $._genTextImageKey(str, w, h);
 			ti = $._tic.get(k);
-			if (ti) {
+			if (ti && !$._genTextImage) {
 				$.textImage(ti, x, y);
 				return;
 			}
@@ -9081,7 +9183,7 @@ main {
 			ti._ascent = _ascent;
 			ti._descent = _descent;
 			$._tic.set(k, ti);
-			$.textImage(ti, x, y);
+			if (!$._genTextImage) $.textImage(ti, x, y);
 		};
 		/**
 		 * Displays an image based on text alignment settings.

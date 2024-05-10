@@ -245,6 +245,19 @@ class Sprite {
      * @type {Number}
      */
     get y(): number;
+    set image(val: p5.Image);
+    /**
+     * The sprite's image or current frame of animation.
+     *
+     * When `sprite.image` is set, two properties are added:
+     *
+     * `sprite.image.offset` determines the x and y position the image
+     * should be drawn at relative to the sprite's center.
+     *
+     * `sprite.image.scale` determines the x and y scale of the image.
+     * @type {p5.Image}
+     */
+    get image(): p5.Image;
     /**
      * Used to detect mouse events with the sprite.
      * @type {_SpriteMouse}
@@ -633,16 +646,10 @@ class Sprite {
     get heading(): string;
     set img(val: p5.Image);
     /**
-     * A reference to the sprite's current image.
+     * Alias for sprite.image
      * @type {p5.Image}
      */
     get img(): p5.Image;
-    set image(val: p5.Image);
-    /**
-     * A reference to the sprite's current image.
-     * @type {p5.Image}
-     */
-    get image(): p5.Image;
     /**
      * Read only. True if the sprite is moving.
      * @type {Boolean}
@@ -737,13 +744,13 @@ class Sprite {
     get opacity(): number;
     set previousPosition(val: any);
     /**
-     * Verbose alias for sprite.prevPos
+     * Alias for sprite.prevPos
      * @type {Object}
      */
     get previousPosition(): any;
     set previousRotation(val: number);
     /**
-     * Verbose alias for sprite.prevRotation
+     * Alias for sprite.prevRotation
      * @type {Number}
      */
     get previousRotation(): number;
@@ -865,6 +872,11 @@ class Sprite {
      * @type {p5.Vector}
      */
     get position(): p5.Vector;
+    /**
+     * The sprite's absolute position on the canvas.
+     * @readonly
+     */
+    readonly get canvasPos(): any;
     set hw(val: number);
     /**
      * Half the width of the sprite.
@@ -1158,6 +1170,51 @@ class Sprite {
      * @returns {Promise} a promise that resolves when the rotation is complete
      */
     rotate(angle: number, speed?: number): Promise<any>;
+    /**
+     * Adds an animation to the sprite. Use this function in the preload p5.js
+     * function. You don't need to name the animation if the sprite will only
+     * use one animation. See SpriteAnimation for more information.
+     *
+     * If an animation was already added to a different sprite or group,
+     * it can not be added to another sprite or group. A clone (copy) of
+     * the animation will be automatically created and added instead.
+     *
+     * @param {String} name - SpriteAnimation identifier
+     * @param {SpriteAnimation} animation - The preloaded animation
+     * @example
+     * sprite.addAni(name, animation);
+     * sprite.addAni(name, frame1, frame2, frame3...);
+     * sprite.addAni(name, atlas);
+     */
+    addAni(...args: any[]): any;
+    /**
+     * Alias for `addAni`.
+     *
+     * Deprecated because it's unclear that the image is
+     * being added as a single frame animation.
+     * @deprecated
+     */
+    addImage(...args: any[]): any;
+    /**
+     * Alias for `addAnis`.
+     *
+     * Deprecated because it's unclear that the images are
+     * being added as single frame animations.
+     * @deprecated
+     */
+    addImage(...args: any[]): void;
+    /**
+     * Add multiple animations to the sprite.
+     * @param {Object} atlases - an object with animation names as keys and
+     * an animation or animation atlas as values
+     * @example
+     * sprite.addAnis({
+     *  name0: atlas0,
+     * 	name1: atlas1
+     * });
+     */
+    addAnis(...args: any[]): void;
+    spriteSheet: any;
     /**
      * Changes the sprite's animation. Use `addAni` to define the
      * animation(s) first.
@@ -1779,29 +1836,15 @@ class Group extends Array<Sprite> {
      */
     autoCull: boolean;
     /**
+     * Alias for `push`.
+     *
      * Adds a sprite to the end of the group.
-     *
-     * Alias for `push`, the standard JS Array function for
-     * adding to an array.
-     *
-     * @memberof Group
-     * @instance
-     * @func add
-     * @param {...Sprite} sprites
-     * @return {Number} The new length of the group
      */
     add: (...sprites: Sprite[]) => number;
     /**
-     * Check if a sprite is in the group.
-     *
-     * @memberof Group
-     * @instance
-     * @func includes
-     * @param {Sprite} sprite
-     * @return {Number} index of the sprite or -1 if not found
-     */
-    /**
      * Alias for group.includes
+     *
+     * Check if a sprite is in the group.
      */
     contains: (searchElement: Sprite, fromIndex?: number) => boolean;
     set ani(val: SpriteAnimation);
@@ -2641,6 +2684,7 @@ class Scale {
 }
 function encodeFloat16(v: any): number;
 function colorPal(c: string, palette: number | any): string;
+function EmojiImage(emoji: string, textSize: number): p5.Image;
 function spriteArt(txt: string, scale: number, palette: number | any): p5.Image;
 function createSprite(...args: any[]): Sprite;
 function createGroup(...args: any[]): Group;
