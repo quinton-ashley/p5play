@@ -1196,14 +1196,6 @@ class Sprite {
      */
     addImage(...args: any[]): any;
     /**
-     * Alias for `addAnis`.
-     *
-     * Deprecated because it's unclear that the images are
-     * being added as single frame animations.
-     * @deprecated
-     */
-    addImage(...args: any[]): void;
-    /**
      * Add multiple animations to the sprite.
      * @param {Object} atlases - an object with animation names as keys and
      * an animation or animation atlas as values
@@ -1215,6 +1207,14 @@ class Sprite {
      */
     addAnis(...args: any[]): void;
     spriteSheet: any;
+    /**
+     * Alias for `addAnis`.
+     *
+     * Deprecated because it's unclear that the images are
+     * being added as single frame animations.
+     * @deprecated
+     */
+    addImages(...args: any[]): void;
     /**
      * Changes the sprite's animation. Use `addAni` to define the
      * animation(s) first.

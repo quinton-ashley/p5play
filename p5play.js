@@ -3858,7 +3858,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * being added as single frame animations.
 		 * @deprecated
 		 */
-		addImage() {
+		addImages() {
 			return this.addAnis(...arguments);
 		}
 
@@ -6473,12 +6473,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 	$.Group.prototype.addAni =
 		$.Group.prototype.addAnimation =
+		$.Group.prototype.addImg =
+		$.Group.prototype.addImage =
 		$.Sprite.prototype.addAnimation =
+		$.Sprite.prototype.addImg =
 			$.Sprite.prototype.addAni;
 
 	$.Group.prototype.addAnis =
 		$.Group.prototype.addAnimations =
+		$.Group.prototype.addImgs =
+		$.Group.prototype.addImages =
 		$.Sprite.prototype.addAnimations =
+		$.Sprite.prototype.addImgs =
 			$.Sprite.prototype.addAnis;
 
 	$.Group.prototype.__step = $.Sprite.prototype.__step;
