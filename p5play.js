@@ -638,7 +638,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let ts = this.tileSize;
 
 				if (this._img || ani instanceof p5.Image) {
-					this.image = new $.EmojiImage(ani, w);
+					if (typeof ani != 'string') this.image = ani;
+					else this.image = new $.EmojiImage(ani, w);
 
 					if (!w && (this._img.w != 1 || this._img.h != 1)) {
 						w = this._img.w / ts;
