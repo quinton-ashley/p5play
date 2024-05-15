@@ -3498,7 +3498,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.vel.y = a * percent;
 
 			// direction destination
-			let destD = this.direction;
+			let destD = this.direction < 0 ? this.direction + 360 : this.direction;
 			// direction margin of error
 			let destDMin = destD - 0.1;
 			let destDMax = destD + 0.1;
@@ -3524,8 +3524,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					// its speed has become slower than the world velocityThreshold
 					// or if its direction has changed significantly enough so that
 					// it will not reach its destination
+					let dir = this.direction < 0 ? this.direction + 360 : this.direction;
 					if (
-						(checkDir && (this.direction <= destDMin || this.direction >= destDMax)) ||
+						(checkDir && (dir <= destDMin || dir >= destDMax)) ||
 						(Math.abs(this.vel.x) <= velThresh && Math.abs(this.vel.y) <= velThresh)
 					) {
 						return false;
