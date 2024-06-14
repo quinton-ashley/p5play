@@ -584,9 +584,9 @@ class Sprite {
      * Displays the sprite.
      *
      * This function is called automatically at the end of each
-     * p5.js draw function call but it can also be run
+     * sketch `draw` function call but it can also be run
      * by users to customize the order sprites are drawn in relation
-     * to other stuff drawn to the p5.js canvas. Also see the sprite.layer
+     * to other stuff drawn to the canvas. Also see the sprite.layer
      * property.
      *
      * A sprite's draw function can be overridden with a
@@ -940,8 +940,8 @@ class Sprite {
     set update(val: Function);
     /**
      * You can set the sprite's update function to a custom
-     * update function which by default, will be run after every p5.js
-     * draw call.
+     * update function which by default, will be run after every
+     * sketch draw call.
      *
      * This function updates the sprite's animation, mouse, and
      *
@@ -1171,7 +1171,7 @@ class Sprite {
      */
     rotate(angle: number, speed?: number): Promise<any>;
     /**
-     * Adds an animation to the sprite. Use this function in the preload p5.js
+     * Adds an animation to the sprite. Use this function in the `preload`
      * function. You don't need to name the animation if the sprite will only
      * use one animation. See SpriteAnimation for more information.
      *
@@ -2162,7 +2162,7 @@ class World {
      * Performs a physics simulation step that advances all sprites'
      * forward in time by 1/60th of a second if no timeStep is given.
      *
-     * This function is automatically called at the end of the p5.js draw
+     * This function is automatically called at the end of the draw
      * loop, unless it was already called inside the draw loop.
      *
      * Decreasing velocityIterations and positionIterations will improve
@@ -2709,7 +2709,7 @@ class Canvas {
      * browser from scrolling the page when the user is playing a game
      * using common keyboard commands.
      *
-     * Supports p5.js' '2d' and 'webgl' renderers.
+     * Supports the '2d' and 'webgl' renderers.
      *
      * Only q5.js has support for canvas options (context attributes).
      *
@@ -2770,7 +2770,7 @@ class Canvas {
     hh: number;
     /**
      * Absolute position of the mouse on the canvas, not relative
-     * to the camera. Same values as p5.js `mouseX` and `mouseY`.
+     * to the camera. Same values as `mouseX` and `mouseY`.
      * @type {Object}
      * @property {Number} x
      * @property {Number} y

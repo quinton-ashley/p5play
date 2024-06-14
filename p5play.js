@@ -1829,9 +1829,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Displays the sprite.
 		 *
 		 * This function is called automatically at the end of each
-		 * p5.js draw function call but it can also be run
+		 * sketch `draw` function call but it can also be run
 		 * by users to customize the order sprites are drawn in relation
-		 * to other stuff drawn to the p5.js canvas. Also see the sprite.layer
+		 * to other stuff drawn to the canvas. Also see the sprite.layer
 		 * property.
 		 *
 		 * A sprite's draw function can be overridden with a
@@ -2807,8 +2807,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * You can set the sprite's update function to a custom
-		 * update function which by default, will be run after every p5.js
-		 * draw call.
+		 * update function which by default, will be run after every
+		 * sketch draw call.
 		 *
 		 * This function updates the sprite's animation, mouse, and
 		 *
@@ -3108,7 +3108,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				y = fixRound(y);
 			} else {
 				let w, h;
-				if (this.ani && !$.p5play.disableImages) {
+				if (this.ani && this.ani.length && !$.p5play.disableImages) {
 					w = this.ani[this.ani._frame].w;
 					h = this.ani[this.ani._frame].h;
 				} else {
@@ -3788,7 +3788,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Adds an animation to the sprite. Use this function in the preload p5.js
+		 * Adds an animation to the sprite. Use this function in the `preload`
 		 * function. You don't need to name the animation if the sprite will only
 		 * use one animation. See SpriteAnimation for more information.
 		 *
@@ -4924,12 +4924,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					$.image(img, this.offset.x, this.offset.y);
 				}
 			} else {
-				log(
-					'Warning: ' +
+				console.warn(
+					'p5play: "' +
 						this.name +
+						'"' +
 						' animation not loaded yet or frame ' +
 						this._frame +
-						' does not exist. Load this animation in the p5.js preload function if you need to use it at the start of your program.'
+						' does not exist. Load this animation in the preload function if you need to use it at the start of your program.'
 				);
 			}
 
@@ -6531,7 +6532,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * </a>
 		 *
 		 * A `world` object is created automatically by p5play. There can only
-		 * be one world per p5.js instance.
+		 * be one world per sketch (instance of p5 or q5).
 		 *
 		 * This class extends `planck.World` and adds some p5play specific
 		 * features.
@@ -6709,7 +6710,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Performs a physics simulation step that advances all sprites'
 		 * forward in time by 1/60th of a second if no timeStep is given.
 		 *
-		 * This function is automatically called at the end of the p5.js draw
+		 * This function is automatically called at the end of the draw
 		 * loop, unless it was already called inside the draw loop.
 		 *
 		 * Decreasing velocityIterations and positionIterations will improve
@@ -7047,16 +7048,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * </a>
 		 *
 		 * A `camera` object is created automatically when p5play loads.
-		 * Currently, there can only be one camera per p5.js instance.
+		 * Currently, there can only be one camera per sketch (instance
+		 * of p5 or q5).
 		 *
 		 * A camera facilitates zooming and scrolling for scenes extending beyond
 		 * the canvas. Moving the camera does not actually move the sprites.
 		 *
 		 * The camera is automatically created on the first draw cycle.
 		 *
-		 * In p5.js terms the camera wraps the whole drawing cycle in a
-		 * transformation matrix but it can be disabled anytime during the draw
-		 * cycle to draw interface elements in an absolute position.
+		 * The camera wraps the whole drawing cycle in a transformation
+		 * matrix (using `push`/`pushMatrix`) but it can be disabled
+		 * during the draw cycle to draw interface elements in an
+		 * absolute position.
 		 */
 		constructor() {
 			// camera position
@@ -8315,7 +8318,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @param {String} c - A single character, a key found in the color palette object.
 	 * @param {Number|Object} palette - can be a palette object or number index
 	 * in the system's palettes array.
-	 * @returns {String} a hex color string for use by p5.js functions
+	 * @returns {String} a hex color string
 	 */
 	this.colorPal = (c, palette) => {
 		if (c instanceof p5.Color) return c;
@@ -8460,7 +8463,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	/**
 	 * Alias for `new SpriteAnimation()`
 	 *
-	 * Load animations in the preload p5.js function if you need to use
+	 * Load animations in the `preload` function if you need to use
 	 * them when your program starts.
 	 *
 	 * @returns {SpriteAnimation}
@@ -8470,7 +8473,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	};
 
 	/**
-	 * Displays an animation. Similar to the p5.js image function.
+	 * Displays an animation. Similar to the `image` function.
 	 *
 	 * @param {SpriteAnimation} ani - Animation to be displayed
 	 * @param {Number} x - position of the animation on the canvas
@@ -8755,10 +8758,9 @@ html, body {
 	height: 100%;
 }
 main {
-	margin: auto;
 	display: flex;
 	flex-wrap: wrap;
-	align-content: center;
+	align-items: center;
 	justify-content: center;
 	height: 100%;
 }`;
@@ -8791,7 +8793,6 @@ main {
 			$.pixelDensity(1);
 			$.noSmooth();
 			$.textFont('monospace');
-			$.ctx.imageSmoothingEnabled = false;
 		}
 
 		return rend;
@@ -8811,7 +8812,7 @@ main {
 		 * browser from scrolling the page when the user is playing a game
 		 * using common keyboard commands.
 		 *
-		 * Supports p5.js' '2d' and 'webgl' renderers.
+		 * Supports the '2d' and 'webgl' renderers.
 		 *
 		 * Only q5.js has support for canvas options (context attributes).
 		 *
@@ -8872,7 +8873,7 @@ main {
 			this.hh;
 			/**
 			 * Absolute position of the mouse on the canvas, not relative
-			 * to the camera. Same values as p5.js `mouseX` and `mouseY`.
+			 * to the camera. Same values as `mouseX` and `mouseY`.
 			 * @type {Object}
 			 * @property {Number} x
 			 * @property {Number} y
@@ -8955,8 +8956,8 @@ main {
 	const _background = $.background;
 
 	/**
-	 * Just like the p5.js background function except it also accepts
-	 * a color palette code.
+	 * Covers the canvas with a color or image.
+	 * In p5play it can also accept a color palette code.
 	 */
 	this.background = function () {
 		let args = arguments;
@@ -8968,8 +8969,8 @@ main {
 	const _fill = $.fill;
 
 	/**
-	 * Just like the p5.js fill function except it also accepts
-	 * a color palette code.
+	 * Sets the color used to fill shapes.
+	 * In p5play it can also accept a color palette code.
 	 */
 	this.fill = function () {
 		let args = arguments;
@@ -8981,8 +8982,8 @@ main {
 	const _stroke = $.stroke;
 
 	/**
-	 * Just like the p5.js stroke function except it also accepts
-	 * a color palette code.
+	 * Sets the color used to stroke an outline around a shape.
+	 * In p5play it can also accept a color palette code.
 	 */
 	this.stroke = function () {
 		let args = arguments;
@@ -8994,9 +8995,9 @@ main {
 	const _loadImage = $.loadImage;
 
 	/**
-	 * Just like the p5.js loadImage function except it also caches images
-	 * so that they are only loaded once. Multiple calls to loadImage with
-	 * the same path will return the same image object. It also adds the
+	 * Loads an image. p5play caches images so that they're only
+	 * loaded once, so multiple calls to `loadImage` with the same
+	 * path will return the same image object. p5play also adds the
 	 * image's url as a property of the image object.
 	 *
 	 * @param {string} url
@@ -9067,8 +9068,8 @@ main {
 	const _image = $.image;
 
 	/**
-	 * Just like the p5.js image function but if
-	 * `p5play.disableImages` is true, images will not be drawn.
+	 * Display an image
+	 * unless `p5play.disableImages` is true.
 	 * @param {p5.Image} img
 	 */
 	$.image = function () {
@@ -9902,6 +9903,8 @@ main {
 	$._ontouchstart = function (e) {
 		if (!$._setupDone) return;
 
+		if ($.getAudioContext && $.getAudioContext()?.state == 'suspended') $.userStartAudio();
+
 		for (let touch of e.changedTouches) {
 			$.touches.push(new $._Touch(touch));
 
@@ -9914,9 +9917,6 @@ main {
 			}
 		}
 		if ($.touchStarted && !$.touchStarted(e)) e.preventDefault();
-
-		let ac = $.getAudioContext();
-		if (ac && ac.state != 'running') $.userStartAudio();
 	};
 
 	$._ontouchmove = function (e) {
@@ -10636,7 +10636,7 @@ main {
 
 p5.prototype.registerMethod('pre', function p5playPreDraw() {
 	const $ = this;
-	// called before each p5.js draw function call
+	// called before each draw function call
 	if (!$._q5) {
 		$.p5play._preDrawFrameTime = performance.now();
 	}
@@ -10648,7 +10648,7 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 
 p5.prototype.registerMethod('post', function p5playPostDraw() {
 	const $ = this;
-	// called after each p5.js draw function call
+	// called after each draw function call
 	$.p5play._inPostDraw = true;
 
 	if ($.allSprites.autoCull) {
@@ -10673,7 +10673,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 			rs.gap = rs.fontSize * 1.25;
 			if (!$._q5) {
 				console.warn(
-					"renderStats() produces inaccurate FPS approximations because deltaTime is calculated incorrectly in p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js or your browser's performance testing tools for accurate results."
+					"renderStats() produces inaccurate FPS approximations because deltaTime is calculated incorrectly in p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js (visit https://q5js.org) or your browser's performance testing tools for accurate results."
 				);
 			}
 		}

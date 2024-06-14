@@ -42,4 +42,4 @@ See the [p5play-web][] repository readme.md for more info.
 [Patreon]: https://www.patreon.com/p5play
 [GitHub Sponsors]: https://github.com/sponsors/quinton-ashley
 [p5play-exceptions]: https://github.com/quinton-ashley/p5play-exceptions
-[p5play project planning page]: https://github.com/quinton-ashley/p5play/projects/1
+[p5play project planning page]: https://github.com/users/quinton-ashley/projects/5
