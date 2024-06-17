@@ -9016,8 +9016,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	// if the user isn't using q5.js
 	// add a backwards compatibility layer for p5.js
 	if (!$.displayMode) {
-		let c = $.canvas;
-
 		document.head.insertAdjacentHTML(
 			'beforeend',
 			`<style>
@@ -9056,6 +9054,8 @@ main {
 		);
 
 		$._adjustDisplay = () => {
+			let c = $.canvas;
+
 			let s = c.style;
 			let p = c.parentElement;
 			if (!s || !p || !c.displayMode) return;
@@ -9091,6 +9091,8 @@ main {
 		};
 
 		$.displayMode = (displayMode = 'normal', renderQuality = 'default', displayScale = 1) => {
+			let c = $.canvas;
+
 			if (typeof displayScale == 'string') {
 				displayScale = parseFloat(displayScale.slice(1));
 			}
