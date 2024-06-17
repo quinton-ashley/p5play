@@ -4628,7 +4628,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			} // end sequence mode
 
 			// spriteSheet mode
-			else if (typeof args[args.length - 1] != 'string' && !(args[args.length - 1] instanceof p5.Image)) {
+			else if (typeof args.at(-1) != 'string' && !(args.at(-1) instanceof p5.Image)) {
 				let sheet = owner.spriteSheet;
 				let atlas;
 				if (args[0] instanceof p5.Image || typeof args[0] == 'string') {
@@ -8647,12 +8647,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 */
 	this.createCanvas = function () {
 		let args = [...arguments];
-		let isFullScreen, isPixelated, scale;
+		let displayMode, renderQuality, displayScale;
 		if (typeof args[0] == 'string') {
 			if (args[0].includes(':')) {
 				let ratio = args[0].split(':');
-				args[2] = args[1];
-				isFullScreen = true;
 				let rW = Number(ratio[0]);
 				let rH = Number(ratio[1]);
 				let w = window.innerWidth;
@@ -8662,7 +8660,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					h = window.innerHeight;
 				}
 				args[0] = Math.round(w);
-				args[1] = Math.round(h);
+				args.splice(1, 0, Math.round(h));
+				displayMode = 'fullscreen';
 			} else {
 				args = [0, 0, ...args];
 			}
@@ -8670,17 +8669,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		if (!args[0]) {
 			args[0] = window.innerWidth;
 			args[1] = window.innerHeight;
-			isFullScreen = true;
+			displayMode = 'fullscreen';
 		}
 		if (typeof args[2] == 'string') {
 			let rend = args[2].toLowerCase().split(' ');
 			if (rend[0] == 'pixelated') {
-				isPixelated = true;
-				if (!rend[1]) isFullScreen = true;
-				else scale = Number(rend[1].slice(1));
+				renderQuality = 'pixelated';
+				if (!rend[1]) displayMode = 'fullscreen';
+				else displayScale = Number(rend[1].slice(1));
+				displayMode = 'centered';
 				args.splice(2, 1);
 			} else if (rend[0] == 'fullscreen') {
-				isFullScreen = true;
+				displayMode = 'fullscreen';
 				args.splice(2, 1);
 			}
 		}
@@ -8734,66 +8734,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 
-		/* prevent callout to copy image, etc when tap to hold */
-		/* prevent webkit from resizing text to fit */
-		/* prevent copy paste, to allow, change 'none' to 'text' */
-		let style = `
-.p5Canvas, .q5Canvas {
-	outline: none;
-	-webkit-touch-callout: none;
-	-webkit-text-size-adjust: none;
-	-webkit-user-select: none;
-	overscroll-behavior: none;
-}
-main {
-	overscroll-behavior: none;
-}`;
-		if (isFullScreen) {
-			style = 'html,\nbody,\n' + style;
-			style += `
-html, body {
-	margin: 0;
-	padding: 0;
-	overflow: hidden;
-	height: 100%;
-}
-main {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-}`;
-		}
-		style += `\n#${c.id} {`;
-		if (isPixelated) {
-			style += `
-	image-rendering: pixelated;
-	font-smooth: never;
-	-webkit-font-smoothing: none;
-`;
-		}
-		if (isFullScreen) {
-			c.fullscreen = true;
-			if (c.w / c.h > window.innerWidth / window.innerHeight) {
-				style += 'width: 100%!important; height: auto!important;';
-			} else style += 'height: 100%!important; width: auto!important;';
-		} else if (scale) {
-			style += `
-	width: ${c.w * scale}px!important;
-	height: ${c.h * scale}px!important;
-`;
-		}
-		style += '\n}';
-		let styleElem = document.createElement('style');
-		styleElem.innerHTML = style;
-		document.head.appendChild(styleElem);
-
-		if (isPixelated) {
-			$.pixelDensity(1);
-			$.noSmooth();
-			$.textFont('monospace');
-		}
+		$.displayMode(displayMode, renderQuality, displayScale);
 
 		return rend;
 	};
@@ -8816,9 +8757,8 @@ main {
 		 *
 		 * Only q5.js has support for canvas options (context attributes).
 		 *
-		 * @param {Number} width
-		 * @param {Number} height
-		 * @param {String} [preset] - 'fullscreen' or 'pixelated'
+		 * @param {Number} [width|aspectRatio]
+		 * @param {Number} [height]
 		 * @param {String} [renderer] - '2d' (default) or 'webgl'
 		 * @param {Object} [options] - context attributes
 		 * @returns HTML5 canvas element
@@ -8829,12 +8769,8 @@ main {
 		 * new Canvas('16:9');
 		 * // 800x600 pixels
 		 * new Canvas(800, 600);
-		 * // fullscreen scaling, fits window (no stretching)
-		 * new Canvas(800, 600, 'fullscreen');
-		 * // pixelated scaling, fits window (no stretching)
-		 * new Canvas(256, 240, 'pixelated');
 		 */
-		constructor(width, height, preset, renderer, options) {
+		constructor(width, height, renderer, options) {
 			/**
 			 * The width of the canvas.
 			 * @type {Number}
@@ -9077,10 +9013,95 @@ main {
 		_image.call($, ...arguments);
 	};
 
+	// if the user isn't using q5.js
+	// add a backwards compatibility layer for p5.js
+	if (!$.displayMode) {
+		let c = $.canvas;
+
+		document.head.insertAdjacentHTML(
+			'beforeend',
+			`<style>
+html, body {
+	margin: 0;
+	padding: 0;
+}
+.p5Canvas {
+	outline: none;
+	-webkit-touch-callout: none;
+	-webkit-text-size-adjust: none;
+	-webkit-user-select: none;
+	overscroll-behavior: none;
+}
+.p5-pixelated {
+	image-rendering: pixelated;
+	font-smooth: never;
+	-webkit-font-smoothing: none;
+}
+.p5-centered,
+.p5-maxed,
+.p5-fullscreen {
+  display: flex;
+	align-items: center;
+	justify-content: center;
+}
+main.p5-centered,
+main.p5-maxed,
+.p5-fullscreen {
+	height: 100vh;
+}
+main {
+	overscroll-behavior: none;
+}
+</style>`
+		);
+
+		$._adjustDisplay = () => {
+			let s = c.style;
+			let p = c.parentElement;
+			if (!s || !p || !c.displayMode) return;
+			if (c.renderQuality == 'pixelated') {
+				c.classList.add('p5-pixelated');
+				$.pixelDensity(1);
+				if ($.noSmooth) $.noSmooth();
+				if ($.textFont) $.textFont('monospace');
+			}
+			if (c.displayMode == 'normal') {
+				p.classList.remove('p5-centered', 'p5-maxed', 'p5-fullscreen');
+				s.width = c.w * c.displayScale + 'px';
+				s.height = c.h * c.displayScale + 'px';
+			} else {
+				p.classList.add('p5-' + c.displayMode);
+				p = p.getBoundingClientRect();
+				if (c.w / c.h > p.width / p.height) {
+					if (c.displayMode == 'centered') {
+						s.width = c.w * c.displayScale + 'px';
+						s.maxWidth = '100%';
+					} else s.width = '100%';
+					s.height = 'auto';
+					s.maxHeight = '';
+				} else {
+					s.width = 'auto';
+					s.maxWidth = '';
+					if (c.displayMode == 'centered') {
+						s.height = c.h * c.displayScale + 'px';
+						s.maxHeight = '100%';
+					} else s.height = '100%';
+				}
+			}
+		};
+
+		$.displayMode = (displayMode = 'normal', renderQuality = 'default', displayScale = 1) => {
+			if (typeof displayScale == 'string') {
+				displayScale = parseFloat(displayScale.slice(1));
+			}
+			Object.assign(c, { displayMode, renderQuality, displayScale });
+			$._adjustDisplay();
+		};
+	}
+
 	let enableTextCache = false;
 	if (typeof $._textCache != 'object') {
-		// if the user isn't using q5.js
-		// add text caching to p5.js, only if the user is using p5.js v1.9.0 or later
+		// only add text caching to p5.js v1.9.0 or later
 		try {
 			enableTextCache = Number(p5.VERSION.replaceAll('.', '')) >= 190;
 		} catch (e) {}
