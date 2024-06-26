@@ -8897,7 +8897,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 */
 	this.background = function () {
 		let args = arguments;
-		if (args.length == 1 && args[0].length == 1) {
+		if (args.length == 1 && args[0]?.length == 1) {
 			_background.call($, $.colorPal(args[0]));
 		} else _background.call($, ...args);
 	};
@@ -8910,7 +8910,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 */
 	this.fill = function () {
 		let args = arguments;
-		if (args.length == 1 && args[0].length == 1) {
+		if (args.length == 1 && args[0]?.length == 1) {
 			_fill.call($, $.colorPal(args[0]));
 		} else _fill.call($, ...args);
 	};
@@ -8923,7 +8923,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 */
 	this.stroke = function () {
 		let args = arguments;
-		if (args.length == 1 && args[0].length == 1) {
+		if (args.length == 1 && args[0]?.length == 1) {
 			_stroke.call($, $.colorPal(args[0]));
 		} else _stroke.call($, ...args);
 	};
