@@ -8676,8 +8676,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (rend[0] == 'pixelated') {
 				renderQuality = 'pixelated';
 				if (!rend[1]) displayMode = 'fullscreen';
-				else displayScale = Number(rend[1].slice(1));
-				displayMode = 'centered';
+				else {
+					displayMode = 'centered';
+					displayScale = Number(rend[1].slice(1));
+				}
 				args.splice(2, 1);
 			} else if (rend[0] == 'fullscreen') {
 				displayMode = 'fullscreen';
