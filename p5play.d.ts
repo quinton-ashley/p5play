@@ -982,7 +982,7 @@ class Sprite {
      * sprite.applyForce(x, y, {x: originX, y: originY});
      * sprite.applyForce({x, y}, {x: originX, y: originY});
      */
-    applyForce(x: any, y: any, originX: any, originY: any, ...args: any[]): void;
+    applyForce(x: any, y?: any, originX?: any, originY?: any, ...args?: any[]): void;
     /**
      * Applies a force that's scaled to the sprite's mass.
      *
