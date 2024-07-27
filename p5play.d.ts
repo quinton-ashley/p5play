@@ -982,14 +982,14 @@ class Sprite {
      * sprite.applyForce(x, y, {x: originX, y: originY});
      * sprite.applyForce({x, y}, {x: originX, y: originY});
      */
-    applyForce(x: any, y: any, originX: any, originY: any, ...args: any[]): void;
+    applyForce(amount: number, origin?: Vector, ...args: any[]): void;
     /**
      * Applies a force that's scaled to the sprite's mass.
      *
      * @param {Number} amount
      * @param {Vector} [origin]
      */
-    applyForceScaled(...args: any[]): void;
+    applyForceScaled(amount: number, origin?: Vector, ...args: any[]): void;
     /**
      * Applies a force to the sprite's center of mass attracting it to
      * the given position.
@@ -2713,9 +2713,8 @@ class Canvas {
      *
      * Only q5.js has support for canvas options (context attributes).
      *
-     * @param {Number} width
-     * @param {Number} height
-     * @param {String} [preset] - 'fullscreen' or 'pixelated'
+     * @param {Number} [width]
+     * @param {Number} [height]
      * @param {String} [renderer] - '2d' (default) or 'webgl'
      * @param {Object} [options] - context attributes
      * @returns HTML5 canvas element
@@ -2726,12 +2725,8 @@ class Canvas {
      * new Canvas('16:9');
      * // 800x600 pixels
      * new Canvas(800, 600);
-     * // fullscreen scaling, fits window (no stretching)
-     * new Canvas(800, 600, 'fullscreen');
-     * // pixelated scaling, fits window (no stretching)
-     * new Canvas(256, 240, 'pixelated');
      */
-    constructor(width: number, height: number, preset?: string, renderer?: string, options?: any);
+    constructor(width?: number, height?: number, renderer?: string, options?: any);
     /**
      * The width of the canvas.
      * @type {Number}

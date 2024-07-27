@@ -3244,7 +3244,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * sprite.applyForce(x, y, {x: originX, y: originY});
 		 * sprite.applyForce({x, y}, {x: originX, y: originY});
 		 */
-		applyForce(x, y, originX, originY) {
+		applyForce(amount, origin) {
 			if (!this.body) return;
 			if (location.host == 'game.thegamebox.ca') {
 				return this.applyForceScaled(...arguments);
@@ -3260,7 +3260,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Number} amount
 		 * @param {Vector} [origin]
 		 */
-		applyForceScaled() {
+		applyForceScaled(amount, origin) {
 			if (!this.body) return;
 			let { forceVector, poa } = this._parseForceArgs(...arguments);
 			forceVector.mul(this.mass);
@@ -8347,28 +8347,31 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		else {
 			let ctx = img.drawingContext;
 			let pd = img._pixelDensity || 1;
-			let imgData = ctx.getImageData(0, 0, img.width * pd, img.height * pd);
-			let data = imgData.data;
-			let left = img.width,
+			let w = img.canvas.width;
+			let h = img.canvas.height;
+			let data = ctx.getImageData(0, 0, w, h).data;
+			let left = w,
 				right = 0,
-				top = img.height,
+				top = h,
 				bottom = 0;
 
-			for (let y = 0; y < img.height * pd; y++) {
-				for (let x = 0; x < img.width * pd; x++) {
-					let index = (y * img.width * pd + x) * 4;
-					if (data[index + 3] !== 0) {
+			let i = 3;
+			for (let y = 0; y < h; y++) {
+				for (let x = 0; x < w; x++) {
+					if (data[i] !== 0) {
 						if (x < left) left = x;
 						if (x > right) right = x;
 						if (y < top) top = y;
 						if (y > bottom) bottom = y;
 					}
+					i += 4;
 				}
 			}
 			top = Math.floor(top / pd);
 			bottom = Math.floor(bottom / pd);
 			left = Math.floor(left / pd);
 			right = Math.floor(right / pd);
+
 			img = img.get(left, top, right - left + 1, bottom - top + 1);
 		}
 		$.pop();
@@ -8612,7 +8615,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			case 'stackblitz.com':
 			case 'jsfiddle.net':
 			case 'aijs.io':
-			case 'preview-aijs.web.app':
+			case 'aijs-code-editor-user-content.web.app':
 			case 'quinton-ashley.github.io':
 				break;
 			default:
@@ -8759,7 +8762,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 *
 		 * Only q5.js has support for canvas options (context attributes).
 		 *
-		 * @param {Number} [width|aspectRatio]
+		 * @param {Number} [width]
 		 * @param {Number} [height]
 		 * @param {String} [renderer] - '2d' (default) or 'webgl'
 		 * @param {Object} [options] - context attributes
@@ -10563,7 +10566,7 @@ main {
 		_onConnect(gp) {
 			if (!gp) return;
 			for (let i = 0; i < this.length; i++) {
-				if (this[i].gamepad?.index === gp.index) {
+				if (gp.index == this[i].gamepad?.index) {
 					this[i].connected = true;
 					log('contros[' + i + '] reconnected: ' + gp.id);
 					return;
@@ -10573,6 +10576,7 @@ main {
 			if (this.onConnect(gp)) {
 				let c = new $.Contro(gp);
 
+				// get the index of the next available slot
 				let index = 0;
 				for (let i = 0; i < this.length; i++) {
 					if (!this[i]) {
@@ -10584,7 +10588,7 @@ main {
 				this[index] = c;
 				if (index == 0) {
 					$.contro = c;
-					if (!$._q5 && $._isGlobal) window.contro = c;
+					if ($._isGlobal) window.contro = c;
 				}
 			}
 		}
