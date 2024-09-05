@@ -3141,6 +3141,10 @@ class Contro extends InputDevice {
      * @type {boolean}
      */
     hasAnalogTriggers: boolean;
+    get cross(): number;
+    get circle(): number;
+    get square(): number;
+    get triangle(): number;
     /**
      * Alias for `leftStick`.
      */
@@ -3151,20 +3155,62 @@ class Contro extends InputDevice {
     get rs(): any;
     /**
      * Alias for `l` (left button).
+     * `lb` is what the button is called on Xbox controllers.
      */
     get lb(): number;
     /**
      * Alias for `r` (right button).
+     * `rb` is what the button is called on Xbox controllers.
      */
     get rb(): number;
     /**
-     * Alias for `lsb`.
+     * Alias for `l` (left button).
+     * `l1` is what the button is called on PlayStation controllers.
+     */
+    get l1(): number;
+    /**
+     * Alias for `r` (right button).
+     * `r1` is what the button is called on PlayStation controllers.
+     */
+    get r1(): number;
+    /**
+     * Alias for `lt` (digital left trigger).
+     * `zl` is what the button is called on Nintendo controllers.
+     */
+    get zl(): number;
+    /**
+     * Alias for `rt` (digital right trigger).
+     * `zr` is what the button is called on Nintendo controllers.
+     */
+    get zr(): number;
+    /**
+     * Alias for `leftTrigger` (analog left trigger).
+     * `l2` is what the trigger is called on PlayStation controllers.
+     */
+    get l2(): number;
+    /**
+     * Alias for `rightTrigger` (analog right trigger).
+     * `r2` is what the trigger is called on PlayStation controllers.
+     */
+    get r2(): number;
+    /**
+     * Verbose alias for `lsb`.
      */
     get leftStickButton(): number;
     /**
-     * Alias for `rsb`.
+     * Verbose alias for `rsb`.
      */
     get rightStickButton(): number;
+    /**
+     * Alias for `lsb` (left stick button).
+     * `l3` is what the trigger is called on PlayStation controllers.
+     */
+    get l3(): number;
+    /**
+     * Alias for `rsb` (right stick button).
+     * `r3` is what the trigger is called on PlayStation controllers.
+     */
+    get r3(): number;
 }
 /**
  * @class

@@ -4892,6 +4892,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		draw(x, y, r, sx, sy) {
 			this.x = x || 0;
 			this.y = y || 0;
+			r ??= this.rotation;
 
 			if (!this.visible) return;
 
@@ -4900,20 +4901,27 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			$.push();
 			$.imageMode('center');
-			$.translate(this.x, this.y);
-			$.rotate(r || this.rotation);
+
+			let _x = x + this.offset.x;
+			let _y = y + this.offset.y;
+
+			if (r) {
+				$.translate(_x, _y);
+				_x = _y = 0;
+				$.rotate(r);
+			}
 			$.scale(sx * this._scale._x, sy * this._scale._y);
 			let img = this[this._frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
 					let { x, y, w, h } = img; // image info
 					if (!this.demoMode) {
-						$.image(this.spriteSheet, this.offset.x, this.offset.y, w, h, x, y, w, h);
+						$.image(this.spriteSheet, _x, _y, w, h, x, y, w, h);
 					} else {
 						$.image(
 							this.spriteSheet,
-							this.offset.x,
-							this.offset.y,
+							_x,
+							_y,
 							this.spriteSheet.w,
 							this.spriteSheet.h,
 							x - this.spriteSheet.w / 2 + w / 2,
@@ -4921,7 +4929,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						);
 					}
 				} else {
-					$.image(img, this.offset.x, this.offset.y);
+					$.image(img, _x, _y);
 				}
 			} else {
 				console.warn(
@@ -10420,6 +10428,19 @@ main {
 			this.leftTrigger = 0;
 			this.rightTrigger = 0;
 		}
+		// aliases for playstation face buttons
+		get cross() {
+			return this.a;
+		}
+		get circle() {
+			return this.b;
+		}
+		get square() {
+			return this.x;
+		}
+		get triangle() {
+			return this.y;
+		}
 		/**
 		 * Alias for `leftStick`.
 		 */
@@ -10434,26 +10455,84 @@ main {
 		}
 		/**
 		 * Alias for `l` (left button).
+		 * `lb` is what the button is called on Xbox controllers.
 		 */
 		get lb() {
 			return this.l;
 		}
 		/**
 		 * Alias for `r` (right button).
+		 * `rb` is what the button is called on Xbox controllers.
 		 */
 		get rb() {
 			return this.r;
 		}
 		/**
-		 * Alias for `lsb`.
+		 * Alias for `l` (left button).
+		 * `l1` is what the button is called on PlayStation controllers.
+		 */
+		get l1() {
+			return this.l;
+		}
+		/**
+		 * Alias for `r` (right button).
+		 * `r1` is what the button is called on PlayStation controllers.
+		 */
+		get r1() {
+			return this.r;
+		}
+		/**
+		 * Alias for `lt` (digital left trigger).
+		 * `zl` is what the button is called on Nintendo controllers.
+		 */
+		get zl() {
+			return this.lt;
+		}
+		/**
+		 * Alias for `rt` (digital right trigger).
+		 * `zr` is what the button is called on Nintendo controllers.
+		 */
+		get zr() {
+			return this.rt;
+		}
+		/**
+		 * Alias for `leftTrigger` (analog left trigger).
+		 * `l2` is what the trigger is called on PlayStation controllers.
+		 */
+		get l2() {
+			return this.leftTrigger;
+		}
+		/**
+		 * Alias for `rightTrigger` (analog right trigger).
+		 * `r2` is what the trigger is called on PlayStation controllers.
+		 */
+		get r2() {
+			return this.rightTrigger;
+		}
+		/**
+		 * Verbose alias for `lsb`.
 		 */
 		get leftStickButton() {
 			return this.lsb;
 		}
 		/**
-		 * Alias for `rsb`.
+		 * Verbose alias for `rsb`.
 		 */
 		get rightStickButton() {
+			return this.rsb;
+		}
+		/**
+		 * Alias for `lsb` (left stick button).
+		 * `l3` is what the trigger is called on PlayStation controllers.
+		 */
+		get l3() {
+			return this.lsb;
+		}
+		/**
+		 * Alias for `rsb` (right stick button).
+		 * `r3` is what the trigger is called on PlayStation controllers.
+		 */
+		get r3() {
 			return this.rsb;
 		}
 	};
