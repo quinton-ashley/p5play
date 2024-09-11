@@ -399,8 +399,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.joints = [];
 			this.joints.removeAll = () => {
-				for (let j of this.joints) {
-					j.remove();
+				while (this.joints.length) {
+					this.joints.at(-1).remove();
 				}
 			};
 
@@ -10553,13 +10553,12 @@ main {
 		 */
 		constructor() {
 			super();
-			let _this = this;
 			if (window) {
 				window.addEventListener('gamepadconnected', (e) => {
-					_this._onConnect(e.gamepad);
+					this._onConnect(e.gamepad);
 				});
 				window.addEventListener('gamepaddisconnected', (e) => {
-					_this._onDisconnect(e.gamepad);
+					this._onDisconnect(e.gamepad);
 				});
 			}
 
@@ -10663,8 +10662,8 @@ main {
 						break;
 					}
 				}
-				log('contros[' + index + '] connected: ' + gp.id);
 				this[index] = c;
+				log('contros[' + index + '] connected: ' + gp.id);
 				if (index == 0) {
 					$.contro = c;
 					if ($._isGlobal) window.contro = c;
