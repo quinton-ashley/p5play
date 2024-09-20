@@ -2799,7 +2799,7 @@ function fill(...args: any[]): void;
 function stroke(...args: any[]): void;
 function loadImage(...args: any[]): p5.Image;
 function loadImg(...args: any[]): p5.Image;
-let enableTextCache: boolean;
+let addTextCache: boolean;
 /**
  * A FriendlyError is a custom error class that extends the native JS
  * Error class. It's used internally by p5play to make error messages

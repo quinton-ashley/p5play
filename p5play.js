@@ -863,12 +863,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 			}
 
-			// "random" color that's not too dark or too light
-			this.color ??= $.color(
-				Math.round($.random(30, 245)),
-				Math.round($.random(30, 245)),
-				Math.round($.random(30, 245))
-			);
+			{
+				let r = $.random(0.12, 0.96);
+				let g = $.random(0.12, 0.96);
+				let b = $.random(0.12, 0.96);
+
+				if ($._colorFormat != 1) {
+					r *= 255;
+					g *= 255;
+					b *= 255;
+				}
+
+				// "random" color that's not too dark or too light
+				this.color ??= $.color(r, g, b);
+			}
 
 			this._textFill ??= $.color(0);
 			this._textSize ??= this.tileSize == 1 ? ($.canvas ? $.textSize() : 12) : 0.8;
@@ -8351,37 +8359,37 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		$.push();
 		$.textSize(textSize);
 		let img = $.createTextImage(emoji);
-		if (img.trim) img = img.trim();
-		else {
-			let ctx = img.drawingContext;
-			let pd = img._pixelDensity || 1;
-			let w = img.canvas.width;
-			let h = img.canvas.height;
-			let data = ctx.getImageData(0, 0, w, h).data;
-			let left = w,
-				right = 0,
-				top = h,
-				bottom = 0;
 
-			let i = 3;
-			for (let y = 0; y < h; y++) {
-				for (let x = 0; x < w; x++) {
-					if (data[i] !== 0) {
-						if (x < left) left = x;
-						if (x > right) right = x;
-						if (y < top) top = y;
-						if (y > bottom) bottom = y;
-					}
-					i += 4;
+		// same code as img.trim() in q5.js
+		let ctx = img.ctx;
+		let pd = img._pixelDensity || 1;
+		let w = img.canvas.width;
+		let h = img.canvas.height;
+		let data = ctx.getImageData(0, 0, w, h).data;
+		let left = w,
+			right = 0,
+			top = h,
+			bottom = 0;
+
+		let i = 3;
+		for (let y = 0; y < h; y++) {
+			for (let x = 0; x < w; x++) {
+				if (data[i] !== 0) {
+					if (x < left) left = x;
+					if (x > right) right = x;
+					if (y < top) top = y;
+					if (y > bottom) bottom = y;
 				}
+				i += 4;
 			}
-			top = Math.floor(top / pd);
-			bottom = Math.floor(bottom / pd);
-			left = Math.floor(left / pd);
-			right = Math.floor(right / pd);
-
-			img = img.get(left, top, right - left + 1, bottom - top + 1);
 		}
+		top = Math.floor(top / pd);
+		bottom = Math.floor(bottom / pd);
+		left = Math.floor(left / pd);
+		right = Math.floor(right / pd);
+
+		img = img.get(left, top, right - left + 1, bottom - top + 1);
+
 		$.pop();
 		img.url = emoji;
 		return img;
@@ -8700,7 +8708,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		let rend = _createCanvas.call($, ...args);
 		$.ctx = $.drawingContext;
 		let c = rend.canvas || rend;
-		c.renderer = rend.GL ? 'webgl' : '2d';
+		if (rend.GL) c.renderer = 'webgl';
+		if (c.renderer != 'webgpu') c.renderer = '2d';
 		c.tabIndex = 0;
 		c.w = args[0];
 		c.h = args[1];
@@ -8734,12 +8743,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		c.hh = c.h * 0.5;
 		c.mouse = { x: $.mouseX, y: $.mouseY };
 		if (c.renderer == '2d') {
-			$.camera.x = c.hw;
-			$.camera.y = c.hh;
+			$.camera.x = $.camera.ogX = c.hw;
+			$.camera.y = $.camera.ogY = c.hh;
 		} else {
 			$.camera.x = 0;
 			$.camera.y = 0;
-			$._textCache = false;
+			if (c.renderer == 'webgl') $._textCache = false;
 			$.p5play._renderStats = {
 				x: -c.hw + 10,
 				y: -c.hh + 20
@@ -9114,19 +9123,19 @@ main {
 		};
 	}
 
-	let enableTextCache = false;
+	let addTextCache = false;
 	if (typeof $._textCache != 'object') {
 		// only add text caching to p5.js v1.9.0 or later
 		try {
-			enableTextCache = Number(p5.VERSION.replaceAll('.', '')) >= 190;
+			addTextCache = Number(p5.VERSION.replaceAll('.', '')) >= 190;
 		} catch (e) {}
 	}
-	if (enableTextCache) {
-		$._textCache = true;
+	if (addTextCache) {
+		$._textCache = false;
 		$._TimedCache = class extends Map {
 			constructor() {
 				super();
-				this.maxSize = 500;
+				this.maxSize = 50000;
 			}
 			set(k, v) {
 				v.lastAccessed = Date.now();
@@ -9139,25 +9148,18 @@ main {
 				return v;
 			}
 			gc() {
-				let t = Infinity;
-				let oldest;
-				let i = 0;
-				for (const [k, v] of this.entries()) {
-					if (v.lastAccessed < t) {
-						t = v.lastAccessed;
-						oldest = i;
-					}
-					i++;
+				const oldestEntries = [];
+				const entryArray = Array.from(this.entries());
+
+				entryArray.sort((a, b) => a[1].lastAccessed - b[1].lastAccessed);
+
+				for (let i = 0; i < Math.min(10000, entryArray.length); i++) {
+					oldestEntries.push(entryArray[i][0]);
 				}
-				i = oldest;
-				for (const k of this.keys()) {
-					if (i == 0) {
-						oldest = k;
-						break;
-					}
-					i--;
+
+				for (const key of oldestEntries) {
+					this.delete(key);
 				}
-				this.delete(oldest);
 			}
 		};
 		$._tic = new $._TimedCache();
@@ -9253,11 +9255,10 @@ main {
 				cY += r._textLeading;
 				if (cY > h) break;
 			}
-			ti = tg.get();
-			ti._ascent = _ascent;
-			ti._descent = _descent;
-			$._tic.set(k, ti);
-			if (!$._genTextImage) $.textImage(ti, x, y);
+			tg._ascent = _ascent;
+			tg._descent = _descent;
+			$._tic.set(k, tg);
+			if (!$._genTextImage) $.textImage(tg, x, y);
 		};
 		/**
 		 * Displays an image based on text alignment settings.
@@ -9625,6 +9626,8 @@ main {
 
 			this._visible = true;
 			this._cursor = 'default';
+			this._ogX = 0;
+			this._ogY = 0;
 		}
 
 		_ac(inp) {
@@ -9639,12 +9642,15 @@ main {
 			$.mouse.canvasPos.x = $.mouseX;
 			$.mouse.canvasPos.y = $.mouseY;
 
-			if ($.camera.x == $.canvas.hw && $.camera.y == $.canvas.hh && $.camera.zoom == 1) {
+			if ($.camera.x == $.camera.ogX && $.camera.y == $.camera.ogY && $.camera.zoom == 1) {
 				this.x = $.mouseX;
 				this.y = $.mouseY;
-			} else {
+			} else if ($.canvas.renderer != 'webgpu') {
 				this.x = ($.mouseX - $.canvas.hw) / $.camera.zoom + $.camera.x;
 				this.y = ($.mouseY - $.canvas.hh) / $.camera.zoom + $.camera.y;
+			} else {
+				this.x = $.mouseX / $.camera.zoom + $.camera.x;
+				this.y = $.mouseY / $.camera.zoom + $.camera.y;
 			}
 		}
 
