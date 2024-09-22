@@ -8361,7 +8361,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		let img = $.createTextImage(emoji);
 
 		// same code as img.trim() in q5.js
-		let ctx = img.ctx;
+		let ctx = img.drawingContext;
 		let pd = img._pixelDensity || 1;
 		let w = img.canvas.width;
 		let h = img.canvas.height;
