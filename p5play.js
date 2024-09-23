@@ -8358,13 +8358,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.EmojiImage = function (emoji, textSize) {
 		$.push();
 		$.textSize(textSize);
-		let img = $.createTextImage(emoji);
+		let g = $.createGraphics(textSize, textSize * 1.25);
+		g.textSize(textSize);
+		g.textAlign($.CENTER);
+		g.text(emoji, textSize / 2, textSize);
 
 		// same code as img.trim() in q5.js
-		let ctx = img.drawingContext;
-		let pd = img._pixelDensity || 1;
-		let w = img.canvas.width;
-		let h = img.canvas.height;
+		let ctx = g.drawingContext;
+		let pd = g._pixelDensity || 1;
+		let w = g.canvas.width;
+		let h = g.canvas.height;
 		let data = ctx.getImageData(0, 0, w, h).data;
 		let left = w,
 			right = 0,
@@ -8388,11 +8391,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		left = Math.floor(left / pd);
 		right = Math.floor(right / pd);
 
-		img = img.get(left, top, right - left + 1, bottom - top + 1);
+		g = g.get(left, top, right - left + 1, bottom - top + 1);
 
 		$.pop();
-		img.url = emoji;
-		return img;
+		g.url = emoji;
+		return g;
 	};
 
 	/**
@@ -9120,169 +9123,6 @@ main {
 			}
 			Object.assign(c, { displayMode, renderQuality, displayScale });
 			$._adjustDisplay();
-		};
-	}
-
-	let addTextCache = false;
-	if (typeof $._textCache != 'object') {
-		// only add text caching to p5.js v1.9.0 or later
-		try {
-			addTextCache = Number(p5.VERSION.replaceAll('.', '')) >= 190;
-		} catch (e) {}
-	}
-	if (addTextCache) {
-		$._textCache = false;
-		$._TimedCache = class extends Map {
-			constructor() {
-				super();
-				this.maxSize = 50000;
-			}
-			set(k, v) {
-				v.lastAccessed = Date.now();
-				super.set(k, v);
-				if (this.size > this.maxSize) this.gc();
-			}
-			get(k) {
-				const v = super.get(k);
-				if (v) v.lastAccessed = Date.now();
-				return v;
-			}
-			gc() {
-				const oldestEntries = [];
-				const entryArray = Array.from(this.entries());
-
-				entryArray.sort((a, b) => a[1].lastAccessed - b[1].lastAccessed);
-
-				for (let i = 0; i < Math.min(10000, entryArray.length); i++) {
-					oldestEntries.push(entryArray[i][0]);
-				}
-
-				for (const key of oldestEntries) {
-					this.delete(key);
-				}
-			}
-		};
-		$._tic = new $._TimedCache();
-		/**
-		 * Enables or disables text caching.
-		 * @param {Boolean} b
-		 * @param {Number} maxSize
-		 */
-		$.textCache = (b, maxSize) => {
-			if (maxSize) $._tic.maxSize = maxSize;
-			if (b !== undefined) $._textCache = b;
-			return $._textCache;
-		};
-		$._genTextImageKey = (str, w, h) => {
-			const r = $._renderer;
-			let font = r._textFont;
-			if (typeof font != 'string') {
-				font = font.font.names.fullName;
-				font = font[Object.keys(font)[0]];
-			}
-			return (
-				str.slice(0, 200) +
-				(r._textStyle || 'normal') +
-				r._textSize +
-				font +
-				(r._doFill ? $.ctx.fillStyle : '') +
-				'_' +
-				(r._doStroke && r._strokeSet ? $.ctx.lineWidth + $.ctx.strokeStyle + '_' : '') +
-				(w || '') +
-				(h ? 'x' + h : '')
-			);
-		};
-		$.createTextImage = (str, w, h) => {
-			let og = $._textCache;
-			$._textCache = true;
-			$._genTextImage = true;
-			$.text(str, 0, 0, w, h);
-			$._genTextImage = false;
-			let k = $._genTextImageKey(str, w, h);
-			$._textCache = og;
-			return $._tic.get(k);
-		};
-		const _text = $.text;
-		/**
-		 * Displays text on the canvas.
-		 *
-		 * @param {String} str - text to display
-		 * @param {Number} x
-		 * @param {Number} y
-		 * @param {Number} w - line width limit
-		 * @param {Number} h - height limit
-		 */
-		$.text = (str, x, y, w, h) => {
-			if (str === undefined) return;
-			str = str.toString();
-			const r = $._renderer;
-			if (!r._doFill && !r._doStroke) return;
-			let ctx = $.ctx;
-			let useCache = $._genTextImage;
-			if (!useCache && $._textCache) {
-				let t = ctx.getTransform();
-				useCache = t.b != 0 || t.c != 0;
-			}
-			if (!useCache) return _text.call($, str, x, y, w, h);
-
-			let c, ti, k, cX, cY, _ascent, _descent;
-			k = $._genTextImageKey(str, w, h);
-			ti = $._tic.get(k);
-			if (ti && !$._genTextImage) {
-				$.textImage(ti, x, y);
-				return;
-			}
-			let tg = $.createGraphics.call($, 1, 1);
-			tg.textFont($.textFont());
-			if ($.textStyle()) tg.textStyle($.textStyle());
-			tg.textSize($.textSize());
-			c = tg.canvas.getContext('2d');
-			let lines = str.split('\n');
-			cX = 0;
-			cY = r._textLeading * lines.length;
-			let m = c.measureText(' ');
-			_ascent = m.fontBoundingBoxAscent;
-			_descent = m.fontBoundingBoxDescent;
-			h ??= cY + _descent;
-			tg.resizeCanvas(Math.ceil(tg.textWidth(str)), Math.ceil(h));
-			tg.fill(ctx.fillStyle);
-			if (r._doStroke) {
-				tg.stroke(ctx.strokeStyle);
-				tg.strokeWeight(ctx.lineWidth);
-			} else tg.noStroke();
-			for (let i = 0; i < lines.length; i++) {
-				tg.text(lines[i], cX, cY);
-				cY += r._textLeading;
-				if (cY > h) break;
-			}
-			tg._ascent = _ascent;
-			tg._descent = _descent;
-			$._tic.set(k, tg);
-			if (!$._genTextImage) $.textImage(tg, x, y);
-		};
-		/**
-		 * Displays an image based on text alignment settings.
-		 * @param {p5.Image} img
-		 * @param {Number} x
-		 * @param {Number} y
-		 */
-		$.textImage = (img, x, y) => {
-			let og = $._renderer._imageMode;
-			$.imageMode.call($, 'corner');
-			const ctx = $.canvas.getContext('2d');
-			if (ctx.textAlign == 'center') x -= img.width * 0.5;
-			else if (ctx.textAlign == 'right') x -= img.width;
-
-			let leadDiff;
-			if (ctx.textBaseline == 'alphabetic') y -= $._renderer._textLeading;
-			else leadDiff = $._renderer._textLeading - $._renderer._textSize;
-
-			if (ctx.textBaseline == 'middle') y -= img._descent + img._ascent * 0.5 + leadDiff;
-			else if (ctx.textBaseline == 'bottom') y -= img._ascent + img._descent + leadDiff;
-			else if (ctx.textBaseline == 'top') y -= img._descent + leadDiff;
-
-			$.image.call($, img, x, y);
-			$.imageMode.call($, og);
 		};
 	}
 
@@ -10784,11 +10624,6 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 				rs.fontSize = 10;
 			}
 			rs.gap = rs.fontSize * 1.25;
-			if (!$._q5) {
-				console.warn(
-					"renderStats() produces inaccurate FPS approximations because deltaTime is calculated incorrectly in p5.js. Even if your game runs at a solid 60hz display rate, the fps calculations shown may be lower. Use q5.js (visit https://q5js.org) or your browser's performance testing tools for accurate results."
-				);
-			}
 		}
 
 		if (!$.p5play._fpsAvg || $.frameCount % 20 === 0) {
