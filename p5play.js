@@ -8634,7 +8634,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			case 'stackblitz.com':
 			case 'jsfiddle.net':
 			case 'aijs.io':
-			case 'aijs-code-editor-user-content.web.app':
+			case 'preview-aijs.web.app':
 			case 'quinton-ashley.github.io':
 				break;
 			default:
