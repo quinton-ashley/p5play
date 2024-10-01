@@ -3159,12 +3159,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this._strokeWeight !== undefined) {
 				$.strokeWeight(this._strokeWeight);
 			}
-			if (this._opacity) $.ctx.globalAlpha = this._opacity;
+			let ogGlobalAlpha;
+			if (this._opacity) {
+				ogGlobalAlpha = $.ctx.globalAlpha;
+				$.ctx.globalAlpha = this._opacity;
+			}
 			if (this._tint) $.tint(this._tint);
 
 			this._draw();
 
 			$.pop();
+			if (this._opacity) $.ctx.globalAlpha = ogGlobalAlpha;
 			this._cameraActiveWhenDrawn = $.camera.isActive;
 
 			if (this.autoDraw) this.autoDraw = null;
