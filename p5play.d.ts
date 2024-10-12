@@ -1201,8 +1201,8 @@ class Sprite {
      * an animation or animation atlas as values
      * @example
      * sprite.addAnis({
-     *  name0: atlas0,
-     * 	name1: atlas1
+     *   name0: atlas0,
+     *   name1: atlas1
      * });
      */
     addAnis(...args: any[]): void;
