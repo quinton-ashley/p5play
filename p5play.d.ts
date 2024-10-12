@@ -2704,18 +2704,17 @@ class Canvas {
      * p5play adds some extra functionality to the `createCanvas`
      * function. See the examples below.
      *
-     * This function also disables the default keydown responses for
-     * the arrow keys, slash, and space. This is to prevent the
-     * browser from scrolling the page when the user is playing a game
-     * using common keyboard commands.
+     * Creating a canvas in p5play disables the browser's default
+     * keydown responses for the slash, space, and arrow keys to
+     * prevent page scrolling which is disruptive to gameplay.
      *
-     * Supports the '2d' and 'webgl' renderers.
+     * For an easy way to scale the canvas or make it pixelated, use
+     * the `displayMode` function.
      *
      * Only q5.js has support for canvas options (context attributes).
      *
      * @param {Number} [width]
      * @param {Number} [height]
-     * @param {String} [renderer] - '2d' (default) or 'webgl'
      * @param {Object} [options] - context attributes
      * @returns HTML5 canvas element
      * @example
@@ -2726,7 +2725,7 @@ class Canvas {
      * // 800x600 pixels
      * new Canvas(800, 600);
      */
-    constructor(width?: number, height?: number, renderer?: string, options?: any);
+    constructor(width?: number, height?: number, renderer: any, options?: any);
     /**
      * The width of the canvas.
      * @type {Number}
@@ -2777,9 +2776,9 @@ class Canvas {
      * Visually the canvas will shrink or extend to the new size. Sprites
      * will not change position.
      *
-     * If you would prefer to keep the camera focused on the same area, then
-     * you must manually adjust the camera position after calling this
-     * function.
+     * If you would prefer to keep the camera focused on the same area,
+     * then you must manually adjust the camera position after calling
+     * this function.
      *
      * @param {Number} w - the new width of the canvas
      * @param {Number} h - the new height of the canvas

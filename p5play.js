@@ -8778,18 +8778,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * p5play adds some extra functionality to the `createCanvas`
 		 * function. See the examples below.
 		 *
-		 * This function also disables the default keydown responses for
-		 * the arrow keys, slash, and space. This is to prevent the
-		 * browser from scrolling the page when the user is playing a game
-		 * using common keyboard commands.
+		 * Disables the browser's default keydown responses for the slash,
+		 * space, and arrow keys to prevent page scrolling.
 		 *
-		 * Supports the '2d' and 'webgl' renderers.
+		 * For an easy way to scale the canvas or make it pixelated, use
+		 * the `displayMode` function.
 		 *
 		 * Only q5.js has support for canvas options (context attributes).
 		 *
 		 * @param {Number} [width]
 		 * @param {Number} [height]
-		 * @param {String} [renderer] - '2d' (default) or 'webgl'
 		 * @param {Object} [options] - context attributes
 		 * @returns HTML5 canvas element
 		 * @example
@@ -8853,9 +8851,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Visually the canvas will shrink or extend to the new size. Sprites
 		 * will not change position.
 		 *
-		 * If you would prefer to keep the camera focused on the same area, then
-		 * you must manually adjust the camera position after calling this
-		 * function.
+		 * If you would prefer to keep the camera focused on the same area,
+		 * then you must manually adjust the camera position after calling
+		 * this function.
 		 *
 		 * @param {Number} w - the new width of the canvas
 		 * @param {Number} h - the new height of the canvas
@@ -9120,6 +9118,24 @@ main {
 			}
 		};
 
+		/** 💻
+		 * The `displayMode` function lets you customize how your canvas is presented.
+		 *
+		 * Display modes:
+		 * - "normal": no styling to canvas or its parent element
+		 * - "centered": canvas will be centered horizontally and vertically within its parent and if it's display size is bigger than its parent it will not clip
+		 * - "maxed": canvas will fill the parent element, same as fullscreen for a global mode canvas inside a `main` element
+		 * - "fullscreen": canvas will fill the screen with letterboxing if necessary to persevere its aspect ratio, like css object-fit contain
+		 *
+		 * Render qualities:
+		 * - "default": pixelDensity set to displayDensity
+		 * - "pixelated": pixelDensity set to 1 and various css styles are applied to the canvas to make it render without image smoothing
+		 *
+		 * Display scale can be set to make small canvases appear larger.
+		 * @param displayMode
+		 * @param renderQuality
+		 * @param displayScale - can be given as a string (ex. "x2") or a number
+		 */
 		$.displayMode = (displayMode = 'normal', renderQuality = 'default', displayScale = 1) => {
 			let c = $.canvas;
 
