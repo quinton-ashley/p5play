@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.22
+ * @version 3.23
  * @author quinton-ashley
  * @license AGPL-3.0
  */
@@ -4725,8 +4725,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					if (frames && Array.isArray(frames)) {
 						frameCount = frames.length;
 					} else frameCount ??= frames || 1;
-					w ??= width || owner.anis.w || owner.width;
-					h ??= height || owner.anis.h || owner.height;
+					w ??= width || owner.anis.w;
+					h ??= height || owner.anis.h;
 					x ??= col || 0;
 					y ??= line || row || 0;
 					if (pos) {
@@ -4739,6 +4739,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					} else if (frameSize) {
 						w = frameSize[0];
 						h = frameSize[1];
+					}
+
+					if (owner instanceof $.Group) {
+						owner.w ??= owner.width;
+						owner.h ??= owner.height;
 					}
 
 					let tileSize = owner.tileSize;
