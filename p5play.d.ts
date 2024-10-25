@@ -1753,17 +1753,9 @@ class Group extends Array<Sprite> {
      */
     d: number;
     /**
-     * @type {Number}
-     */
-    diameter: number;
-    /**
      * @type {Boolean}
      */
     dynamic: boolean;
-    /**
-     * @type {Number}
-     */
-    height: number;
     /**
      * @type {String}
      */
@@ -1784,10 +1776,6 @@ class Group extends Array<Sprite> {
      * @type {Boolean}
      */
     static: boolean;
-    /**
-     * @type {Number}
-     */
-    width: number;
     /**
      * Each group has a unique id number. Don't change it!
      * Its useful for debugging.
@@ -1883,6 +1871,21 @@ class Group extends Array<Sprite> {
      * @type {Number}
      */
     get amount(): number;
+    set diameter(val: number);
+    /**
+     * @type {Number}
+     */
+    get diameter(): number;
+    set width(val: number);
+    /**
+     * @type {Number}
+     */
+    get width(): number;
+    set height(val: number);
+    /**
+     * @type {Number}
+     */
+    get height(): number;
     set velocity(val: p5.Vector);
     /**
      * The sprite's velocity vector {x, y}

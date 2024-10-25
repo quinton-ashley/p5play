@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.23
+ * @version 3.24
  * @author quinton-ashley
  * @license AGPL-3.0
  */
@@ -4596,11 +4596,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (!isNaN(args[1])) num2 = Number(args[1]);
 				else to = args[1];
 
+				let extIndex = from.lastIndexOf('.');
 				let digits1 = 0;
 				let digits2 = 0;
 
-				// skip extension work backwards to find the numbers
-				for (let i = from.length - 5; i >= 0; i--) {
+				// start from ext "."
+				// work backwards to find where the numbers end
+				for (let i = extIndex - 1; i >= 0; i--) {
 					if (!isNaN(from.charAt(i))) digits1++;
 					else break;
 				}
@@ -4612,9 +4614,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					}
 				}
 
-				let prefix1 = from.slice(0, -4 - digits1);
+				let ext = from.slice(extIndex);
+				let prefix1 = from.slice(0, extIndex - digits1);
 				let prefix2;
-				if (to) prefix2 = to.slice(0, -4 - digits2);
+				if (to) prefix2 = to.slice(0, extIndex - digits2);
 
 				// images don't belong to the same sequence
 				// they are just two separate images with numbers
@@ -4622,13 +4625,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					this.push($.loadImage(from));
 					this.push($.loadImage(to));
 				} else {
-					// Our numbers likely have leading zeroes, which means that some
-					// browsers (e.g., PhantomJS) will interpret them as base 8 (octal)
-					// instead of decimal. To fix this, we'll explicity tell parseInt to
-					// use a base of 10 (decimal). For more details on this issue, see
-					// http://stackoverflow.com/a/8763427/2422398.
-					let num1 = parseInt(from.slice(-4 - digits1, -4), 10);
-					num2 ??= parseInt(to.slice(-4 - digits2, -4), 10);
+					let num1 = parseInt(from.slice(extIndex - digits1, extIndex), 10);
+					num2 ??= parseInt(to.slice(extIndex - digits2, extIndex), 10);
 
 					// swap if inverted
 					if (num2 < num1) {
@@ -4643,14 +4641,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						for (let i = num1; i <= num2; i++) {
 							// Use nf() to number format 'i' into the amount of digits
 							// ex: 14 with 4 digits is 0014
-							fileName = prefix1 + $.nf(i, digits1) + '.png';
+							fileName = prefix1 + $.nf(i, digits1) + ext;
 							this.push($.loadImage(fileName));
 						}
 					} // case: case img1, img2
 					else {
 						for (let i = num1; i <= num2; i++) {
 							// Use nf() to number format 'i' into four digits
-							fileName = prefix1 + i + '.png';
+							fileName = prefix1 + i + ext;
 							this.push($.loadImage(fileName));
 						}
 					}
@@ -4739,11 +4737,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					} else if (frameSize) {
 						w = frameSize[0];
 						h = frameSize[1];
-					}
-
-					if (owner instanceof $.Group) {
-						owner.w ??= owner.width;
-						owner.h ??= owner.height;
 					}
 
 					let tileSize = owner.tileSize;
@@ -4937,26 +4930,24 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			$.push();
 			$.imageMode('center');
 
-			let _x = x + this.offset.x;
-			let _y = y + this.offset.y;
-
-			if (r) {
-				$.translate(_x, _y);
-				_x = _y = 0;
-				$.rotate(r);
-			}
+			$.translate(this.x, this.y);
+			$.rotate(r);
 			$.scale(sx * this._scale._x, sy * this._scale._y);
+
+			let ox = this.offset.x;
+			let oy = this.offset.y;
+
 			let img = this[this._frame];
 			if (img !== undefined) {
 				if (this.spriteSheet) {
 					let { x, y, w, h } = img; // image info
 					if (!this.demoMode) {
-						$.image(this.spriteSheet, _x, _y, w, h, x, y, w, h);
+						$.image(this.spriteSheet, ox, oy, w, h, x, y, w, h);
 					} else {
 						$.image(
 							this.spriteSheet,
-							_x,
-							_y,
+							ox,
+							oy,
 							this.spriteSheet.w,
 							this.spriteSheet.h,
 							x - this.spriteSheet.w / 2 + w / 2,
@@ -4964,7 +4955,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 						);
 					}
 				} else {
-					$.image(img, _x, _y);
+					$.image(img, ox, oy);
 				}
 			} else {
 				console.warn(
@@ -5485,17 +5476,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.d;
 			/**
-			 * @type {Number}
-			 */
-			this.diameter;
-			/**
 			 * @type {Boolean}
 			 */
 			this.dynamic;
-			/**
-			 * @type {Number}
-			 */
-			this.height;
 			/**
 			 * @type {String}
 			 */
@@ -5516,10 +5499,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @type {Boolean}
 			 */
 			this.static;
-			/**
-			 * @type {Number}
-			 */
-			this.width;
 
 			/**
 			 * Each group has a unique id number. Don't change it!
@@ -5646,7 +5625,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			for (let prop of $.Sprite.propsAll) {
-				if (prop == 'ani' || prop == 'velocity') continue;
+				if (prop == 'ani' || prop == 'velocity' || prop == 'width' || prop == 'height' || prop == 'diameter') continue;
 
 				Object.defineProperty(this, prop, {
 					get() {
@@ -5833,6 +5812,34 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (shouldAdd) new this.Sprite();
 				else this[this.length - 1].remove();
 			}
+		}
+
+		/**
+		 * @type {Number}
+		 */
+		get diameter() {
+			return this.d;
+		}
+		set diameter(val) {
+			this.d = val;
+		}
+		/**
+		 * @type {Number}
+		 */
+		get width() {
+			return this.w;
+		}
+		set width(val) {
+			this.w = val;
+		}
+		/**
+		 * @type {Number}
+		 */
+		get height() {
+			return this.h;
+		}
+		set height(val) {
+			this.h = val;
 		}
 
 		/**
