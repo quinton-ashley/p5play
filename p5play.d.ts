@@ -1529,6 +1529,7 @@ class SpriteAnimation extends Array<p5.Image> {
      * @type {Number}
      */
     get width(): number;
+    get defaultWidth(): any;
     /**
      * Height of the animation's current frame.
      * @type {Number}
@@ -1539,6 +1540,7 @@ class SpriteAnimation extends Array<p5.Image> {
      * @type {Number}
      */
     get height(): number;
+    get defaultHeight(): any;
 }
 /**
  * <a href="https://p5play.org/learn/animation.html">

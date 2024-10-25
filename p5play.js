@@ -642,16 +642,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					else this.image = new $.EmojiImage(ani, w);
 
 					if (!w && (this._img.w != 1 || this._img.h != 1)) {
-						w = this._img.w / ts;
-						h ??= this._img.h / ts;
+						w = (this._img.defaultWidth || this._img.w) / ts;
+						h ??= (this._img.defaultHeight || this._img.h) / ts;
 					}
 				} else {
 					if (typeof ani == 'string') this._changeAni(ani);
 					else this._ani = ani.clone();
 
 					if (!w && (this._ani.w != 1 || this._ani.h != 1)) {
-						w = this._ani.w / ts;
-						h ??= this._ani.h / ts;
+						w = (this._ani.defaultWidth || this._ani.w) / ts;
+						h ??= (this._ani.defaultHeight || this._ani.h) / ts;
 					}
 				}
 			}
@@ -4772,7 +4772,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 							y *= h;
 						}
 						for (let i = 0; i < frameCount; i++) {
-							_this.push({ x, y, w, h });
+							let f = { x, y, w, h };
+							f.defaultWidth = w * $._defaultImageScale;
+							f.defaultHeight = h * $._defaultImageScale;
+							_this.push(f);
 							x += w;
 							if (x >= _this.spriteSheet.width) {
 								x = 0;
@@ -4783,10 +4786,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					} else {
 						let sw = Math.round(_this.spriteSheet.width / w);
 						for (let frame of frames) {
+							let f;
 							if (typeof frame == 'number') {
 								y = Math.floor(frame / sw) * h;
 								x = (frame % sw) * w;
-								_this.push({ x, y, w, h });
+								f = { x, y, w, h };
 							} else {
 								let f;
 								if (frame.length == 2) {
@@ -4801,8 +4805,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 										h: frame[3]
 									};
 								}
-								_this.push(f);
 							}
+							f.defaultWidth = w * $._defaultImageScale;
+							f.defaultHeight = h * $._defaultImageScale;
+							_this.push(f);
 						}
 					}
 				}
@@ -4942,7 +4948,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (this.spriteSheet) {
 					let { x, y, w, h } = img; // image info
 					if (!this.demoMode) {
-						$.image(this.spriteSheet, ox, oy, w, h, x, y, w, h);
+						$.image(this.spriteSheet, ox, oy, img.defaultWidth || w, img.defaultHeight || h, x, y, w, h);
 					} else {
 						$.image(
 							this.spriteSheet,
@@ -5168,6 +5174,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			else if (frameInfo) return frameInfo.w;
 			return 1;
 		}
+		get defaultWidth() {
+			return this[this._frame].defaultWidth;
+		}
 
 		/**
 		 * Height of the animation's current frame.
@@ -5185,6 +5194,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (frameInfo instanceof p5.Image) return frameInfo.height;
 			else if (frameInfo) return frameInfo.h;
 			return 1;
+		}
+		get defaultHeight() {
+			return this[this._frame].defaultHeight;
 		}
 	};
 
