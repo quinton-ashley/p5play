@@ -10,8 +10,19 @@ Open source licensed under the [AGPLv3][]. Multi-licensed for [professional][] a
 
 ## Credits ⭐️
 
-p5play (v3) was created by Quinton Ashley [@quinton-ashley][].  
-p5.play (v1) was created by Paolo Pedercini [@molleindustria][].
+p5play (version 3) was created by Quinton Ashley.
+
+Huge thanks to everyone that's helped with p5play! 🙏
+
+Paolo Pedercini, creator of p5.play (version 1), who trusted me to take over the project.
+
+Erin Catto, creator of the Box2D physics simulator.
+
+Ali Shakiba, creator of planck.js, a JavaScript port of Box2D used behind the scenes by p5play.
+
+Contributors: @Tezumie, Oliver Zell, Caleb Foss, and Bobby S.
+
+Testers and bug reporters: Lachlan Noble, Raj Raizada, Nathan Anil, Chayarat Wangweera, Zhiyuan Guo, Aarnav Gupta, and Carter Noa.
 
 ## Contributing to p5play ✍️
 

@@ -34,7 +34,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_22');
+			gtag('event', 'p5play_v3_24');
 		};
 	}
 
@@ -264,7 +264,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * expect it to, if not you'll just get an error.
 		 *
 		 * Special feature! If the first parameter to this constructor is a
-		 * loaded p5.Image, SpriteAnimation, or name of a SpriteAnimation,
+		 * loaded p5.Image, Ani, or name of a animation,
 		 * then the Sprite will be created with that animation. If the
 		 * dimensions of the sprite are not given, then the Sprite will be
 		 * created using the dimensions of the animation.
@@ -318,10 +318,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				args = args.slice(1);
 			}
 
-			// first arg is a SpriteAnimation, animation name, or p5.Image
+			// first arg is a Ani, animation name, or p5.Image
 			if (
 				args[0] !== undefined &&
-				(typeof args[0] == 'string' || args[0] instanceof $.SpriteAnimation || args[0] instanceof p5.Image)
+				(typeof args[0] == 'string' || args[0] instanceof $.Ani || args[0] instanceof p5.Image)
 			) {
 				// shift
 				ani = args[0];
@@ -387,10 +387,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.groups = [];
 
 			/**
-			 * Keys are the animation label, values are SpriteAnimation objects.
-			 * @type {SpriteAnimations}
+			 * Keys are the animation label, values are Ani objects.
+			 * @type {Anis}
 			 */
-			this.animations = new $.SpriteAnimations();
+			this.animations = new $.Anis();
 
 			/**
 			 * Joints that the sprite is attached to
@@ -1343,7 +1343,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Reference to the sprite's current animation.
-		 * @type {SpriteAnimation}
+		 * @type {Ani}
 		 */
 		get animation() {
 			return this._ani;
@@ -1354,7 +1354,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Reference to the sprite's current animation.
-		 * @type {SpriteAnimation}
+		 * @type {Ani}
 		 */
 		get ani() {
 			return this._ani;
@@ -1364,8 +1364,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Keys are the animation label, values are SpriteAnimation objects
-		 * @type {SpriteAnimations}
+		 * Keys are the animation label, values are Ani objects
+		 * @type {Anis}
 		 */
 		get anis() {
 			return this.animations;
@@ -3820,14 +3820,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Adds an animation to the sprite. Use this function in the `preload`
 		 * function. You don't need to name the animation if the sprite will only
-		 * use one animation. See SpriteAnimation for more information.
+		 * use one animation. See Ani for more information.
 		 *
 		 * If an animation was already added to a different sprite or group,
 		 * it can not be added to another sprite or group. A clone (copy) of
 		 * the animation will be automatically created and added instead.
 		 *
-		 * @param {String} name - SpriteAnimation identifier
-		 * @param {SpriteAnimation} animation - The preloaded animation
+		 * @param {String} name - Ani identifier
+		 * @param {Ani} animation - The preloaded animation
 		 * @example
 		 * sprite.addAni(name, animation);
 		 * sprite.addAni(name, frame1, frame2, frame3...);
@@ -3835,23 +3835,23 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		addAni() {
 			if ($.p5play.disableImages) {
-				this._ani = new $.SpriteAnimation();
+				this._ani = new $.Ani();
 				return;
 			}
 			let args = [...arguments];
 			let name, ani;
-			if (args[0] instanceof $.SpriteAnimation) {
+			if (args[0] instanceof $.Ani) {
 				ani = args[0];
 				if (ani._addedToSpriteOrGroup) ani = ani.clone();
 				name = ani.name || 'default';
 				ani.name = name;
-			} else if (args[1] instanceof $.SpriteAnimation) {
+			} else if (args[1] instanceof $.Ani) {
 				name = args[0];
 				ani = args[1];
 				if (ani._addedToSpriteOrGroup) ani = ani.clone();
 				ani.name = name;
 			} else {
-				ani = new $.SpriteAnimation(this, ...args);
+				ani = new $.Ani(this, ...args);
 				name = ani.name;
 			}
 			this.animations[name] = ani;
@@ -3925,7 +3925,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		async changeAni(anis) {
 			if ($.p5play.disableImages) return;
 			if (arguments.length > 1) anis = [...arguments];
-			else if (anis instanceof $.SpriteAnimation) {
+			else if (anis instanceof $.Ani) {
 				if (anis == this._ani) return;
 				anis = [anis];
 			} else if (!Array.isArray(anis)) {
@@ -3938,7 +3938,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			for (let i = 0; i < anis.length; i++) {
 				let ani = anis[i];
 				if (
-					ani instanceof $.SpriteAnimation ||
+					ani instanceof $.Ani ||
 					ani instanceof p5.Image ||
 					(typeof ani == 'string' && ani.length != 1 && ani.includes('.'))
 				) {
@@ -4027,7 +4027,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * added using the group.addAnimation method to a group the sprite
 		 * has been added to.
 		 *
-		 * See SpriteAnimation for more control over the sequence.
+		 * See Ani for more control over the sequence.
 		 */
 		_changeAni(label) {
 			if (this._ani?._onChange) this._ani._onChange();
@@ -4467,29 +4467,29 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @class
 	 * @extends Array<p5.Image>
 	 */
-	this.SpriteAnimation = class extends Array {
+	this.Ani = class extends Array {
 		/**
 		 * <a href="https://p5play.org/learn/animation.html">
 		 * Look at the Animation reference pages before reading these docs.
 		 * </a>
 		 *
-		 * A SpriteAnimation object contains a series of images (p5.Image objects)
-		 * that can be displayed sequentially.
+		 * An `Ani` object contains an array of images (Q5.Image objects)
+		 * that can be displayed with the `animation` function or by
+		 * being a sprite's animation.
 		 *
-		 * A sprite can have multiple labeled animations, see Sprite.addAnimation
-		 * and Sprite.changeAnimation, but you can also create animations that
-		 * can be used without being added to a sprite first.
+		 * An animation can be created multiple ways, including from:
+		 * - a list of image file paths as multiple input parameters
+		 * - a sequence of numbered images by providing the file path to
+		 * the first image frame and last frame index
+		 * - a sprite sheet image path and atlas object, frame locator, or
+		 * frame locators array (see the Learn page on Ani for more info)
 		 *
-		 * The SpriteAnimation constructor can be used in multiple ways.
-		 * An animation can be created either from a list of images or sequentially
-		 * numbered images. p5play will try to detect the sequence pattern.
-		 *
-		 * For example if the image file path is "image1.png" and the last frame
-		 * index is 3 then "image2.png" and "image3.png" will be loaded as well.
+		 * `Ani` is not a shorthand for `Animation`, since that class name
+		 * is already used by the JS Web Animations API.
 		 *
 		 * @param {...p5.Image} ...images - p5.Image objects to be used as frames
 		 * @example
-		 * let shapeShifter = new SpriteAnimation("dog.png", "cat.png", "snake.png");
+		 * let shapeShifter = new Ani("dog.png", "cat.png", "snake.png");
 		 */
 		constructor() {
 			super();
@@ -4661,7 +4661,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let atlas;
 				if (args[0] instanceof p5.Image || typeof args[0] == 'string') {
 					if (args.length >= 3) {
-						throw new FriendlyError('SpriteAnimation', 1);
+						throw new FriendlyError('Ani', 1);
 					}
 					sheet = args[0];
 					atlas = args[1];
@@ -4690,7 +4690,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 				function _generateSheetFrames() {
 					if (Array.isArray(atlas)) {
-						if (atlas.length == 4) {
+						if (typeof atlas[0] == 'object') {
+							atlas = { frames: atlas };
+						} else if (atlas.length == 4) {
 							atlas = { pos: atlas.slice(0, 2), size: atlas.slice(2) };
 						} else {
 							atlas = { pos: atlas };
@@ -4792,7 +4794,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 								x = (frame % sw) * w;
 								f = { x, y, w, h };
 							} else {
-								let f;
 								if (frame.length == 2) {
 									x = frame[0] * w;
 									y = frame[1] * h;
@@ -4806,8 +4807,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 									};
 								}
 							}
-							f.defaultWidth = w * $._defaultImageScale;
-							f.defaultHeight = h * $._defaultImageScale;
+							f.defaultWidth = f.w * $._defaultImageScale;
+							f.defaultHeight = f.h * $._defaultImageScale;
 							_this.push(f);
 						}
 					}
@@ -4833,7 +4834,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set frame(val) {
 			if (val < 0 || val >= this.length) {
-				throw new FriendlyError('SpriteAnimation.frame', [val, this.length]);
+				throw new FriendlyError('Ani.frame', [val, this.length]);
 			}
 			this._frame = val;
 			this._cycles = 0;
@@ -4887,7 +4888,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/**
 		 * Make a copy of the animation.
 		 *
-		 * @return {SpriteAnimation} A copy of the animation.
+		 * @return {Ani} A copy of the animation.
 		 */
 		clone() {
 			if (!this.length) {
@@ -4895,7 +4896,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					`The animation named "${this.name}" must be loaded before it can be properly copied. Sprites need their own copy of a group's animation. Try loading the animation in the preload function and creating new group sprites in the setup function.`
 				);
 			}
-			let ani = new $.SpriteAnimation();
+			let ani = new $.Ani();
 			ani.spriteSheet = this.spriteSheet;
 			for (let i = 0; i < this.length; i++) {
 				ani.push(this[i]);
@@ -5200,28 +5201,25 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	$.SpriteAnimation.props = [
-		'demoMode',
-		'endOnFirstFrame',
-		'frameDelay',
-		'frameSize',
-		'looping',
-		'offset',
-		'rotation',
-		'scale'
-	];
+	$.Ani.props = ['demoMode', 'endOnFirstFrame', 'frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale'];
+
+	/**
+	 * Alias for Ani for backwards compatibility.
+	 * @deprecated
+	 */
+	$.SpriteAnimation = $.Ani;
 
 	/**
 	 * <a href="https://p5play.org/learn/animation.html">
 	 * Look at the Animation reference pages before reading these docs.
 	 * </a>
 	 *
-	 * This SpriteAnimations class serves the same role that Group does
-	 * for Sprites. This class is used internally to create `sprite.anis`
-	 * and `group.anis`. It's not intended to be used directly by p5play users.
+	 * This Anis class serves the same role that Group does for Sprites.
+	 * This class is used internally to create `sprite.anis`
+	 * and `group.anis`.
 	 *
-	 * In instance objects of this class, the keys are animation names,
-	 * values are SpriteAnimation objects.
+	 * In instances of this class, the keys are animation names,
+	 * values are Ani objects.
 	 *
 	 * Because users only expect instances of this class to contain
 	 * animation names as keys, it uses an internal private object
@@ -5230,12 +5228,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 *
 	 * @class
 	 */
-	this.SpriteAnimations = class {
+	this.Anis = class {
 		#_ = {};
 		constructor() {
 			let _this = this;
 
-			let props = [...$.SpriteAnimation.props];
+			let props = [...$.Ani.props, 'w', 'h'];
 			let vecProps = ['offset', 'scale'];
 
 			for (let prop of props) {
@@ -5246,10 +5244,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					set(val) {
 						_this.#_[prop] = val;
 
-						// change the prop in all the sprite of this group
+						// change the prop in all the sprites of this group
 						for (let k in _this) {
 							let x = _this[k];
-							if (!(x instanceof SpriteAnimation)) continue;
+							if (!(x instanceof Ani)) continue;
 							x[prop] = val;
 						}
 					}
@@ -5271,13 +5269,26 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 							for (let k in _this) {
 								let x = _this[k];
-								if (!(x instanceof SpriteAnimation)) continue;
+								if (!(x instanceof Ani)) continue;
 								x[vecProp][prop] = val;
 							}
 						}
 					});
 				}
 			}
+		}
+
+		get width() {
+			return this.w;
+		}
+		set width(val) {
+			this.w = val;
+		}
+		get height() {
+			return this.h;
+		}
+		set height(val) {
+			this.h = val;
 		}
 	};
 
@@ -5291,23 +5302,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Look at the Group reference pages before reading these docs.
 		 * </a>
 		 *
-		 * A Group is a collection of sprites with similar traits and behaviors.
+		 * A Group is an array of sprites with similar traits and behaviors.
 		 *
-		 * For example a group may contain all the coin sprites that the
-		 * player can collect.
+		 * Group extends Array, so you can use them in for of loops. They
+		 * inherit all the functions and properties of standard arrays
+		 * such as `group.length` and functions like `group.includes()`.
 		 *
-		 * Group extends Array. You can use them in for loops just like arrays
-		 * since they inherit all the functions and properties of standard
-		 * arrays such as `group.length` and functions like `group.includes()`.
+		 * Changing a group setting changes it for all the sprites in the
+		 * group, similar to class inheritance. Groups can have subgroups,
+		 * creating a hierarchy of inheritance.
 		 *
-		 * Since groups just contain references to sprites, a sprite can be in
-		 * multiple groups.
-		 *
-		 * `sprite.remove()` removes the sprite from all the groups
-		 * it belongs to. `group.removeAll()` removes all the sprites from
-		 * a group.
-		 *
-		 * The top level group is a p5 instance level variable named
+		 * The top level group is a q5 instance level variable named
 		 * `allSprites` that contains all the sprites added to the sketch.
 		 */
 		constructor(...args) {
@@ -5580,10 +5585,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 
 			/**
-			 * Keys are the animation label, values are SpriteAnimation objects.
-			 * @type {SpriteAnimations}
+			 * Keys are the animation label, values are Ani objects.
+			 * @type {Anis}
 			 */
-			this.animations = new $.SpriteAnimations();
+			this.animations = new $.Anis();
 
 			this._hasOverlap = {};
 			this._collisions = {};
@@ -5751,7 +5756,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Reference to the group's current animation.
-		 * @type {SpriteAnimation}
+		 * @type {Ani}
 		 */
 		get ani() {
 			return this._ani;
@@ -5762,7 +5767,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		/**
 		 * Reference to the group's current animation.
-		 * @type {SpriteAnimation}
+		 * @type {Ani}
 		 */
 		get animation() {
 			return this._ani;
@@ -5773,7 +5778,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * The group's animations.
-		 * @type {SpriteAnimations}
+		 * @type {Anis}
 		 */
 		get anis() {
 			return this.animations;
@@ -6564,6 +6569,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
+	// use of addImg and addImage is deprecated
 	$.Group.prototype.addAni =
 		$.Group.prototype.addAnimation =
 		$.Group.prototype.addImg =
@@ -6572,6 +6578,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		$.Sprite.prototype.addImg =
 			$.Sprite.prototype.addAni;
 
+	// use of addImgs and addImages is deprecated
 	$.Group.prototype.addAnis =
 		$.Group.prototype.addAnimations =
 		$.Group.prototype.addImgs =
@@ -8529,21 +8536,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	};
 
 	/**
-	 * Alias for `new SpriteAnimation()`
+	 * Alias for `new Ani()`
 	 *
 	 * Load animations in the `preload` function if you need to use
 	 * them when your program starts.
 	 *
-	 * @returns {SpriteAnimation}
+	 * @returns {Ani}
 	 */
 	this.loadAnimation = this.loadAni = function () {
-		return new $.SpriteAnimation(...arguments);
+		return new $.Ani(...arguments);
 	};
 
 	/**
 	 * Displays an animation. Similar to the `image` function.
 	 *
-	 * @param {SpriteAnimation} ani - Animation to be displayed
+	 * @param {Ani} ani - Animation to be displayed
 	 * @param {Number} x - position of the animation on the canvas
 	 * @param {Number} y - position of the animation on the canvas
 	 * @param {Number} r - rotation of the animation
@@ -9229,9 +9236,9 @@ main {
 				2: "You're trying to check for an overlap with a sprite or group that doesn't exist!"
 			}
 		},
-		SpriteAnimation: {
+		Ani: {
 			constructor: {
-				base: "Hey so, I tried to make a new SpriteAnimation but couldn't",
+				base: "Hey so, I tried to make a new Ani but couldn't",
 				1: 'The name of the animation must be the first input parameter.'
 			},
 			frame: 'Index $0 out of bounds. That means there is no frame $0 in this animation. It only has $1 frames!'

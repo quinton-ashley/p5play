@@ -124,7 +124,7 @@ class Sprite {
      * expect it to, if not you'll just get an error.
      *
      * Special feature! If the first parameter to this constructor is a
-     * loaded p5.Image, SpriteAnimation, or name of a SpriteAnimation,
+     * loaded p5.Image, Ani, or name of a animation,
      * then the Sprite will be created with that animation. If the
      * dimensions of the sprite are not given, then the Sprite will be
      * created using the dimensions of the animation.
@@ -168,10 +168,10 @@ class Sprite {
      */
     groups: Group[];
     /**
-     * Keys are the animation label, values are SpriteAnimation objects.
-     * @type {SpriteAnimations}
+     * Keys are the animation label, values are Ani objects.
+     * @type {Anis}
      */
-    animations: SpriteAnimations;
+    animations: Anis;
     /**
      * Joints that the sprite is attached to
      * @type {Joint[]}
@@ -378,23 +378,23 @@ class Sprite {
      * Removes overlap sensors from the sprite.
      */
     removeSensors(): void;
-    set animation(val: SpriteAnimation);
+    set animation(val: Ani);
     /**
      * Reference to the sprite's current animation.
-     * @type {SpriteAnimation}
+     * @type {Ani}
      */
-    get animation(): SpriteAnimation;
-    set ani(val: SpriteAnimation);
+    get animation(): Ani;
+    set ani(val: Ani);
     /**
      * Reference to the sprite's current animation.
-     * @type {SpriteAnimation}
+     * @type {Ani}
      */
-    get ani(): SpriteAnimation;
+    get ani(): Ani;
     /**
-     * Keys are the animation label, values are SpriteAnimation objects
-     * @type {SpriteAnimations}
+     * Keys are the animation label, values are Ani objects
+     * @type {Anis}
      */
-    get anis(): SpriteAnimations;
+    get anis(): Anis;
     set autoDraw(val: boolean);
     /**
      * autoDraw is a property of all groups that controls whether
@@ -1173,14 +1173,14 @@ class Sprite {
     /**
      * Adds an animation to the sprite. Use this function in the `preload`
      * function. You don't need to name the animation if the sprite will only
-     * use one animation. See SpriteAnimation for more information.
+     * use one animation. See Ani for more information.
      *
      * If an animation was already added to a different sprite or group,
      * it can not be added to another sprite or group. A clone (copy) of
      * the animation will be automatically created and added instead.
      *
-     * @param {String} name - SpriteAnimation identifier
-     * @param {SpriteAnimation} animation - The preloaded animation
+     * @param {String} name - Ani identifier
+     * @param {Ani} animation - The preloaded animation
      * @example
      * sprite.addAni(name, animation);
      * sprite.addAni(name, frame1, frame2, frame3...);
@@ -1340,29 +1340,29 @@ class Sprite {
  * @class
  * @extends Array<p5.Image>
  */
-class SpriteAnimation extends Array<p5.Image> {
+class Ani extends Array<p5.Image> {
     /**
      * <a href="https://p5play.org/learn/animation.html">
      * Look at the Animation reference pages before reading these docs.
      * </a>
      *
-     * A SpriteAnimation object contains a series of images (p5.Image objects)
-     * that can be displayed sequentially.
+     * An `Ani` object contains an array of images (Q5.Image objects)
+     * that can be displayed with the `animation` function or by
+     * being a sprite's animation.
      *
-     * A sprite can have multiple labeled animations, see Sprite.addAnimation
-     * and Sprite.changeAnimation, but you can also create animations that
-     * can be used without being added to a sprite first.
+     * An animation can be created multiple ways, including from:
+     * - a list of image file paths as multiple input parameters
+     * - a sequence of numbered images by providing the file path to
+     * the first image frame and last frame index
+     * - a sprite sheet image path and atlas object, frame locator, or
+     * frame locators array (see the Learn page on Ani for more info)
      *
-     * The SpriteAnimation constructor can be used in multiple ways.
-     * An animation can be created either from a list of images or sequentially
-     * numbered images. p5play will try to detect the sequence pattern.
-     *
-     * For example if the image file path is "image1.png" and the last frame
-     * index is 3 then "image2.png" and "image3.png" will be loaded as well.
+     * `Ani` is not a shorthand for `Animation`, since that class name
+     * is already used by the JS Web Animations API.
      *
      * @param {...p5.Image} ...images - p5.Image objects to be used as frames
      * @example
-     * let shapeShifter = new SpriteAnimation("dog.png", "cat.png", "snake.png");
+     * let shapeShifter = new Ani("dog.png", "cat.png", "snake.png");
      */
     constructor(...args: p5.Image[]);
     /**
@@ -1444,9 +1444,9 @@ class SpriteAnimation extends Array<p5.Image> {
     /**
      * Make a copy of the animation.
      *
-     * @return {SpriteAnimation} A copy of the animation.
+     * @return {Ani} A copy of the animation.
      */
-    clone(): SpriteAnimation;
+    clone(): Ani;
     /**
      * Draws the animation at coordinate x and y.
      * Updates the frames automatically.
@@ -1547,12 +1547,12 @@ class SpriteAnimation extends Array<p5.Image> {
  * Look at the Animation reference pages before reading these docs.
  * </a>
  *
- * This SpriteAnimations class serves the same role that Group does
- * for Sprites. This class is used internally to create `sprite.anis`
- * and `group.anis`. It's not intended to be used directly by p5play users.
+ * This Anis class serves the same role that Group does for Sprites.
+ * This class is used internally to create `sprite.anis`
+ * and `group.anis`.
  *
- * In instance objects of this class, the keys are animation names,
- * values are SpriteAnimation objects.
+ * In instances of this class, the keys are animation names,
+ * values are Ani objects.
  *
  * Because users only expect instances of this class to contain
  * animation names as keys, it uses an internal private object
@@ -1561,7 +1561,13 @@ class SpriteAnimation extends Array<p5.Image> {
  *
  * @class
  */
-class SpriteAnimations {
+class Anis {
+    set width(val: any);
+    get width(): any;
+    w: any;
+    set height(val: any);
+    get height(): any;
+    h: any;
     #private;
 }
 /**
@@ -1574,23 +1580,17 @@ class Group extends Array<Sprite> {
      * Look at the Group reference pages before reading these docs.
      * </a>
      *
-     * A Group is a collection of sprites with similar traits and behaviors.
+     * A Group is an array of sprites with similar traits and behaviors.
      *
-     * For example a group may contain all the coin sprites that the
-     * player can collect.
+     * Group extends Array, so you can use them in for of loops. They
+     * inherit all the functions and properties of standard arrays
+     * such as `group.length` and functions like `group.includes()`.
      *
-     * Group extends Array. You can use them in for loops just like arrays
-     * since they inherit all the functions and properties of standard
-     * arrays such as `group.length` and functions like `group.includes()`.
+     * Changing a group setting changes it for all the sprites in the
+     * group, similar to class inheritance. Groups can have subgroups,
+     * creating a hierarchy of inheritance.
      *
-     * Since groups just contain references to sprites, a sprite can be in
-     * multiple groups.
-     *
-     * `sprite.remove()` removes the sprite from all the groups
-     * it belongs to. `group.removeAll()` removes all the sprites from
-     * a group.
-     *
-     * The top level group is a p5 instance level variable named
+     * The top level group is a q5 instance level variable named
      * `allSprites` that contains all the sprites added to the sketch.
      */
     constructor(...args: any[]);
@@ -1795,10 +1795,10 @@ class Group extends Array<Sprite> {
     }[];
     parent: any;
     /**
-     * Keys are the animation label, values are SpriteAnimation objects.
-     * @type {SpriteAnimations}
+     * Keys are the animation label, values are Ani objects.
+     * @type {Anis}
      */
-    animations: SpriteAnimations;
+    animations: Anis;
     Sprite: typeof Sprite;
     GroupSprite: typeof Sprite;
     Group: typeof Group;
@@ -1837,23 +1837,23 @@ class Group extends Array<Sprite> {
      * Check if a sprite is in the group.
      */
     contains: (searchElement: Sprite, fromIndex?: number) => boolean;
-    set ani(val: SpriteAnimation);
+    set ani(val: Ani);
     /**
      * Reference to the group's current animation.
-     * @type {SpriteAnimation}
+     * @type {Ani}
      */
-    get ani(): SpriteAnimation;
-    set animation(val: SpriteAnimation);
+    get ani(): Ani;
+    set animation(val: Ani);
     /**
      * Reference to the group's current animation.
-     * @type {SpriteAnimation}
+     * @type {Ani}
      */
-    get animation(): SpriteAnimation;
+    get animation(): Ani;
     /**
      * The group's animations.
-     * @type {SpriteAnimations}
+     * @type {Anis}
      */
-    get anis(): SpriteAnimations;
+    get anis(): Anis;
     set img(val: p5.Image);
     /**
      * Alias for `group.image`.
@@ -2693,9 +2693,9 @@ function EmojiImage(emoji: string, textSize: number): p5.Image;
 function spriteArt(txt: string, scale: number, palette: number | any): p5.Image;
 function createSprite(...args: any[]): Sprite;
 function createGroup(...args: any[]): Group;
-function loadAnimation(...args: any[]): SpriteAnimation;
-function loadAni(...args: any[]): SpriteAnimation;
-function animation(ani: SpriteAnimation, x: number, y: number, r: number, sX: number, sY: number): void;
+function loadAnimation(...args: any[]): Ani;
+function loadAni(...args: any[]): Ani;
+function animation(ani: Ani, x: number, y: number, r: number, sX: number, sY: number): void;
 function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
