@@ -3044,8 +3044,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 					} else $.noStroke();
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 						if (this.debug) {
-							if (!fxt.m_isSensor) $.stroke(0, 255, 0);
-							else $.stroke(255, 255, 0);
+							if (!fxt.m_isSensor) $.stroke(0, 255, 0, 127);
+							else $.stroke(255, 255, 0, 127);
 						} else if (fxt.m_isSensor) continue;
 						this._drawFixture(fxt);
 					}
@@ -4340,7 +4340,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * addSensor function.
 		 */
 		addDefaultSensors() {
-			if (this._hasSensors) return;
 			let shape;
 			if (this.body && this.fixtureList) {
 				for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
