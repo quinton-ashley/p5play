@@ -2186,22 +2186,18 @@ class World {
     get realTime(): number;
     /**
      * Returns the sprites at a position, ordered by layer.
-     *
-     * Optionally you can specify a group to search.
-     *
      * @param {Number} x
      * @param {Number} y
-     * @param {Group} [group] - the group to search
-     * @param {Boolean} [cameraActiveWhenDrawn] - if true, only sprites that
-     * were drawn when the camera was active will be returned
+     * @param {Group} [group] - limit results to a specific group,
+     * allSprites by default
+     * @param {Boolean} [cameraActiveWhenDrawn] - limit results to
+     * sprites drawn when the camera was active, true by default
      * @returns {Sprite[]} an array of sprites
      */
     getSpritesAt(x: number, y: number, group?: Group, cameraActiveWhenDrawn?: boolean): Sprite[];
     /**
      * Returns the sprite at the specified position
-     * on the top most layer.
-     *
-     * Optionally you can specify a group to search.
+     * on the top most layer, drawn when the camera was on.
      *
      * @param {Number} x
      * @param {Number} y

@@ -3171,6 +3171,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			$.pop();
 			if (this._opacity) $.ctx.globalAlpha = ogGlobalAlpha;
 			this._cameraActiveWhenDrawn = $.camera.isActive;
+			if (!$.camera.isActive) $.camera._wasOff = true;
 
 			if (this.autoDraw) this.autoDraw = null;
 		}
@@ -6827,18 +6828,15 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Returns the sprites at a position, ordered by layer.
-		 *
-		 * Optionally you can specify a group to search.
-		 *
 		 * @param {Number} x
 		 * @param {Number} y
-		 * @param {Group} [group] - the group to search
-		 * @param {Boolean} [cameraActiveWhenDrawn] - if true, only sprites that
-		 * were drawn when the camera was active will be returned
+		 * @param {Group} [group] - limit results to a specific group,
+		 * allSprites by default
+		 * @param {Boolean} [cameraActiveWhenDrawn] - limit results to
+		 * sprites drawn when the camera was active
 		 * @returns {Sprite[]} an array of sprites
 		 */
-		getSpritesAt(x, y, group, cameraActiveWhenDrawn) {
-			cameraActiveWhenDrawn ??= true;
+		getSpritesAt(x, y, group, cameraActiveWhenDrawn = true) {
 			const convertedPoint = new pl.Vec2(x / $.world.meterSize, y / $.world.meterSize);
 			const aabb = new pl.AABB();
 			aabb.lowerBound = new pl.Vec2(convertedPoint.x - 0.001, convertedPoint.y - 0.001);
@@ -6868,9 +6866,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Returns the sprite at the specified position
-		 * on the top most layer.
-		 *
-		 * Optionally you can specify a group to search.
+		 * on the top most layer, drawn when the camera was on.
 		 *
 		 * @param {Number} x
 		 * @param {Number} y
@@ -7360,7 +7356,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this.isActive) {
 				$.pop();
 				this.isActive = false;
-				this._wasOff = true;
 			}
 		}
 	}; //end camera class
