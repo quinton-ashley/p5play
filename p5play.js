@@ -51,9 +51,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		new pl.Vec2((x / tileSize) * $.world.meterSize, (y / tileSize) * $.world.meterSize);
 	const scaleXFrom = (x, tileSize) => (x / tileSize) * $.world.meterSize;
 
-	const isSlop = (val) => Math.abs(val) <= pl.Settings.linearSlop;
-	const fixRound = (val, slop) =>
-		Math.abs(val - Math.round(val)) <= (slop || pl.Settings.linearSlop) ? Math.round(val) : val;
+	const linearSlop = pl.Settings.linearSlop;
+	const angularSlop = pl.Settings.angularSlop / 60;
+	const isSlop = (val) => Math.abs(val) <= linearSlop;
+	const fixRound = (val, slop) => (Math.abs(val - Math.round(val)) <= (slop || linearSlop) ? Math.round(val) : val);
 
 	const minAngleDist = (ang, rot) => {
 		let full = $._angleMode == 'degrees' ? 360 : $.TWO_PI;
@@ -2228,8 +2229,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get rotation() {
 			if (!this.body) return this._rotation || 0;
 			let val = this.body.getAngle();
+			val = $.p5play.friendlyRounding ? fixRound(val, angularSlop) : val;
 			if ($._angleMode == 'degrees') val = $.degrees(val);
-			return $.p5play.friendlyRounding ? fixRound(val, pl.Settings.angularSlop) : val;
+			return val;
 		}
 		set rotation(val) {
 			if (this.body) {
@@ -6833,7 +6835,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @param {Group} [group] - limit results to a specific group,
 		 * allSprites by default
 		 * @param {Boolean} [cameraActiveWhenDrawn] - limit results to
-		 * sprites drawn when the camera was active
+		 * sprites drawn when the camera was active, true by default
 		 * @returns {Sprite[]} an array of sprites
 		 */
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn = true) {
