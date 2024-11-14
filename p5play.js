@@ -38,8 +38,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		};
 	}
 
-	// the p5play default angle mode is degrees
-	$.angleMode('degrees');
+	// in p5play the default angle mode is degrees
+	const DEGREES = $.DEGREES;
+	$.angleMode(DEGREES);
 
 	// scale to planck coordinates from p5 coordinates
 	const scaleTo = (x, y, tileSize) =>
@@ -57,7 +58,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	const fixRound = (val, slop) => (Math.abs(val - Math.round(val)) <= (slop || linearSlop) ? Math.round(val) : val);
 
 	const minAngleDist = (ang, rot) => {
-		let full = $._angleMode == 'degrees' ? 360 : $.TWO_PI;
+		let full = $._angleMode == DEGREES ? 360 : $.TWO_PI;
 		let dist1 = (ang - rot) % full;
 		let dist2 = (full - Math.abs(dist1)) * -Math.sign(dist1);
 		return (Math.abs(dist1) < Math.abs(dist2) ? dist1 : dist2) || 0;
@@ -2230,12 +2231,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (!this.body) return this._rotation || 0;
 			let val = this.body.getAngle();
 			val = $.p5play.friendlyRounding ? fixRound(val, angularSlop) : val;
-			if ($._angleMode == 'degrees') val = $.degrees(val);
+			if ($._angleMode == DEGREES) val = $.degrees(val);
 			return val;
 		}
 		set rotation(val) {
 			if (this.body) {
-				if ($._angleMode == 'degrees') {
+				if ($._angleMode == DEGREES) {
 					val = $.radians(val % 360);
 				}
 				this.body.setAngle(val);
@@ -2280,7 +2281,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get rotationSpeed() {
 			if (this.body) {
 				let val = this.body.getAngularVelocity() / 60;
-				if ($._angleMode == 'degrees') return $.degrees(val);
+				if ($._angleMode == DEGREES) return $.degrees(val);
 				return val;
 			}
 			return this._rotationSpeed;
@@ -2288,7 +2289,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set rotationSpeed(val) {
 			if (this.body) {
 				val *= 60;
-				if ($._angleMode == 'degrees') val = $.radians(val);
+				if ($._angleMode == DEGREES) val = $.radians(val);
 				this.body.setAngularVelocity(val);
 			} else this._rotationSpeed = val;
 		}
@@ -3715,7 +3716,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (angle == this.rotation) return;
 
-			let full = $._angleMode == 'degrees' ? 360 : $.TWO_PI;
+			let full = $._angleMode == DEGREES ? 360 : $.TWO_PI;
 			angle = (angle - this.rotation) % full;
 			if (angle < 0 && speed > 0) angle += full;
 			if (angle > 0 && speed < 0) angle -= full;
@@ -7922,7 +7923,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				new pl.Vec2(0, 1)
 			);
 			this._createJoint(j);
-			this._angle = $._angleMode == 'degrees' ? 90 : 1.5707963267948966;
+			this._angle = $._angleMode == DEGREES ? 90 : 1.5707963267948966;
 		}
 
 		_display() {
@@ -8035,7 +8036,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			this.spriteA.body.setAwake(true);
 			this.spriteB.body.setAwake(true);
-			if ($._angleMode == 'degrees') val = $.radians(val);
+			if ($._angleMode == DEGREES) val = $.radians(val);
 			this._j.m_lowerAngle = val;
 		}
 
@@ -8055,7 +8056,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			this.spriteA.body.setAwake(true);
 			this.spriteB.body.setAwake(true);
-			if ($._angleMode == 'degrees') val = $.radians(val);
+			if ($._angleMode == DEGREES) val = $.radians(val);
 			this._j.m_upperAngle = val;
 		}
 
