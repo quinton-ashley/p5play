@@ -585,14 +585,16 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			x ??= group.x;
 			if (x === undefined) {
-				if ($.canvas?.renderer == '2d') x = $.canvas.hw / this.tileSize;
-				else x = 0;
+				if ($.canvas?.renderer == '2d' && !$._webgpuFallback) {
+					x = $.canvas.hw / this.tileSize;
+				} else x = 0;
 				if (w) this._vertexMode = true;
 			}
 			y ??= group.y;
 			if (y === undefined) {
-				if ($.canvas?.renderer == '2d') y = $.canvas.hh / this.tileSize;
-				else y = 0;
+				if ($.canvas?.renderer == '2d' && !$._webgpuFallback) {
+					y = $.canvas.hh / this.tileSize;
+				} else y = 0;
 			}
 
 			let forcedBoxShape = false;
@@ -8795,17 +8797,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
 		c.mouse = { x: $.mouseX, y: $.mouseY };
-		if (c.renderer == '2d') {
+		if (c.renderer == '2d' && !$._webgpuFallback) {
 			$.camera.x = $.camera.ogX = c.hw;
 			$.camera.y = $.camera.ogY = c.hh;
 		} else {
 			$.camera.x = 0;
 			$.camera.y = 0;
 			if (c.renderer == 'webgl') $._textCache = false;
-			$.p5play._renderStats = {
-				x: -c.hw + 10,
-				y: -c.hh + 20
-			};
+			if (!$._webgpuFallback) {
+				$.p5play._renderStats = {
+					x: -c.hw + 10,
+					y: -c.hh + 20
+				};
+			}
 		}
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 
@@ -10633,6 +10637,8 @@ main {
 	 * @type {Contro}
 	 */
 	this.contro = new $.Contro('mock0');
+
+	if ($._webgpuFallback) $._beginRender = false;
 
 	/**
 	 * FPS, amongst the gaming community, refers to how fast a computer
