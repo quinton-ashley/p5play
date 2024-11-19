@@ -1983,6 +1983,9 @@ class Group extends Array<Sprite> {
      */
     moveAway(x: any, y: any, repel: any): void;
     /**
+     */
+    repelFrom(...args: any[]): void;
+    /**
      * Alias for group.length
      * @deprecated
      */
