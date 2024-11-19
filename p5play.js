@@ -125,17 +125,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.friendlyRounding = true;
 
 			/**
-			 * Set to the latest version of p5play v3's
-			 * minor version number. For example to enable
-			 * v3.16 features, set this to 16.
-			 *
-			 * Some features are not backwards compatible
-			 * with older versions of p5play, so this
-			 * variable is used to enable them.
-			 * @type {Number}
-			 * @default 0
+			 * Groups that are removed using `group.remove()` are not
+			 * fully deleted from `p5play.groups` by default, so their data
+			 * is still accessible. Set to false to permanently delete
+			 * removed groups, which reduces memory usage.
+			 * @type {Boolean}
+			 * @default true
 			 */
-			this.targetVersion = 0;
+			this.storeRemovedGroupRefs = true;
 
 			/**
 			 * Information about the operating system being used to run
@@ -3006,7 +3003,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (this._removed) {
 				if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
 					if (this._isSprite) delete $.p5play.sprites[this._uid];
-					else if ($.p5play.targetVersion >= 16) delete $.p5play.groups[this._uid];
+					else if (!$.p5play.storeRemovedGroupRefs) delete $.p5play.groups[this._uid];
 
 					// remove contact events
 					for (let eventType in eventTypes) {

@@ -49,17 +49,14 @@ class P5Play {
      */
     friendlyRounding: boolean;
     /**
-     * Set to the latest version of p5play v3's
-     * minor version number. For example to enable
-     * v3.16 features, set this to 16.
-     *
-     * Some features are not backwards compatible
-     * with older versions of p5play, so this
-     * variable is used to enable them.
-     * @type {Number}
-     * @default 0
+     * Groups that are removed using `group.remove()` are not
+     * fully deleted from `p5play.groups` by default, so their data
+     * is still accessible. Set to false to permanently delete
+     * removed groups, which reduces memory usage.
+     * @type {Boolean}
+     * @default true
      */
-    targetVersion: number;
+    storeRemovedGroupRefs: boolean;
     /**
      * Information about the operating system being used to run
      * p5play, retrieved from the `navigator` object.
