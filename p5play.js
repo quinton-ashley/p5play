@@ -6327,6 +6327,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
+		 */
+		repelFrom() {
+			for (let s of this) {
+				s.repelFrom(...arguments);
+			}
+		}
+
+		/**
 		 * Alias for group.length
 		 * @deprecated
 		 */
