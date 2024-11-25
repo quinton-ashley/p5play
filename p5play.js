@@ -35,6 +35,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
 			gtag('event', 'p5play_v3_24');
+			if (location.hostname.endsWith('codehs.com')) {
+				gtag('event', 'codehs');
+			}
 		};
 	}
 
@@ -1547,7 +1550,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._color;
 		}
 		set color(val) {
-			// TODO: check if the color is the same as the current color
 			if (this.watch) this.mod[9] = true;
 			this._color = this._parseColor(val);
 		}
@@ -1562,7 +1564,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set colour(val) {
 			this.color = val;
 		}
-
 		/**
 		 * Alias for sprite.fillColor
 		 * @type {p5.Color}
@@ -1574,11 +1575,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set fill(val) {
 			this.color = val;
 		}
-
 		/**
-		 * Alias for sprite.color
-		 * @type {p5.Color}
-		 * @default random color
+		 * Deprecated alias for sprite.fill, will be removed in the future.
+		 * @deprecated
 		 */
 		get fillColor() {
 			return this._color;
@@ -1602,9 +1601,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._stroke = this._parseColor(val);
 		}
 		/**
-		 * Alias for sprite.stroke
-		 * @type {p5.Color}
-		 * @default undefined
+		 * Deprecated alias for sprite.stroke, will be removed in the future.
+		 * @deprecated
 		 */
 		get strokeColor() {
 			return this._stroke;
@@ -2399,7 +2397,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._tint;
 		}
 		set tint(val) {
-			if (this.watch) this.mod[42] = true;
+			if (this.watch) this.mod[38] = true;
 			this._tint = this._parseColor(val);
 		}
 
@@ -4425,6 +4423,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	$.Sprite.propsAll = $.Sprite.props.concat([
 		'autoDraw',
 		'autoUpdate',
+		'colour',
 		'd',
 		'diameter',
 		'dynamic',
@@ -4436,6 +4435,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		'speed',
 		'spriteSheet',
 		'static',
+		'textColour',
+		'textFill',
 		'width'
 	]);
 
@@ -8273,43 +8274,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			return this._avg;
 		}
 	}
-
-	// source: https://stackoverflow.com/a/8796597/3792062
-	function decodeFloat16(b) {
-		let e = (b & 0x7c00) >> 10,
-			f = b & 0x03ff;
-		return (
-			(b >> 15 ? -1 : 1) *
-			(e ? (e === 0x1f ? (f ? NaN : Infinity) : Math.pow(2, e - 15) * (1 + f / 0x400)) : 6.103515625e-5 * (f / 0x400))
-		);
-	}
-
-	// source: https://stackoverflow.com/a/32633586/3792062
-	const encodeFloat16 = (function () {
-		let fv = new Float32Array(1);
-		let iv = new Int32Array(fv.buffer);
-		return function toHalf(v) {
-			fv[0] = v;
-			let x = iv[0];
-			let b = (x >> 16) & 0x8000;
-			let m = (x >> 12) & 0x07ff;
-			let e = (x >> 23) & 0xff;
-			if (e < 103) return b;
-			if (e > 142) {
-				b |= 0x7c00;
-				b |= (e == 255 ? 0 : 1) && x & 0x007fffff;
-				return b;
-			}
-			if (e < 113) {
-				m |= 0x0800;
-				b |= (m >> (114 - e)) + ((m >> (113 - e)) & 1);
-				return b;
-			}
-			b |= ((e - 112) << 10) | (m >> 1);
-			b += m & 1;
-			return b;
-		};
-	})();
 
 	function isArrowFunction(fn) {
 		return !/^(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*(?:(?:(?:async\s(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*\s*)?function|class)(?:\s|(?:(?:\/\*[^(?:\*\/)]*\*\/\s*)|(?:\/\/[^\r\n]*))*)|(?:[_$\w][\w0-9_$]*\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\()|(?:\[\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*(?:(?:['][^']+['])|(?:["][^"]+["]))\s*(?:\/\*[^(?:\*\/)]*\*\/\s*)*\s*\]\())/.test(

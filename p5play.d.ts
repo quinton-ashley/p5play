@@ -462,13 +462,12 @@ class Sprite {
      * @default random color
      */
     get fill(): p5.Color;
-    set fillColor(val: p5.Color);
+    set fillColor(val: any);
     /**
-     * Alias for sprite.color
-     * @type {p5.Color}
-     * @default random color
+     * Deprecated alias for sprite.fill, will be removed in the future.
+     * @deprecated
      */
-    get fillColor(): p5.Color;
+    get fillColor(): any;
     set stroke(val: p5.Color);
     /**
      * Overrides sprite's stroke color. By default the stroke of a sprite
@@ -478,13 +477,12 @@ class Sprite {
      * @default undefined
      */
     get stroke(): p5.Color;
-    set strokeColor(val: p5.Color);
+    set strokeColor(val: any);
     /**
-     * Alias for sprite.stroke
-     * @type {p5.Color}
-     * @default undefined
+     * Deprecated alias for sprite.stroke, will be removed in the future.
+     * @deprecated
      */
-    get strokeColor(): p5.Color;
+    get strokeColor(): any;
     set strokeWeight(val: number);
     /**
      * The sprite's stroke weight, the thickness of its outline.
@@ -2683,7 +2681,6 @@ class RopeJoint extends Joint {
 class Scale {
     valueOf(): any;
 }
-function encodeFloat16(v: any): number;
 function colorPal(c: string, palette: number | any): string;
 function EmojiImage(emoji: string, textSize: number): p5.Image;
 function spriteArt(txt: string, scale: number, palette: number | any): p5.Image;
