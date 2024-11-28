@@ -9030,13 +9030,17 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				});
 			}
 
-			for (let cb of _img.cbs) {
-				cb(_img);
+			// server side use of p5play makes images load synchronously
+			if (_img.cbs) {
+				for (let cb of _img.cbs) {
+					cb(_img);
+				}
+				for (let i = 1; i < _img.calls; i++) {
+					$._decrementPreload();
+				}
+				_img.cbs = [];
 			}
-			for (let i = 1; i < _img.calls; i++) {
-				$._decrementPreload();
-			}
-			_img.cbs = [];
+
 			$.p5play.onImageLoad(img);
 		};
 		img = _loadImage.call($, url, _cb);
