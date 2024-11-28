@@ -35,7 +35,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
 			gtag('event', 'p5play_v3_24');
-			if (location.hostname.endsWith('codehs.com')) {
+			if (location.hostname == 'codehs.com' || location.hostname == 'static1.codehs.com') {
 				gtag('event', 'codehs');
 			}
 		};
@@ -9062,7 +9062,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 	// if the user isn't using q5.js
 	// add a backwards compatibility layer for p5.js
-	if (!$.displayMode) {
+	if (!$.displayMode && typeof document == 'object') {
 		document.head.insertAdjacentHTML(
 			'beforeend',
 			`<style>
