@@ -9074,6 +9074,9 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
+body.hasFrameBorder {
+	display: block;
+}
 .p5Canvas {
 	outline: none;
 	-webkit-touch-callout: none;
