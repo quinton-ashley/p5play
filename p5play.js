@@ -37,6 +37,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			gtag('event', 'p5play_v3_24');
 			if (location.hostname == 'codehs.com' || location.hostname == 'static1.codehs.com') {
 				gtag('event', 'codehs');
+				function showAlert() {
+					alert(
+						"CodeHS is currently prohibited from using p5play. CodeHS has failed to comply with p5play's AGPL license since January 11, 2024. CodeHS was notified on September 13, 2024 that their closed source, commercial use of p5play on codehs.com requires a proprietary license. Software theft is a violation of the Digital Millennium Copyright Act. Contact CodeHS Support to voice your frustration with this disruption in service. Contact info@p5play.org for more information."
+					);
+					setTimeout(showAlert, 4000);
+				}
+				showAlert();
+				return;
 			}
 		};
 	}
@@ -6839,7 +6847,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Returns the sprites at a position, ordered by layer.
-		 * @param {Number} x
+		 * @param {Number} x - x coordinate or position object
 		 * @param {Number} y
 		 * @param {Group} [group] - limit results to a specific group,
 		 * allSprites by default
@@ -6848,6 +6856,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @returns {Sprite[]} an array of sprites
 		 */
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn = true) {
+			if (typeof x == 'object') {
+				y = x.y;
+				x = x.x;
+			}
 			const convertedPoint = new pl.Vec2(x / $.world.meterSize, y / $.world.meterSize);
 			const aabb = new pl.AABB();
 			aabb.lowerBound = new pl.Vec2(convertedPoint.x - 0.001, convertedPoint.y - 0.001);
@@ -7708,10 +7720,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			this._springiness = val;
 
-			if (this.type != 'wheel') {
-				this._j.setFrequency(val);
-				return;
-			}
+			if (this.type != 'wheel') return this._j.setFrequency(val);
 			this._j.setSpringFrequencyHz(val);
 		}
 
@@ -8221,6 +8230,46 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set maxLength(val) {
 			this._j.setMaxLength(scaleXTo(val, this.spriteA.tileSize));
+		}
+	};
+
+	this.GrabJoint = class extends this.Joint {
+		constructor(spriteA, pos) {
+			if (typeof pos != 'object') pos = mouse;
+
+			super(spriteA, spriteA, 'grab');
+
+			let j = pl.MouseJoint(
+				{
+					maxForce: 1e3,
+					frequencyHz: 3,
+					dampingRatio: 0.9,
+					target: spriteA.body.getPosition()
+				},
+				spriteA.body,
+				spriteA.body,
+				new pl.Vec2(pos.x / $.world.meterSize, pos.y / $.world.meterSize)
+			);
+			this._createJoint(j);
+
+			this._target = { x: pos.x, y: pos.y };
+		}
+
+		_draw() {
+			$.line(this.spriteA.x, this.spriteA.y, this._target.x, this._target.y);
+		}
+
+		get target() {
+			return this._target;
+		}
+		set target(pos) {
+			let x = (this._target.x = pos.x);
+			let y = (this._target.y = pos.y);
+			this._j.setTarget(new pl.Vec2(x / $.world.meterSize, y / $.world.meterSize));
+		}
+
+		set maxForce(val) {
+			this._j.setMaxForce(val);
 		}
 	};
 

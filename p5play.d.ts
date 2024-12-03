@@ -2184,7 +2184,7 @@ class World {
     get realTime(): number;
     /**
      * Returns the sprites at a position, ordered by layer.
-     * @param {Number} x
+     * @param {Number} x - x coordinate or position object
      * @param {Number} y
      * @param {Group} [group] - limit results to a specific group,
      * allSprites by default
@@ -2677,6 +2677,18 @@ class RopeJoint extends Joint {
      * The maximum length of the rope.
      */
     get maxLength(): number;
+}
+class GrabJoint extends Joint {
+    constructor(spriteA: any, pos: any);
+    set target(pos: {
+        x: any;
+        y: any;
+    });
+    get target(): {
+        x: any;
+        y: any;
+    };
+    set maxForce(val: any);
 }
 class Scale {
     valueOf(): any;
