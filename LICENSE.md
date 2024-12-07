@@ -57,11 +57,13 @@ The Licensee must purchase a [p5play Professional License](https://p5play.org/pr
 
 ### 1e. Educational Use Limitation
 
-The Licensee is expressly forbidden from using the Content for educational purposes, such as in class or coursework.
+Under fair use, the Licensee may produce educational content, such as YouTube tutorials, that explains and showcases use of the Content in a fixed media format, which does not enable direct interaction with the Content.
 
-Users must purchase a [p5play Educational License](https://p5play.org/teach) subscription for educational use of the Content, even if it's used indirectly through a third-party provider, unless their use is covered by a p5play Educational licensee.
+The Content can also be used in interactive art that is educational in nature, but the topics covered must not be related to computer programming or game development. For example, a game that teaches players how to cook is permitted.
 
-As an exception, the Content can be used in interactive art that is educational in nature, but the topics covered must not be related to computer programming or game development. For example, a game that teaches players how to cook is permitted.
+Educational Use of the Content, such as in class instruction or coursework in which the Content is used directly by teachers or students, is prohibited under this Agreement.
+
+Educational Use of the Content requires the [p5play Educational License](https://p5play.org/teach), even if the Content is used indirectly through a third-party provider.
 
 ### 1f. No Military Use
 

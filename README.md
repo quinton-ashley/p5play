@@ -6,7 +6,11 @@ p5play is a JavaScript game engine that uses q5.js/p5.js for graphics and Box2D 
 
 Join us on [Discord][] to ask questions and meet other people making games with p5play. 👾
 
-Open source licensed under the [AGPLv3][]. Multi-licensed for [professional][] and [educational][] use. By using p5play you agree to the [Terms of Service][].
+The [p5play Personal License][] enables free, open source, personal use.
+
+Educational use requires the [p5play Educational License][].
+
+Commercial game development requires the [p5play Professional License][].
 
 ## Credits ⭐️
 
@@ -32,9 +36,8 @@ Take a look at the [p5play project planning page][]. Let me know what you'd like
 [@quinton-ashley]: https://github.com/quinton-ashley
 [@molleindustria]: https://github.com/molleindustria
 [Discord]: https://discord.gg/EJwnJATmj7
-[AGPLv3]: https://github.com/quinton-ashley/p5play/blob/main/LICENSE.md
-[professional]: https://p5play.org/pro
-[educational]: https://p5play.org/teach
-[Terms of Service]: https://github.com/quinton-ashley/p5play-web/blob/main/account/TOS.md
+[p5play Personal License]: https://github.com/quinton-ashley/p5play/blob/main/LICENSE.md
+[p5play Educational License]: https://p5play.org/teach
+[p5play Professional License]: https://p5play.org/pro
 [p5play project planning page]: https://github.com/users/quinton-ashley/projects/5
 [p5play-web]: https://github.com/quinton-ashley/p5play-web
