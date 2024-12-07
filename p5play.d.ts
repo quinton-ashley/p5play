@@ -2678,17 +2678,32 @@ class RopeJoint extends Joint {
      */
     get maxLength(): number;
 }
-class GrabJoint extends Joint {
-    constructor(spriteA: any, pos: any);
-    set target(pos: {
-        x: any;
-        y: any;
-    });
-    get target(): {
-        x: any;
-        y: any;
-    };
-    set maxForce(val: any);
+/**
+ * @class
+ * @extends Joint
+ */
+class GrabberJoint extends Joint {
+    /**
+     * A Grabber joint enables you to grab sprites and move them with
+     * a max force towards a target position.
+     *
+     * @param {Sprite} sprite - the sprite to grab
+     */
+    constructor(sprite: Sprite);
+    set target(pos: any);
+    /**
+     * The target position of the joint that the sprite will be
+     * moved towards. Must be an object with x and y properties.
+     * @type {Object}
+     */
+    get target(): any;
+    set maxForce(val: number);
+    /**
+     * The maximum force that the joint can exert on the sprite.
+     * @type {Number}
+     * @default 1000
+     */
+    get maxForce(): number;
 }
 class Scale {
     valueOf(): any;

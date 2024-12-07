@@ -1,8 +1,7 @@
 /**
  * p5play
- * @version 3.24
+ * @version 3.25
  * @author quinton-ashley
- * @license AGPL-3.0
  */
 
 if (typeof planck != 'object') {
@@ -34,10 +33,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_24');
-			if (location.hostname == 'codehs.com' || location.hostname == 'static1.codehs.com') {
-				gtag('event', 'codehs');
-			}
+			gtag('event', 'p5play_v3_25');
 		};
 	}
 
@@ -8225,41 +8221,64 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	this.GrabJoint = class extends this.Joint {
-		constructor(spriteA, pos) {
-			if (typeof pos != 'object') pos = mouse;
+	/**
+	 * @class
+	 * @extends Joint
+	 */
+	this.GrabberJoint = class extends this.Joint {
+		/**
+		 * A Grabber joint enables you to grab sprites and move them with
+		 * a max force towards a target position.
+		 *
+		 * @param {Sprite} sprite - the sprite to grab
+		 */
+		constructor(sprite) {
+			super(sprite, sprite, 'grab');
 
-			super(spriteA, spriteA, 'grab');
+			this._target = { x: 0, y: 0 };
+			this.__target = new pl.Vec2(0, 0);
 
 			let j = pl.MouseJoint(
 				{
-					maxForce: 1e3,
+					maxForce: 1000,
 					frequencyHz: 3,
 					dampingRatio: 0.9,
-					target: spriteA.body.getPosition()
+					target: sprite.body.getPosition()
 				},
-				spriteA.body,
-				spriteA.body,
-				new pl.Vec2(pos.x / $.world.meterSize, pos.y / $.world.meterSize)
+				sprite.body,
+				sprite.body
 			);
 			this._createJoint(j);
-
-			this._target = { x: pos.x, y: pos.y };
 		}
 
 		_draw() {
 			$.line(this.spriteA.x, this.spriteA.y, this._target.x, this._target.y);
 		}
 
+		/**
+		 * The target position of the joint that the sprite will be
+		 * moved towards. Must be an object with x and y properties.
+		 * @type {Object}
+		 */
 		get target() {
 			return this._target;
 		}
 		set target(pos) {
-			let x = (this._target.x = pos.x);
-			let y = (this._target.y = pos.y);
-			this._j.setTarget(new pl.Vec2(x / $.world.meterSize, y / $.world.meterSize));
+			this._target.x = pos.x;
+			this._target.y = pos.y;
+			this.__target.x = pos.x / $.world.meterSize;
+			this.__target.y = pos.y / $.world.meterSize;
+			this._j.setTarget(this.__target);
 		}
 
+		/**
+		 * The maximum force that the joint can exert on the sprite.
+		 * @type {Number}
+		 * @default 1000
+		 */
+		get maxForce() {
+			return this._j.getMaxForce();
+		}
 		set maxForce(val) {
 			this._j.setMaxForce(val);
 		}
@@ -10699,21 +10718,6 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	const $ = this;
 	// called after each draw function call
 	$.p5play._inPostDraw = true;
-
-	if (window?.location?.hostname.endsWith('codehs.com')) {
-		$.background('yellow');
-		$.fill('black');
-		$.textSize(14);
-		$.textAlign($.LEFT, $.BASELINE);
-		$.text(
-			"CodeHS is currently prohibited from using p5play.\n\nCodeHS has failed to comply with p5play's AGPL license since January 11, 2024. CodeHS was notified on September 13, 2024 that their closed source, commercial use of p5play on codehs.com requires a proprietary license.\n\nSoftware theft is a violation of the Digital Millennium Copyright Act.\n\nContact CodeHS Support to voice your frustration with this disruption in service. Contact info@p5play.org for more information.",
-			12,
-			12,
-			300
-		);
-		$.noLoop();
-		return;
-	}
 
 	if ($.allSprites.autoCull) {
 		$.allSprites.cull(10000);
