@@ -10615,7 +10615,7 @@ main {
 
 				// get the index of the next available slot
 				let index = 0;
-				for (let i = 0; i < this.length; i++) {
+				for (let i = 0; i <= this.length; i++) {
 					if (!this[i]) {
 						index = i;
 						break;
