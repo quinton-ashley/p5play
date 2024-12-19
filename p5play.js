@@ -9036,7 +9036,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 	this.frameRate = function (hz) {
 		let ret = _frameRate.call($, hz);
-		if (hz) $.world._updateTimeStep();
+		if (hz) $.world._setTimeStep();
 		return ret;
 	};
 
@@ -10785,12 +10785,28 @@ main {
 		$.pop();
 	};
 
+	/**
+	 * p5play runs this function 60 times per second by default.
+	 *
+	 * Put input handling and game logic code in this function, which
+	 * should run before physics simulation and drawing.
+	 */
+	this.update ??= () => {};
+
+	/**
+	 * p5play runs this function 60 times per second by default.
+	 *
+	 * Put drawing code in this function, which should run after
+	 * input handling, game logic, and physics simulation.
+	 */
+	this.drawFrame ??= () => {};
+
 	if ($._isGlobal && window.update) {
 		$.update = window.update;
 	}
 
-	if ($._isGlobal && window.updateCamera) {
-		$.updateCamera = window.updateCamera;
+	if ($._isGlobal && window.drawFrame) {
+		$.drawFrame = window.drawFrame;
 	}
 });
 
@@ -10805,7 +10821,7 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 	$.mouse._update();
 	$.contros._update();
 
-	if ($.update) $.update();
+	$.update();
 
 	if ($.allSprites._autoUpdate) {
 		$.allSprites.update();
@@ -10827,7 +10843,7 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 	}
 	$.world.autoStep ??= true;
 
-	if ($.updateCamera) $.updateCamera();
+	$.drawFrame();
 
 	if ($.allSprites._autoDraw) {
 		$.camera.on();
