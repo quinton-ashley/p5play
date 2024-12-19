@@ -28,7 +28,11 @@ If a web server/client-side web app ("Website") uses the Content as part of the 
 
 The Licensee is also permitted to use the Content privately in projects that are not made available to others. Yet, public or limited distribution of closed source projects using the Content is prohibited.
 
-### 1b. Derivative Work Restrictions
+### 1b. Limited Redistribution
+
+The Licensee may host verbatim, unmodified copies of the Content only. "Verbatim copies" means exact duplicates of the Content as provided by the Licensor, without changes. The Licensee may not sell or sublicense the Content.
+
+### 1c. Derivative Work Restrictions
 
 Any modification, enhancement, or adaptation of the Content ("Derivative Work") shall be owned by the Licensor. Derivative Works must be created for the sole purpose of improving the Content, for the benefit of all users of p5play.
 
@@ -40,10 +44,6 @@ By creating a Derivative Work, the Licensee hereby:
 - Agrees to execute any documents necessary to perfect such rights
 
 The Licensee must notify and distribute Derivative Works to the Licensor via GitHub PR, email (info@p5play.org), or Discord post/message and not by any other means.
-
-### 1c. Limited Redistribution
-
-The Licensee may host verbatim, unmodified copies of the Content only. "Verbatim copies" means exact duplicates of the Content as provided by the Licensor, without changes. The Licensee may not sell or sublicense the Content.
 
 ### 1d. No Commercial Use
 

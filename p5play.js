@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.25
+ * @version 3.26
  * @author quinton-ashley
  */
 
@@ -33,7 +33,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_25');
+			gtag('event', 'p5play_v3_26');
 		};
 	}
 
@@ -236,6 +236,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 */
 	this.p5play = new $.P5Play();
 	delete $.P5Play;
+
+	let usePhysics = true;
+	let timeScale = 1;
 
 	const log = console.log;
 	/**
@@ -451,31 +454,33 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			Object.defineProperty(this._pos, 'x', {
 				get() {
-					if (!_this.body) return _this._position.x;
+					if (!_this.body || !usePhysics) return _this._position.x;
 					let x = (_this.body.getPosition().x / _this.tileSize) * $.world.meterSize;
 					return $.p5play.friendlyRounding ? fixRound(x) : x;
 				},
 				set(val) {
+					_this._position.x = val;
+
 					if (_this.body) {
 						let pos = new pl.Vec2((val * _this.tileSize) / $.world.meterSize, _this.body.getPosition().y);
 						_this.body.setPosition(pos);
 					}
-					_this._position.x = val;
 				}
 			});
 
 			Object.defineProperty(this._pos, 'y', {
 				get() {
-					if (!_this.body) return _this._position.y;
+					if (!_this.body || !usePhysics) return _this._position.y;
 					let y = (_this.body.getPosition().y / _this.tileSize) * $.world.meterSize;
 					return $.p5play.friendlyRounding ? fixRound(y) : y;
 				},
 				set(val) {
+					_this._position.y = val;
+
 					if (_this.body) {
 						let pos = new pl.Vec2(_this.body.getPosition().x, (val * _this.tileSize) / $.world.meterSize);
 						_this.body.setPosition(pos);
 					}
-					_this._position.y = val;
 				}
 			});
 
@@ -1372,12 +1377,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * autoDraw is a property of all groups that controls whether
-		 * a group is automatically drawn to the screen after the end
-		 * of each draw cycle.
-		 *
-		 * It only needs to be set to false once and then it will
-		 * remain false for the rest of the sketch, unless changed.
+		 * Controls whether a sprite is updated before each physics update,
+		 * when users let p5play automatically manage the frame cycle.
+		 * @type {Boolean}
+		 * @default true
+		 */
+		get autoUpdate() {
+			return this._autoUpdate;
+		}
+		set autoUpdate(val) {
+			this._autoUpdate = val;
+		}
+
+		/**
+		 * Controls whether a sprite is drawn after each physics update,
+		 * when users let p5play automatically manage the frame cycle.
 		 * @type {Boolean}
 		 * @default true
 		 */
@@ -1389,7 +1403,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * This property disables the ability for a sprite to "sleep".
+		 * Controls the ability for a sprite to "sleep".
 		 *
 		 * "Sleeping" sprites are not included in the physics simulation, a
 		 * sprite starts "sleeping" when it stops moving and doesn't collide
@@ -1400,27 +1414,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get allowSleeping() {
 			return this.body?.isSleepingAllowed();
 		}
-
 		set allowSleeping(val) {
 			if (this.watch) this.mod[5] = true;
 			if (this.body) this.body.setSleepingAllowed(val);
-		}
-
-		/**
-		 * autoUpdate is a property of all groups that controls whether
-		 * a group is automatically updated after the end of each draw
-		 * cycle.
-		 *
-		 * It only needs to be set to false once and then it will
-		 * remain false for the rest of the sketch, unless changed.
-		 * @type {Boolean}
-		 * @default true
-		 */
-		get autoUpdate() {
-			return this._autoUpdate;
-		}
-		set autoUpdate(val) {
-			this._autoUpdate = val;
 		}
 
 		/**
@@ -1513,17 +1509,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				this.removeColliders();
 				if (this.fixture?.m_isSensor) this.body.m_gravityScale = 0;
 				else {
-					this._position.x = this.x;
-					this._position.y = this.y;
-					this._velocity.x = this.vel.x;
-					this._velocity.y = this.vel.y;
-					this._rotation = this.rotation;
-					this._rotationSpeed = this.rotationSpeed;
-
+					this._syncWithPhysicsBody();
 					$.world.destroyBody(this.body);
 					this.body = null;
 				}
 			}
+		}
+
+		_syncWithPhysicsBody() {
+			this._position.x = this.x;
+			this._position.y = this.y;
+			this._velocity.x = this.vel.x;
+			this._velocity.y = this.vel.y;
+			this._rotation = this.rotation;
+			this._rotationSpeed = this.rotationSpeed;
 		}
 
 		_parseColor(val) {
@@ -1571,16 +1570,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set fill(val) {
 			this.color = val;
 		}
-		/**
-		 * Deprecated alias for sprite.fill, will be removed in the future.
-		 * @deprecated
-		 */
-		get fillColor() {
-			return this._color;
-		}
-		set fillColor(val) {
-			this.color = val;
-		}
 
 		/**
 		 * Overrides sprite's stroke color. By default the stroke of a sprite
@@ -1595,16 +1584,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		set stroke(val) {
 			if (this.watch) this.mod[29] = true;
 			this._stroke = this._parseColor(val);
-		}
-		/**
-		 * Deprecated alias for sprite.stroke, will be removed in the future.
-		 * @deprecated
-		 */
-		get strokeColor() {
-			return this._stroke;
-		}
-		set strokeColor(val) {
-			this.stroke = val;
 		}
 
 		/**
@@ -2022,7 +2001,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this._layer = val;
 		}
 		/**
-		 * When the physics simulation is progressed in `world.step`,
+		 * When the physics simulation is progressed in `world.physicsUpdate`,
 		 * each sprite's life is decreased by `world.timeScale`.
 		 *
 		 * If life becomes less than or equal to 0, the sprite will
@@ -2221,21 +2200,18 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * @default 0
 		 */
 		get rotation() {
-			if (!this.body) return this._rotation || 0;
+			if (!this.body || !usePhysics) return this._rotation || 0;
 			let val = this.body.getAngle();
-			val = $.p5play.friendlyRounding ? fixRound(val, angularSlop) : val;
-			if ($._angleMode == DEGREES) val = $.degrees(val);
-			return val;
+			if ($.p5play.friendlyRounding) val = fixRound(val, angularSlop);
+			return $._angleMode == DEGREES ? $.degrees(val) : val;
 		}
 		set rotation(val) {
+			this._rotation = val;
+
 			if (this.body) {
-				if ($._angleMode == DEGREES) {
-					val = $.radians(val % 360);
-				}
+				if ($._angleMode == DEGREES) val = $.radians(val % 360);
 				this.body.setAngle(val);
 				this.body.synchronizeTransform();
-			} else {
-				this._rotation = val;
 			}
 		}
 		/**
@@ -2274,8 +2250,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		get rotationSpeed() {
 			if (this.body) {
 				let val = this.body.getAngularVelocity() / 60;
-				if ($._angleMode == DEGREES) return $.degrees(val);
-				return val;
+				return $._angleMode == DEGREES ? $.degrees(val) : val;
 			}
 			return this._rotationSpeed;
 		}
@@ -2810,14 +2785,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * You can set the sprite's update function to a custom
-		 * update function which by default, will be run after every
-		 * sketch draw call.
+		 * Runs before each physics update by default, when p5play is automatically
+		 * managing the frame cycle.
 		 *
-		 * This function updates the sprite's animation, mouse, and
+		 * Set this to a custom function that handles input, directs sprite movement,
+		 * and performs other tasks that should run before the physics update.
 		 *
-		 * There's no way to individually update a sprite or group
-		 * of sprites in the physics simulation though.
+		 * Optionally, users can run this function manually in p5play's `update`
+		 * function.
 		 * @type {Function}
 		 */
 		get update() {
@@ -2825,6 +2800,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		set update(val) {
 			this._customUpdate = val;
+		}
+
+		/**
+		 * Runs at the end of the p5play frame cycle.
+		 *
+		 * Users should not directly run this function.
+		 * @type {Function}
+		 */
+		get postDraw() {
+			return this._postDraw;
+		}
+		set postDraw(val) {
+			this._customPostDraw = val;
 		}
 
 		/**
@@ -2867,27 +2855,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		_update() {
-			if (this._ani?.update) this._ani.update();
-
-			for (let prop in this.mouse) {
-				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
-			}
-
 			if (this._customUpdate) this._customUpdate();
-
 			if (this.autoUpdate) this.autoUpdate = null;
 		}
 
 		_step() {
-			this.life -= $.world.timeScale;
+			this.life -= timeScale;
 			if (this._life != 2147483647 && this._life <= 0) {
 				this.remove();
 			}
 
-			if (!this.body && !this._removed) {
-				this.rotation += this._rotationSpeed;
-				this.x += this.vel.x;
-				this.y += this.vel.y;
+			if ((!this.body || !usePhysics) && !this._removed) {
+				this._position.x += this.vel.x * timeScale;
+				this._position.y += this.vel.y * timeScale;
+				this._rotation += this._rotationSpeed * timeScale;
 			}
 
 			if (this.watch) {
@@ -3063,6 +3044,19 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				$.textSize(this.textSize * this.tileSize);
 				$.text(this.text, 0, 0);
 			}
+		}
+
+		_postDraw() {
+			if (this._ani?.update) this._ani.update();
+
+			for (let prop in this.mouse) {
+				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
+			}
+
+			if (this._customPostDraw) this._customPostDraw();
+
+			this.autoDraw ??= true;
+			this.autoUpdate ??= true;
 		}
 
 		/*
@@ -3864,17 +3858,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Alias for `addAni`.
-		 *
-		 * Deprecated because it's unclear that the image is
-		 * being added as a single frame animation.
-		 * @deprecated
-		 */
-		addImage() {
-			return this.addAni(...arguments);
-		}
-
-		/**
 		 * Add multiple animations to the sprite.
 		 * @param {Object} atlases - an object with animation names as keys and
 		 * an animation or animation atlas as values
@@ -3897,17 +3880,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				let atlas = atlases[name];
 				this.addAni(name, atlas);
 			}
-		}
-
-		/**
-		 * Alias for `addAnis`.
-		 *
-		 * Deprecated because it's unclear that the images are
-		 * being added as single frame animations.
-		 * @deprecated
-		 */
-		addImages() {
-			return this.addAnis(...arguments);
 		}
 
 		/**
@@ -5203,12 +5175,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	$.Ani.props = ['demoMode', 'endOnFirstFrame', 'frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale'];
 
 	/**
-	 * Alias for Ani for backwards compatibility.
-	 * @deprecated
-	 */
-	$.SpriteAnimation = $.Ani;
-
-	/**
 	 * <a href="https://p5play.org/learn/animation.html">
 	 * Look at the Animation reference pages before reading these docs.
 	 * </a>
@@ -5535,12 +5501,12 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 				if (!this.idNum) {
 					console.warn(
-						'ERROR: Surpassed the limit of 999 groups in memory. Use less groups or delete groups from the p5play.groups array to recycle ids.'
+						'ERROR: Surpassed the limit of 999 groups in memory. Try setting `p5play.storeRemovedGroupRefs = false`. Use less groups or delete groups from the p5play.groups array to recycle ids.'
 					);
 					// if there are no empty slots, try to prevent a crash by
 					// finding the first slot that has a group with no sprites in it
 					for (let i = 1; i < $.p5play.groups.length; i++) {
-						if (!$.p5play.groups[i].length) {
+						if (!$.p5play.groups[i]?.length) {
 							this.idNum = i;
 							break;
 						}
@@ -6545,34 +6511,39 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Draws all the sprites in the group.
+		 * Updates all the sprites in the group.
+		 */
+		update() {
+			for (let s of this) {
+				if (!$.p5play._inPostDraw || s.autoUpdate) {
+					s.update();
+				}
+			}
+			if (this._autoUpdate) this._autoUpdate = null;
+		}
+
+		/**
+		 * Draws all the sprites in the group in ascending order
+		 * by `sprite.layer`.
 		 */
 		draw() {
 			let g = [...this];
 			g.sort((a, b) => a._layer - b._layer);
-			for (let i = 0; i < g.length; i++) {
-				let sprite = g[i];
-				if (sprite._visible !== false && (!$.p5play._inPostDraw || sprite.autoDraw)) {
-					sprite.draw();
+			for (let s of g) {
+				if (s._visible !== false && (!$.p5play._inPostDraw || s.autoDraw)) {
+					s.draw();
 				}
 			}
 			if (this._autoDraw) this._autoDraw = null;
 		}
 
 		/**
-		 * Updates all the sprites in the group. See sprite.update for
-		 * more information.
-		 *
-		 * By default, allSprites.update is called after every draw call.
-		 *
+		 * Runs every group sprite's post draw function.
 		 */
-		update() {
+		postDraw() {
 			for (let s of this) {
-				if (!$.p5play._inPostDraw || this.autoUpdate) {
-					s.update();
-				}
+				s.postDraw();
 			}
-			if (this._autoUpdate) this._autoUpdate = null;
 		}
 	};
 
@@ -6661,7 +6632,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 
 			this._timeScale = 1;
-			this._updateTimeStep();
+			this._updateRate = 60;
+			this._syncedToFrameRate = true;
+			this._lastStepTime = 0;
+			this._setTimeStep();
 
 			/**
 			 * @type {Number}
@@ -6722,6 +6696,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 */
 			this.autoStep = true;
 
+			this.step = this.physicsUpdate;
+
 			if (window.Event) {
 				this.steppedEvent = new window.Event('p5play_worldStepped');
 			}
@@ -6757,11 +6733,31 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			}
 			if (this._timeScale == val) return;
 			this._timeScale = val;
-			this._updateTimeStep();
+			this._setTimeStep();
 		}
 
-		_updateTimeStep() {
-			this._timeStep = (1 / ($._targetFrameRate || 60)) * this._timeScale;
+		/**
+		 * The fixed update rate of the physics simulation in hertz.
+		 *
+		 * The time step, the amount of time that passes during a
+		 * physics update, is calculated to be: 1 / updateRate * timeScale
+		 *
+		 * Setting the update rate to a value lower than 50hz is not
+		 * recommended, as simulation quality will degrade.
+		 * @type {Number}
+		 * @default 60
+		 */
+		get updateRate() {
+			return this._updateRate;
+		}
+		set updateRate(val) {
+			this._updateRate = val;
+			this._syncedToFrameRate = val == $._targetFrameRate;
+			this._setTimeStep();
+		}
+
+		_setTimeStep() {
+			this._timeStep = (1 / this._updateRate) * this._timeScale;
 		}
 
 		/**
@@ -6789,25 +6785,34 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * This function is automatically called at the end of the draw
 		 * loop, unless it was already called inside the draw loop.
 		 *
-		 * Decreasing velocityIterations and positionIterations will improve
-		 * performance but decrease simulation quality.
+		 * Setting the timeStep below 1/50th of a second will
+		 * significantly degrade simulation quality, without improving
+		 * performance. Decreasing `velocityIterations` and
+		 * `positionIterations` will improve performance but decrease
+		 * simulation quality.
 		 *
 		 * @param {Number} [timeStep] - time step in seconds
 		 * @param {Number} [velocityIterations] - 8 by default
 		 * @param {Number} [positionIterations] - 3 by default
 		 */
-		step(timeStep, velocityIterations, positionIterations) {
+		physicsUpdate(timeStep, velocityIterations, positionIterations) {
+			usePhysics = true;
+			timeScale = this._timeScale;
+
 			for (let s of $.allSprites) {
 				s.prevPos.x = s.x;
 				s.prevPos.y = s.y;
 				s.prevRotation = s.rotation;
 			}
+
+			timeStep ??= this._timeStep;
+
 			super.step(
-				timeStep || this._timeStep,
+				timeStep,
 				velocityIterations || this.velocityIterations,
 				positionIterations || this.positionIterations
 			);
-			this.physicsTime += timeStep || this._timeStep;
+			this.physicsTime += timeStep;
 
 			let sprites = Object.values($.p5play.sprites);
 			let groups = Object.values($.p5play.groups);
@@ -6821,6 +6826,46 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if ($.canvas.dispatchEvent) {
 				$.canvas.dispatchEvent(this.steppedEvent);
 			}
+
+			if (!this._syncedToFrameRate) {
+				for (let s of $.allSprites) s._syncWithPhysicsBody();
+			}
+
+			if (this.autoStep) this.autoStep = null;
+		}
+
+		/**
+		 * Experimental!
+		 *
+		 * Visually moves all sprites forward in time by the given
+		 * time step, based on their current velocity vector and
+		 * rotation speed.
+		 *
+		 * Does not perform any physics calculations.
+		 *
+		 * This function may be useful for making extrapolated frames
+		 * between physics steps, if a frame rate of 100hz or more
+		 * is desired.
+		 * @param {Number} [timeStep] - time step in seconds
+		 */
+		extrapolationUpdate(timeStep) {
+			timeStep ??= this._timeStep;
+
+			for (let s of $.allSprites) {
+				s.prevPos.x = s.x;
+				s.prevPos.y = s.y;
+				s.prevRotation = s.rotation;
+			}
+
+			usePhysics = false;
+			timeScale = (timeStep / this._timeStep) * this._timeScale;
+
+			let sprites = Object.values($.p5play.sprites);
+			let groups = Object.values($.p5play.groups);
+
+			for (let s of sprites) s._step();
+			for (let g of groups) g._step();
+
 			if (this.autoStep) this.autoStep = null;
 		}
 
@@ -6938,10 +6983,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		/*
 		 * If contact ended between sprites that where previously in contact,
 		 * then their contact trackers are set to -2 which will be incremented
-		 * to -1 on the next world step call.
+		 * to -1 on the next physics update.
 		 *
 		 * However, if contact begins and ends on the same frame, then the contact
-		 * trackers are set to -4 and incremented to -3 on the next world step call.
+		 * trackers are set to -4 and incremented to -3 on the next physics update.
 		 */
 		_endContact(contact) {
 			let a = contact.m_fixtureA;
@@ -7338,9 +7383,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Activates the camera.
-		 * The canvas will be drawn according to the camera position and scale until
-		 * camera.off() is called
 		 *
+		 * The canvas will be drawn according to the camera position and scale until
+		 * camera.off() is called.
 		 */
 		on() {
 			if (!this.isActive) {
@@ -7359,9 +7404,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Deactivates the camera.
-		 * The canvas will be drawn normally, ignoring the camera's position
-		 * and scale until camera.on() is called
 		 *
+		 * The canvas will be drawn normally, ignoring the camera's position
+		 * and scale until camera.on() is called.
 		 */
 		off() {
 			if (this.isActive) {
@@ -8615,8 +8660,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	/**
 	 * Delays code execution in an async function for the specified time.
 	 *
-	 * If no input is given, it waits until after a
-	 * world step is completed.
+	 * If no input is given, it waits until after a physics update is completed.
 	 *
 	 * @param {Number} millisecond
 	 * @returns {Promise} A Promise that fulfills after the specified time.
@@ -9064,7 +9108,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		if (img) {
 			// if not finished loading, add callback to the list
-			if ((img.width <= 1 && img.height <= 1) || !img.pixels.length) {
+			if ((img.width <= 1 && img.height <= 1) || !img.pixels?.length) {
 				if (cb) {
 					img.cbs.push(cb);
 					img.calls++;
@@ -10690,47 +10734,7 @@ main {
 	 */
 	this.getFPS ??= () => $.p5play._fps;
 
-	/**
-	 * Deprecated. Use `p5play.renderStats = true` instead.
-	 *
-	 * @deprecated
-	 * @param {Number} x
-	 * @param {Number} y
-	 */
-	this.renderStats = (x, y) => {
-		console.error('p5play: renderStats() function is deprecated. Use `p5play.renderStats = true` instead.');
-	};
-});
-
-p5.prototype.registerMethod('pre', function p5playPreDraw() {
-	const $ = this;
-	// called before each draw function call
-	if (!$._q5) {
-		$.p5play._preDrawFrameTime = performance.now();
-	}
-	$.p5play.spritesDrawn = 0;
-
-	$.mouse._update();
-	$.contros._update();
-});
-
-p5.prototype.registerMethod('post', function p5playPostDraw() {
-	const $ = this;
-	// called after each draw function call
-	$.p5play._inPostDraw = true;
-
-	if ($.allSprites.autoCull) {
-		$.allSprites.cull(10000);
-	}
-
-	if ($.allSprites._autoDraw) {
-		$.camera.on();
-		$.allSprites.draw();
-		$.camera.off();
-	}
-	$.allSprites._autoDraw ??= true;
-
-	if ($.p5play.renderStats) {
+	$.renderStats = () => {
 		let rs = $.p5play._renderStats;
 		if (!rs.fontSize) {
 			if ($.allSprites.tileSize == 1 || $.allSprites.tileSize > 16) {
@@ -10779,23 +10783,63 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		$.text('fps min: ' + $.p5play._fpsMin, x, y + rs.gap * 3);
 		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 4);
 		$.pop();
-		rs.show = false;
+	};
+
+	if ($._isGlobal && window.update) {
+		$.update = window.update;
 	}
 
-	if ($.world.autoStep && $.world.timeScale > 0) {
-		$.world.step();
+	if ($._isGlobal && window.updateCamera) {
+		$.updateCamera = window.updateCamera;
 	}
-	$.world.autoStep ??= true;
+});
+
+// called before each draw function call
+p5.prototype.registerMethod('pre', function p5playPreDraw() {
+	const $ = this;
+	if (!$._q5) {
+		$.p5play._preDrawFrameTime = performance.now();
+	}
+	$.p5play.spritesDrawn = 0;
+
+	$.mouse._update();
+	$.contros._update();
+
+	if ($.update) $.update();
 
 	if ($.allSprites._autoUpdate) {
 		$.allSprites.update();
 	}
 	$.allSprites._autoUpdate ??= true;
+});
 
-	for (let s of $.allSprites) {
-		s.autoDraw ??= true;
-		s.autoUpdate ??= true;
+// called after each draw function call
+p5.prototype.registerMethod('post', function p5playPostDraw() {
+	const $ = this;
+	$.p5play._inPostDraw = true;
+
+	if ($.allSprites.autoCull) {
+		$.allSprites.cull(10000);
 	}
+
+	if ($.world.autoStep && $.world.timeScale > 0) {
+		$.world.physicsUpdate();
+	}
+	$.world.autoStep ??= true;
+
+	if ($.updateCamera) $.updateCamera();
+
+	if ($.allSprites._autoDraw) {
+		$.camera.on();
+		$.allSprites.draw();
+	}
+	$.allSprites._autoDraw ??= true;
+
+	$.camera.off();
+
+	$.allSprites.postDraw();
+
+	if ($.p5play.renderStats) $.renderStats();
 
 	for (let k in $.kb) {
 		if (k == 'holdThreshold') continue;
@@ -10876,8 +10920,6 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		}
 		$.world.mouseSprites = sprites;
 	}
-
-	$.camera.off();
 
 	if (!$._q5) {
 		$.p5play._postDrawFrameTime = performance.now();

@@ -95,6 +95,8 @@ class P5Play {
     onImageLoad(): void;
 }
 var p5play: P5Play;
+let usePhysics: boolean;
+let timeScale: number;
 const log: {
     (...data: any[]): void;
     (message?: any, ...optionalParams: any[]): void;
@@ -392,21 +394,25 @@ class Sprite {
      * @type {Anis}
      */
     get anis(): Anis;
+    set autoUpdate(val: boolean);
+    /**
+     * Controls whether a sprite is updated before each physics update,
+     * when users let p5play automatically manage the frame cycle.
+     * @type {Boolean}
+     * @default true
+     */
+    get autoUpdate(): boolean;
     set autoDraw(val: boolean);
     /**
-     * autoDraw is a property of all groups that controls whether
-     * a group is automatically drawn to the screen after the end
-     * of each draw cycle.
-     *
-     * It only needs to be set to false once and then it will
-     * remain false for the rest of the sketch, unless changed.
+     * Controls whether a sprite is drawn after each physics update,
+     * when users let p5play automatically manage the frame cycle.
      * @type {Boolean}
      * @default true
      */
     get autoDraw(): boolean;
     set allowSleeping(val: boolean);
     /**
-     * This property disables the ability for a sprite to "sleep".
+     * Controls the ability for a sprite to "sleep".
      *
      * "Sleeping" sprites are not included in the physics simulation, a
      * sprite starts "sleeping" when it stops moving and doesn't collide
@@ -415,18 +421,6 @@ class Sprite {
      * @default true
      */
     get allowSleeping(): boolean;
-    set autoUpdate(val: boolean);
-    /**
-     * autoUpdate is a property of all groups that controls whether
-     * a group is automatically updated after the end of each draw
-     * cycle.
-     *
-     * It only needs to be set to false once and then it will
-     * remain false for the rest of the sketch, unless changed.
-     * @type {Boolean}
-     * @default true
-     */
-    get autoUpdate(): boolean;
     set bounciness(val: number);
     /**
      * The bounciness of the sprite's physics body.
@@ -462,12 +456,6 @@ class Sprite {
      * @default random color
      */
     get fill(): p5.Color;
-    set fillColor(val: any);
-    /**
-     * Deprecated alias for sprite.fill, will be removed in the future.
-     * @deprecated
-     */
-    get fillColor(): any;
     set stroke(val: p5.Color);
     /**
      * Overrides sprite's stroke color. By default the stroke of a sprite
@@ -477,12 +465,6 @@ class Sprite {
      * @default undefined
      */
     get stroke(): p5.Color;
-    set strokeColor(val: any);
-    /**
-     * Deprecated alias for sprite.stroke, will be removed in the future.
-     * @deprecated
-     */
-    get strokeColor(): any;
     set strokeWeight(val: number);
     /**
      * The sprite's stroke weight, the thickness of its outline.
@@ -675,7 +657,7 @@ class Sprite {
     get layer(): number;
     set life(val: number);
     /**
-     * When the physics simulation is progressed in `world.step`,
+     * When the physics simulation is progressed in `world.physicsUpdate`,
      * each sprite's life is decreased by `world.timeScale`.
      *
      * If life becomes less than or equal to 0, the sprite will
@@ -717,7 +699,7 @@ class Sprite {
      * @default {x: false, y: false}
      */
     get mirror(): any;
-    set offset(val: any);
+    set offset(val: object);
     /**
      * Offsetting the sprite moves the sprite's physics body relative
      * to its center.
@@ -729,7 +711,7 @@ class Sprite {
      * @property {Number} y - the sprite's vertical offset
      * @default {x: 0, y: 0}
      */
-    get offset(): any;
+    get offset(): object;
     set opacity(val: number);
     /**
      * The sprite's opacity. 0 is transparent, 1 is opaque.
@@ -780,7 +762,7 @@ class Sprite {
      * @default false
      */
     get rotationLock(): boolean;
-    set scale(val: any);
+    set scale(val: number | any);
     /**
      * Scale of the sprite's physics body. Default is {x: 1, y: 1}
      *
@@ -793,7 +775,7 @@ class Sprite {
      * @type {Number|Object}
      * @default 1
      */
-    get scale(): any;
+    get scale(): number | any;
     set sleeping(val: boolean);
     /**
      * Wake a sprite up or put it to sleep.
@@ -934,17 +916,25 @@ class Sprite {
     get radius(): number;
     set update(val: Function);
     /**
-     * You can set the sprite's update function to a custom
-     * update function which by default, will be run after every
-     * sketch draw call.
+     * Runs before each physics update by default, when p5play is automatically
+     * managing the frame cycle.
      *
-     * This function updates the sprite's animation, mouse, and
+     * Set this to a custom function that handles input, directs sprite movement,
+     * and performs other tasks that should run before the physics update.
      *
-     * There's no way to individually update a sprite or group
-     * of sprites in the physics simulation though.
+     * Optionally, users can run this function manually in p5play's `update`
+     * function.
      * @type {Function}
      */
     get update(): Function;
+    set postDraw(val: Function);
+    /**
+     * Runs at the end of the p5play frame cycle.
+     *
+     * Users should not directly run this function.
+     * @type {Function}
+     */
+    get postDraw(): Function;
     set velocity(val: p5.Vector);
     /**
      * The sprite's velocity vector {x, y}
@@ -1183,14 +1173,6 @@ class Sprite {
      */
     addAni(...args: any[]): any;
     /**
-     * Alias for `addAni`.
-     *
-     * Deprecated because it's unclear that the image is
-     * being added as a single frame animation.
-     * @deprecated
-     */
-    addImage(...args: any[]): any;
-    /**
      * Add multiple animations to the sprite.
      * @param {Object} atlases - an object with animation names as keys and
      * an animation or animation atlas as values
@@ -1202,14 +1184,6 @@ class Sprite {
      */
     addAnis(...args: any[]): void;
     spriteSheet: any;
-    /**
-     * Alias for `addAnis`.
-     *
-     * Deprecated because it's unclear that the images are
-     * being added as single frame animations.
-     * @deprecated
-     */
-    addImages(...args: any[]): void;
     /**
      * Changes the sprite's animation. Use `addAni` to define the
      * animation(s) first.
@@ -1426,7 +1400,7 @@ class Ani extends Array<p5.Image> {
      * @default 4
      */
     get frameDelay(): number;
-    set scale(val: any);
+    set scale(val: number | any);
     /**
      * The animation's scale.
      *
@@ -1435,7 +1409,7 @@ class Ani extends Array<p5.Image> {
      * @type {Number|Object}
      * @default 1
      */
-    get scale(): any;
+    get scale(): number | any;
     /**
      * Make a copy of the animation.
      *
@@ -2054,17 +2028,18 @@ class Group extends Array<Sprite> {
      */
     removeAll(): void;
     /**
-     * Draws all the sprites in the group.
+     * Updates all the sprites in the group.
+     */
+    update(): void;
+    /**
+     * Draws all the sprites in the group in ascending order
+     * by `sprite.layer`.
      */
     draw(): void;
     /**
-     * Updates all the sprites in the group. See sprite.update for
-     * more information.
-     *
-     * By default, allSprites.update is called after every draw call.
-     *
+     * Runs every group sprite's post draw function.
      */
-    update(): void;
+    postDraw(): void;
 }
 /**
  * @class
@@ -2143,6 +2118,7 @@ class World {
      * @default true
      */
     autoStep: boolean;
+    step: (timeStep?: number, velocityIterations?: number, positionIterations?: number) => void;
     steppedEvent: Event;
     set gravity(val: any);
     /**
@@ -2161,6 +2137,19 @@ class World {
      * @default 1.0
      */
     get timeScale(): number;
+    set updateRate(val: number);
+    /**
+     * The fixed update rate of the physics simulation in hertz.
+     *
+     * The time step, the amount of time that passes during a
+     * physics update, is calculated to be: 1 / updateRate * timeScale
+     *
+     * Setting the update rate to a value lower than 50hz is not
+     * recommended, as simulation quality will degrade.
+     * @type {Number}
+     * @default 60
+     */
+    get updateRate(): number;
     /**
      * Performs a physics simulation step that advances all sprites'
      * forward in time by 1/60th of a second if no timeStep is given.
@@ -2168,14 +2157,32 @@ class World {
      * This function is automatically called at the end of the draw
      * loop, unless it was already called inside the draw loop.
      *
-     * Decreasing velocityIterations and positionIterations will improve
-     * performance but decrease simulation quality.
+     * Setting the timeStep below 1/50th of a second will
+     * significantly degrade simulation quality, without improving
+     * performance. Decreasing `velocityIterations` and
+     * `positionIterations` will improve performance but decrease
+     * simulation quality.
      *
      * @param {Number} [timeStep] - time step in seconds
      * @param {Number} [velocityIterations] - 8 by default
      * @param {Number} [positionIterations] - 3 by default
      */
-    step(timeStep?: number, velocityIterations?: number, positionIterations?: number): void;
+    physicsUpdate(timeStep?: number, velocityIterations?: number, positionIterations?: number): void;
+    /**
+     * Experimental!
+     *
+     * Visually moves all sprites forward in time by the given
+     * time step, based on their current velocity vector and
+     * rotation speed.
+     *
+     * Does not perform any physics calculations.
+     *
+     * This function may be useful for making extrapolated frames
+     * between physics steps, if a frame rate of 100hz or more
+     * is desired.
+     * @param {Number} [timeStep] - time step in seconds
+     */
+    extrapolationUpdate(timeStep?: number): void;
     /**
      * The real time in seconds since the world was created, including
      * time spent paused.
@@ -2315,16 +2322,16 @@ class Camera {
     zoomTo(target: number, speed: number): Promise<any>;
     /**
      * Activates the camera.
-     * The canvas will be drawn according to the camera position and scale until
-     * camera.off() is called
      *
+     * The canvas will be drawn according to the camera position and scale until
+     * camera.off() is called.
      */
     on(): void;
     /**
      * Deactivates the camera.
-     * The canvas will be drawn normally, ignoring the camera's position
-     * and scale until camera.on() is called
      *
+     * The canvas will be drawn normally, ignoring the camera's position
+     * and scale until camera.on() is called.
      */
     off(): void;
 }
@@ -2945,12 +2952,12 @@ class _Mouse extends InputDevice {
      * The mouse's position.
      * @type {object}
      */
-    get pos(): any;
+    get pos(): object;
     /**
      * The mouse's position. Alias for pos.
      * @type {object}
      */
-    get position(): any;
+    get position(): object;
     set cursor(val: string);
     /**
      * The mouse's CSS cursor style.
@@ -3299,6 +3306,8 @@ class _Contros extends Array<Contro> {
 var contros: _Contros;
 var controllers: _Contros;
 var contro: Contro;
-function renderStats(x: number, y: number): void;
+namespace p5 {
+    let disableFriendlyErrors: boolean;
+}
 
 }
