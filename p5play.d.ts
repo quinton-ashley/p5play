@@ -197,11 +197,14 @@ class Sprite {
     mod: any;
     set tileSize(val: number);
     /**
+     * DEPRECATED: Will be removed in version 4, use scaling instead.
+     *
      * The tile size is used to change the size of one unit of
      * measurement for the sprite.
      *
      * For example, if the tile size is 16, then a sprite with
      * x=1 and y=1 will be drawn at position (16, 16) on the canvas.
+     * @deprecated
      * @type {Number}
      * @default 1
      */

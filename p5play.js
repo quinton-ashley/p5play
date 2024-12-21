@@ -1682,11 +1682,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
+		 * DEPRECATED: Will be removed in version 4, use scaling instead.
+		 *
 		 * The tile size is used to change the size of one unit of
 		 * measurement for the sprite.
 		 *
 		 * For example, if the tile size is 16, then a sprite with
 		 * x=1 and y=1 will be drawn at position (16, 16) on the canvas.
+		 * @deprecated
 		 * @type {Number}
 		 * @default 1
 		 */
@@ -4411,7 +4414,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	$.Sprite.colliderTypes = ['d', 's', 'k', 'n'];
 	$.Sprite.shapeTypes = ['box', 'circle', 'chain', 'polygon'];
 
-	// TODO: draw lines when the Turtle moves
+	// DEPRECATED: Will be removed in version 4
 	$.Turtle = function (size) {
 		if ($.allSprites.tileSize > 1) {
 			throw new Error(`Turtle can't be used when allSprites.tileSize is greater than 1.`);
@@ -6547,22 +6550,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 	};
 
-	// use of addImg and addImage is deprecated
 	$.Group.prototype.addAni =
 		$.Group.prototype.addAnimation =
-		$.Group.prototype.addImg =
-		$.Group.prototype.addImage =
 		$.Sprite.prototype.addAnimation =
-		$.Sprite.prototype.addImg =
 			$.Sprite.prototype.addAni;
 
-	// use of addImgs and addImages is deprecated
 	$.Group.prototype.addAnis =
 		$.Group.prototype.addAnimations =
-		$.Group.prototype.addImgs =
-		$.Group.prototype.addImages =
 		$.Sprite.prototype.addAnimations =
-		$.Sprite.prototype.addImgs =
 			$.Sprite.prototype.addAnis;
 
 	$.Group.prototype.__step = $.Sprite.prototype.__step;
@@ -6893,9 +6888,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn = true) {
 			if (typeof x == 'object') {
 				cameraActiveWhenDrawn = group ?? true;
-				group = h;
-				h = w;
-				w = y;
+				group = y;
 				y = x.y;
 				x = x.x;
 			}
