@@ -2191,6 +2191,8 @@ class World {
     get realTime(): number;
     /**
      * Returns the sprites at a position, ordered by layer.
+     *
+     * Sprites must have a physics body to be detected.
      * @param {Number} x - x coordinate or position object
      * @param {Number} y
      * @param {Group} [group] - limit results to a specific group,
@@ -2204,6 +2206,7 @@ class World {
      * Returns the sprite at the specified position
      * on the top most layer, drawn when the camera was on.
      *
+     * The sprite must have a physics body to be detected.
      * @param {Number} x
      * @param {Number} y
      * @param {Group} [group] - the group to search
@@ -2224,10 +2227,11 @@ class World {
      */
     get allowSleeping(): boolean;
     /**
-     * Finds the first sprite that intersects a ray (line),
-     * excluding any sprites that intersect with the starting point.
+     * Finds the first sprite (with a physics body) that
+     * intersects a ray (line), excluding any sprites that intersect
+     * with the starting point.
      *
-     * Can also be given a starting position and a maximum end position.
+     * This function can also be given start and end points.
      * @param {Object} startPos - starting position of the ray cast
      * @param {Number} direction - direction of the ray
      * @param {Number} maxDistance - max distance the ray should check
@@ -2235,10 +2239,11 @@ class World {
      */
     rayCast(startPos: any, direction: number, maxDistance: number): Sprite;
     /**
-     * Finds sprites that intersect a line (ray), excluding any sprites
-     * that intersect the starting point.
+     * Finds sprites (with physics bodies) that intersect
+     * a line (ray), excluding any sprites that intersect the
+     * starting point.
      *
-     * Can also be given a starting position and a maximum end position.
+     * This function can also be given start and end points.
      * @param {Object} startPos - starting position of the ray cast
      * @param {Number} direction - direction of the ray
      * @param {Number} maxDistance - max distance the ray should check

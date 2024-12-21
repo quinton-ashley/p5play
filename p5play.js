@@ -6880,6 +6880,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * Returns the sprites at a position, ordered by layer.
+		 *
+		 * Sprites must have a physics body to be detected.
 		 * @param {Number} x - x coordinate or position object
 		 * @param {Number} y
 		 * @param {Group} [group] - limit results to a specific group,
@@ -6890,18 +6892,25 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		getSpritesAt(x, y, group, cameraActiveWhenDrawn = true) {
 			if (typeof x == 'object') {
+				cameraActiveWhenDrawn = group ?? true;
+				group = h;
+				h = w;
+				w = y;
 				y = x.y;
 				x = x.x;
 			}
-			const convertedPoint = new pl.Vec2(x / $.world.meterSize, y / $.world.meterSize);
+			const point = new pl.Vec2(x / this.meterSize, y / this.meterSize);
 			const aabb = new pl.AABB();
-			aabb.lowerBound = new pl.Vec2(convertedPoint.x - 0.001, convertedPoint.y - 0.001);
-			aabb.upperBound = new pl.Vec2(convertedPoint.x + 0.001, convertedPoint.y + 0.001);
+			aabb.lowerBound = new pl.Vec2(point.x - 0.001, point.y - 0.001);
+			aabb.upperBound = new pl.Vec2(point.x + 0.001, point.y + 0.001);
 
-			// Query the world for overlapping shapes.
+			// Query the world for fixture AABBs that overlap the point AABB
+			// narrowing down the number of fixtures to check with
+			// the more expensive testPoint method
 			let fxts = [];
 			this.queryAABB(aabb, (fxt) => {
-				if (fxt.getShape().testPoint(fxt.getBody().getTransform(), convertedPoint)) {
+				// we need to make sure the point is actually within the shape
+				if (fxt.getShape().testPoint(fxt.getBody().getTransform(), point)) {
 					fxts.push(fxt);
 				}
 				return true;
@@ -6924,6 +6933,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * Returns the sprite at the specified position
 		 * on the top most layer, drawn when the camera was on.
 		 *
+		 * The sprite must have a physics body to be detected.
 		 * @param {Number} x
 		 * @param {Number} y
 		 * @param {Group} [group] - the group to search
@@ -7079,10 +7089,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Finds the first sprite that intersects a ray (line),
-		 * excluding any sprites that intersect with the starting point.
+		 * Finds the first sprite (with a physics body) that
+		 * intersects a ray (line), excluding any sprites that intersect
+		 * with the starting point.
 		 *
-		 * Can also be given a starting position and a maximum end position.
+		 * This function can also be given start and end points.
 		 * @param {Object} startPos - starting position of the ray cast
 		 * @param {Number} direction - direction of the ray
 		 * @param {Number} maxDistance - max distance the ray should check
@@ -7094,10 +7105,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * Finds sprites that intersect a line (ray), excluding any sprites
-		 * that intersect the starting point.
+		 * Finds sprites (with physics bodies) that intersect
+		 * a line (ray), excluding any sprites that intersect the
+		 * starting point.
 		 *
-		 * Can also be given a starting position and a maximum end position.
+		 * This function can also be given start and end points.
 		 * @param {Object} startPos - starting position of the ray cast
 		 * @param {Number} direction - direction of the ray
 		 * @param {Number} maxDistance - max distance the ray should check
