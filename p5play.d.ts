@@ -58,6 +58,19 @@ class P5Play {
      */
     storeRemovedGroupRefs: boolean;
     /**
+     * Snaps sprites to the nearest `p5play.gridSize`
+     * increment when they are moved.
+     * @type {Boolean}
+     * @default false
+     */
+    snapToGrid: boolean;
+    /**
+     * The size of the grid cells that sprites are snapped to.
+     * @type {Number}
+     * @default 0.5
+     */
+    gridSize: number;
+    /**
      * Information about the operating system being used to run
      * p5play, retrieved from the `navigator` object.
      */
@@ -197,7 +210,7 @@ class Sprite {
     mod: any;
     set tileSize(val: number);
     /**
-     * DEPRECATED: Will be removed in version 4, use scaling instead.
+     * DEPRECATED: Will be removed in version 4.
      *
      * The tile size is used to change the size of one unit of
      * measurement for the sprite.

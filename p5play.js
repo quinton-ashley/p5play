@@ -134,6 +134,21 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.storeRemovedGroupRefs = true;
 
 			/**
+			 * Snaps sprites to the nearest `p5play.gridSize`
+			 * increment when they are moved.
+			 * @type {Boolean}
+			 * @default false
+			 */
+			this.snapToGrid = false;
+
+			/**
+			 * The size of the grid cells that sprites are snapped to.
+			 * @type {Number}
+			 * @default 0.5
+			 */
+			this.gridSize = 0.5;
+
+			/**
 			 * Information about the operating system being used to run
 			 * p5play, retrieved from the `navigator` object.
 			 */
@@ -1682,7 +1697,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * DEPRECATED: Will be removed in version 4, use scaling instead.
+		 * DEPRECATED: Will be removed in version 4.
 		 *
 		 * The tile size is used to change the size of one unit of
 		 * measurement for the sprite.
@@ -3439,10 +3454,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			let x = $.cos(direction) * distance;
 			let y = $.sin(direction) * distance;
 
-			if (this.tileSize != 1 && (directionNamed || direction % 90 == 0) && distance % 0.5 == 0) {
-				// snap movement to nearest half tile
-				x = Math.round((this.x + Math.round(x)) * 2) / 2;
-				y = Math.round((this.y + Math.round(y)) * 2) / 2;
+			if (
+				(this.tileSize != 1 || $.p5play.snapToGrid) &&
+				(directionNamed || direction % 90 == 0) &&
+				distance % $.p5play.gridSize == 0
+			) {
+				// snap movement to grid
+				x = Math.round((this.x + Math.round(x)) / $.p5play.gridSize) * $.p5play.gridSize;
+				y = Math.round((this.y + Math.round(y)) / $.p5play.gridSize) * $.p5play.gridSize;
 			} else {
 				x += this.x;
 				y += this.y;
@@ -3516,7 +3535,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			velThresh = Math.min(velThresh, speed * 0.1);
 
 			// proximity margin of error
-			let margin = speed * 0.51;
+			let margin = speed * 0.51 * ($.world.meterSize / 60);
 
 			// if x or y is null, we only care that the sprite
 			// reaches the destination along one axis
@@ -8770,6 +8789,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			default:
 				if (
 					/^[\d\.]+$/.test(lh) ||
+					lh.endsWith('.lan') ||
 					lh.endsWith('stackblitz.io') ||
 					lh.endsWith('glitch.me') ||
 					lh.endsWith('replit.dev') ||
