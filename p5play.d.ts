@@ -708,7 +708,10 @@ class Sprite {
     resetCenterOfMass(): void;
     set mirror(val: any);
     /**
-     * The sprite's mirror states.
+     * DEPRECATED: Will be removed in version 4.
+     *
+     * Use sprite.scale instead.
+     * @deprecated
      * @type {Object}
      * @property {Boolean} x - the sprite's horizontal mirror state
      * @property {Boolean} y - the sprite's vertical mirror state
