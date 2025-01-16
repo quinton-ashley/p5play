@@ -9144,10 +9144,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				if (cb) {
 					img.cbs.push(cb);
 					img.calls++;
-				} else $._decrementPreload();
+				} else if (!$._q5) $._decrementPreload();
 			} else {
 				if (cb) cb(); // if already loaded, run the callback immediately
-				$._decrementPreload();
+				if (!$._q5) $._decrementPreload();
 			}
 			return img;
 		}
@@ -9171,8 +9171,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				for (let cb of _img.cbs) {
 					cb(_img);
 				}
-				for (let i = 1; i < _img.calls; i++) {
-					$._decrementPreload();
+				if (!$._q5) {
+					for (let i = 1; i < _img.calls; i++) {
+						$._decrementPreload();
+					}
 				}
 				_img.cbs = [];
 			}
