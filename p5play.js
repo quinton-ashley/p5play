@@ -504,7 +504,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			Object.defineProperty(this._canvasPos, 'x', {
 				get() {
 					let x = _this._pos.x - $.camera.x;
-					if ($.canvas.renderer == '2d') x += $.canvas.hw / $.camera._zoom;
+					if ($.canvas.renderer == 'c2d') x += $.canvas.hw / $.camera._zoom;
 					return x;
 				}
 			});
@@ -512,7 +512,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			Object.defineProperty(this._canvasPos, 'y', {
 				get() {
 					let y = _this._pos.y - $.camera.y;
-					if ($.canvas.renderer == '2d') y += $.canvas.hh / $.camera._zoom;
+					if ($.canvas.renderer == 'c2d') y += $.canvas.hh / $.camera._zoom;
 					return y;
 				}
 			});
@@ -601,14 +601,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			x ??= group.x;
 			if (x === undefined) {
-				if ($.canvas?.renderer == '2d' && !$._webgpuFallback) {
+				if ($.canvas?.renderer == 'c2d' && !$._webgpuFallback) {
 					x = $.canvas.hw / this.tileSize;
 				} else x = 0;
 				if (w) this._vertexMode = true;
 			}
 			y ??= group.y;
 			if (y === undefined) {
-				if ($.canvas?.renderer == '2d' && !$._webgpuFallback) {
+				if ($.canvas?.renderer == 'c2d' && !$._webgpuFallback) {
 					y = $.canvas.hh / this.tileSize;
 				} else y = 0;
 			}
@@ -2107,7 +2107,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 		/**
 		 * DEPRECATED: Will be removed in version 4.
-		 * 
+		 *
 		 * Use sprite.scale instead.
 		 * @deprecated
 		 * @type {Object}
@@ -7285,7 +7285,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.x = val;
 			let x = -val;
-			if ($.canvas.renderer == '2d') x += $.canvas.hw / this._zoom;
+			if ($.canvas.renderer == 'c2d') x += $.canvas.hw / this._zoom;
 			this.__pos.x = x;
 			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.x = Math.round(x);
@@ -7304,7 +7304,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.y = val;
 			let y = -val;
-			if ($.canvas.renderer == '2d') y += $.canvas.hh / this._zoom;
+			if ($.canvas.renderer == 'c2d') y += $.canvas.hh / this._zoom;
 			this.__pos.y = y;
 			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.y = Math.round(y);
@@ -7372,9 +7372,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._zoom = val;
 			let x = -this._pos.x;
-			if ($.canvas.renderer == '2d') x += $.canvas.hw / val;
+			if ($.canvas.renderer == 'c2d') x += $.canvas.hw / val;
 			let y = -this._pos.y;
-			if ($.canvas.renderer == '2d') y += $.canvas.hh / val;
+			if ($.canvas.renderer == 'c2d') y += $.canvas.hh / val;
 			this.__pos.x = x;
 			this.__pos.y = y;
 			if ($.allSprites.pixelPerfect) {
@@ -8869,7 +8869,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		$.ctx = $.drawingContext;
 		let c = rend.canvas || rend;
 		if (rend.GL) c.renderer = 'webgl';
-		if (c.renderer != 'webgpu') c.renderer = '2d';
+		else if (c.renderer != 'webgpu') c.renderer = 'c2d';
 		c.tabIndex = 0;
 		c.w = args[0];
 		c.h = args[1];
@@ -8902,7 +8902,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
 		c.mouse = { x: $.mouseX, y: $.mouseY };
-		if (c.renderer == '2d' && !$._webgpuFallback) {
+		if (c.renderer == 'c2d' && !$._webgpuFallback) {
 			$.camera.x = $.camera.ogX = c.hw;
 			$.camera.y = $.camera.ogY = c.hh;
 		} else {
@@ -9055,7 +9055,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				c.style.height = '100%!important';
 			}
 		}
-		if (c.renderer == '2d') {
+		if (c.renderer == 'c2d') {
 			$.camera.x = c.hw;
 			$.camera.y = c.hh;
 		} else {
