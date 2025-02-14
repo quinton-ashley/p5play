@@ -9140,7 +9140,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 		if (img) {
 			// if not finished loading, add callback to the list
-			if ((img.width <= 1 && img.height <= 1) || !img.pixels?.length) {
+			if ((img.width <= 1 && img.height <= 1) || typeof img.pixels === "undefined") {
 				if (cb) {
 					img.cbs.push(cb);
 					img.calls++;
