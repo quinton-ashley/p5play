@@ -43,6 +43,12 @@ class P5Play {
      */
     palettes: any[];
     /**
+     * Emoji scale factor, used when making emoji images.
+     * @type {Number}
+     * @default 1
+     */
+    emojiScale: number;
+    /**
      * Friendly rounding eliminates some floating point errors.
      * @type {Boolean}
      * @default true

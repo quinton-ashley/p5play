@@ -109,12 +109,20 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			 * @default false
 			 */
 			this.disableImages = false;
+
 			/**
 			 * The default color palette, at index 0 of this array,
 			 * has all the letters of the English alphabet mapped to colors.
 			 * @type {Array}
 			 */
 			this.palettes = [];
+
+			/**
+			 * Emoji scale factor, used when making emoji images.
+			 * @type {Number}
+			 * @default 1
+			 */
+			this.emojiScale = 1;
 
 			/**
 			 * Friendly rounding eliminates some floating point errors.
@@ -8513,12 +8521,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * let img = new EmojiImage('🏀', 32);
 	 */
 	this.EmojiImage = function (emoji, textSize) {
-		$.push();
-		$.textSize(textSize);
-		let g = $.createGraphics(textSize, textSize * 1.25);
+		textSize *= $.p5play.emojiScale;
+		let size = textSize * 1.25;
+		let g = $.createGraphics(size, size);
 		g.textSize(textSize);
 		g.textAlign($.CENTER);
-		g.text(emoji, textSize / 2, textSize);
+		g.textFont($.textFont());
+		g.text(emoji, size / 2, textSize);
 
 		// same code as img.trim() in q5.js
 		let ctx = g.drawingContext;
@@ -8549,8 +8558,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		right = Math.floor(right / pd);
 
 		g = g.get(left, top, right - left + 1, bottom - top + 1);
-
-		$.pop();
 		g.url = emoji;
 		return g;
 	};
