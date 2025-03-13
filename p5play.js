@@ -8523,10 +8523,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	this.EmojiImage = function (emoji, textSize) {
 		textSize *= $.p5play.emojiScale;
 		let size = textSize * 1.25;
-		let g = $.createGraphics(size, size);
+		let g = $.createGraphics(size, size, $.P2D);
 		g.textSize(textSize);
 		g.textAlign($.CENTER);
-		g.textFont($.textFont());
+		g.textFont($.canvas.renderer != 'webgpu' ? $.textFont() : $._g.textFont());
 		g.text(emoji, size / 2, textSize);
 
 		// same code as img.trim() in q5.js
