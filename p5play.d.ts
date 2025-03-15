@@ -1325,9 +1325,9 @@ class Sprite {
 }
 /**
  * @class
- * @extends Array<p5.Image>
+ * @extends Array<Image>
  */
-class Ani extends Array<p5.Image> {
+class Ani extends Array<new (width?: number, height?: number) => HTMLImageElement> {
     /**
      * <a href="https://p5play.org/learn/animation.html">
      * Look at the Animation reference pages before reading these docs.
@@ -1347,11 +1347,11 @@ class Ani extends Array<p5.Image> {
      * `Ani` is not a shorthand for `Animation`, since that class name
      * is already used by the JS Web Animations API.
      *
-     * @param {...p5.Image} ...images - p5.Image objects to be used as frames
+     * @param {...Image} ...images - Image objects to be used as frames
      * @example
      * let shapeShifter = new Ani("dog.png", "cat.png", "snake.png");
      */
-    constructor(...args: p5.Image[]);
+    constructor(...args: (new (width?: number, height?: number) => HTMLImageElement)[]);
     /**
      * The name of the animation
      * @type {String}
@@ -1502,7 +1502,7 @@ class Ani extends Array<p5.Image> {
      */
     get lastFrame(): number;
     /**
-     * The current frame as p5.Image. Read only.
+     * The current frame as an Image object. Read only.
      * @type {Image}
      */
     get frameImage(): new (width?: number, height?: number) => HTMLImageElement;
@@ -2750,7 +2750,7 @@ function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
 let userDisabledP5Errors: boolean;
-function createCanvas(...args: any[]): Renderer;
+function createCanvas(...args: any[]): HTMLCanvasElement;
 /**
  * @class
  */

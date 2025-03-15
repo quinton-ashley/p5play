@@ -4473,7 +4473,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 	/**
 	 * @class
-	 * @extends Array<p5.Image>
+	 * @extends Array<Image>
 	 */
 	this.Ani = class extends Array {
 		/**
@@ -4495,7 +4495,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * `Ani` is not a shorthand for `Animation`, since that class name
 		 * is already used by the JS Web Animations API.
 		 *
-		 * @param {...p5.Image} ...images - p5.Image objects to be used as frames
+		 * @param {...Image} ...images - Image objects to be used as frames
 		 * @example
 		 * let shapeShifter = new Ani("dog.png", "cat.png", "snake.png");
 		 */
@@ -5155,7 +5155,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		}
 
 		/**
-		 * The current frame as p5.Image. Read only.
+		 * The current frame as an Image object. Read only.
 		 * @type {Image}
 		 */
 		get frameImage() {
@@ -8575,7 +8575,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * @param {String} txt - each character represents a pixel color value
 	 * @param {Number} scale - the scale of the image
 	 * @param {Number|Object} palette - color palette
-	 * @returns {Image} A p5.Image object
+	 * @returns {Image} An Image object
 	 *
 	 * @example
 	 * let str = `
@@ -8830,10 +8830,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * Use of `new Canvas()` is preferred. Check the Canvas constructor
 	 * for documentation.
 	 *
-	 * This function differs from `new Canvas()` because it returns a
-	 * p5.Renderer object instead of the HTML5 canvas object itself.
-	 *
-	 * @returns {Renderer} renderer object
+	 * @returns {HTMLCanvasElement} renderer object
 	 */
 	this.createCanvas = function () {
 		let args = [...arguments];
