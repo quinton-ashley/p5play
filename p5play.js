@@ -263,13 +263,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	let usePhysics = true;
 	let timeScale = 1;
 
-	const log = console.log;
-	/**
-	 * Shortcut for console.log
-	 * @type {Function}
-	 * @param {...any} args
-	 */
-	this.log = console.log;
+	let log = ($.log = console.log);
 
 	$.DYN = $.DYNAMIC = 'dynamic';
 	$.STA = $.STATIC = 'static';
@@ -2520,8 +2514,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			this.pos = val;
 		}
 		/**
-		 * The sprite's absolute position on the canvas.
-		 * @readonly
+		 * The sprite's absolute position on the canvas. Read only.
 		 */
 		get canvasPos() {
 			return this._canvasPos;
@@ -8830,7 +8823,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 * Use of `new Canvas()` is preferred. Check the Canvas constructor
 	 * for documentation.
 	 *
-	 * @returns {HTMLCanvasElement} renderer object
+	 * @returns {Canvas} renderer object
 	 */
 	this.createCanvas = function () {
 		let args = [...arguments];
@@ -8947,11 +8940,11 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * For an easy way to scale the canvas or make it pixelated, use
 		 * the `displayMode` function.
 		 *
-		 * Only q5.js has support for canvas options (context attributes).
+		 * Only q5.js has support for canvas options.
 		 *
 		 * @param {Number} [width]
 		 * @param {Number} [height]
-		 * @param {Object} [options] - context attributes
+		 * @param {Object} [options] - canvas options or renderer
 		 * @returns HTML5 canvas element
 		 * @example
 		 * // fills the window
@@ -8961,7 +8954,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * // 800x600 pixels
 		 * new Canvas(800, 600);
 		 */
-		constructor(width, height, renderer, options) {
+		constructor(width, height, options) {
 			/**
 			 * The width of the canvas.
 			 * @type {Number}
@@ -9974,11 +9967,7 @@ main {
 		}
 	};
 
-	/**
-	 * An array of touch objects.
-	 * @type {_Touch[]}
-	 */
-	this.touches = [];
+	$.touches = [];
 	$.touches.holdThreshold = 12;
 
 	$._ontouchstart = function (e) {

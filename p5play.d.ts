@@ -1,3 +1,5 @@
+import 'q5';
+
 declare global {
 
 class P5Play {
@@ -114,10 +116,6 @@ class P5Play {
 var p5play: P5Play;
 let usePhysics: boolean;
 let timeScale: number;
-const log: {
-    (...data: any[]): void;
-    (message?: any, ...optionalParams: any[]): void;
-};
 /**
  * @class
  */
@@ -868,10 +866,9 @@ class Sprite {
      */
     get position(): Vector;
     /**
-     * The sprite's absolute position on the canvas.
-     * @readonly
+     * The sprite's absolute position on the canvas. Read only.
      */
-    readonly get canvasPos(): any;
+    get canvasPos(): any;
     set hw(val: number);
     /**
      * Half the width of the sprite.
@@ -2750,7 +2747,7 @@ function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
 let userDisabledP5Errors: boolean;
-function createCanvas(...args: any[]): HTMLCanvasElement;
+function createCanvas(...args: any[]): Canvas;
 /**
  * @class
  */
@@ -2766,11 +2763,11 @@ class Canvas {
      * For an easy way to scale the canvas or make it pixelated, use
      * the `displayMode` function.
      *
-     * Only q5.js has support for canvas options (context attributes).
+     * Only q5.js has support for canvas options.
      *
      * @param {Number} [width]
      * @param {Number} [height]
-     * @param {Object} [options] - context attributes
+     * @param {Object} [options] - canvas options or renderer
      * @returns HTML5 canvas element
      * @example
      * // fills the window
@@ -2780,7 +2777,7 @@ class Canvas {
      * // 800x600 pixels
      * new Canvas(800, 600);
      */
-    constructor(width?: number, height?: number, renderer: any, options?: any);
+    constructor(width?: number, height?: number, options?: any);
     /**
      * The width of the canvas.
      * @type {Number}
@@ -3078,7 +3075,6 @@ class _Touch extends InputDevice {
     canvasPos: any;
     force: any;
 }
-var touches: _Touch[];
 /**
  * @class
  * @extends InputDevice
