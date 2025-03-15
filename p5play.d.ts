@@ -1,5 +1,3 @@
-import * as p5 from 'p5';
-
 declare global {
 
 class P5Play {
@@ -121,11 +119,6 @@ const log: {
     (message?: any, ...optionalParams: any[]): void;
 };
 /**
- * Shortcut for console.log
- * @type {Function}
- * @param {...any} args
- */
-/**
  * @class
  */
 class Sprite {
@@ -142,7 +135,7 @@ class Sprite {
      * expect it to, if not you'll just get an error.
      *
      * Special feature! If the first parameter to this constructor is a
-     * loaded p5.Image, Ani, or name of a animation,
+     * loaded Image, Ani, or name of a animation,
      * then the Sprite will be created with that animation. If the
      * dimensions of the sprite are not given, then the Sprite will be
      * created using the dimensions of the animation.
@@ -266,7 +259,7 @@ class Sprite {
      * @type {Number}
      */
     get y(): number;
-    set image(img: p5.Image);
+    set image(img: new (width?: number, height?: number) => HTMLImageElement);
     /**
      * The sprite's image or current frame of animation.
      *
@@ -276,9 +269,9 @@ class Sprite {
      * should be drawn at relative to the sprite's center.
      *
      * `sprite.image.scale` determines the x and y scale of the image.
-     * @type {p5.Image}
+     * @type {Image}
      */
-    get image(): p5.Image;
+    get image(): new (width?: number, height?: number) => HTMLImageElement;
     /**
      * Used to detect mouse events with the sprite.
      * @type {_SpriteMouse}
@@ -383,13 +376,13 @@ class Sprite {
      * @default 0
      */
     get rotation(): number;
-    set vel(val: p5.Vector);
+    set vel(val: Vector);
     /**
      * The sprite's velocity vector {x, y}
-     * @type {p5.Vector}
+     * @type {Vector}
      * @default {x: 0, y: 0}
      */
-    get vel(): p5.Vector;
+    get vel(): Vector;
     /**
      * Removes the physics body colliders from the sprite but not
      * overlap sensors.
@@ -457,36 +450,36 @@ class Sprite {
      * @default 0
      */
     get rotationSpeed(): number;
-    set color(val: p5.Color);
+    set color(val: Color);
     /**
      * The sprite's current color. By default sprites get a random color.
-     * @type {p5.Color}
+     * @type {Color}
      * @default random color
      */
-    get color(): p5.Color;
-    set colour(val: p5.Color);
+    get color(): Color;
+    set colour(val: Color);
     /**
      * Alias for color. colour is the British English spelling.
-     * @type {p5.Color}
+     * @type {Color}
      * @default random color
      */
-    get colour(): p5.Color;
-    set fill(val: p5.Color);
+    get colour(): Color;
+    set fill(val: Color);
     /**
      * Alias for sprite.fillColor
-     * @type {p5.Color}
+     * @type {Color}
      * @default random color
      */
-    get fill(): p5.Color;
-    set stroke(val: p5.Color);
+    get fill(): Color;
+    set stroke(val: Color);
     /**
      * Overrides sprite's stroke color. By default the stroke of a sprite
      * is determined by its collider type, which can also be overridden
      * by the sketch's stroke color.
-     * @type {p5.Color}
+     * @type {Color}
      * @default undefined
      */
-    get stroke(): p5.Color;
+    get stroke(): Color;
     set strokeWeight(val: number);
     /**
      * The sprite's stroke weight, the thickness of its outline.
@@ -494,36 +487,36 @@ class Sprite {
      * @default undefined
      */
     get strokeWeight(): number;
-    set textColor(val: p5.Color);
+    set textColor(val: Color);
     /**
      * The sprite's text fill color. Black by default.
-     * @type {p5.Color}
+     * @type {Color}
      * @default black (#000000)
      */
-    get textColor(): p5.Color;
+    get textColor(): Color;
     set textColour(val: any);
     get textColour(): any;
-    set textFill(val: p5.Color);
+    set textFill(val: Color);
     /**
      * The sprite's text fill color. Black by default.
-     * @type {p5.Color}
+     * @type {Color}
      * @default black (#000000)
      */
-    get textFill(): p5.Color;
+    get textFill(): Color;
     set textSize(val: number);
     /**
      * The sprite's text size, the sketch's current textSize by default.
      * @type {Number}
      */
     get textSize(): number;
-    set textStroke(val: p5.Color);
+    set textStroke(val: Color);
     /**
      * The sprite's text stroke color.
      * No stroke by default, does not inherit from the sketch's stroke color.
-     * @type {p5.Color}
+     * @type {Color}
      * @default undefined
      */
-    get textStroke(): p5.Color;
+    get textStroke(): Color;
     set textStrokeWeight(val: number);
     /**
      * The sprite's text stroke weight, the thickness of its outline.
@@ -643,12 +636,12 @@ class Sprite {
      * @default undefined
      */
     get heading(): string;
-    set img(val: p5.Image);
+    set img(val: new (width?: number, height?: number) => HTMLImageElement);
     /**
      * Alias for `sprite.image`.
-     * @type {p5.Image}
+     * @type {Image}
      */
-    get img(): p5.Image;
+    get img(): new (width?: number, height?: number) => HTMLImageElement;
     /**
      * Read only. True if the sprite is moving.
      * @type {Boolean}
@@ -829,23 +822,23 @@ class Sprite {
      * @default false
      */
     get static(): boolean;
-    set tint(val: p5.Color);
+    set tint(val: Color);
     /**
      * Tint color applied to the sprite when drawn.
      *
      * Note that this is not good for performance, you should probably
      * pre-render the effect if you want to use it a lot.
-     * @type {p5.Color}
+     * @type {Color}
      * @default undefined
      */
-    get tint(): p5.Color;
-    set tintColor(val: p5.Color);
+    get tint(): Color;
+    set tintColor(val: Color);
     /**
      * Alias for sprite.tint
-     * @type {p5.Color}
+     * @type {Color}
      * @default undefined
      */
-    get tintColor(): p5.Color;
+    get tintColor(): Color;
     /**
      * The sprite's vertices, in vertex mode format.
      * @type {Array}
@@ -862,18 +855,18 @@ class Sprite {
      * @default true
      */
     get visible(): boolean;
-    set pos(val: p5.Vector);
+    set pos(val: Vector);
     /**
      * The position vector {x, y}
-     * @type {p5.Vector}
+     * @type {Vector}
      */
-    get pos(): p5.Vector;
-    set position(val: p5.Vector);
+    get pos(): Vector;
+    set position(val: Vector);
     /**
      * The position vector {x, y}
-     * @type {p5.Vector}
+     * @type {Vector}
      */
-    get position(): p5.Vector;
+    get position(): Vector;
     /**
      * The sprite's absolute position on the canvas.
      * @readonly
@@ -960,13 +953,13 @@ class Sprite {
      * @type {Function}
      */
     get postDraw(): Function;
-    set velocity(val: p5.Vector);
+    set velocity(val: Vector);
     /**
      * The sprite's velocity vector {x, y}
-     * @type {p5.Vector}
+     * @type {Vector}
      * @default {x: 0, y: 0}
      */
-    get velocity(): p5.Vector;
+    get velocity(): Vector;
     set gravityScale(val: number);
     /**
      * A ratio that defines how much the sprite is affected by gravity.
@@ -1510,9 +1503,9 @@ class Ani extends Array<p5.Image> {
     get lastFrame(): number;
     /**
      * The current frame as p5.Image. Read only.
-     * @type {p5.Image}
+     * @type {Image}
      */
-    get frameImage(): p5.Image;
+    get frameImage(): new (width?: number, height?: number) => HTMLImageElement;
     /**
      * Width of the animation's current frame.
      * @type {Number}
@@ -1677,9 +1670,9 @@ class Group extends Array<Sprite> {
      */
     mirror: any;
     /**
-     * @type {p5.Vector}
+     * @type {Vector}
      */
-    offset: p5.Vector;
+    offset: Vector;
     /**
      * @type {Boolean}
      */
@@ -1697,9 +1690,9 @@ class Group extends Array<Sprite> {
      */
     rotationLock: boolean;
     /**
-     * @type {p5.Vector}
+     * @type {Vector}
      */
-    scale: p5.Vector;
+    scale: Vector;
     /**
      * @type {Number}
      */
@@ -1709,9 +1702,9 @@ class Group extends Array<Sprite> {
      */
     sleeping: boolean;
     /**
-     * @type {p5.Color}
+     * @type {Color}
      */
-    stroke: p5.Color;
+    stroke: Color;
     /**
      * @type {Number}
      */
@@ -1721,9 +1714,9 @@ class Group extends Array<Sprite> {
      */
     text: number;
     /**
-     * @type {p5.Color}
+     * @type {Color}
      */
-    textColor: p5.Color;
+    textColor: Color;
     /**
      * @type {String}
      */
@@ -1848,18 +1841,18 @@ class Group extends Array<Sprite> {
      * @type {Anis}
      */
     get anis(): Anis;
-    set img(val: p5.Image);
+    set img(val: new (width?: number, height?: number) => HTMLImageElement);
     /**
      * Alias for `group.image`.
-     * @type {p5.Image}
+     * @type {Image}
      */
-    get img(): p5.Image;
-    set image(img: p5.Image);
+    get img(): new (width?: number, height?: number) => HTMLImageElement;
+    set image(img: new (width?: number, height?: number) => HTMLImageElement);
     /**
      * The group's image.
-     * @type {p5.Image}
+     * @type {Image}
      */
-    get image(): p5.Image;
+    get image(): new (width?: number, height?: number) => HTMLImageElement;
     set amount(val: number);
     /**
      * Depending on the value that the amount property is set to, the group will
@@ -1882,13 +1875,13 @@ class Group extends Array<Sprite> {
      * @type {Number}
      */
     get height(): number;
-    set velocity(val: p5.Vector);
+    set velocity(val: Vector);
     /**
      * The sprite's velocity vector {x, y}
-     * @type {p5.Vector}
+     * @type {Vector}
      * @default {x: 0, y: 0}
      */
-    get velocity(): p5.Vector;
+    get velocity(): Vector;
     centroid: {
         x: number;
         y: number;
@@ -2443,24 +2436,24 @@ class Joint {
      * @param {Number} [yB]
      */
     get draw(): Function;
-    set offsetA(val: p5.Vector);
+    set offsetA(val: Vector);
     /**
      * Offset to the joint's anchorA position from the center of spriteA.
      *
      * Only distance and hinge joints have an offsetA.
-     * @type {p5.Vector}
+     * @type {Vector}
      * @default {x: 0, y: 0}
      */
-    get offsetA(): p5.Vector;
-    set offsetB(val: p5.Vector);
+    get offsetA(): Vector;
+    set offsetB(val: Vector);
     /**
      * Offset to the joint's anchorB position from the center of spriteB.
      *
      * Only distance, hinge, and wheel joints have an offsetB.
-     * @type {p5.Vector}
+     * @type {Vector}
      * @default {x: 0, y: 0}
      */
-    get offsetB(): p5.Vector;
+    get offsetB(): Vector;
     set springiness(val: number);
     /**
      * The springiness of the joint, a 0-1 ratio.
@@ -2746,8 +2739,8 @@ class Scale {
     valueOf(): any;
 }
 function colorPal(c: string, palette: number | any): string;
-function EmojiImage(emoji: string, textSize: number): p5.Image;
-function spriteArt(txt: string, scale: number, palette: number | any): p5.Image;
+function EmojiImage(emoji: string, textSize: number): new (width?: number, height?: number) => HTMLImageElement;
+function spriteArt(txt: string, scale: number, palette: number | any): new (width?: number, height?: number) => HTMLImageElement;
 function createSprite(...args: any[]): Sprite;
 function createGroup(...args: any[]): Group;
 function loadAnimation(...args: any[]): Ani;
@@ -2757,7 +2750,7 @@ function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
 let userDisabledP5Errors: boolean;
-function createCanvas(...args: any[]): p5.Renderer;
+function createCanvas(...args: any[]): Renderer;
 /**
  * @class
  */
@@ -2858,8 +2851,8 @@ function frameRate(hz: any): any;
 function background(...args: any[]): void;
 function fill(...args: any[]): void;
 function stroke(...args: any[]): void;
-function loadImage(...args: any[]): p5.Image;
-function loadImg(...args: any[]): p5.Image;
+function loadImage(...args: any[]): new (width?: number, height?: number) => HTMLImageElement;
+function loadImg(...args: any[]): new (width?: number, height?: number) => HTMLImageElement;
 /**
  * A FriendlyError is a custom error class that extends the native JS
  * Error class. It's used internally by p5play to make error messages
@@ -3336,8 +3329,5 @@ class _Contros extends Array<Contro> {
 var contros: _Contros;
 var controllers: _Contros;
 var contro: Contro;
-namespace p5 {
-    let disableFriendlyErrors: boolean;
-}
 
 }
