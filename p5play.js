@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.26
+ * @version 3.27
  * @author quinton-ashley
  */
 
@@ -33,7 +33,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_26');
+			gtag('event', 'p5play_v3_27');
 		};
 	}
 
@@ -510,7 +510,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			Object.defineProperty(this._canvasPos, 'x', {
 				get() {
 					let x = _this._pos.x - $.camera.x;
-					if ($.canvas.renderer == 'c2d') x += $.canvas.hw / $.camera._zoom;
+					if ($._c2d) x += $.canvas.hw / $.camera._zoom;
 					return x;
 				}
 			});
@@ -518,7 +518,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			Object.defineProperty(this._canvasPos, 'y', {
 				get() {
 					let y = _this._pos.y - $.camera.y;
-					if ($.canvas.renderer == 'c2d') y += $.canvas.hh / $.camera._zoom;
+					if ($._c2d) y += $.canvas.hh / $.camera._zoom;
 					return y;
 				}
 			});
@@ -607,16 +607,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 			x ??= group.x;
 			if (x === undefined) {
-				if ($.canvas?.renderer == 'c2d' && !$._webgpuFallback) {
-					x = $.canvas.hw / this.tileSize;
-				} else x = 0;
+				if ($._c2d) x = $.canvas.hw / this.tileSize;
+				else x = 0;
 				if (w) this._vertexMode = true;
 			}
 			y ??= group.y;
 			if (y === undefined) {
-				if ($.canvas?.renderer == 'c2d' && !$._webgpuFallback) {
-					y = $.canvas.hh / this.tileSize;
-				} else y = 0;
+				if ($._c2d) y = $.canvas.hh / this.tileSize;
+				else y = 0;
 			}
 
 			let forcedBoxShape = false;
@@ -7290,7 +7288,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.x = val;
 			let x = -val;
-			if ($.canvas.renderer == 'c2d') x += $.canvas.hw / this._zoom;
+			if ($._c2d) x += $.canvas.hw / this._zoom;
 			this.__pos.x = x;
 			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.x = Math.round(x);
@@ -7309,7 +7307,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._pos.y = val;
 			let y = -val;
-			if ($.canvas.renderer == 'c2d') y += $.canvas.hh / this._zoom;
+			if ($._c2d) y += $.canvas.hh / this._zoom;
 			this.__pos.y = y;
 			if ($.allSprites.pixelPerfect) {
 				this.__pos.rounded.y = Math.round(y);
@@ -7377,9 +7375,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			if (val === undefined || isNaN(val)) return;
 			this._zoom = val;
 			let x = -this._pos.x;
-			if ($.canvas.renderer == 'c2d') x += $.canvas.hw / val;
+			if ($._c2d) x += $.canvas.hw / val;
 			let y = -this._pos.y;
-			if ($.canvas.renderer == 'c2d') y += $.canvas.hh / val;
+			if ($._c2d) y += $.canvas.hh / val;
 			this.__pos.x = x;
 			this.__pos.y = y;
 			if ($.allSprites.pixelPerfect) {
@@ -8523,7 +8521,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		let g = $.createGraphics(size, size, $.P2D);
 		g.textSize(textSize);
 		g.textAlign($.CENTER);
-		g.textFont($.canvas.renderer != 'webgpu' ? $.textFont() : $._g.textFont());
+		g.textFont(!$.canvas.webgpu ? $.textFont() : $._g.textFont());
 		g.text(emoji, size / 2, textSize);
 
 		// same code as img.trim() in q5.js
@@ -8869,8 +8867,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		let rend = _createCanvas.call($, ...args);
 		$.ctx = $.drawingContext;
 		let c = rend.canvas || rend;
-		if (rend.GL) c.renderer = 'webgl';
-		else if (c.renderer != 'webgpu') c.renderer = 'c2d';
+		if (rend.GL) {
+			c.renderer = 'webgl';
+			$._webgl = true;
+		} else if (!$._webgpu) $._c2d = true;
 		c.tabIndex = 0;
 		c.w = args[0];
 		c.h = args[1];
@@ -8903,14 +8903,14 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
 		c.mouse = { x: $.mouseX, y: $.mouseY };
-		if (c.renderer == 'c2d' && !$._webgpuFallback) {
+		if ($._c2d) {
 			$.camera.x = $.camera.ogX = c.hw;
 			$.camera.y = $.camera.ogY = c.hh;
 		} else {
 			$.camera.x = 0;
 			$.camera.y = 0;
-			if (c.renderer == 'webgl') $._textCache = false;
-			if (!$._webgpuFallback) {
+			if ($._webgl) $._textCache = false;
+			else if ($._webgpu) {
 				$.p5play._renderStats = {
 					x: -c.hw + 10,
 					y: -c.hh + 20
@@ -9056,7 +9056,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				c.style.height = '100%!important';
 			}
 		}
-		if (c.renderer == 'c2d') {
+		if ($._c2d) {
 			$.camera.x = c.hw;
 			$.camera.y = c.hh;
 		} else {
@@ -9677,7 +9677,7 @@ main {
 			if ($.camera.x == $.camera.ogX && $.camera.y == $.camera.ogY && $.camera.zoom == 1) {
 				this.x = $.mouseX;
 				this.y = $.mouseY;
-			} else if ($.canvas.renderer != 'webgpu') {
+			} else if (!$._webgpu) {
 				this.x = ($.mouseX - $.canvas.hw) / $.camera.zoom + $.camera.x;
 				this.y = ($.mouseY - $.canvas.hh) / $.camera.zoom + $.camera.y;
 			} else {
@@ -10748,8 +10748,6 @@ main {
 	 * @type {Contro}
 	 */
 	this.contro = new $.Contro('mock0');
-
-	if ($._webgpuFallback) $._beginRender = false;
 
 	/**
 	 * FPS, amongst the gaming community, refers to how fast a computer

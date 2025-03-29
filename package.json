@@ -11,7 +11,7 @@
 	"funding": [
 		{
 			"type": "patreon",
-			"url": "https://www.patreon.com/p5play"
+			"url": "https://www.patreon.com/q5play"
 		},
 		{
 			"type": "github",
@@ -50,5 +50,5 @@
 		"version": "git add -A",
 		"postversion": "git push"
 	},
-	"version": "3.26.13"
+	"version": "3.27.0"
 }
