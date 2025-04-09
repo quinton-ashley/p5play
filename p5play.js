@@ -8909,8 +8909,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		} else {
 			$.camera.x = 0;
 			$.camera.y = 0;
-			if ($._webgl) $._textCache = false;
-			else if ($._webgpu) {
+			if ($._webgpu) {
 				$.p5play._renderStats = {
 					x: -c.hw + 10,
 					y: -c.hh + 20
@@ -9128,7 +9127,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 	 */
 	this.loadImage = this.loadImg = function () {
 		if ($.p5play.disableImages) {
-			$._decrementPreload();
+			if (!$._q5) $._decrementPreload();
 			// return a dummy image object to prevent errors
 			return { w: 16, width: 16, h: 16, height: 16, pixels: [] };
 		}
@@ -10798,7 +10797,7 @@ main {
 
 		$.push();
 		$.fill(0, 0, 0, 128);
-		$.rect(rs.x - 5, rs.y - rs.fontSize, rs.fontSize * 8.5, rs.gap * 5 + 5);
+		$.rect(rs.x - 5, rs.y - rs.fontSize, rs.fontSize * 8.5, rs.gap * 4 + 5);
 		$.fill($.p5play._statsColor);
 		$.textAlign('left');
 		$.textSize(rs.fontSize);
@@ -10807,10 +10806,9 @@ main {
 		let x = rs.x;
 		let y = rs.y;
 		$.text('sprites: ' + $.p5play.spritesDrawn, x, y);
-		$.text('display: ' + Math.round($.frameRate()) + 'hz', x, y + rs.gap);
-		$.text('fps avg: ' + $.p5play._fpsAvg, x, y + rs.gap * 2);
-		$.text('fps min: ' + $.p5play._fpsMin, x, y + rs.gap * 3);
-		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 4);
+		$.text('fps avg: ' + $.p5play._fpsAvg, x, y + rs.gap);
+		$.text('fps min: ' + $.p5play._fpsMin, x, y + rs.gap * 2);
+		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 3);
 		$.pop();
 	};
 
