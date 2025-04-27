@@ -10,6 +10,10 @@ if (typeof planck != 'object') {
 	} else throw 'planck.js must be loaded before p5play';
 }
 
+if (p5.prototype?.registerMethod == undefined) {
+	throw new Error('p5.js v2 does not support p5play. Please use p5.js v1 or q5.js. https://q5js.org');
+}
+
 p5.prototype.registerMethod('init', function p5playInit() {
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
