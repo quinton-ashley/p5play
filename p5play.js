@@ -10832,8 +10832,14 @@ main {
 	 */
 	this.drawFrame ??= () => {};
 
+	// hacky workaround for bug in p5.js v1
+	// https://github.com/processing/p5.js/issues/7781
+	if (!$._q5) $._isGlobal = !!(typeof window !== 'undefined' && window.p5 && window.setup);
+
 	if ($._isGlobal && window.update) {
 		$.update = window.update;
+		// p5.js won't run the draw loop without a draw function defined
+		if (!$._q5) window.draw = () => {};
 	}
 
 	if ($._isGlobal && window.drawFrame) {
