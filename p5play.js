@@ -10831,10 +10831,10 @@ main {
 	 * input handling, game logic, and physics simulation.
 	 */
 	this.drawFrame ??= () => {};
+});
 
-	// hacky workaround for bug in p5.js v1
-	// https://github.com/processing/p5.js/issues/7781
-	if (!$._q5) $._isGlobal = !!(typeof window !== 'undefined' && window.p5 && window.setup);
+p5.prototype.registerMethod('afterSetup', function p5playAfterSetup() {
+	const $ = this;
 
 	if ($._isGlobal && window.update) {
 		$.update = window.update;
