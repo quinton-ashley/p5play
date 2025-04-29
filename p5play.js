@@ -10815,6 +10815,20 @@ main {
 		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 3);
 		$.pop();
 	};
+});
+
+p5.prototype.registerMethod('afterSetup', function p5playAfterSetup() {
+	const $ = this;
+
+	if ($._isGlobal && window.update) {
+		$.update = window.update;
+		// p5.js won't run the draw loop without a draw function defined
+		if (!$._q5) window.draw = () => {};
+	}
+
+	if ($._isGlobal && window.drawFrame) {
+		$.drawFrame = window.drawFrame;
+	}
 
 	/**
 	 * p5play runs this function 60 times per second by default.
@@ -10831,20 +10845,6 @@ main {
 	 * input handling, game logic, and physics simulation.
 	 */
 	this.drawFrame ??= () => {};
-});
-
-p5.prototype.registerMethod('afterSetup', function p5playAfterSetup() {
-	const $ = this;
-
-	if ($._isGlobal && window.update) {
-		$.update = window.update;
-		// p5.js won't run the draw loop without a draw function defined
-		if (!$._q5) window.draw = () => {};
-	}
-
-	if ($._isGlobal && window.drawFrame) {
-		$.drawFrame = window.drawFrame;
-	}
 });
 
 // called before each draw function call
