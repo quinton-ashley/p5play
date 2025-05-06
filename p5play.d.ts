@@ -2842,14 +2842,7 @@ class Canvas {
      */
     save(): void;
 }
-var canvas: Canvas;
-function resizeCanvas(w: any, h: any): void;
-function frameRate(hz: any): any;
-function background(...args: any[]): void;
-function fill(...args: any[]): void;
-function stroke(...args: any[]): void;
-function loadImage(...args: any[]): new (width?: number, height?: number) => HTMLImageElement;
-function loadImg(...args: any[]): new (width?: number, height?: number) => HTMLImageElement;
+
 /**
  * A FriendlyError is a custom error class that extends the native JS
  * Error class. It's used internally by p5play to make error messages

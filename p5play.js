@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.27
+ * @version 3.29
  * @author quinton-ashley
  */
 
@@ -37,7 +37,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_27');
+			gtag('event', 'p5play_v3_29');
 		};
 	}
 
@@ -9025,12 +9025,6 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 */
 		save() {}
 	};
-
-	/**
-	 * HTML5 canvas element.
-	 * @type {Canvas}
-	 */
-	this.canvas = $.canvas;
 
 	$.Canvas = function () {
 		return $.createCanvas(...arguments).canvas;
