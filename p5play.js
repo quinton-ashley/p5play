@@ -4,17 +4,17 @@
  * @author quinton-ashley
  */
 
+if (typeof p5 == 'undefined') {
+	throw 'You need to load q5.js or p5.js before p5play';
+}
+
 if (typeof planck != 'object') {
 	if (typeof process == 'object') {
 		global.planck = require('./planck.min.js');
-	} else throw 'planck.js must be loaded before p5play';
+	} else throw 'You need to load planck.js before p5play!';
 }
 
-if (p5.prototype?.registerMethod == undefined) {
-	throw new Error('p5.js v2 does not support p5play. Please use p5.js v1 or q5.js. https://q5js.org');
-}
-
-p5.prototype.registerMethod('init', function p5playInit() {
+let p5playInit = function () {
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
 
@@ -40,6 +40,9 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			gtag('event', 'p5play_v3_29');
 		};
 	}
+
+	let using_p5v1 = !$._q5 && p5.VERSION[0] == 1;
+	let using_p5v2 = !$._q5 && p5.VERSION[0] == 2;
 
 	// in p5play the default angle mode is degrees
 	const DEGREES = $.DEGREES;
@@ -842,7 +845,8 @@ p5.prototype.registerMethod('init', function p5playInit() {
 				}
 				if (typeof val == 'object') {
 					if (val instanceof p5.Color) {
-						this[prop] = $.color(...val.levels);
+						// make a copy of the color
+						this[prop] = $.color(val);
 					} else {
 						this[prop] = Object.assign({}, val);
 					}
@@ -1552,11 +1556,10 @@ p5.prototype.registerMethod('init', function p5playInit() {
 			// false if color was copied with Object.assign
 			if (val instanceof p5.Color) {
 				return val;
-			} else if (typeof val != 'object') {
-				if (val.length == 1) return $.colorPal(val);
-				else return $.color(val);
+			} else if (typeof val != 'object' && val.length == 1) {
+				return $.colorPal(val);
 			}
-			return $.color(...val.levels);
+			return $.color(val);
 		}
 
 		/**
@@ -7582,7 +7585,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		 * It's better to use a specific joint class constructor:
 		 *
 		 * GlueJoint, DistanceJoint, WheelJoint, HingeJoint,
-		 * SliderJoint, or RopeJoint.
+		 * SliderJoint, RopeJoint, or GrabberJoint.
 		 *
 		 * All other joint classes extend this class. Joint type
 		 * can not be changed after a joint is created.
@@ -8744,7 +8747,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 
 	async function playIntro() {
 		if (document.getElementById('p5play-intro')) return;
-		$._incrementPreload();
+		if (!using_p5v2) $._incrementPreload();
 		let d = document.createElement('div');
 		d.id = 'p5play-intro';
 		d.style = 'position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1000; background-color: black;';
@@ -8776,7 +8779,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		d.style.display = 'none';
 		d.remove();
 		document.getElementById('p5play-intro')?.remove();
-		$._decrementPreload();
+		if (!using_p5v2) $._decrementPreload();
 	}
 
 	if (window.location) {
@@ -8871,6 +8874,7 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		let rend = _createCanvas.call($, ...args);
 		$.ctx = $.drawingContext;
 		let c = rend.canvas || rend;
+		window.canvas = c; // for p5 v2
 		if (rend.GL) {
 			c.renderer = 'webgl';
 			$._webgl = true;
@@ -8923,6 +8927,13 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
 
 		$.displayMode(displayMode, renderQuality, displayScale);
+
+		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
+		c.addEventListener(pointer + 'down', onpointerdown);
+		if (window) {
+			window.addEventListener(pointer + 'move', onpointermove);
+			window.addEventListener(pointer + 'up', onpointerup);
+		}
 
 		return rend;
 	};
@@ -9109,96 +9120,99 @@ p5.prototype.registerMethod('init', function p5playInit() {
 		} else _stroke.call($, ...args);
 	};
 
-	const _loadImage = $.loadImage;
+	// image cache can't be used with p5 v2
+	if (!using_p5v2) {
+		const _loadImage = $.loadImage;
 
-	/**
-	 * Loads an image. p5play caches images so that they're only
-	 * loaded once, so multiple calls to `loadImage` with the same
-	 * path will return the same image object. p5play also adds the
-	 * image's url as a property of the image object.
-	 *
-	 * @param {string} url
-	 * @param {number} [width]
-	 * @param {number} [height]
-	 * @param {function} [callback]
-	 * @returns {Image}
-	 */
-	this.loadImage = this.loadImg = function () {
-		if ($.p5play.disableImages) {
-			if (!$._q5) $._decrementPreload();
-			// return a dummy image object to prevent errors
-			return { w: 16, width: 16, h: 16, height: 16, pixels: [] };
-		}
-		let args = arguments;
-		let url = args[0];
-		let img = $.p5play.images[url];
-		let cb;
-		if (typeof args[args.length - 1] == 'function') {
-			cb = args[args.length - 1];
-		}
-		if (img) {
-			// if not finished loading, add callback to the list
-			if (img.width <= 1 && img.height <= 1) {
-				if (cb) {
-					img.cbs.push(cb);
-					img.calls++;
-				} else if (!$._q5) $._decrementPreload();
-			} else {
-				if (cb) cb(); // if already loaded, run the callback immediately
+		/**
+		 * Loads an image. p5play caches images so that they're only
+		 * loaded once, so multiple calls to `loadImage` with the same
+		 * path will return the same image object. p5play also adds the
+		 * image's url as a property of the image object.
+		 *
+		 * @param {string} url
+		 * @param {number} [width]
+		 * @param {number} [height]
+		 * @param {function} [callback]
+		 * @returns {Image}
+		 */
+		this.loadImage = this.loadImg = function () {
+			if ($.p5play.disableImages) {
 				if (!$._q5) $._decrementPreload();
+				// return a dummy image object to prevent errors
+				return { w: 16, width: 16, h: 16, height: 16, pixels: [] };
 			}
+			let args = arguments;
+			let url = args[0];
+			let img = $.p5play.images[url];
+			let cb;
+			if (typeof args[args.length - 1] == 'function') {
+				cb = args[args.length - 1];
+			}
+			if (img) {
+				// if not finished loading, add callback to the list
+				if (img.width <= 1 && img.height <= 1) {
+					if (cb) {
+						img.cbs.push(cb);
+						img.calls++;
+					} else if (!$._q5) $._decrementPreload();
+				} else {
+					if (cb) cb(); // if already loaded, run the callback immediately
+					if (!$._q5) $._decrementPreload();
+				}
+				return img;
+			}
+			const _cb = (_img) => {
+				// in q5 these getters are already defined
+				if (!_img.w) {
+					Object.defineProperty(_img, 'w', {
+						get: function () {
+							return this.width;
+						}
+					});
+					Object.defineProperty(_img, 'h', {
+						get: function () {
+							return this.height;
+						}
+					});
+				}
+
+				// server side use of p5play makes images load synchronously
+				if (_img.cbs) {
+					for (let cb of _img.cbs) {
+						cb(_img);
+					}
+					if (!$._q5) {
+						for (let i = 1; i < _img.calls; i++) {
+							$._decrementPreload();
+						}
+					}
+					_img.cbs = [];
+				}
+
+				$.p5play.onImageLoad(img);
+			};
+			img = _loadImage.call($, url, _cb);
+			img.cbs = [];
+			img.calls = 1;
+			if (cb) img.cbs.push(cb);
+			img.url = url;
+			$.p5play.images[url] = img;
 			return img;
-		}
-		const _cb = (_img) => {
-			// in q5 these getters are already defined
-			if (!_img.w) {
-				Object.defineProperty(_img, 'w', {
-					get: function () {
-						return this.width;
-					}
-				});
-				Object.defineProperty(_img, 'h', {
-					get: function () {
-						return this.height;
-					}
-				});
-			}
-
-			// server side use of p5play makes images load synchronously
-			if (_img.cbs) {
-				for (let cb of _img.cbs) {
-					cb(_img);
-				}
-				if (!$._q5) {
-					for (let i = 1; i < _img.calls; i++) {
-						$._decrementPreload();
-					}
-				}
-				_img.cbs = [];
-			}
-
-			$.p5play.onImageLoad(img);
 		};
-		img = _loadImage.call($, url, _cb);
-		img.cbs = [];
-		img.calls = 1;
-		if (cb) img.cbs.push(cb);
-		img.url = url;
-		$.p5play.images[url] = img;
-		return img;
-	};
 
-	const _image = $.image;
+		const _image = $.image;
 
-	/**
-	 * Display an image
-	 * unless `p5play.disableImages` is true.
-	 * @param {Image} img
-	 */
-	$.image = function () {
-		if ($.p5play.disableImages) return;
-		_image.call($, ...arguments);
-	};
+		/**
+		 * Display an image
+		 * unless `p5play.disableImages` is true.
+		 * @param {Image} img
+		 */
+		$.image = function () {
+			if ($.p5play.disableImages) return;
+			_image.call($, ...arguments);
+		};
+	}
 
 	// if the user isn't using q5.js
 	// add a backwards compatibility layer for p5.js
@@ -9802,7 +9816,18 @@ main {
 		}
 	};
 
-	const __onmousedown = function (btn) {
+	let pressAmt = 0;
+
+	let onpointerdown = function (e) {
+		if (!$._setupDone) return;
+		pressAmt++;
+
+		if (p5.aud && p5.aud.state != 'running') p5.aud.resume();
+
+		let btn = 'left';
+		if (e.button === 1) btn = 'center';
+		else if (e.button === 2) btn = 'right';
+
 		$.mouse.isActive = true;
 		$.mouse[btn]++;
 		if ($.world.mouseSprites.length) {
@@ -9821,38 +9846,26 @@ main {
 		}
 	};
 
-	const _onmousedown = $._onmousedown;
-
-	$._onmousedown = function (e) {
+	let onpointermove = function (e) {
 		if (!$._setupDone) return;
 
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
 
-		__onmousedown.call($, btn);
-		_onmousedown.call($, e);
-	};
-
-	const __onmousemove = function (btn) {
 		let m = $.mouse;
 		if (m[btn] > 0) m._dragFrame[btn] = true;
 	};
 
-	const _onmousemove = $._onmousemove;
-
-	$._onmousemove = function (e) {
+	let onpointerup = function (e) {
 		if (!$._setupDone) return;
+		if (pressAmt > 0) pressAmt--;
+		else return;
 
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
 		else if (e.button === 2) btn = 'right';
 
-		__onmousemove.call($, btn);
-		_onmousemove.call($, e);
-	};
-
-	const __onmouseup = function (btn) {
 		let m = $.mouse;
 		if (m[btn] >= m.holdThreshold) m[btn] = -2;
 		else if (m[btn] > 1) m[btn] = -1;
@@ -9873,19 +9886,6 @@ main {
 			msm[btn] = 0;
 			msm.drag[btn] = 0;
 		}
-	};
-
-	const _onmouseup = $._onmouseup;
-
-	$._onmouseup = function (e) {
-		if (!$._setupDone) return;
-
-		let btn = 'left';
-		if (e.button === 1) btn = 'center';
-		else if (e.button === 2) btn = 'right';
-
-		__onmouseup.call($, btn);
-		_onmouseup.call($, e);
 	};
 
 	/**
@@ -9980,7 +9980,7 @@ main {
 				$.mouseY = $.touches[0].y;
 				$.mouse._update();
 				$.world.mouseSprites = $.world.getMouseSprites();
-				$._onmousedown(e);
+				if (using_p5v1) $._onmousedown(e);
 			}
 		}
 		if ($.touchStarted && !$.touchStarted(e)) e.preventDefault();
@@ -9997,7 +9997,7 @@ main {
 				$.mouseX = $.touches[0].x;
 				$.mouseY = $.touches[0].y;
 				$.mouse._update();
-				$._onmousemove(e);
+				if (using_p5v1) $._onmousemove(e);
 			}
 		}
 		if ($.touchMoved && !$.touchMoved(e)) e.preventDefault();
@@ -10020,7 +10020,7 @@ main {
 				$.mouseX = $.touches[0].x;
 				$.mouseY = $.touches[0].y;
 				$.mouse._update();
-				$._onmouseup(e);
+				if (using_p5v1) $._onmouseup(e);
 			}
 		}
 		if ($.touchEnded && !$.touchEnded(e)) e.preventDefault();
@@ -10193,9 +10193,7 @@ main {
 		return e.key;
 	}
 
-	const _onkeydown = $._onkeydown;
-
-	$._onkeydown = function (e) {
+	let onkeydown = function (e) {
 		let key = e.key;
 		if (this.p5play.standardizeKeyboard) {
 			key = _getKeyFromCode(e);
@@ -10216,13 +10214,9 @@ main {
 
 		let k = this.kb._simpleKeyControls[key];
 		if (k) this.kb._pre(k);
-
-		_onkeydown.call(this, e);
 	};
 
-	const _onkeyup = $._onkeyup;
-
-	$._onkeyup = function (e) {
+	let onkeyup = function (e) {
 		let key = e.key;
 		if (this.p5play.standardizeKeyboard) {
 			key = _getKeyFromCode(e);
@@ -10247,9 +10241,12 @@ main {
 			let k = key.toLowerCase();
 			if (this.kb[k] > 0) this.kb._rel(k);
 		}
-
-		_onkeyup.call(this, e);
 	};
+
+	if (window) {
+		window.addEventListener('keydown', onkeydown.bind(this));
+		window.addEventListener('keyup', onkeyup.bind(this));
+	}
 
 	/**
 	 * @class
@@ -10809,9 +10806,9 @@ main {
 		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 3);
 		$.pop();
 	};
-});
+};
 
-p5.prototype.registerMethod('afterSetup', function p5playAfterSetup() {
+let p5playAfterSetup = function () {
 	const $ = this;
 
 	if ($._isGlobal && window.update) {
@@ -10839,10 +10836,10 @@ p5.prototype.registerMethod('afterSetup', function p5playAfterSetup() {
 	 * input handling, game logic, and physics simulation.
 	 */
 	this.drawFrame ??= () => {};
-});
+};
 
 // called before each draw function call
-p5.prototype.registerMethod('pre', function p5playPreDraw() {
+let p5playPreDraw = function () {
 	const $ = this;
 	if (!$._q5) {
 		$.p5play._preDrawFrameTime = performance.now();
@@ -10858,10 +10855,10 @@ p5.prototype.registerMethod('pre', function p5playPreDraw() {
 		$.allSprites.update();
 	}
 	$.allSprites._autoUpdate ??= true;
-});
+};
 
 // called after each draw function call
-p5.prototype.registerMethod('post', function p5playPostDraw() {
+let p5playPostDraw = function () {
 	const $ = this;
 	$.p5play._inPostDraw = true;
 
@@ -10973,4 +10970,129 @@ p5.prototype.registerMethod('post', function p5playPostDraw() {
 		$.p5play._fps = Math.round(1000 / ($.p5play._postDrawFrameTime - $.p5play._preDrawFrameTime)) || 1;
 	}
 	$.p5play._inPostDraw = false;
-});
+};
+
+if (p5.prototype?.registerMethod == undefined) {
+	// p5.js v2
+	console.error('p5play is not compatible with p5.js v2. Please use p5.js v1 or q5.js. https://q5js.org');
+
+	p5.registerAddon((p5, proto, lifecycles) => {
+		// the following code is from the p5.js preload compatibility addon
+		// which has been modified to work with p5play via a hacky workaround
+		// https://github.com/processing/p5.js-compatibility/blob/main/src/preload.js
+
+		let methods = {
+			loadImage: () => new p5.Image(1, 1),
+			loadModel: () => new p5.Geometry(),
+			loadJSON: () => {},
+			loadStrings: () => [],
+			loadFont: (pInst) => new p5.Font(pInst, new FontFace('default', 'default.woff'))
+		};
+
+		p5.isPreloadSupported = () => true;
+
+		let promises = [];
+		let prevMethods = {};
+
+		for (let method in methods) {
+			let prevMethod = proto[method];
+			prevMethods[method] = prevMethod;
+
+			proto[method] = function (...args) {
+				if (!this._isInPreload) {
+					return prevMethod.apply(this, args);
+				}
+				let obj = methods[method](this);
+				let promise = prevMethod.apply(this, args).then((result) => {
+					for (let key in result) {
+						obj[key] = result[key];
+					}
+				});
+				promises.push(promise);
+				return obj;
+			};
+		}
+
+		// the old p5.sound fails to load with p5.js v2
+		p5.Sound = class extends Audio {
+			constructor(path) {
+				super(path);
+				this.load();
+			}
+			setVolume(level) {
+				this.volume = level;
+			}
+			setLoop(loop) {
+				this.loop = loop;
+			}
+			setPan() {}
+			isLoaded() {
+				return this.loaded;
+			}
+			isPlaying() {
+				return !this.paused;
+			}
+		};
+
+		proto.loadSound = (path) => {
+			p5.aud ??= new AudioContext();
+			let a = new p5.Sound(path);
+			a.crossOrigin = 'Anonymous';
+			promises.push(
+				(a.promise = new Promise((resolve) => {
+					a.addEventListener('canplaythrough', () => {
+						a.loaded = true;
+						resolve(a);
+					});
+				}))
+			);
+			return a;
+		};
+		proto.getAudioContext = () => p5.aud;
+		proto.userStartAudio = () => p5.aud.resume();
+
+		// having "code" be reserved by p5 makes "Red Remover" not work
+		delete proto.code;
+
+		lifecycles.presetup = async function () {
+			const $ = this;
+
+			// p5 v2 requires a canvas to be created before preload
+			// otherwise functions like color() will throw errors
+			// because _renderer is not defined
+			$.createCanvas.call($, 100, 100);
+
+			// init hook
+			p5playInit.call($);
+
+			// manually propagate p5play stuff to the global window object
+			if ($._isGlobal) {
+				// prettier-ignore
+				let props = ['p5play','DYN','DYNAMIC','STA','STATIC','KIN','KINEMATIC','Sprite','Ani','Anis','Group','World','world','createCanvas','Canvas','canvas','displayMode','Camera','camera','Tiles','Joint','GlueJoint','DistanceJoint','WheelJoint','HingeJoint','SliderJoint','RopeJoint','GrabberJoint','kb','keyboard','mouse','touches','allSprites','camera','contro','contros','controllers','spriteArt','EmojiImage','getFPS'
+				];
+				for (let p of props) {
+					window[p] = $[p];
+				}
+			}
+
+			if (!window.preload) return;
+
+			$._isInPreload = true;
+			window.preload();
+			$._isInPreload = false;
+
+			// Wait for everything to load before letting setup run
+			await Promise.all(promises);
+		};
+
+		lifecycles.postsetup = p5playAfterSetup;
+		lifecycles.predraw = p5playPreDraw;
+		lifecycles.postdraw = p5playPostDraw;
+	});
+} else {
+	// q5.js or p5.js v1
+	p5.prototype.registerMethod('init', p5playInit);
+	p5.prototype.registerMethod('afterSetup', p5playAfterSetup);
+	p5.prototype.registerMethod('pre', p5playPreDraw);
+	p5.prototype.registerMethod('post', p5playPostDraw);
+}
