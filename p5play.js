@@ -9822,7 +9822,7 @@ main {
 		if (!$._setupDone) return;
 		pressAmt++;
 
-		if (p5.aud && p5.aud.state != 'running') p5.aud.resume();
+		if (!$._isQ5 && p5.aud && p5.aud.state != 'running') p5.aud.resume();
 
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
