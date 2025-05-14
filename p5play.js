@@ -15,6 +15,8 @@ if (typeof planck != 'object') {
 }
 
 let p5playInit = function () {
+	// START p5play.d.ts
+
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
 
@@ -272,9 +274,12 @@ let p5playInit = function () {
 
 	let log = ($.log = console.log);
 
-	$.DYN = $.DYNAMIC = 'dynamic';
-	$.STA = $.STATIC = 'static';
-	$.KIN = $.KINEMATIC = 'kinematic';
+	this.DYN = 'dynamic';
+	this.DYNAMIC = 'dynamic';
+	this.STA = 'static';
+	this.STATIC = 'static';
+	this.KIN = 'kinematic';
+	this.KINEMATIC = 'kinematic';
 
 	/**
 	 * @class
@@ -285,12 +290,13 @@ let p5playInit = function () {
 		 * Look at the Sprite reference pages before reading these docs.
 		 * </a>
 		 *
-		 * The Sprite constructor can be used in many different ways.
+		 * Creates a new sprite.
 		 *
-		 * In fact it's so flexible that I've only listed out some of the
-		 * most common ways it can be used in the examples section below.
-		 * Try experimenting with it! It's likely to work the way you
-		 * expect it to, if not you'll just get an error.
+		 * All parameters are optional. A sprite's default position is in the
+		 * center of the canvas and default box collider is 50x50 pixels.
+		 *
+		 * Depending on the input parameters, the sprite can be created with
+		 * a box, circle, polygon, or chain collider.
 		 *
 		 * Special feature! If the first parameter to this constructor is a
 		 * loaded Image, Ani, or name of a animation,
@@ -309,8 +315,8 @@ let p5playInit = function () {
 		 * set then this parameter becomes the diameter of the placeholder circle.
 		 * @param {Number} [h] - height of the placeholder rectangle and of the collider
 		 * until an image or new collider are set
-		 * @param {String} [collider] - collider type is 'dynamic' by default, can be
-		 * 'static', 'kinematic', or 'none'
+		 * @param {String} [physicsType] - physics type is DYNAMIC by default, can be
+		 * STATIC, KINEMATIC, or NONE
 		 * @example
 		 *
 		 * let spr = new Sprite();
@@ -323,7 +329,7 @@ let p5playInit = function () {
 		 *
 		 * let line = new Sprite(x, y, [length, angle]);
 		 */
-		constructor(x, y, w, h, collider) {
+		constructor(x, y, w, h, physicsType) {
 			// using boolean flags is faster than instanceof checks
 			this._isSprite = true;
 
@@ -369,7 +375,7 @@ let p5playInit = function () {
 				y = args[1];
 				w = args[2];
 				h = args[3];
-				collider = args[4];
+				physicsType = args[4];
 			} else {
 				// valid use for creating chain/polygon using vertex mode:
 				// new Sprite([[x1, y1], [x2, y2], ...], colliderType)
@@ -377,8 +383,8 @@ let p5playInit = function () {
 				y = undefined;
 				w = args[0];
 				h = undefined;
-				collider = args[1];
-				if (Array.isArray(collider)) {
+				physicsType = args[1];
+				if (Array.isArray(physicsType)) {
 					throw new FriendlyError('Sprite', 1, [`[[${w}], [${h}]]`]);
 				}
 			}
@@ -386,7 +392,7 @@ let p5playInit = function () {
 			// valid use without setting size:
 			// new Sprite(x, y, colliderType)
 			if (typeof w == 'string') {
-				collider = w;
+				physicsType = w;
 				w = undefined;
 			}
 
@@ -394,7 +400,7 @@ let p5playInit = function () {
 				if (isColliderType(h)) {
 					// valid use to create a circle:
 					// new Sprite(x, y, d, colliderType)
-					collider = h;
+					physicsType = h;
 				} else {
 					// valid use to create a regular polygon:
 					// new Sprite(x, y, sideLength, polygonName)
@@ -602,15 +608,15 @@ let p5playInit = function () {
 			this._layer = group._layer;
 			this._layer ??= $.allSprites._getTopLayer() + 1;
 
-			if (group.dynamic) collider ??= 'dynamic';
-			if (group.kinematic) collider ??= 'kinematic';
-			if (group.static) collider ??= 'static';
-			collider ??= group.collider;
+			if (group.dynamic) physicsType ??= 'dynamic';
+			if (group.kinematic) physicsType ??= 'kinematic';
+			if (group.static) physicsType ??= 'static';
+			physicsType ??= group.collider;
 
-			if (!collider || typeof collider != 'string') {
-				collider = 'dynamic';
+			if (!physicsType || typeof physicsType != 'string') {
+				physicsType = 'dynamic';
 			}
-			this.collider = collider;
+			this.collider = physicsType;
 
 			x ??= group.x;
 			if (x === undefined) {
@@ -1463,28 +1469,10 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * The sprite's collider type. Default is "dynamic".
-		 *
-		 * The collider type can be one of the following strings:
-		 * "dynamic", "static", "kinematic", "none".
-		 *
-		 * The letters "d", "s", "k", "n" can be used as shorthand.
-		 *
-		 * When a sprite with a collider type of "d", "s", or "k" is
-		 * changed to "none", or vice versa, the sprite will
-		 * maintain its current position, velocity, rotation, and
-		 * rotation speed.
-		 *
-		 * Sprites can't have their collider type
-		 * set to "none" if they have a polygon or chain collider,
-		 * multiple colliders, or multiple sensors.
-		 *
-		 * To achieve the same effect as setting collider type
-		 * to "none", use `.overlaps(allSprites)` to have your
-		 * sprite overlap with all sprites.
-		 *
+		 * Deprecated alias for `physicsType`/`physics`.
+		 * @deprecated
 		 * @type {String}
-		 * @default 'dynamic'
+		 * @default DYNAMIC
 		 */
 		get collider() {
 			return this._collider;
@@ -1541,6 +1529,49 @@ let p5playInit = function () {
 					this.body = null;
 				}
 			}
+		}
+
+		/**
+		 * Verbose alias for `physics`.
+		 * @type {String}
+		 * @default DYNAMIC
+		 */
+		get physicsType() {
+			return this._collider;
+		}
+		set physicsType(val) {
+			this.collider = val;
+		}
+
+		/**
+		 * The sprite's physics type. Default is DYNAMIC.
+		 *
+		 * The physics type can be one of the following:
+		 * DYNAMIC, STATIC, KINEMATIC, or NONE.
+		 *
+		 * DYN, STA, and KIN can be used as shorthand.
+		 *
+		 * When a sprite's physics type is changed to NONE,
+		 * or from NONE to another type, the sprite will
+		 * maintain its current position, velocity, rotation, and
+		 * rotation speed.
+		 *
+		 * Sprites can't have their physics type
+		 * set to NONE if they have a polygon or chain collider,
+		 * multiple colliders, or multiple sensors.
+		 *
+		 * To achieve the same effect as setting physics type
+		 * to NONE, use `.overlaps(allSprites)` to have your
+		 * sprite overlap with all sprites.
+		 *
+		 * @type {String}
+		 * @default DYNAMIC
+		 */
+		get physics() {
+			return this._collider;
+		}
+		set physics(val) {
+			this.collider = val;
 		}
 
 		_syncWithPhysicsBody() {
@@ -9822,7 +9853,7 @@ main {
 		if (!$._setupDone) return;
 		pressAmt++;
 
-		if (!$._isQ5 && p5.aud && p5.aud.state != 'running') p5.aud.resume();
+		if (!$._isQ5 && $.userStartAudio) $.userStartAudio();
 
 		let btn = 'left';
 		if (e.button === 1) btn = 'center';
@@ -10806,6 +10837,8 @@ main {
 		$.text('fps max: ' + $.p5play._fpsMax, x, y + rs.gap * 3);
 		$.pop();
 	};
+
+	// END p5play.d.ts
 };
 
 let p5playAfterSetup = function () {
@@ -11012,44 +11045,6 @@ if (p5.prototype?.registerMethod == undefined) {
 				return obj;
 			};
 		}
-
-		// the old p5.sound fails to load with p5.js v2
-		p5.Sound = class extends Audio {
-			constructor(path) {
-				super(path);
-				this.load();
-			}
-			setVolume(level) {
-				this.volume = level;
-			}
-			setLoop(loop) {
-				this.loop = loop;
-			}
-			setPan() {}
-			isLoaded() {
-				return this.loaded;
-			}
-			isPlaying() {
-				return !this.paused;
-			}
-		};
-
-		proto.loadSound = (path) => {
-			p5.aud ??= new AudioContext();
-			let a = new p5.Sound(path);
-			a.crossOrigin = 'Anonymous';
-			promises.push(
-				(a.promise = new Promise((resolve) => {
-					a.addEventListener('canplaythrough', () => {
-						a.loaded = true;
-						resolve(a);
-					});
-				}))
-			);
-			return a;
-		};
-		proto.getAudioContext = () => p5.aud;
-		proto.userStartAudio = () => p5.aud.resume();
 
 		// having "code" be reserved by p5 makes "Red Remover" not work
 		delete proto.code;
