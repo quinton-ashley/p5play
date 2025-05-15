@@ -10869,6 +10869,8 @@ let p5playAfterSetup = function () {
 	 * input handling, game logic, and physics simulation.
 	 */
 	this.drawFrame ??= () => {};
+
+	$._setupDone = true;
 };
 
 // called before each draw function call
