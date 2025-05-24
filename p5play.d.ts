@@ -2766,7 +2766,6 @@ function animation(ani: Ani, x: number, y: number, r: number, sX: number, sY: nu
 function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
-let userDisabledP5Errors: boolean;
 function createCanvas(...args: any[]): Canvas;
 /**
  * @class

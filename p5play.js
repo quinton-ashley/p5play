@@ -20,6 +20,9 @@ let p5playInit = function () {
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
 
+	let userDisabledP5Errors = p5.disableFriendlyErrors;
+	p5.disableFriendlyErrors = true;
+
 	// Google Analytics collects anonymous usage data to help make p5play better.
 	// To opt out, set window._p5play_gtagged to false before loading p5play.
 	if (
@@ -8850,9 +8853,6 @@ let p5playInit = function () {
 		}
 	}
 
-	let userDisabledP5Errors = p5.disableFriendlyErrors;
-	p5.disableFriendlyErrors = true;
-
 	const _createCanvas = $.createCanvas;
 
 	/**
@@ -8955,7 +8955,7 @@ let p5playInit = function () {
 				};
 			}
 		}
-		if (!userDisabledP5Errors) p5.disableFriendlyErrors = false;
+		p5.disableFriendlyErrors = userDisabledP5Errors;
 
 		$.displayMode(displayMode, renderQuality, displayScale);
 
@@ -9869,7 +9869,7 @@ main {
 				msm.hover = 0;
 				msm.drag[btn] = 0;
 			}
-			ms = $.world.mouseSprites[0];
+			let ms = $.world.mouseSprites[0];
 			$.world.mouseSprite = ms;
 			msm = ms.mouse;
 			msm[btn] = 1;
