@@ -470,21 +470,23 @@ class Sprite {
 	get physics(): string;
 	set color(val: Color);
 	/**
-	 * The sprite's current color. By default sprites get a random color.
+	 * Alias for `fill`.
+	 *
+	 * By default sprites get a random color.
 	 * @type {Color}
 	 * @default random color
 	 */
 	get color(): Color;
 	set colour(val: Color);
 	/**
-	 * Alias for color. colour is the British English spelling.
+	 * Alias for `color` and `fill`. colour is the British English spelling.
 	 * @type {Color}
 	 * @default random color
 	 */
 	get colour(): Color;
 	set fill(val: Color);
 	/**
-	 * Alias for sprite.fillColor
+	 * Sets the sprite's fill color.
 	 * @type {Color}
 	 * @default random color
 	 */
@@ -507,13 +509,18 @@ class Sprite {
 	get strokeWeight(): number;
 	set textColor(val: Color);
 	/**
-	 * The sprite's text fill color. Black by default.
+	 * Alias for `textFill`.
 	 * @type {Color}
 	 * @default black (#000000)
 	 */
 	get textColor(): Color;
-	set textColour(val: any);
-	get textColour(): any;
+	set textColour(val: Color);
+	/**
+	 * Alias for `textFill`.
+	 * @type {Color}
+	 * @default black (#000000)
+	 */
+	get textColour(): Color;
 	set textFill(val: Color);
 	/**
 	 * The sprite's text fill color. Black by default.

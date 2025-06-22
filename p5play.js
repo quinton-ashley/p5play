@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.29
+ * @version 3.31
  * @author quinton-ashley
  */
 
@@ -42,7 +42,7 @@ let p5playInit = function () {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_29');
+			gtag('event', 'p5play_v3_31');
 		};
 	}
 
@@ -1597,7 +1597,9 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * The sprite's current color. By default sprites get a random color.
+		 * Alias for `fill`.
+		 *
+		 * By default sprites get a random color.
 		 * @type {Color}
 		 * @default random color
 		 */
@@ -1608,8 +1610,9 @@ let p5playInit = function () {
 			if (this.watch) this.mod[9] = true;
 			this._color = this._parseColor(val);
 		}
+
 		/**
-		 * Alias for color. colour is the British English spelling.
+		 * Alias for `color` and `fill`. colour is the British English spelling.
 		 * @type {Color}
 		 * @default random color
 		 */
@@ -1619,8 +1622,9 @@ let p5playInit = function () {
 		set colour(val) {
 			this.color = val;
 		}
+
 		/**
-		 * Alias for sprite.fillColor
+		 * Sets the sprite's fill color.
 		 * @type {Color}
 		 * @default random color
 		 */
@@ -1660,7 +1664,7 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * The sprite's text fill color. Black by default.
+		 * Alias for `textFill`.
 		 * @type {Color}
 		 * @default black (#000000)
 		 */
@@ -1671,12 +1675,19 @@ let p5playInit = function () {
 			if (this.watch) this.mod[32] = true;
 			this._textFill = this._parseColor(val);
 		}
+
+		/**
+		 * Alias for `textFill`.
+		 * @type {Color}
+		 * @default black (#000000)
+		 */
 		get textColour() {
 			return this._textFill;
 		}
 		set textColour(val) {
 			this.textColor = val;
 		}
+
 		/**
 		 * The sprite's text fill color. Black by default.
 		 * @type {Color}
@@ -4717,12 +4728,13 @@ let p5playInit = function () {
 				} else {
 					let url;
 					if (typeof sheet == 'string') url = sheet;
-					else url = sheet.url;
+					else url = sheet.src;
 					$._incrementPreload();
 					this.spriteSheet = $.loadImage(url, () => {
 						_generateSheetFrames();
 						$._decrementPreload();
 					});
+					this.spriteSheet.src = url;
 					if (typeof sheet == 'string') {
 						owner.spriteSheet = this.spriteSheet;
 					}
@@ -8594,7 +8606,7 @@ let p5playInit = function () {
 		right = Math.floor(right / pd);
 
 		g = g.get(left, top, right - left + 1, bottom - top + 1);
-		g.url = emoji;
+		g.src = emoji;
 		return g;
 	};
 
@@ -9227,7 +9239,7 @@ let p5playInit = function () {
 			img.cbs = [];
 			img.calls = 1;
 			if (cb) img.cbs.push(cb);
-			img.url = url;
+			img.src = url;
 			$.p5play.images[url] = img;
 			return img;
 		};
@@ -9288,26 +9300,20 @@ main {
 </style>`
 		);
 
-		$._adjustDisplay = () => {
+		$._adjustDisplay = (forced) => {
 			let c = $.canvas;
-
 			let s = c.style;
-			let p = c.parentElement;
-			if (!s || !p || !c.displayMode) return;
-			if (c.renderQuality == 'pixelated') {
-				c.classList.add('p5-pixelated');
-				$.pixelDensity(1);
-				if ($.noSmooth) $.noSmooth();
-				if ($.textFont) $.textFont('monospace');
-			}
+			// if the canvas doesn't have a style,
+			// it may be a server side canvas, so return
+			if (!s) return;
 			if (c.displayMode == 'normal') {
-				p.classList.remove('p5-centered', 'p5-maxed', 'p5-fullscreen');
+				// unless the canvas needs to be resized, return
+				if (!forced) return;
 				s.width = c.w * c.displayScale + 'px';
 				s.height = c.h * c.displayScale + 'px';
 			} else {
-				p.classList.add('p5-' + c.displayMode);
-				p = p.getBoundingClientRect();
-				if (c.w / c.h > p.width / p.height) {
+				let parent = c.parentElement.getBoundingClientRect();
+				if (c.w / c.h > parent.width / parent.height) {
 					if (c.displayMode == 'centered') {
 						s.width = c.w * c.displayScale + 'px';
 						s.maxWidth = '100%';
@@ -9325,32 +9331,54 @@ main {
 			}
 		};
 
-		/** 💻
-		 * The `displayMode` function lets you customize how your canvas is presented.
-		 *
-		 * Display modes:
-		 * - "normal": no styling to canvas or its parent element
-		 * - "centered": canvas will be centered horizontally and vertically within its parent and if it's display size is bigger than its parent it will not clip
-		 * - "maxed": canvas will fill the parent element, same as fullscreen for a global mode canvas inside a `main` element
-		 * - "fullscreen": canvas will fill the screen with letterboxing if necessary to preserve its aspect ratio, like css object-fit contain
-		 *
-		 * Render qualities:
-		 * - "default": pixelDensity set to displayDensity
-		 * - "pixelated": pixelDensity set to 1 and various css styles are applied to the canvas to make it render without image smoothing
-		 *
-		 * Display scale can be set to make small canvases appear larger.
-		 * @param displayMode
-		 * @param renderQuality
-		 * @param displayScale - can be given as a string (ex. "x2") or a number
-		 */
-		$.displayMode = (displayMode = 'normal', renderQuality = 'default', displayScale = 1) => {
-			let c = $.canvas;
+		$.MAXED = 'maxed';
+		$.SMOOTH = 'smooth';
+		$.PIXELATED = 'pixelated';
 
+		/** 💻
+		 * Customize how your canvas is presented.
+		 * @param {string} mode Display modes:
+		 *   - NORMAL: (default) canvas is not repositioned
+		 *   - CENTER: canvas is moved to the center of its parent
+		 *   - MAXED: canvas will be scaled to fill the parent element, with letterboxing if necessary to preserve its aspect ratio
+		 * @param {string} renderQuality Render quality settings:
+		 *   - SMOOTH: (default) smooth upscaling if the canvas is scaled
+		 *   - PIXELATED: pixels rendered as sharp squares
+		 * @param {number} scale can also be given as a string (for example "x2")
+		 * @example
+createCanvas(50, 25);
+
+displayMode(CENTER, PIXELATED, 4);
+
+circle(25, 12.5, 16);
+		 */
+		$.displayMode = (displayMode = 'normal', renderQuality = 'smooth', displayScale = 1) => {
+			let c = $.canvas;
 			if (typeof displayScale == 'string') {
 				displayScale = parseFloat(displayScale.slice(1));
 			}
+			if (displayMode == 'fullscreen') displayMode = 'maxed';
+			if (displayMode == 'center') displayMode = 'centered';
+
+			if (c.displayMode) {
+				c.parentElement.classList.remove('p5-' + c.displayMode);
+				c.classList.remove('p5-pixelated');
+			}
+
+			c.parentElement.classList.add('p5-' + displayMode);
+
+			if (renderQuality == 'pixelated') {
+				c.classList.add('p5-pixelated');
+				$.pixelDensity(1);
+				if ($.noSmooth) $.noSmooth();
+				if ($.textFont) $.textFont('monospace');
+			}
+
 			Object.assign(c, { displayMode, renderQuality, displayScale });
-			$._adjustDisplay();
+
+			if ($.ctx) $.push();
+			$._adjustDisplay(true);
+			if ($.ctx) $.pop();
 		};
 	}
 
@@ -11007,9 +11035,19 @@ let p5playPostDraw = function () {
 	$.p5play._inPostDraw = false;
 };
 
+let recommendation = `For the best experience with p5play, use q5.js v3:
+
+<script src="https://q5js.org/q5.js"></script>
+
+Or use p5.js v1.11.4 (tested for quality assurance):
+
+<script src="https://cdn.jsdelivr.net/npm/p5@1.11.4/lib/p5.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.11.4/lib/addons/p5.sound.min.js"></script>
+`;
+
 if (p5.prototype?.registerMethod == undefined) {
-	// p5.js v2
-	console.error('p5play is not compatible with p5.js v2. Please use p5.js v1 or q5.js. https://q5js.org');
+	// experimental support for p5.js v2
+	console.error(`p5play's support for p5.js v${p5.VERSION} is limited and experimental.\n\n` + recommendation);
 
 	p5.registerAddon((p5, proto, lifecycles) => {
 		// the following code is from the p5.js preload compatibility addon
@@ -11048,7 +11086,7 @@ if (p5.prototype?.registerMethod == undefined) {
 			};
 		}
 
-		// having "code" be reserved by p5 makes "Red Remover" not work
+		// "code" shouldn't be reserved by p5
 		delete proto.code;
 
 		lifecycles.presetup = async function () {
@@ -11065,7 +11103,7 @@ if (p5.prototype?.registerMethod == undefined) {
 			// manually propagate p5play stuff to the global window object
 			if ($._isGlobal) {
 				// prettier-ignore
-				let props = ['p5play','DYN','DYNAMIC','STA','STATIC','KIN','KINEMATIC','Sprite','Ani','Anis','Group','World','world','createCanvas','Canvas','canvas','displayMode','Camera','camera','Tiles','Joint','GlueJoint','DistanceJoint','WheelJoint','HingeJoint','SliderJoint','RopeJoint','GrabberJoint','kb','keyboard','mouse','touches','allSprites','camera','contro','contros','controllers','spriteArt','EmojiImage','getFPS'
+				let props = ['p5play','DYN','DYNAMIC','STA','STATIC','KIN','KINEMATIC','Sprite','Ani','Anis','Group','World','world','createCanvas','Canvas','canvas','MAXED','SMOOTH','PIXELATED','displayMode','Camera','camera','Tiles','Joint','GlueJoint','DistanceJoint','WheelJoint','HingeJoint','SliderJoint','RopeJoint','GrabberJoint','kb','keyboard','mouse','touches','allSprites','camera','contro','contros','controllers','spriteArt','EmojiImage','getFPS'
 				];
 				for (let p of props) {
 					window[p] = $[p];
@@ -11087,6 +11125,26 @@ if (p5.prototype?.registerMethod == undefined) {
 		lifecycles.postdraw = p5playPostDraw;
 	});
 } else {
+	function isVersionInRange(v, min, max) {
+		if (!v) return false;
+		let toArr = (ver) => ver.split('.').map(Number);
+		[v, min, max] = [v, min, max].map(toArr);
+		for (let i = 0; i < 3; i++) {
+			if (v[i] < min[i]) return false;
+			if (v[i] > max[i]) return false;
+			if (v[i] > min[i] && v[i] < max[i]) return true;
+		}
+		return (
+			(v[0] === min[0] && v[1] === min[1] && v[2] >= min[2]) ||
+			(v[0] === max[0] && v[1] === max[1] && v[2] <= max[2]) ||
+			(v[0] === min[0] && v[1] > min[1] && v[1] < max[1])
+		);
+	}
+
+	if (typeof Q5 == 'undefined' && !isVersionInRange(p5.VERSION, '1.10.0', '1.11.4')) {
+		console.error(`p5play does not support p5.js v${p5.VERSION}.\n\n` + recommendation);
+	}
+
 	// q5.js or p5.js v1
 	p5.prototype.registerMethod('init', p5playInit);
 	p5.prototype.registerMethod('afterSetup', p5playAfterSetup);
