@@ -8792,10 +8792,10 @@ let p5playInit = function () {
 	};
 
 	async function playIntro() {
-		if (document.getElementById('p5play-intro')) return;
+		if (document.getElementById('made-with-p5play')) return;
 		if (!using_p5v2) $._incrementPreload();
 		let d = document.createElement('div');
-		d.id = 'p5play-intro';
+		d.id = 'made-with-p5play';
 		d.style = 'position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1000; background-color: black;';
 		let logo = document.createElement('img');
 		logo.style = `position: absolute; top: 50%; left: 50%; width: 80vmin; height: 40vmin; margin-left: -40vmin; margin-top: -20vmin; z-index: 1001; opacity: 1; scale: 1; transition: scale 1.5s, opacity 0.4s ease-in-out;`;
@@ -8824,7 +8824,7 @@ let p5playInit = function () {
 		await $.delay(400);
 		d.style.display = 'none';
 		d.remove();
-		document.getElementById('p5play-intro')?.remove();
+		document.getElementById('made-with-p5play')?.remove();
 		if (!using_p5v2) $._decrementPreload();
 	}
 
