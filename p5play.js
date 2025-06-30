@@ -642,10 +642,10 @@ let p5playInit = function () {
 				}
 			}
 
-			if (typeof x == 'function') x = x(group.length);
-			if (typeof y == 'function') y = y(group.length);
-			if (typeof w == 'function') w = w(group.length);
-			if (typeof h == 'function') h = h(group.length);
+			if (typeof x == 'function') x = x.call(this, group.length);
+			if (typeof y == 'function') y = y.call(this, group.length);
+			if (typeof w == 'function') w = w.call(this, group.length);
+			if (typeof h == 'function') h = h.call(this, group.length);
 
 			this.x = x;
 			this.y = y;
@@ -659,7 +659,7 @@ let p5playInit = function () {
 					if (!ani) {
 						ani = group._img;
 						if (typeof ani == 'function') {
-							ani = ani(group.length);
+							ani = ani.call(this, group.length);
 						}
 						if (ani) this._img = true;
 					}
@@ -820,8 +820,8 @@ let p5playInit = function () {
 
 			let gvx = group.vel.x || 0;
 			let gvy = group.vel.y || 0;
-			if (typeof gvx == 'function') gvx = gvx(group.length - 1);
-			if (typeof gvy == 'function') gvy = gvy(group.length - 1);
+			if (typeof gvx == 'function') gvx = gvx.call(this, group.length - 1);
+			if (typeof gvy == 'function') gvy = gvy.call(this, group.length - 1);
 			this.vel.x = gvx;
 			this.vel.y = gvy;
 
@@ -850,7 +850,7 @@ let p5playInit = function () {
 				let val = group[prop];
 				if (val === undefined) continue;
 				if (typeof val == 'function' && isArrowFunction(val)) {
-					val = val(group.length - 1);
+					val = val.call(this, group.length - 1);
 				}
 				if (typeof val == 'object') {
 					if (val instanceof p5.Color) {
@@ -894,7 +894,7 @@ let p5playInit = function () {
 					let val = g[prop];
 					if (val === undefined) continue;
 					if (typeof val == 'function' && isArrowFunction(val)) {
-						val = val(g.length - 1);
+						val = val.call(this, g.length - 1);
 					}
 					if (typeof val == 'object') {
 						this[prop] = Object.assign({}, val);
@@ -3227,8 +3227,12 @@ let p5playInit = function () {
 			}
 			let ogGlobalAlpha;
 			if (this._opacity) {
-				ogGlobalAlpha = $.ctx.globalAlpha;
-				$.ctx.globalAlpha = this._opacity;
+				if ($.opacity) {
+					$.opacity(this._opacity);
+				} else {
+					ogGlobalAlpha = $.ctx.globalAlpha;
+					$.ctx.globalAlpha = this._opacity;
+				}
 			}
 			if (this._tint) $.tint(this._tint);
 
@@ -4532,8 +4536,8 @@ let p5playInit = function () {
 		 * - a list of image file paths as multiple input parameters
 		 * - a sequence of numbered images by providing the file path to
 		 * the first image frame and last frame index
-		 * - a sprite sheet image path and atlas object, frame locator, or
-		 * frame locators array (see the Learn page on Ani for more info)
+		 * - a sprite sheet image path and atlas object, subtexture locator, or
+		 * frame locators array
 		 *
 		 * `Ani` is not a shorthand for `Animation`, since that class name
 		 * is already used by the JS Web Animations API.
@@ -4868,6 +4872,16 @@ let p5playInit = function () {
 							_this.push(f);
 						}
 					}
+
+					_this.cutFrames = atlas.cutFrames ?? owner.anis.cutFrames;
+
+					if (_this.cutFrames) {
+						for (let i = 0; i < _this.length; i++) {
+							let frame = _this[i];
+							// create a new image object for each frame
+							_this[i] = _this.spriteSheet.get(frame.x, frame.y, frame.w, frame.h);
+						}
+					}
 				}
 			} // end SpriteSheet mode
 			else {
@@ -5002,7 +5016,7 @@ let p5playInit = function () {
 
 			let img = this[this._frame];
 			if (img !== undefined) {
-				if (this.spriteSheet) {
+				if (this.spriteSheet && img.x !== undefined) {
 					let { x, y, w, h } = img; // image info
 					if (!this.demoMode) {
 						$.image(this.spriteSheet, ox, oy, img.defaultWidth || w, img.defaultHeight || h, x, y, w, h);
@@ -5257,7 +5271,17 @@ let p5playInit = function () {
 		}
 	};
 
-	$.Ani.props = ['demoMode', 'endOnFirstFrame', 'frameDelay', 'frameSize', 'looping', 'offset', 'rotation', 'scale'];
+	$.Ani.props = [
+		'demoMode',
+		'endOnFirstFrame',
+		'frameDelay',
+		'frameSize',
+		'looping',
+		'offset',
+		'rotation',
+		'scale',
+		'cutFrames'
+	];
 
 	/**
 	 * <a href="https://p5play.org/learn/animation.html">
@@ -6496,18 +6520,14 @@ let p5playInit = function () {
 		 * Using `group.remove` instead is recommended because it's easier to use,
 		 * and it uses this function internally.
 		 *
-		 * Similar to `Array.splice` except it does not accept adding sprites,
-		 * third parameters and beyond are ignored.
-		 *
-		 * This function also removes the group and its super-groups from the
-		 * sprites' groups array.
+		 * Use `push` to add sprites to a group instead of this function.
 		 *
 		 * @param {Number} idx - index
 		 * @param {Number} amount - number of sprites to remove
 		 * @return {Sprite[]} the removed sprites
 		 */
-		splice(idx, amount) {
-			let removed = super.splice(idx, amount);
+		splice(idx, amount, ...sprites) {
+			let removed = super.splice(idx, amount, ...sprites);
 			if (!removed) return;
 
 			let gIDs = [];
@@ -6520,6 +6540,7 @@ let p5playInit = function () {
 				do {
 					gIDs.push(gID);
 					let gIdx = s.groups.findIndex((g) => g._uid == gID);
+					if (gIdx == -1) break;
 					let g = s.groups.splice(gIdx, 1);
 					gID = g[0].parent;
 				} while (gID);
@@ -8704,6 +8725,31 @@ let p5playInit = function () {
 	 */
 	this.loadAnimation = this.loadAni = function () {
 		return new $.Ani(...arguments);
+	};
+
+	/**
+	 * Parses a texture atlas XML file and returns an object
+	 * with subtexture names as keys, which p5play can use
+	 * to load animations.
+	 * @param {string} xml - XML file string
+	 * @returns atlas
+	 */
+	this.parseTextureAtlas = function (xml) {
+		let parser = new DOMParser(),
+			doc = parser.parseFromString(xml, 'application/xml'),
+			subTextures = doc.querySelectorAll('SubTexture'),
+			atlas = {};
+		for (let st of subTextures) {
+			// remove file extension
+			let name = st.getAttribute('name').replace(/\.[^/.]+$/, '');
+			atlas[name] = {
+				x: Number(st.getAttribute('x')),
+				y: Number(st.getAttribute('y')),
+				width: Number(st.getAttribute('width')),
+				height: Number(st.getAttribute('height'))
+			};
+		}
+		return atlas;
 	};
 
 	/**

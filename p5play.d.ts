@@ -1365,8 +1365,8 @@ class Ani extends Array<new (width?: number, height?: number) => HTMLImageElemen
 	 * - a list of image file paths as multiple input parameters
 	 * - a sequence of numbered images by providing the file path to
 	 * the first image frame and last frame index
-	 * - a sprite sheet image path and atlas object, frame locator, or
-	 * frame locators array (see the Learn page on Ani for more info)
+	 * - a sprite sheet image path and atlas object, subtexture locator, or
+	 * frame locators array
 	 *
 	 * `Ani` is not a shorthand for `Animation`, since that class name
 	 * is already used by the JS Web Animations API.
@@ -2046,17 +2046,13 @@ class Group extends Array<Sprite> {
 	 * Using `group.remove` instead is recommended because it's easier to use,
 	 * and it uses this function internally.
 	 *
-	 * Similar to `Array.splice` except it does not accept adding sprites,
-	 * third parameters and beyond are ignored.
-	 *
-	 * This function also removes the group and its super-groups from the
-	 * sprites' groups array.
+	 * Use `push` to add sprites to a group instead of this function.
 	 *
 	 * @param {Number} idx - index
 	 * @param {Number} amount - number of sprites to remove
 	 * @return {Sprite[]} the removed sprites
 	 */
-	splice(idx: number, amount: number): Sprite[];
+	splice(idx: number, amount: number, ...sprites: any[]): Sprite[];
 	/**
 	 * Not supported!
 	 * @return {Number} the new length of the group
@@ -2769,6 +2765,7 @@ function createSprite(...args: any[]): Sprite;
 function createGroup(...args: any[]): Group;
 function loadAnimation(...args: any[]): Ani;
 function loadAni(...args: any[]): Ani;
+function parseTextureAtlas(xml: string): {};
 function animation(ani: Ani, x: number, y: number, r: number, sX: number, sY: number): void;
 function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;

@@ -1,13 +1,15 @@
 {
 	"name": "p5play",
+	"version": "3.31.2",
+	"description": "A JavaScript game engine that uses p5.js for graphics and Box2D for physics.",
 	"author": "quinton-ashley <info@p5play.org>",
-	"bugs": {
-		"url": "https://github.com/quinton-ashley/p5play/issues"
-	},
+	"license": "p5play Personal License",
 	"contributors": [
 		"Paolo Pedercini <info@molleindustria.it>"
 	],
-	"description": "A JavaScript game engine that uses p5.js for graphics and Box2D for physics.",
+	"bugs": {
+		"url": "https://github.com/quinton-ashley/p5play/issues"
+	},
 	"funding": [
 		{
 			"type": "patreon",
@@ -39,7 +41,6 @@
 		"controller",
 		"gamepad"
 	],
-	"license": "p5play Personal License",
 	"main": "p5play.js",
 	"types": "p5play.d.ts",
 	"homepage": "https://p5play.org",
@@ -53,6 +54,5 @@
 		"V": "npm version minor --force",
 		"version": "git add -A",
 		"postversion": "git push"
-	},
-	"version": "3.31.1"
+	}
 }
