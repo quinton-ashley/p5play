@@ -4,6 +4,11 @@ declare global {
 
 class P5Play {
 	/**
+	 * The version of p5play.
+	 * Patch versions are not denoted in this string.
+	 */
+	version: string;
+	/**
 	 * Contains all the sprites in the sketch,
 	 * but users should use the `allSprites` group.
 	 *
@@ -55,14 +60,14 @@ class P5Play {
 	 */
 	friendlyRounding: boolean;
 	/**
-	 * Groups that are removed using `group.remove()` are not
-	 * fully deleted from `p5play.groups` by default, so their data
-	 * is still accessible. Set to false to permanently delete
-	 * removed groups, which reduces memory usage.
+	 * Groups that are deleted using `group.delete()` are not
+	 * immediately erased from `p5play.groups` by default, so their data
+	 * is still accessible. Set to false to permanently erase
+	 * deleted groups, which reduces memory usage.
 	 * @type {Boolean}
 	 * @default true
 	 */
-	storeRemovedGroupRefs: boolean;
+	storeDeletedGroupRefs: boolean;
 	/**
 	 * Snaps sprites to the nearest `p5play.gridSize`
 	 * increment when they are moved.
@@ -176,18 +181,18 @@ class Sprite {
 	 */
 	idNum: number;
 	/**
-	 * Groups the sprite belongs to, including allSprites
+	 * Groups the sprite belongs to, including allSprites.
 	 * @type {Group[]}
 	 * @default [allSprites]
 	 */
 	groups: Group[];
 	/**
-	 * Keys are the animation label, values are Ani objects.
+	 * An Anis object, which has animation labels as keys and Ani objects as values.
 	 * @type {Anis}
 	 */
 	animations: Anis;
 	/**
-	 * Joints that the sprite is attached to
+	 * The joints that the sprite is attached to.
 	 * @type {Joint[]}
 	 * @default []
 	 */
@@ -296,6 +301,13 @@ class Sprite {
 	 * @default undefined
 	 */
 	text: string;
+	/**
+	 * Deprecated alias for `sprite.delete()`.
+	 *
+	 * Will be removed in version 4.
+	 * @deprecated
+	 */
+	remove: () => void;
 	/**
 	 * Adds a collider (fixture) to the sprite's physics body.
 	 *
@@ -784,13 +796,6 @@ class Sprite {
 	 * @default false
 	 */
 	get pixelPerfect(): boolean;
-	set removed(val: boolean);
-	/**
-	 * If the sprite has been removed from the world.
-	 * @type {Boolean}
-	 * @default false
-	 */
-	get removed(): boolean;
 	set rotationDrag(val: number);
 	/**
 	 * The amount the sprite resists rotating.
@@ -1247,18 +1252,32 @@ class Sprite {
 	 */
 	changeAnimation(...args: string[]): Promise<void>;
 	/**
-	 * Removes the Sprite from the sketch and all the groups it
-	 * belongs to.
+	 * Deletes the sprite and removes it from all groups.
 	 *
-	 * When a sprite is removed it will not be drawn or updated anymore.
-	 * If it has a physics body, it will be removed from the
-	 * physics world simulation.
+	 * If it has physics colliders or sensors, they will be
+	 * destroyed in the physics world simulation.
 	 *
-	 * There's no way to undo this operation. If you want to hide a
-	 * sprite use `sprite.visible = false` instead.
+	 * When a sprite is deleted it will not be drawn or updated anymore.
 	 *
+	 * There's no way to undo this operation. If you want to merely
+	 * hide a sprite use `sprite.visible = false` instead.
 	 */
-	remove(): void;
+	delete(): void;
+	/**
+	 * True if the sprite has been deleted.
+	 * @type {Boolean}
+	 * @default false
+	 * @readonly
+	 */
+	readonly get deleted(): boolean;
+	/**
+	 * Deprecate alias for `sprite.deleted`.
+	 * @deprecated
+	 * @type {Boolean}
+	 * @default false
+	 * @readonly
+	 */
+	readonly get removed(): boolean;
 	/**
 	 * Warning: This function might be changed in a future release.
 	 *
@@ -1704,7 +1723,7 @@ class Group extends Array<Sprite> {
 	/**
 	 * @type {Boolean}
 	 */
-	removed: boolean;
+	deleted: boolean;
 	/**
 	 * @type {Number}
 	 */
@@ -1828,7 +1847,7 @@ class Group extends Array<Sprite> {
 	};
 	/**
 	 * autoCull is a property of the allSprites group only,
-	 * that controls whether sprites are automatically removed
+	 * that controls whether sprites are automatically deleted
 	 * when they are 10,000 pixels away from the camera.
 	 *
 	 * It only needs to be set to false once and then it will
@@ -1848,6 +1867,15 @@ class Group extends Array<Sprite> {
 	 * Check if a sprite is in the group.
 	 */
 	contains: (searchElement: Sprite, fromIndex?: number) => boolean;
+	/**
+	 * Deprecated alias for `group.deleteAll`
+	 *
+	 * In v4 `group.removeAll` will be a convenient way to
+	 * remove all sprites from the group, but not delete
+	 * them from the world.
+	 * @deprecated
+	 */
+	removeAll: () => void;
 	set ani(val: Ani);
 	/**
 	 * Reference to the group's current animation.
@@ -1880,7 +1908,7 @@ class Group extends Array<Sprite> {
 	set amount(val: number);
 	/**
 	 * Depending on the value that the amount property is set to, the group will
-	 * either add or remove sprites.
+	 * either automatically create or delete sprites.
 	 * @type {Number}
 	 */
 	get amount(): number;
@@ -2005,18 +2033,20 @@ class Group extends Array<Sprite> {
 	 */
 	size(): number;
 	/**
-	 * Remove sprites that go outside the given culling boundary
-	 * relative to the camera. Sprites with chain colliders can not be culled.
+	 * Delete sprites that go outside the given culling boundary
+	 * relative to the camera.
+	 *
+	 * Sprites with chain colliders can not be culled.
 	 *
 	 * Can also be used with a uniform size for all boundaries, see example.
 	 *
-	 * @param {Number} top - the distance that sprites can move below the canvas before they are removed
-	 * @param {Number} bottom - the distance that sprites can move below the canvas before they are removed
-	 * @param {Number} left - the distance that sprites can move beyond the left side of the canvas before they are removed
-	 * @param {Number} right - the distance that sprites can move beyond the right side of the canvas before they are removed
+	 * @param {Number} top - the distance that sprites can move below the canvas before they are deleted
+	 * @param {Number} bottom - the distance that sprites can move below the canvas before they are deleted
+	 * @param {Number} left - the distance that sprites can move beyond the left side of the canvas before they are deleted
+	 * @param {Number} right - the distance that sprites can move beyond the right side of the canvas before they are deleted
 	 * @param {Function} [cb] - the function to be run when a sprite is culled,
 	 * it's given the sprite being culled, if no callback is given then the
-	 * sprite is removed
+	 * sprite is deleted
 	 * @return {Number} the number of sprites culled
 	 * @example
 	 * // alternate uniform size syntax
@@ -2024,47 +2054,42 @@ class Group extends Array<Sprite> {
 	 */
 	cull(top: number, bottom: number, left: number, right: number, cb?: Function): number;
 	/**
-	 * If no input is given to this function, the group itself will be
-	 * marked as removed and deleted from p5play's internal memory, the
-	 * `p5play.groups` array. Every sprite in the group will be removed
-	 * from the world and every other group they belong to.
+	 * If removalCount is greater than 0, that amount of
+	 * sprites starting from the start index will be removed
+	 * from this group and its sub groups recursively (if any),
 	 *
-	 * Groups should not be used after they are removed.
+	 * Then any provided sprites will be added at the start index
+	 * to this group and at the end of each of its parent groups recursively,
+	 * if not already present in parent groups.
 	 *
-	 * If this function receives as input an index of a sprite in the
-	 * group or the sprite itself, it will remove that sprite from
-	 * this group and its super groups (if any), but NOT from the world.
+	 * @param {Number} start - start index
+	 * @param {Number} removalCount - number of sprites to remove, starting from the start index
+	 * @param {...Sprite} sprites - sprites to add at start index
+	 * @return {Sprite[]} the removed sprites
+	 */
+	splice(start: number, removalCount: number, ...sprites: Sprite[]): Sprite[];
+	/**
+	 * Removes a sprite from this group and its sub groups (if any),
+	 * but does not delete it from the world.
 	 *
-	 * To remove a sprite from the world and every group it belongs to,
-	 * use `sprite.remove()` instead.
-	 *
-	 * @param {Sprite|Number} item - the sprite to be removed or its index
-	 * @return {Sprite} the removed sprite or undefined if the specified sprite was not found
+	 * @param {Sprite|Number} item - the sprite to be deleted or its index
+	 * @return {Sprite} the deleted sprite or undefined if the specified sprite was not found
 	 */
 	remove(item: Sprite | number): Sprite;
 	/**
-	 * Using `group.remove` instead is recommended because it's easier to use,
-	 * and it uses this function internally.
+	 * Deletes the group and all its sprites
+	 * from the world and every other group they belong to.
 	 *
-	 * Use `push` to add sprites to a group instead of this function.
-	 *
-	 * @param {Number} idx - index
-	 * @param {Number} amount - number of sprites to remove
-	 * @return {Sprite[]} the removed sprites
+	 * Don't attempt to use a group after deleting it.
 	 */
-	splice(idx: number, amount: number, ...sprites: any[]): Sprite[];
+	delete(): void;
 	/**
-	 * Not supported!
-	 * @return {Number} the new length of the group
-	 */
-	unshift(): number;
-	/**
-	 * Removes all the sprites in the group from the world and
-	 * every other group they belong to.
+	 * Deletes all the sprites in the group
+	 * from the world and every other group they belong to.
 	 *
 	 * Does not delete the group itself.
 	 */
-	removeAll(): void;
+	deleteAll(): void;
 	/**
 	 * Updates all the sprites in the group.
 	 */
@@ -2446,6 +2471,20 @@ class Joint {
 	 * @default true
 	 */
 	visible: boolean;
+	/**
+	 * True if the joint was deleted.
+	 * @type {Boolean}
+	 * @default false
+	 * @readonly
+	 */
+	readonly deleted: boolean;
+	/**
+	 * Deprecated alias for `joint.delete`.
+	 *
+	 * Will be removed in v4.
+	 * @deprecated
+	 */
+	remove: () => void;
 	set draw(val: Function);
 	/**
 	 * Function that draws the joint. Can be overridden by the user.
@@ -2559,10 +2598,10 @@ class Joint {
 	 */
 	get reactionTorque(): any;
 	/**
-	 * Removes the joint from the world and from each of the
+	 * Deletes the joint from the world and from each of the
 	 * sprites' joints arrays.
 	 */
-	remove(): void;
+	delete(): void;
 }
 /**
  * @class

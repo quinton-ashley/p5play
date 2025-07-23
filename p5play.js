@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.31
+ * @version 3.32
  * @author quinton-ashley
  */
 
@@ -16,6 +16,8 @@ if (typeof planck != 'object') {
 
 let p5playInit = function () {
 	// START p5play.d.ts
+
+	const VERSION = '3.32';
 
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
@@ -42,7 +44,7 @@ let p5playInit = function () {
 			};
 			gtag('js', new Date());
 			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v3_31');
+			gtag('event', 'p5play_v' + VERSION.replace('.', '_'));
 		};
 	}
 
@@ -90,6 +92,11 @@ let p5playInit = function () {
 		 * which contains information about the sketch.
 		 */
 		constructor() {
+			/**
+			 * The version of p5play.
+			 * Patch versions are not denoted in this string.
+			 */
+			this.version = VERSION;
 			/**
 			 * Contains all the sprites in the sketch,
 			 * but users should use the `allSprites` group.
@@ -144,14 +151,14 @@ let p5playInit = function () {
 			this.friendlyRounding = true;
 
 			/**
-			 * Groups that are removed using `group.remove()` are not
-			 * fully deleted from `p5play.groups` by default, so their data
-			 * is still accessible. Set to false to permanently delete
-			 * removed groups, which reduces memory usage.
+			 * Groups that are deleted using `group.delete()` are not
+			 * immediately erased from `p5play.groups` by default, so their data
+			 * is still accessible. Set to false to permanently erase
+			 * deleted groups, which reduces memory usage.
 			 * @type {Boolean}
 			 * @default true
 			 */
-			this.storeRemovedGroupRefs = true;
+			this.storeDeletedGroupRefs = true;
 
 			/**
 			 * Snaps sprites to the nearest `p5play.gridSize`
@@ -418,29 +425,32 @@ let p5playInit = function () {
 			$.p5play.spritesCreated++;
 
 			/**
-			 * Groups the sprite belongs to, including allSprites
+			 * Groups the sprite belongs to, including allSprites.
 			 * @type {Group[]}
 			 * @default [allSprites]
 			 */
 			this.groups = [];
 
 			/**
-			 * Keys are the animation label, values are Ani objects.
+			 * An Anis object, which has animation labels as keys and Ani objects as values.
 			 * @type {Anis}
 			 */
 			this.animations = new $.Anis();
 
 			/**
-			 * Joints that the sprite is attached to
+			 * The joints that the sprite is attached to.
 			 * @type {Joint[]}
 			 * @default []
 			 */
 			this.joints = [];
-			this.joints.removeAll = () => {
-				while (this.joints.length) {
-					this.joints.at(-1).remove();
+			this.joints.deleteAll = () => {
+				while (this.joints.length > 0) {
+					this.joints.at(-1).delete();
 				}
 			};
+
+			// deprecated alias, will be removed in v4
+			this.joints.removeAll = this.joints.deleteAll;
 
 			/**
 			 * If set to true, p5play will record all changes to the sprite's
@@ -462,7 +472,7 @@ let p5playInit = function () {
 			 */
 			this.mod = {};
 
-			this._removed = false;
+			this._deleted = false;
 			this._life = 2147483647;
 			this._visible = true;
 			this._pixelPerfect = false;
@@ -921,6 +931,14 @@ let p5playInit = function () {
 
 			this._textFill ??= $.color(0);
 			this._textSize ??= this.tileSize == 1 ? ($.canvas ? $.textSize() : 12) : 0.8;
+
+			/**
+			 * Deprecated alias for `sprite.delete()`.
+			 *
+			 * Will be removed in version 4.
+			 * @deprecated
+			 */
+			this.remove = this.delete;
 		}
 
 		/**
@@ -949,8 +967,8 @@ let p5playInit = function () {
 		 * @param {Number} h - height of the collider
 		 */
 		addCollider(offsetX, offsetY, w, h) {
-			if (this._removed) {
-				console.error("Can't add colliders to a sprite that was removed.");
+			if (this._deleted) {
+				console.error("Can't add colliders to a sprite that was deleted.");
 				return;
 			}
 			if (this.__collider == 3) {
@@ -1010,8 +1028,8 @@ let p5playInit = function () {
 		 * @param {Number} h - height of the collider
 		 */
 		addSensor(offsetX, offsetY, w, h) {
-			if (this._removed) {
-				console.error("Can't add sensors to a sprite that was removed.");
+			if (this._deleted) {
+				console.error("Can't add sensors to a sprite that was deleted.");
 				return;
 			}
 			let s = this._parseShape(...arguments);
@@ -1499,8 +1517,8 @@ let p5playInit = function () {
 				return;
 			}
 
-			if (this._removed) {
-				throw new Error('Cannot change the collider type of a sprite that was removed.');
+			if (this._deleted) {
+				throw new Error('Cannot change the collider type of a sprite that was deleted.');
 			}
 
 			let oldCollider = this.__collider;
@@ -2254,21 +2272,6 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * If the sprite has been removed from the world.
-		 * @type {Boolean}
-		 * @default false
-		 */
-		get removed() {
-			return this._removed;
-		}
-		set removed(val) {
-			if (!val || this._removed) return;
-			if (this.watch) this.mod[23] = true;
-			this._removed = true;
-			this._remove();
-		}
-
-		/**
 		 * The angle of the sprite's rotation, not the direction it's moving.
 		 *
 		 * If angleMode is set to "degrees", the value will be returned in
@@ -2941,7 +2944,7 @@ let p5playInit = function () {
 				this.remove();
 			}
 
-			if ((!this.body || !usePhysics) && !this._removed) {
+			if ((!this.body || !usePhysics) && !this._deleted) {
 				this._position.x += this.vel.x * timeScale;
 				this._position.y += this.vel.y * timeScale;
 				this._rotation += this._rotationSpeed * timeScale;
@@ -2955,7 +2958,7 @@ let p5playInit = function () {
 				}
 			}
 
-			if (!this.body && !this._removed) return;
+			if (!this.body && !this._deleted) return;
 
 			this.__step();
 		}
@@ -3048,13 +3051,13 @@ let p5playInit = function () {
 				checkCollisions = false;
 			}
 
-			// all of p5play's references to a removed sprite can be deleted
+			// all of p5play's references to a deleted sprite can be erased
 			// only if the sprite was not colliding or overlapping with
 			// anything or its last collided and overlapped events were handled
-			if (this._removed) {
+			if (this._deleted) {
 				if (Object.keys(this._collisions).length == 0 && Object.keys(this._overlappers).length == 0) {
 					if (this._isSprite) delete $.p5play.sprites[this._uid];
-					else if (!$.p5play.storeRemovedGroupRefs) delete $.p5play.groups[this._uid];
+					else if (!$.p5play.storeDeletedGroupRefs) delete $.p5play.groups[this._uid];
 
 					// remove contact events
 					for (let eventType in eventTypes) {
@@ -4107,30 +4110,51 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * Removes the Sprite from the sketch and all the groups it
-		 * belongs to.
+		 * Deletes the sprite and removes it from all groups.
 		 *
-		 * When a sprite is removed it will not be drawn or updated anymore.
-		 * If it has a physics body, it will be removed from the
-		 * physics world simulation.
+		 * If it has physics colliders or sensors, they will be
+		 * destroyed in the physics world simulation.
 		 *
-		 * There's no way to undo this operation. If you want to hide a
-		 * sprite use `sprite.visible = false` instead.
+		 * When a sprite is deleted it will not be drawn or updated anymore.
 		 *
+		 * There's no way to undo this operation. If you want to merely
+		 * hide a sprite use `sprite.visible = false` instead.
 		 */
-		remove() {
-			this.removed = true;
-		}
+		delete() {
+			if (this._deleted) return;
+			if (this.watch) this.mod[23] = true;
 
-		_remove() {
-			if (this.body) $.world.destroyBody(this.body);
-			this.body = null;
+			this._deleted = true;
 
-			// when removed from the world also remove all the sprite
-			// from all its groups
-			for (let g of this.groups) {
+			// removes the sprite from all the groups it belongs to
+			for (let i = this.groups.length - 1; i >= 0; i--) {
+				let g = this.groups[i];
 				g.remove(this);
 			}
+
+			if (this.body) $.world.destroyBody(this.body);
+			this.body = null;
+		}
+
+		/**
+		 * True if the sprite has been deleted.
+		 * @type {Boolean}
+		 * @default false
+		 * @readonly
+		 */
+		get deleted() {
+			return this._deleted;
+		}
+
+		/**
+		 * Deprecate alias for `sprite.deleted`.
+		 * @deprecated
+		 * @type {Boolean}
+		 * @default false
+		 * @readonly
+		 */
+		get removed() {
+			return this._deleted;
 		}
 
 		/**
@@ -4447,7 +4471,7 @@ let p5playInit = function () {
 		mirror: 'Vec2_boolean', // 20
 		offset: 'Vec2', // 21
 		pixelPerfect: 'boolean', // 22
-		removed: 'boolean', // 23
+		deleted: 'boolean', // 23
 		rotationDrag: 'number', // 24
 		rotationLock: 'boolean', // 25
 		scale: 'Vec2', // 26
@@ -5505,7 +5529,7 @@ let p5playInit = function () {
 			/**
 			 * @type {Boolean}
 			 */
-			this.removed;
+			this.deleted;
 			/**
 			 * @type {Number}
 			 */
@@ -5603,14 +5627,14 @@ let p5playInit = function () {
 			} else {
 				// find the first empty slot in the groups array
 				for (let i = 1; i < $.p5play.groups.length; i++) {
-					if (!$.p5play.groups[i]?.removed) {
+					if (!$.p5play.groups[i]?.deleted) {
 						this.idNum = i;
 						break;
 					}
 				}
 				if (!this.idNum) {
 					console.warn(
-						'ERROR: Surpassed the limit of 999 groups in memory. Try setting `p5play.storeRemovedGroupRefs = false`. Use less groups or delete groups from the p5play.groups array to recycle ids.'
+						'ERROR: Surpassed the limit of 999 groups in memory. Try setting `p5play.storeDeletedGroupRefs = false`. Use less groups or delete groups from the p5play.groups array to recycle ids.'
 					);
 					// if there are no empty slots, try to prevent a crash by
 					// finding the first slot that has a group with no sprites in it
@@ -5787,7 +5811,7 @@ let p5playInit = function () {
 			if (this._isAllSpritesGroup) {
 				/**
 				 * autoCull is a property of the allSprites group only,
-				 * that controls whether sprites are automatically removed
+				 * that controls whether sprites are automatically deleted
 				 * when they are 10,000 pixels away from the camera.
 				 *
 				 * It only needs to be set to false once and then it will
@@ -5813,10 +5837,20 @@ let p5playInit = function () {
 			 * Check if a sprite is in the group.
 			 */
 			this.contains = this.includes;
+
+			/**
+			 * Deprecated alias for `group.deleteAll`
+			 *
+			 * In v4 `group.removeAll` will be a convenient way to
+			 * remove all sprites from the group, but not delete
+			 * them from the world.
+			 * @deprecated
+			 */
+			this.removeAll = this.deleteAll;
 		}
 
 		/*
-		 * Returns the highest layer in a group
+		 * Returns the highest layer value in a group.
 		 */
 		_getTopLayer() {
 			if (this.length == 0) return 0;
@@ -5889,7 +5923,7 @@ let p5playInit = function () {
 
 		/**
 		 * Depending on the value that the amount property is set to, the group will
-		 * either add or remove sprites.
+		 * either automatically create or delete sprites.
 		 * @type {Number}
 		 */
 		get amount() {
@@ -5901,7 +5935,7 @@ let p5playInit = function () {
 			diff = Math.abs(diff);
 			for (let i = 0; i < diff; i++) {
 				if (shouldAdd) new this.Sprite();
-				else this[this.length - 1].remove();
+				else this[this.length - 1].delete();
 			}
 		}
 
@@ -6332,73 +6366,6 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * Its better to use the group Sprite constructor instead.
-		 * `new group.Sprite()` which both creates a group sprite using
-		 * soft inheritance and adds it to the group.
-		 *
-		 * Adds a sprite or multiple sprites to the group, whether they were
-		 * already in the group or not, just like with the Array.push()
-		 * method. Only sprites can be added to a group.
-		 *
-		 * @param {...Sprite} sprites - The sprite or sprites to be added
-		 * @returns {Number} the new length of the group
-		 */
-		push(...sprites) {
-			if (this.removed) {
-				console.warn(
-					"Adding a sprite to a group that was removed. Use `group.removeAll()` to remove all of a group's sprites without removing the group itself. Restoring the group in p5play's memory."
-				);
-				$.p5play.groups[this._uid] = this;
-				this.removed = false;
-			}
-			for (let s of sprites) {
-				if (!(s instanceof $.Sprite)) {
-					throw new Error('You can only add sprites to a group, not ' + typeof s);
-				}
-				if (s.removed) {
-					console.error("Can't add a removed sprite to a group");
-					continue;
-				}
-
-				let b;
-				for (let tuid in this._hasOverlap) {
-					let hasOverlap = this._hasOverlap[tuid];
-					if (hasOverlap && !s._hasSensors) {
-						s.addDefaultSensors();
-					}
-					if (tuid >= 1000) b = $.p5play.sprites[tuid];
-					else b = $.p5play.groups[tuid];
-
-					if (!b || b.removed) continue;
-
-					if (!hasOverlap) b._ensureCollide(s);
-					else b._ensureOverlap(s);
-				}
-				for (let event in eventTypes) {
-					let contactTypes = eventTypes[event];
-					for (let contactType of contactTypes) {
-						let ledger = $.p5play[contactType];
-						let lg = ledger[this._uid];
-						if (!lg) continue;
-
-						let ls = (ledger[s._uid] ??= {});
-						for (let b_uid in lg) {
-							ls[b_uid] = lg[b_uid];
-						}
-					}
-				}
-
-				super.push(s);
-				// push to subgroups, excluding allSprites
-				// since sprites are automatically added to allSprites
-				if (this.parent) $.p5play.groups[this.parent].push(s);
-
-				s.groups.push(this);
-			}
-			return this.length;
-		}
-
-		/**
 		 */
 		repelFrom() {
 			for (let s of this) {
@@ -6424,18 +6391,20 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * Remove sprites that go outside the given culling boundary
-		 * relative to the camera. Sprites with chain colliders can not be culled.
+		 * Delete sprites that go outside the given culling boundary
+		 * relative to the camera.
+		 *
+		 * Sprites with chain colliders can not be culled.
 		 *
 		 * Can also be used with a uniform size for all boundaries, see example.
 		 *
-		 * @param {Number} top - the distance that sprites can move below the canvas before they are removed
-		 * @param {Number} bottom - the distance that sprites can move below the canvas before they are removed
-		 * @param {Number} left - the distance that sprites can move beyond the left side of the canvas before they are removed
-		 * @param {Number} right - the distance that sprites can move beyond the right side of the canvas before they are removed
+		 * @param {Number} top - the distance that sprites can move below the canvas before they are deleted
+		 * @param {Number} bottom - the distance that sprites can move below the canvas before they are deleted
+		 * @param {Number} left - the distance that sprites can move beyond the left side of the canvas before they are deleted
+		 * @param {Number} right - the distance that sprites can move beyond the right side of the canvas before they are deleted
 		 * @param {Function} [cb] - the function to be run when a sprite is culled,
 		 * it's given the sprite being culled, if no callback is given then the
-		 * sprite is removed
+		 * sprite is deleted
 		 * @return {Number} the number of sprites culled
 		 * @example
 		 * // alternate uniform size syntax
@@ -6470,93 +6439,87 @@ let p5playInit = function () {
 					culled++;
 					if (cb) cb(s, culled);
 					else s.remove();
-					if (s.removed) i--;
+					if (s.deleted) i--;
 				}
 			}
 			return culled;
 		}
 
 		/**
-		 * If no input is given to this function, the group itself will be
-		 * marked as removed and deleted from p5play's internal memory, the
-		 * `p5play.groups` array. Every sprite in the group will be removed
-		 * from the world and every other group they belong to.
+		 * Adds a sprite or multiple sprites to the group at the end of
+		 * the group list, just like the `Array.push()` method.
 		 *
-		 * Groups should not be used after they are removed.
+		 * Instead of creating a sprite and adding it to a group with this
+		 * method, it's better to use the group Sprite constructor instead,
+		 * `new group.Sprite()`, which both creates a group sprite using
+		 * soft inheritance and adds it to the group list.
 		 *
-		 * If this function receives as input an index of a sprite in the
-		 * group or the sprite itself, it will remove that sprite from
-		 * this group and its super groups (if any), but NOT from the world.
-		 *
-		 * To remove a sprite from the world and every group it belongs to,
-		 * use `sprite.remove()` instead.
-		 *
-		 * @param {Sprite|Number} item - the sprite to be removed or its index
-		 * @return {Sprite} the removed sprite or undefined if the specified sprite was not found
+		 * @param {...Sprite} sprites - The sprite or sprites to be added
+		 * @returns {Number} the new length of the group
 		 */
-		remove(item) {
-			if (item === undefined) {
-				this.removeAll();
-				if (!this._isAllSpritesGroup) this.removed = true;
-				return;
-			}
-
-			let idx;
-			if (typeof item == 'number') {
-				if (item >= 0) idx = item;
-				else idx = this.length + item;
-			} else {
-				idx = this.indexOf(item);
-			}
-
-			if (idx == -1) return;
-
-			let s = this[idx];
-			this.splice(idx, 1);
-			return s;
+		push(...sprites) {
+			this.splice(this.length, 0, ...sprites);
+			return this.length;
 		}
 
 		/**
-		 * Using `group.remove` instead is recommended because it's easier to use,
-		 * and it uses this function internally.
+		 * If removalCount is greater than 0, that amount of
+		 * sprites starting from the start index will be removed
+		 * from this group and its sub groups recursively (if any),
 		 *
-		 * Use `push` to add sprites to a group instead of this function.
+		 * Then any provided sprites will be added at the start index
+		 * to this group and at the end of each of its parent groups recursively,
+		 * if not already present in parent groups.
 		 *
-		 * @param {Number} idx - index
-		 * @param {Number} amount - number of sprites to remove
+		 * @param {Number} start - start index
+		 * @param {Number} removalCount - number of sprites to remove, starting from the start index
+		 * @param {...Sprite} sprites - sprites to add at start index
 		 * @return {Sprite[]} the removed sprites
 		 */
-		splice(idx, amount, ...sprites) {
-			let removed = super.splice(idx, amount, ...sprites);
-			if (!removed) return;
-
-			let gIDs = [];
-			for (let s of removed) {
-				if (s.removed) continue;
-
-				// remove from the removed sprites' group array
-				// this group and its super-groups
-				let gID = this._uid;
-				do {
-					gIDs.push(gID);
-					let gIdx = s.groups.findIndex((g) => g._uid == gID);
-					if (gIdx == -1) break;
-					let g = s.groups.splice(gIdx, 1);
-					gID = g[0].parent;
-				} while (gID);
+		splice(start, removalCount, ...sprites) {
+			if (this.deleted) {
+				console.warn(
+					'Edited group' +
+						this._uid +
+						" that was deleted. Use `group.deleteAll()` to remove all of a group's sprites without deleting the group itself. Restoring the group to p5play's memory."
+				);
+				$.p5play.groups[this._uid] = this;
+				this.deleted = false;
 			}
 
-			// loop through the groups that the sprite was removed from
-			for (let gID of gIDs) {
-				let a = $.p5play.groups[gID];
+			// filter out non-sprites and log a warning
+			sprites = sprites.filter((s) => {
+				if (!(s instanceof $.Sprite)) {
+					console.warn('Only sprites can be added to a group, skipping:', s);
+					return false;
+				}
+				if (s.deleted) {
+					console.warn("Can't add a deleted sprite to a group, skipping:", s);
+					return false;
+				}
+				return true;
+			});
+
+			let removed = super.splice(start, removalCount, ...sprites);
+
+			// removals
+			if (removalCount) {
+				for (let s of removed) {
+					if (s == undefined) continue;
+					for (let g of this.subgroups) {
+						// recursive removal
+						let i = g.indexOf(s);
+						if (i >= 0) g.splice(i, 1);
+					}
+					s.groups = s.groups.filter((g) => g._uid != this._uid);
+				}
+				let a = this;
 				for (let eventType in eventTypes) {
-					// loop through group's contacts with other sprites and groups
 					for (let b_uid in a[eventType]) {
 						if (a[eventType][b_uid] == 0) continue;
 						let b;
 						if (b_uid >= 1000) b = $.p5play.sprites[b_uid];
 						else b = $.p5play.groups[b_uid];
-						// check if any group members are still in contact with the sprite
 						let inContact = false;
 						for (let s of a) {
 							if (s[eventType][b._uid] > 0) {
@@ -6564,7 +6527,6 @@ let p5playInit = function () {
 								break;
 							}
 						}
-						// if not, set the contact to the collided or overlapped state
 						if (!inContact) {
 							a[eventType][b._uid] = -2;
 							b[eventType][a._uid] = -2;
@@ -6572,43 +6534,140 @@ let p5playInit = function () {
 					}
 				}
 			}
+
+			// addition
+			if (sprites.length > 0) {
+				for (let s of sprites) {
+					let b;
+					for (let tuid in this._hasOverlap) {
+						let hasOverlap = this._hasOverlap[tuid];
+						if (hasOverlap && !s._hasSensors) {
+							s.addDefaultSensors();
+						}
+						if (tuid >= 1000) b = $.p5play.sprites[tuid];
+						else b = $.p5play.groups[tuid];
+
+						if (!b || b.deleted) continue;
+
+						if (!hasOverlap) b._ensureCollide(s);
+						else b._ensureOverlap(s);
+					}
+					for (let event in eventTypes) {
+						let contactTypes = eventTypes[event];
+						for (let contactType of contactTypes) {
+							let ledger = $.p5play[contactType];
+							let lg = ledger[this._uid];
+							if (!lg) continue;
+
+							let ls = (ledger[s._uid] ??= {});
+							for (let b_uid in lg) {
+								ls[b_uid] = lg[b_uid];
+							}
+						}
+					}
+				}
+			}
+
+			// add recursively to parent groups, excluding allSprites (id is 0)
+			if (this.parent && sprites.length) {
+				let g = $.p5play.groups[this.parent];
+				// only add sprites that are not already in the group
+				let uniqueSprites = sprites.filter((s) => !g.includes(s));
+				if (uniqueSprites.length) g.splice(g.length, 0, ...uniqueSprites);
+			}
+
+			for (let s of sprites) {
+				// only add this group to the sprite's group list if not already present
+				if (!s.groups.some((g) => g._uid === this._uid)) {
+					s.groups.push(this);
+				}
+			}
+
 			return removed;
 		}
 
+		_splice(start, removalCount, ...sprites) {
+			return super.splice(start, removalCount, ...sprites);
+		}
+
 		/**
-		 * Removes the last sprite in the group.
+		 * Removes the last sprite in the group from the group.
 		 * @return {Sprite} the removed sprite or undefined if the group is empty
 		 */
 		pop() {
-			return this.remove(this.length - 1);
+			return this.splice(this.length - 1, 1)[0];
 		}
 
 		/**
-		 * Removes the last sprite in the group.
+		 * Removes the last sprite in the group from the group.
 		 * @return {Sprite} the removed sprite or undefined if the group is empty
 		 */
 		shift() {
-			return this.remove(0);
+			return this.splice(0, 1)[0];
 		}
 
 		/**
-		 * Not supported!
+		 * Adds one or more sprites to the beginning of the group.
+		 * @param {...Sprite} sprites - the sprite or sprites to be added
 		 * @return {Number} the new length of the group
 		 */
-		unshift() {
-			console.error('unshift is not supported for groups');
+		unshift(...sprites) {
+			this.splice(0, 0, ...sprites);
 			return this.length;
 		}
 
 		/**
-		 * Removes all the sprites in the group from the world and
-		 * every other group they belong to.
+		 * Removes a sprite from this group and its sub groups (if any),
+		 * but does not delete it from the world.
+		 *
+		 * @param {Sprite|Number} item - the sprite to be deleted or its index
+		 * @return {Sprite} the deleted sprite or undefined if the specified sprite was not found
+		 */
+		remove(item) {
+			// deprecated alias for `group.delete`, will remove this behavior in v4
+			if (item === undefined) return this.delete();
+
+			let idx;
+			if (typeof item == 'number') {
+				idx = item;
+				if (item < 0) idx += this.length;
+			} else {
+				idx = this.lastIndexOf(item);
+			}
+
+			if (idx < 0 || idx >= this.length) return;
+
+			return this.splice(idx, 1)[0];
+		}
+
+		// /**
+		//  * Removes all sprites from the group and its sub groups (if any),
+		//  * but does not delete them from the world.
+		//  */
+		// removeAll() {
+		// 	return this.splice(0, this.length);
+		// }
+
+		/**
+		 * Deletes the group and all its sprites
+		 * from the world and every other group they belong to.
+		 *
+		 * Don't attempt to use a group after deleting it.
+		 */
+		delete() {
+			this.deleteAll();
+			if (!this._isAllSpritesGroup) this.deleted = true;
+		}
+
+		/**
+		 * Deletes all the sprites in the group
+		 * from the world and every other group they belong to.
 		 *
 		 * Does not delete the group itself.
 		 */
-		removeAll() {
+		deleteAll() {
 			while (this.length > 0) {
-				this.at(-1).remove();
+				this.at(-1).delete();
 			}
 		}
 
@@ -6621,7 +6680,7 @@ let p5playInit = function () {
 		 */
 		update() {
 			for (let s of this) {
-				if (!$.p5play._inPostDraw || s.autoUpdate) {
+				if (s.autoUpdate) {
 					s.update();
 				}
 			}
@@ -7013,12 +7072,13 @@ let p5playInit = function () {
 			});
 			if (fxts.length == 0) return [];
 
-			group ??= $.allSprites;
 			let sprites = [];
 			for (let fxt of fxts) {
 				const s = fxt.m_body.sprite;
 				if (s._cameraActiveWhenDrawn == cameraActiveWhenDrawn) {
-					if (!sprites.find((x) => x._uid == s._uid)) sprites.push(s);
+					if (!sprites.find((x) => x._uid == s._uid)) {
+						if (!group || group.includes(s)) sprites.push(s);
+					}
 				}
 			}
 			sprites.sort((a, b) => (a._layer - b._layer) * -1);
@@ -7756,6 +7816,22 @@ let p5playInit = function () {
 			 */
 			this.visible = true;
 
+			/**
+			 * True if the joint was deleted.
+			 * @type {Boolean}
+			 * @default false
+			 * @readonly
+			 */
+			this.deleted = false;
+
+			/**
+			 * Deprecated alias for `joint.delete`.
+			 *
+			 * Will be removed in v4.
+			 * @deprecated
+			 */
+			this.remove = this.delete;
+
 			spriteA.joints.push(this);
 			spriteB.joints.push(this);
 		}
@@ -7979,15 +8055,15 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * Removes the joint from the world and from each of the
+		 * Deletes the joint from the world and from each of the
 		 * sprites' joints arrays.
 		 */
-		remove() {
-			if (this._removed) return;
+		delete() {
+			if (this.deleted) return;
 			this.spriteA.joints.splice(this.spriteA.joints.indexOf(this), 1);
 			this.spriteB.joints.splice(this.spriteB.joints.indexOf(this), 1);
 			$.world.destroyJoint(this._j);
-			this._removed = true;
+			this.deleted = true;
 		}
 	};
 
@@ -10969,7 +11045,6 @@ let p5playPreDraw = function () {
 // called after each draw function call
 let p5playPostDraw = function () {
 	const $ = this;
-	$.p5play._inPostDraw = true;
 
 	if ($.allSprites.autoCull) {
 		$.allSprites.cull(10000);
@@ -10981,6 +11056,8 @@ let p5playPostDraw = function () {
 	$.world.autoStep ??= true;
 
 	$.drawFrame();
+
+	$.p5play._inPostDraw = true;
 
 	if ($.allSprites._autoDraw) {
 		$.camera.on();

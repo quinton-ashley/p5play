@@ -10,7 +10,7 @@ The [p5play Personal License][] enables free, open source, personal use.
 
 Educational use requires the [p5play Educational License][].
 
-Commercial game development requires the [p5play Professional License][].
+Make a free account on [p5play.org][] and agree to the [p5play Professional License][] to use p5play in commercial projects.
 
 ## Credits ⭐️
 
