@@ -792,6 +792,12 @@ class Sprite {
 	 *
 	 * Set pixelPerfect to true to make p5play always display sprites
 	 * at integer pixel precision. This is useful for making retro games.
+	 *
+	 * This will also set `sprite.anis.cutFrames` to true, which
+	 * will make p5play cut frames from a sprite sheet into
+	 * separate images, so that pixel bleeding from other frames
+	 * doesn't occur. This can be disabled separately.
+	 *
 	 * @type {Boolean}
 	 * @default false
 	 */

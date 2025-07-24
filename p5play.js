@@ -2260,6 +2260,12 @@ let p5playInit = function () {
 		 *
 		 * Set pixelPerfect to true to make p5play always display sprites
 		 * at integer pixel precision. This is useful for making retro games.
+		 *
+		 * This will also set `sprite.anis.cutFrames` to true, which
+		 * will make p5play cut frames from a sprite sheet into
+		 * separate images, so that pixel bleeding from other frames
+		 * doesn't occur. This can be disabled separately.
+		 *
 		 * @type {Boolean}
 		 * @default false
 		 */
@@ -2269,6 +2275,7 @@ let p5playInit = function () {
 		set pixelPerfect(val) {
 			if (this.watch) this.mod[22] = true;
 			this._pixelPerfect = val;
+			this.anis.cutFrames = true;
 		}
 
 		/**
@@ -4734,7 +4741,7 @@ let p5playInit = function () {
 				}
 			} // end sequence mode
 
-			// spriteSheet mode
+			// sprite sheet mode
 			else if (typeof args.at(-1) != 'string' && !(args.at(-1) instanceof p5.Image)) {
 				let sheet = owner.spriteSheet;
 				let atlas;
@@ -8968,7 +8975,7 @@ let p5playInit = function () {
 			case 'jsfiddle.net':
 			case 'aijs.io':
 			case 'preview-aijs.web.app':
-			case 'quinton-ashley.github.io':
+			case 'quintos-org.github.io':
 				break;
 			default:
 				if (
