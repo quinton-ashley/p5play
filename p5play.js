@@ -2261,10 +2261,8 @@ let p5playInit = function () {
 		 * Set pixelPerfect to true to make p5play always display sprites
 		 * at integer pixel precision. This is useful for making retro games.
 		 *
-		 * This will also set `sprite.anis.cutFrames` to true, which
-		 * will make p5play cut frames from a sprite sheet into
-		 * separate images, so that pixel bleeding from other frames
-		 * doesn't occur. This can be disabled separately.
+		 * Also if using a tightly packed sprite sheet,
+		 * consider setting `sprite.anis.cutFrames` to true.
 		 *
 		 * @type {Boolean}
 		 * @default false
@@ -2275,7 +2273,6 @@ let p5playInit = function () {
 		set pixelPerfect(val) {
 			if (this.watch) this.mod[22] = true;
 			this._pixelPerfect = val;
-			this.anis.cutFrames = true;
 		}
 
 		/**
@@ -4757,6 +4754,10 @@ let p5playInit = function () {
 
 				let _this = this;
 
+				if (sheet == undefined) {
+					throw new FriendlyError('Ani', 2);
+				}
+
 				if (sheet instanceof p5.Image && sheet.width != 1 && sheet.height != 1) {
 					this.spriteSheet = sheet;
 					_generateSheetFrames();
@@ -5352,7 +5353,7 @@ let p5playInit = function () {
 						// change the prop in all the sprites of this group
 						for (let k in _this) {
 							let x = _this[k];
-							if (!(x instanceof Ani)) continue;
+							if (!(x instanceof $.Ani)) continue;
 							x[prop] = val;
 						}
 					}
@@ -5374,7 +5375,7 @@ let p5playInit = function () {
 
 							for (let k in _this) {
 								let x = _this[k];
-								if (!(x instanceof Ani)) continue;
+								if (!(x instanceof $.Ani)) continue;
 								x[vecProp][prop] = val;
 							}
 						}
@@ -8814,13 +8815,12 @@ let p5playInit = function () {
 	 * Parses a texture atlas XML file and returns an object
 	 * with subtexture names as keys, which p5play can use
 	 * to load animations.
-	 * @param {string} xml - XML file string
+	 * @param {string} xml - XML file string or Document
 	 * @returns atlas
 	 */
 	this.parseTextureAtlas = function (xml) {
-		let parser = new DOMParser(),
-			doc = parser.parseFromString(xml, 'application/xml'),
-			subTextures = doc.querySelectorAll('SubTexture'),
+		let doc = xml.DOM || (xml instanceof Document ? xml : new DOMParser().parseFromString(xml.text || xml, 'text/xml'));
+		let subTextures = doc.querySelectorAll('SubTexture'),
 			atlas = {};
 		for (let st of subTextures) {
 			// remove file extension
@@ -9553,8 +9553,9 @@ circle(25, 12.5, 16);
 		},
 		Ani: {
 			constructor: {
-				base: "Hey so, I tried to make a new Ani but couldn't",
-				1: 'The name of the animation must be the first input parameter.'
+				base: "I tried to make a new Ani but couldn't",
+				1: 'The name of the animation must be the first input parameter.',
+				2: 'Make sure to set the sprite sheet image before adding animations from it.'
 			},
 			frame: 'Index $0 out of bounds. That means there is no frame $0 in this animation. It only has $1 frames!'
 		},
