@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.32
+ * @version 3.33
  * @author quinton-ashley
  */
 
@@ -17,7 +17,7 @@ if (typeof planck != 'object') {
 let p5playInit = function () {
 	// START p5play.d.ts
 
-	const VERSION = '3.32';
+	const VERSION = '3.33';
 
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
@@ -598,21 +598,19 @@ let p5playInit = function () {
 			});
 
 			this._mirror = {
-				_x: 1,
-				_y: 1,
 				get x() {
-					return this._x < 0;
+					return this._scale.x < 0;
 				},
 				set x(val) {
-					if (_this.watch) _this.mod[20] = true;
-					this._x = val ? -1 : 1;
+					if (_this.watch) _this.mod[26] = true;
+					this._scale.x = Math.abs(this._scale.x) * (val ? -1 : 1);
 				},
 				get y() {
-					return this._y < 0;
+					return this._scale.y < 0;
 				},
 				set y(val) {
-					if (_this.watch) _this.mod[20] = true;
-					this._y = val ? -1 : 1;
+					if (_this.watch) _this.mod[26] = true;
+					this._scale.y = Math.abs(this._scale.y) * (val ? -1 : 1);
 				}
 			};
 
@@ -3073,75 +3071,6 @@ let p5playInit = function () {
 			}
 		}
 
-		// default draw
-		__draw() {
-			if (!$.p5play.disableImages) {
-				if (this._ani) {
-					this._ani.draw(this._offset._x, this._offset._y, 0, this._scale._x, this._scale._y);
-				} else if (this._img) {
-					let img = this._img;
-					let shouldScale = this._scale._x != 1 || this._scale._y != 1 || img.scale.x != 1 || img.scale.y != 1;
-					if (shouldScale) {
-						$.push();
-						$.scale(this._scale._x * img.scale.x, this._scale._y * img.scale.y);
-					}
-					$.image(img, this._offset._x + img.offset.x, this._offset._y + img.offset.y);
-					if (shouldScale) $.pop();
-				}
-			}
-			if (!(this._ani || this._img) || this.debug || $.p5play.disableImages) {
-				if (this.debug) {
-					$.noFill();
-					$.stroke(0, 255, 0);
-					$.line(0, -2, 0, 2);
-					$.line(-2, 0, 2, 0);
-				}
-
-				if (this.__collider != 3) {
-					if (!this.debug && this._strokeWeight !== 0) {
-						if (this.__shape == 2) $.stroke(this.stroke || this.color);
-						else if (this._stroke) $.stroke(this._stroke);
-					} else $.noStroke();
-					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
-						if (this.debug) {
-							if (!fxt.m_isSensor) $.stroke(0, 255, 0, 127);
-							else $.stroke(255, 255, 0, 127);
-						} else if (fxt.m_isSensor) continue;
-						this._drawFixture(fxt);
-					}
-				} else {
-					if (this._strokeWeight !== 0) $.stroke(this._stroke || 120);
-					if (this.__shape == 0) {
-						$.rect(this._offset._x, this._offset._y, this.w * this.tileSize, this.h * this.tileSize);
-					} else if (this.__shape == 1) {
-						$.circle(this._offset._x, this._offset._y, this.d * this.tileSize);
-					}
-				}
-			}
-			if (this.text !== undefined) {
-				$.textAlign($.CENTER, $.CENTER);
-				$.fill(this._textFill);
-				if (this._textStrokeWeight) $.strokeWeight(this._textStrokeWeight);
-				if (this._textStroke) $.stroke(this._textStroke);
-				else $.noStroke();
-				$.textSize(this.textSize * this.tileSize);
-				$.text(this.text, 0, 0);
-			}
-		}
-
-		_postDraw() {
-			if (this._ani?.update) this._ani.update();
-
-			for (let prop in this.mouse) {
-				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
-			}
-
-			if (this._customPostDraw) this._customPostDraw();
-
-			this.autoDraw ??= true;
-			this.autoUpdate ??= true;
-		}
-
 		/*
 		 * Applies `rotation`, `mirror` scaling, and `world.origin`
 		 * translation before the sprite's `draw` function is called.
@@ -3224,10 +3153,13 @@ let p5playInit = function () {
 			$.ellipseMode('center');
 
 			$.translate(x, y);
+
 			if (this.rotation) $.rotate(this.rotation);
-			if (this._mirror._x != 1 || this._mirror._y != 1) {
-				$.scale(this._mirror._x, this._mirror._y);
+
+			if (this._scale.x != 1 || this._scale.y != 1) {
+				$.scale(this._scale.x, this._scale.y);
 			}
+
 			$.fill(this.color);
 			if (this._strokeWeight !== undefined) {
 				$.strokeWeight(this._strokeWeight);
@@ -3251,6 +3183,81 @@ let p5playInit = function () {
 			if (!$.camera.isActive) $.camera._wasOff = true;
 
 			if (this.autoDraw) this.autoDraw = null;
+		}
+
+		// default draw
+		__draw() {
+			let g = this._ani || this._img;
+
+			if (g && !$.p5play.disableImages) {
+				if (this._offset.x || this._offset.y) {
+					$.translate(this._offset.x, this._offset.y);
+				}
+
+				let scaleX = g._scale._x;
+				let scaleY = g._scale._y;
+				let shouldScale = scaleX != 1 || scaleY != 1;
+
+				if (shouldScale) $.scale(scaleX, scaleY);
+
+				let ox = g.offset.x;
+				let oy = g.offset.y;
+
+				if (this._ani) g.draw(ox, oy);
+				else $.image(g, ox, oy);
+			}
+
+			if (!g || this.debug || $.p5play.disableImages) {
+				if (this.debug) {
+					$.noFill();
+					$.stroke(0, 255, 0);
+					$.line(0, -2, 0, 2);
+					$.line(-2, 0, 2, 0);
+				}
+
+				if (this.__collider != 3) {
+					if (!this.debug && this._strokeWeight !== 0) {
+						if (this.__shape == 2) $.stroke(this.stroke || this.color);
+						else if (this._stroke) $.stroke(this._stroke);
+					} else $.noStroke();
+					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
+						if (this.debug) {
+							if (!fxt.m_isSensor) $.stroke(0, 255, 0, 127);
+							else $.stroke(255, 255, 0, 127);
+						} else if (fxt.m_isSensor) continue;
+						this._drawFixture(fxt);
+					}
+				} else {
+					if (this._strokeWeight !== 0) $.stroke(this._stroke || 120);
+					if (this.__shape == 0) {
+						$.rect(this._offset._x, this._offset._y, this.w * this.tileSize, this.h * this.tileSize);
+					} else if (this.__shape == 1) {
+						$.circle(this._offset._x, this._offset._y, this.d * this.tileSize);
+					}
+				}
+			}
+			if (this.text !== undefined) {
+				$.textAlign($.CENTER, $.CENTER);
+				$.fill(this._textFill);
+				if (this._textStrokeWeight) $.strokeWeight(this._textStrokeWeight);
+				if (this._textStroke) $.stroke(this._textStroke);
+				else $.noStroke();
+				$.textSize(this.textSize * this.tileSize);
+				$.text(this.text, 0, 0);
+			}
+		}
+
+		_postDraw() {
+			if (this._ani?.update) this._ani.update();
+
+			for (let prop in this.mouse) {
+				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
+			}
+
+			if (this._customPostDraw) this._customPostDraw();
+
+			this.autoDraw ??= true;
+			this.autoUpdate ??= true;
 		}
 
 		/*
@@ -4803,13 +4810,11 @@ let p5playInit = function () {
 						frameCount,
 						frameDelay,
 						frameSize,
-						delay,
-						rotation
+						delay
 					} = atlas;
 					frameSize ??= size || owner.anis.frameSize;
 					if (delay) _this.frameDelay = delay;
 					if (frameDelay) _this.frameDelay = frameDelay;
-					if (rotation) _this.rotation = rotation;
 					if (frames && Array.isArray(frames)) {
 						frameCount = frames.length;
 					} else frameCount ??= frames || 1;
@@ -4956,16 +4961,6 @@ let p5playInit = function () {
 			if (val <= 0) val = 1;
 			this._frameDelay = val;
 		}
-		/*
-		 * TODO frameChange
-		 * Set the animation's frame delay in seconds.
-		 */
-		// get frameChange() {
-
-		// }
-		// set frameChange(val) {
-
-		// }
 
 		/**
 		 * The animation's scale.
@@ -5014,58 +5009,37 @@ let p5playInit = function () {
 		}
 
 		/**
-		 * Draws the animation at coordinate x and y.
-		 * Updates the frames automatically.
+		 * Draws the animation.  Similar to the q5.js `image` function.
 		 *
-		 * Optional parameters effect the current draw cycle only and
-		 * are not saved between draw cycles.
+		 * If the animation is playing, it will advance to the next frame
+		 * automatically.
 		 *
-		 * @param {Number} x - horizontal position
-		 * @param {Number} y - vertical position
-		 * @param {Number} [r] - rotation
-		 * @param {Number} [sx] - scale x
-		 * @param {Number} [sy] - scale y
+		 * `imageMode` affects the position of the animation.
+		 *
+		 * @param {Number} dx - x coordinate to draw the animation
+		 * @param {Number} dy - y coordinate to draw the animation
+		 * @param {Number} [dw] - width to draw the animation
+		 * @param {Number} [dh] - height to draw the animation
 		 */
-		draw(x, y, r, sx, sy) {
-			this.x = x || 0;
-			this.y = y || 0;
-			r ??= this.rotation;
-
-			if (!this.visible) return;
-
-			sx ??= 1;
-			sy ??= 1;
-
-			$.push();
-			$.imageMode('center');
-
-			$.translate(this.x, this.y);
-			$.rotate(r);
-			$.scale(sx * this._scale._x, sy * this._scale._y);
-
-			let ox = this.offset.x;
-			let oy = this.offset.y;
-
+		draw(dx, dy, dw, dh) {
 			let img = this[this._frame];
 			if (img !== undefined) {
-				if (this.spriteSheet && img.x !== undefined) {
+				if (this.spriteSheet) {
 					let { x, y, w, h } = img; // image info
 					if (!this.demoMode) {
-						$.image(this.spriteSheet, ox, oy, img.defaultWidth || w, img.defaultHeight || h, x, y, w, h);
+						$.image(this.spriteSheet, dx, dy, dw || img.defaultWidth || w, dh || img.defaultHeight || h, x, y, w, h);
 					} else {
 						$.image(
 							this.spriteSheet,
-							ox,
-							oy,
-							this.spriteSheet.w,
-							this.spriteSheet.h,
+							dx,
+							dy,
+							dw || this.spriteSheet.w,
+							dh || this.spriteSheet.h,
 							x - this.spriteSheet.w / 2 + w / 2,
 							y - this.spriteSheet.h / 2 + h / 2
 						);
 					}
-				} else {
-					$.image(img, ox, oy);
-				}
+				} else $.image(img, dx, dy, dw, dh);
 			} else {
 				console.warn(
 					'p5play: "' +
@@ -5077,10 +5051,6 @@ let p5playInit = function () {
 				);
 			}
 
-			$.pop();
-		}
-
-		update() {
 			if (!this.playing) return;
 
 			this._cycles++;
@@ -5303,17 +5273,7 @@ let p5playInit = function () {
 		}
 	};
 
-	$.Ani.props = [
-		'demoMode',
-		'endOnFirstFrame',
-		'frameDelay',
-		'frameSize',
-		'looping',
-		'offset',
-		'rotation',
-		'scale',
-		'cutFrames'
-	];
+	$.Ani.props = ['demoMode', 'endOnFirstFrame', 'frameDelay', 'looping', 'offset', 'scale', 'cutFrames'];
 
 	/**
 	 * <a href="https://p5play.org/learn/animation.html">
@@ -8836,18 +8796,26 @@ let p5playInit = function () {
 	};
 
 	/**
-	 * Displays an animation. Similar to the `image` function.
+	 * Displays an animation. Similar to the q5.js `image` function.
+	 *
+	 * If the animation is playing, it will advance to the next frame
+	 * automatically.
+	 *
+	 * Sets `imageMode(CENTER)` before drawing the animation,
+	 * and restores the previous image mode after drawing. This behavior
+	 * is deprecated and will be removed in v4.
 	 *
 	 * @param {Ani} ani - Animation to be displayed
 	 * @param {Number} x - position of the animation on the canvas
 	 * @param {Number} y - position of the animation on the canvas
-	 * @param {Number} r - rotation of the animation
-	 * @param {Number} sX - scale of the animation in the x direction
-	 * @param {Number} sY - scale of the animation in the y direction
+	 * @param {Number} w - display width of the animation
+	 * @param {Number} h - display height of the animation
 	 */
-	this.animation = function (ani, x, y, r, sX, sY) {
-		if (ani.visible) ani.update();
-		ani.draw(x, y, r, sX, sY);
+	this.animation = function (ani, x = 0, y = 0, w, h) {
+		let og = $._getImageMode ? $._getImageMode() : $.imageMode();
+		$.imageMode('center');
+		ani.draw(x, y, w, h);
+		$.imageMode(og);
 	};
 
 	/**
@@ -9004,7 +8972,7 @@ let p5playInit = function () {
 	 */
 	this.createCanvas = function () {
 		let args = [...arguments];
-		let displayMode, renderQuality, displayScale;
+		let display, renderQuality, displayScale;
 		if (typeof args[0] == 'string') {
 			if (args[0].includes(':')) {
 				let ratio = args[0].split(':');
@@ -9018,7 +8986,7 @@ let p5playInit = function () {
 				}
 				args[0] = Math.round(w);
 				args.splice(1, 0, Math.round(h));
-				displayMode = 'fullscreen';
+				display = 'maxed';
 			} else {
 				args = [0, 0, ...args];
 			}
@@ -9026,20 +8994,20 @@ let p5playInit = function () {
 		if (!args[0]) {
 			args[0] = window.innerWidth;
 			args[1] = window.innerHeight;
-			displayMode = 'fullscreen';
+			display = 'maxed';
 		}
 		if (typeof args[2] == 'string') {
 			let rend = args[2].toLowerCase().split(' ');
 			if (rend[0] == 'pixelated') {
 				renderQuality = 'pixelated';
-				if (!rend[1]) displayMode = 'fullscreen';
+				if (!rend[1]) display = 'maxed';
 				else {
-					displayMode = 'centered';
+					display = 'centered';
 					displayScale = Number(rend[1].slice(1));
 				}
 				args.splice(2, 1);
-			} else if (rend[0] == 'fullscreen') {
-				displayMode = 'fullscreen';
+			} else if (rend[0] == 'fullscreen' || rend[0] == 'maxed') {
+				display = 'maxed';
 				args.splice(2, 1);
 			}
 		}
@@ -9098,7 +9066,7 @@ let p5playInit = function () {
 		}
 		p5.disableFriendlyErrors = userDisabledP5Errors;
 
-		$.displayMode(displayMode, renderQuality, displayScale);
+		$.displayMode(display, renderQuality, displayScale);
 
 		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
 		c.addEventListener(pointer + 'down', onpointerdown);
@@ -9227,7 +9195,7 @@ let p5playInit = function () {
 		c.h = c.height / $.pixelDensity();
 		c.hw = c.w * 0.5;
 		c.hh = c.h * 0.5;
-		if (c.fullscreen) {
+		if (c.maxed) {
 			if (c.w / c.h > window.innerWidth / window.innerHeight) {
 				c.style.width = '100%!important';
 				c.style.height = 'auto!important';
@@ -9412,15 +9380,13 @@ body.hasFrameBorder {
 	-webkit-font-smoothing: none;
 }
 .p5-centered,
-.p5-maxed,
-.p5-fullscreen {
+.p5-maxed {
   display: flex;
 	align-items: center;
 	justify-content: center;
 }
 main.p5-centered,
-main.p5-maxed,
-.p5-fullscreen {
+main.p5-maxed {
 	height: 100vh;
 }
 main {

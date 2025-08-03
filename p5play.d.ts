@@ -1482,22 +1482,19 @@ class Ani extends Array<new (width?: number, height?: number) => HTMLImageElemen
 	 */
 	clone(): Ani;
 	/**
-	 * Draws the animation at coordinate x and y.
-	 * Updates the frames automatically.
+	 * Draws the animation.  Similar to the q5.js `image` function.
 	 *
-	 * Optional parameters effect the current draw cycle only and
-	 * are not saved between draw cycles.
+	 * If the animation is playing, it will advance to the next frame
+	 * automatically.
 	 *
-	 * @param {Number} x - horizontal position
-	 * @param {Number} y - vertical position
-	 * @param {Number} [r] - rotation
-	 * @param {Number} [sx] - scale x
-	 * @param {Number} [sy] - scale y
+	 * `imageMode` affects the position of the animation.
+	 *
+	 * @param {Number} dx - x coordinate to draw the animation
+	 * @param {Number} dy - y coordinate to draw the animation
+	 * @param {Number} [dw] - width to draw the animation
+	 * @param {Number} [dh] - height to draw the animation
 	 */
-	draw(x: number, y: number, r?: number, sx?: number, sy?: number): void;
-	x: number;
-	y: number;
-	update(): void;
+	draw(dx: number, dy: number, dw?: number, dh?: number): void;
 	/**
 	 * Plays the animation, starting from the specified frame.
 	 *
@@ -2809,7 +2806,7 @@ function createGroup(...args: any[]): Group;
 function loadAnimation(...args: any[]): Ani;
 function loadAni(...args: any[]): Ani;
 function parseTextureAtlas(xml: string): {};
-function animation(ani: Ani, x: number, y: number, r: number, sX: number, sY: number): void;
+function animation(ani: Ani, x: number, y: number, w: number, h: number): void;
 function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
