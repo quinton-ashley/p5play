@@ -3194,8 +3194,8 @@ let p5playInit = function () {
 					$.translate(this._offset.x, this._offset.y);
 				}
 
-				let scaleX = g._scale._x;
-				let scaleY = g._scale._y;
+				let scaleX = g._scale.x;
+				let scaleY = g._scale.y;
 				let shouldScale = scaleX != 1 || scaleY != 1;
 
 				if (shouldScale) $.scale(scaleX, scaleY);
@@ -3248,8 +3248,6 @@ let p5playInit = function () {
 		}
 
 		_postDraw() {
-			if (this._ani?.update) this._ani.update();
-
 			for (let prop in this.mouse) {
 				if (this.mouse[prop] == -1) this.mouse[prop] = 0;
 			}
@@ -5190,8 +5188,7 @@ let p5playInit = function () {
 				return;
 			}
 
-			// targetFrame gets used by the update() method to decide what frame to
-			// select next.  When it's not being used it gets set to -1.
+			// when it's not being used it gets set to -1
 			this.targetFrame = toFrame;
 			this._cycles = 0;
 
