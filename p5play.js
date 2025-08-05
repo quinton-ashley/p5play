@@ -599,18 +599,18 @@ let p5playInit = function () {
 
 			this._mirror = {
 				get x() {
-					return this._scale.x < 0;
+					return _this._scale.x < 0;
 				},
 				set x(val) {
 					if (_this.watch) _this.mod[26] = true;
-					this._scale.x = Math.abs(this._scale.x) * (val ? -1 : 1);
+					_this._scale.x = Math.abs(_this._scale.x) * (val ? -1 : 1);
 				},
 				get y() {
-					return this._scale.y < 0;
+					return _this._scale.y < 0;
 				},
 				set y(val) {
 					if (_this.watch) _this.mod[26] = true;
-					this._scale.y = Math.abs(this._scale.y) * (val ? -1 : 1);
+					_this._scale.y = Math.abs(_this._scale.y) * (val ? -1 : 1);
 				}
 			};
 
