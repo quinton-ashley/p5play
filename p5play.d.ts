@@ -2810,6 +2810,7 @@ function animation(ani: Ani, x: number, y: number, w: number, h: number): void;
 function delay(milliseconds: any): Promise<any>;
 function sleep(milliseconds: any): Promise<any>;
 function play(sound: any): Promise<any>;
+let didCreateCanvas: boolean;
 function createCanvas(...args: any[]): Canvas;
 /**
  * @class

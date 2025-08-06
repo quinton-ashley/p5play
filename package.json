@@ -1,6 +1,6 @@
 {
 	"name": "p5play",
-	"version": "3.33.2",
+	"version": "3.33.3",
 	"description": "A JavaScript game engine that uses p5.js for graphics and Box2D for physics.",
 	"author": "quinton-ashley <info@p5play.org>",
 	"license": "p5play Personal License",

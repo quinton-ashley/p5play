@@ -2029,6 +2029,7 @@ let p5playInit = function () {
 		}
 
 		_extendImage(img) {
+			img._isImage = true;
 			img.offset ??= { x: 0, y: 0 };
 			img._scale ??= { x: 1, y: 1 };
 			if (!img.scale) {
@@ -5022,7 +5023,7 @@ let p5playInit = function () {
 		draw(dx, dy, dw, dh) {
 			let img = this[this._frame];
 			if (img !== undefined) {
-				if (this.spriteSheet) {
+				if (this.spriteSheet && !(this._isImage || img.pixels)) {
 					let { x, y, w, h } = img; // image info
 					if (!this.demoMode) {
 						$.image(this.spriteSheet, dx, dy, dw || img.defaultWidth || w, dh || img.defaultHeight || h, x, y, w, h);
@@ -8959,6 +8960,8 @@ let p5playInit = function () {
 		}
 	}
 
+	let didCreateCanvas = false;
+
 	const _createCanvas = $.createCanvas;
 
 	/**
@@ -8969,6 +8972,10 @@ let p5playInit = function () {
 	 */
 	this.createCanvas = function () {
 		let args = [...arguments];
+
+		// prevent p5.js v1 overriding the user's canvas with a new default canvas
+		if (didCreateCanvas && args[0] == 100 && args[1] == 100) return;
+
 		let display, renderQuality, displayScale;
 		if (typeof args[0] == 'string') {
 			if (args[0].includes(':')) {
@@ -9072,6 +9079,7 @@ let p5playInit = function () {
 			window.addEventListener(pointer + 'up', onpointerup);
 		}
 
+		didCreateCanvas = true;
 		return rend;
 	};
 
