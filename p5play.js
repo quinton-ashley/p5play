@@ -3157,9 +3157,8 @@ let p5playInit = function () {
 
 			if (this.rotation) $.rotate(this.rotation);
 
-			if (this._scale.x != 1 || this._scale.y != 1) {
-				$.scale(this._scale.x, this._scale.y);
-			}
+			let shouldScale = this._scale.x != 1 || this._scale.y != 1;
+			if (shouldScale) $.scale(this._scale.x, this._scale.y);
 
 			$.fill(this.color);
 			if (this._strokeWeight !== undefined) {
@@ -3176,39 +3175,11 @@ let p5playInit = function () {
 			}
 			if (this._tint) $.tint(this._tint);
 
-			this._draw();
+			let drawn = this._draw();
 
-			$.pop();
-			if (this._opacity) $.ctx.globalAlpha = ogGlobalAlpha;
-			this._cameraActiveWhenDrawn = $.camera.isActive;
-			if (!$.camera.isActive) $.camera._wasOff = true;
+			if (shouldScale) $.scale(1 / this._scale.x, 1 / this._scale.y);
 
-			if (this.autoDraw) this.autoDraw = null;
-		}
-
-		// default draw
-		__draw() {
-			let g = this._ani || this._img;
-
-			if (g && !$.p5play.disableImages) {
-				if (this._offset.x || this._offset.y) {
-					$.translate(this._offset.x, this._offset.y);
-				}
-
-				let scaleX = g._scale.x;
-				let scaleY = g._scale.y;
-				let shouldScale = scaleX != 1 || scaleY != 1;
-
-				if (shouldScale) $.scale(scaleX, scaleY);
-
-				let ox = g.offset.x;
-				let oy = g.offset.y;
-
-				if (this._ani) g.draw(ox, oy);
-				else $.image(g, ox, oy);
-			}
-
-			if (!g || this.debug || $.p5play.disableImages) {
+			if (drawn === false || this.debug) {
 				if (this.debug) {
 					$.noFill();
 					$.stroke(0, 255, 0);
@@ -3223,8 +3194,8 @@ let p5playInit = function () {
 					} else $.noStroke();
 					for (let fxt = this.fixtureList; fxt; fxt = fxt.getNext()) {
 						if (this.debug) {
-							if (!fxt.m_isSensor) $.stroke(0, 255, 0, 127);
-							else $.stroke(255, 255, 0, 127);
+							if (!fxt.m_isSensor) $.stroke(0, 255, 0, 232);
+							else $.stroke(255, 255, 0, 232);
 						} else if (fxt.m_isSensor) continue;
 						this._drawFixture(fxt);
 					}
@@ -3237,6 +3208,7 @@ let p5playInit = function () {
 					}
 				}
 			}
+
 			if (this.text !== undefined) {
 				$.textAlign($.CENTER, $.CENTER);
 				$.fill(this._textFill);
@@ -3246,6 +3218,41 @@ let p5playInit = function () {
 				$.textSize(this.textSize * this.tileSize);
 				$.text(this.text, 0, 0);
 			}
+
+			$.pop();
+			if (this._opacity) $.ctx.globalAlpha = ogGlobalAlpha;
+			this._cameraActiveWhenDrawn = $.camera.isActive;
+			if (!$.camera.isActive) $.camera._wasOff = true;
+
+			if (this.autoDraw) this.autoDraw = null;
+		}
+
+		// default draw
+		__draw() {
+			let g = this._ani || this._img;
+
+			if (!g || $.p5play.disableImages) return false;
+
+			if (this._offset.x || this._offset.y) {
+				$.translate(this._offset.x, this._offset.y);
+			}
+
+			let scaleX = g._scale.x;
+			let scaleY = g._scale.y;
+			let shouldScaleImg = scaleX != 1 || scaleY != 1;
+
+			if (shouldScaleImg) $.scale(scaleX, scaleY);
+
+			let ox = g.offset.x;
+			let oy = g.offset.y;
+
+			if (this._ani) g.draw(ox, oy);
+			else $.image(g, ox, oy);
+
+			if (!this.debug && this.text === undefined) return;
+
+			// reset the scale
+			if (shouldScaleImg) $.scale(1 / scaleX, 1 / scaleY);
 		}
 
 		_postDraw() {
@@ -9281,7 +9288,7 @@ let p5playInit = function () {
 		 * @param {function} [callback]
 		 * @returns {Image}
 		 */
-		this.loadImage = this.loadImg = function () {
+		this.loadImage = function () {
 			if ($.p5play.disableImages) {
 				if (!$._q5) $._decrementPreload();
 				// return a dummy image object to prevent errors
