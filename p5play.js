@@ -2556,8 +2556,13 @@ let p5playInit = function () {
 				let pos = new pl.Vec2((val.x * this.tileSize) / $.world.meterSize, (val.y * this.tileSize) / $.world.meterSize);
 				this.body.setPosition(pos);
 			}
-			this._position.x = val.x;
-			this._position.y = val.y;
+			let x, y;
+			if (Array.isArray(val)) {
+				x = val[0];
+				y = val[1];
+			}
+			this._position.x = x ?? val.x;
+			this._position.y = y ?? val.y;
 		}
 		/**
 		 * The position vector {x, y}
@@ -8937,17 +8942,17 @@ let p5playInit = function () {
 			case '127.0.0.1':
 			case 'localhost':
 			case 'p5play.org':
+			case 'p5play-web.pages.dev':
 			case 'editor.p5js.org':
 			case 'codepen.io':
-			case 'codera.app':
 			case 'aug4th.com':
 			case 'cdpn.io':
 			case 'glitch.com':
 			case 'replit.com':
 			case 'stackblitz.com':
 			case 'jsfiddle.net':
-			case 'aijs.io':
-			case 'preview-aijs.web.app':
+			case 'codevre.com':
+			case 'preview.codevre.com':
 			case 'quintos-org.github.io':
 				break;
 			default:
@@ -10509,7 +10514,13 @@ circle(25, 12.5, 16);
 				up: 12,
 				down: 13,
 				left: 14,
-				right: 15
+				right: 15,
+				home: 16,
+				capture: 17,
+				lsl: 18,
+				lsr: 19,
+				rsl: 20,
+				rsr: 21
 			};
 			/**
 			 * Sticks and triggers are mapped to `gamepad.axes` indices.
@@ -10552,14 +10563,21 @@ circle(25, 12.5, 16);
 			 */
 			this.hasAnalogTriggers = this._axeTriggers || undefined;
 
+			/**
+			 * True if the controller is a Nintendo-style controller.
+			 * @type {boolean}
+			 */
+			this.isNintendo = false;
+
 			// corrects button mapping for GuliKit KingKong 2 Pro controllers
 			// which have a Nintendo Switch style button layout
 			// https://www.aliexpress.com/item/1005003624801819.html
-			if (this.id.includes('GuliKit')) {
+			if (this.id.includes('Joy-Con') || this.id.includes('Nintendo') || this.id.includes('GuliKit')) {
 				this.buttonMapping.a = 1;
 				this.buttonMapping.b = 0;
 				this.buttonMapping.x = 3;
 				this.buttonMapping.y = 2;
+				this.isNintendo = true;
 			}
 		}
 
@@ -10730,6 +10748,30 @@ circle(25, 12.5, 16);
 		get r3() {
 			return this.rsb;
 		}
+		/**
+		 * Nintendo Joy-Con side button.
+		 */
+		get leftSideLeft() {
+			return this.lsl;
+		}
+		/**
+		 * Nintendo Joy-Con side button.
+		 */
+		get leftSideRight() {
+			return this.lsr;
+		}
+		/**
+		 * Nintendo Joy-Con side button.
+		 */
+		get rightSideLeft() {
+			return this.rsl;
+		}
+		/**
+		 * Nintendo Joy-Con side button.
+		 */
+		get rightSideRight() {
+			return this.rsr;
+		}
 	};
 
 	/**
@@ -10830,11 +10872,20 @@ circle(25, 12.5, 16);
 		 * the array and its state is reset.
 		 * @type {Function}
 		 * @param {Gamepad} gamepad
-		 * @returns {Boolean} true if the controllers should be removed from this p5play controllers array
+		 * @returns {Boolean} true if the controller should be removed from this p5play controllers array
 		 */
 		onDisconnect(gamepad) {
 			return false;
 		}
+
+		/**
+		 * Runs when this controllers array changes:
+		 * when a controller is added or removed.
+		 * Overwrite this function to customize the behavior.
+		 * @type {Function}
+		 * @param {Number} index The index of the controller that was added or removed
+		 */
+		onChange(index) {}
 
 		_onConnect(gp) {
 			if (!gp) return;
@@ -10863,6 +10914,7 @@ circle(25, 12.5, 16);
 					$.contro = c;
 					if ($._isGlobal) window.contro = c;
 				}
+				this.onChange(index);
 			}
 		}
 
@@ -10872,8 +10924,10 @@ circle(25, 12.5, 16);
 				if (this[i].gamepad?.index === gp.index) {
 					this[i].connected = false;
 					log('contros[' + i + '] disconnected: ' + gp.id);
-					if (this.onDisconnect(gp)) this.remove(i);
-					else this[i]._reset();
+					if (this.onDisconnect(gp)) {
+						this.remove(i);
+						this.onChange(i);
+					} else this[i]._reset();
 					return;
 				}
 			}

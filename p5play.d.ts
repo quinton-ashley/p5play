@@ -3252,6 +3252,11 @@ class Contro extends InputDevice {
 	 * @type {boolean}
 	 */
 	hasAnalogTriggers: boolean;
+	/**
+	 * True if the controller is a Nintendo-style controller.
+	 * @type {boolean}
+	 */
+	isNintendo: boolean;
 	get cross(): number;
 	get circle(): number;
 	get square(): number;
@@ -3322,6 +3327,22 @@ class Contro extends InputDevice {
 	 * `r3` is what the trigger is called on PlayStation controllers.
 	 */
 	get r3(): number;
+	/**
+	 * Nintendo Joy-Con side button.
+	 */
+	get leftSideLeft(): any;
+	/**
+	 * Nintendo Joy-Con side button.
+	 */
+	get leftSideRight(): any;
+	/**
+	 * Nintendo Joy-Con side button.
+	 */
+	get rightSideLeft(): any;
+	/**
+	 * Nintendo Joy-Con side button.
+	 */
+	get rightSideRight(): any;
 }
 /**
  * @class
@@ -3380,9 +3401,17 @@ class _Contros extends Array<Contro> {
 	 * the array and its state is reset.
 	 * @type {Function}
 	 * @param {Gamepad} gamepad
-	 * @returns {Boolean} true if the controllers should be removed from this p5play controllers array
+	 * @returns {Boolean} true if the controller should be removed from this p5play controllers array
 	 */
 	onDisconnect(gamepad: Gamepad): boolean;
+	/**
+	 * Runs when this controllers array changes:
+	 * when a controller is added or removed.
+	 * Overwrite this function to customize the behavior.
+	 * @type {Function}
+	 * @param {Number} index The index of the controller that was added or removed
+	 */
+	onChange(index: number): void;
 }
 var contros: _Contros;
 var controllers: _Contros;
