@@ -51,6 +51,10 @@ let p5playInit = function () {
 	let using_p5v1 = !$._q5 && p5.VERSION[0] == 1;
 	let using_p5v2 = !$._q5 && p5.VERSION[0] == 2;
 
+	if (using_p5v2 && p5.prototype?.registerMethod) {
+		$.createCanvas.call($, 100, 100);
+	}
+
 	// in p5play the default angle mode is degrees
 	const DEGREES = $.DEGREES;
 	$.angleMode(DEGREES);
@@ -11029,7 +11033,16 @@ circle(25, 12.5, 16);
 	};
 
 	// END p5play.d.ts
+
+	if (using_p5v2 && p5.prototype?.registerMethod && $._isGlobal) {
+		for (let p of p5playGlobals) {
+			window[p] = $[p];
+		}
+	}
 };
+
+// prettier-ignore
+let p5playGlobals = ['p5play','DYN','DYNAMIC','STA','STATIC','KIN','KINEMATIC','Sprite','Ani','Anis','Group','World','world','createCanvas','Canvas','canvas','MAXED','SMOOTH','PIXELATED','displayMode','Camera','camera','Tiles','Joint','GlueJoint','DistanceJoint','WheelJoint','HingeJoint','SliderJoint','RopeJoint','GrabberJoint','kb','keyboard','mouse','touches','allSprites','camera','contro','contros','controllers','spriteArt','EmojiImage','getFPS'];
 
 let p5playAfterSetup = function () {
 	const $ = this;
@@ -11208,10 +11221,28 @@ Or use p5.js v1.11.4 (tested for quality assurance):
 <script src="https://cdn.jsdelivr.net/npm/p5@1.11.4/lib/addons/p5.sound.min.js"></script>
 `;
 
-if (p5.prototype?.registerMethod == undefined) {
-	// experimental support for p5.js v2
-	console.error(`p5play's support for p5.js v${p5.VERSION} is limited and experimental.\n\n` + recommendation);
+function isVersionInRange(v, min, max) {
+	if (!v) return false;
+	let toArr = (ver) => ver.split('.').map(Number);
+	[v, min, max] = [v, min, max].map(toArr);
+	for (let i = 0; i < 3; i++) {
+		if (v[i] < min[i]) return false;
+		if (v[i] > max[i]) return false;
+		if (v[i] > min[i] && v[i] < max[i]) return true;
+	}
+	return (
+		(v[0] === min[0] && v[1] === min[1] && v[2] >= min[2]) ||
+		(v[0] === max[0] && v[1] === max[1] && v[2] <= max[2]) ||
+		(v[0] === min[0] && v[1] > min[1] && v[1] < max[1])
+	);
+}
 
+if (typeof Q5 == 'undefined' && !isVersionInRange(p5.VERSION, '1.10.0', '1.11.4')) {
+	console.error(`p5play does not support p5.js v${p5.VERSION}.\n\n` + recommendation);
+}
+
+// if using p5 v2 without the preload compatibility addon
+if (p5.prototype?.registerMethod == undefined) {
 	p5.registerAddon((p5, proto, lifecycles) => {
 		// the following code is from the p5.js preload compatibility addon
 		// which has been modified to work with p5play via a hacky workaround
@@ -11249,9 +11280,6 @@ if (p5.prototype?.registerMethod == undefined) {
 			};
 		}
 
-		// "code" shouldn't be reserved by p5
-		delete proto.code;
-
 		lifecycles.presetup = async function () {
 			const $ = this;
 
@@ -11265,10 +11293,7 @@ if (p5.prototype?.registerMethod == undefined) {
 
 			// manually propagate p5play stuff to the global window object
 			if ($._isGlobal) {
-				// prettier-ignore
-				let props = ['p5play','DYN','DYNAMIC','STA','STATIC','KIN','KINEMATIC','Sprite','Ani','Anis','Group','World','world','createCanvas','Canvas','canvas','MAXED','SMOOTH','PIXELATED','displayMode','Camera','camera','Tiles','Joint','GlueJoint','DistanceJoint','WheelJoint','HingeJoint','SliderJoint','RopeJoint','GrabberJoint','kb','keyboard','mouse','touches','allSprites','camera','contro','contros','controllers','spriteArt','EmojiImage','getFPS'
-				];
-				for (let p of props) {
+				for (let p of p5playGlobals) {
 					window[p] = $[p];
 				}
 			}
@@ -11288,27 +11313,7 @@ if (p5.prototype?.registerMethod == undefined) {
 		lifecycles.postdraw = p5playPostDraw;
 	});
 } else {
-	function isVersionInRange(v, min, max) {
-		if (!v) return false;
-		let toArr = (ver) => ver.split('.').map(Number);
-		[v, min, max] = [v, min, max].map(toArr);
-		for (let i = 0; i < 3; i++) {
-			if (v[i] < min[i]) return false;
-			if (v[i] > max[i]) return false;
-			if (v[i] > min[i] && v[i] < max[i]) return true;
-		}
-		return (
-			(v[0] === min[0] && v[1] === min[1] && v[2] >= min[2]) ||
-			(v[0] === max[0] && v[1] === max[1] && v[2] <= max[2]) ||
-			(v[0] === min[0] && v[1] > min[1] && v[1] < max[1])
-		);
-	}
-
-	if (typeof Q5 == 'undefined' && !isVersionInRange(p5.VERSION, '1.10.0', '1.11.4')) {
-		console.error(`p5play does not support p5.js v${p5.VERSION}.\n\n` + recommendation);
-	}
-
-	// q5.js or p5.js v1
+	// if using q5, p5 v1, or p5 v2 with the preload compatibility addon
 	p5.prototype.registerMethod('init', p5playInit);
 	p5.prototype.registerMethod('afterSetup', p5playAfterSetup);
 	p5.prototype.registerMethod('pre', p5playPreDraw);
