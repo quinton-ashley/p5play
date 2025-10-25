@@ -2953,7 +2953,7 @@ let p5playInit = function () {
 		_step() {
 			this.life -= timeScale;
 			if (this._life != 2147483647 && this._life <= 0) {
-				this.remove();
+				this.delete();
 			}
 
 			if ((!this.body || !usePhysics) && !this._deleted) {
@@ -8963,6 +8963,7 @@ let p5playInit = function () {
 				if (
 					/^[\d\.]+$/.test(lh) ||
 					lh.endsWith('.lan') ||
+					lh.endsWith('.local') ||
 					lh.endsWith('stackblitz.io') ||
 					lh.endsWith('glitch.me') ||
 					lh.endsWith('replit.dev') ||
@@ -8981,10 +8982,29 @@ let p5playInit = function () {
 	const _createCanvas = $.createCanvas;
 
 	/**
-	 * Use of `new Canvas()` is preferred. Check the Canvas constructor
-	 * for documentation.
+	 * p5play adds some extra functionality to the `createCanvas`
+	 * function. See the examples below.
 	 *
-	 * @returns {Canvas} renderer object
+	 * Creating a canvas in p5play disables the browser's default
+	 * keydown responses to the slash, space, and arrow keys to
+	 * prevent page scrolling, which is disruptive to gameplay.
+	 *
+	 * For an easy way to scale the canvas or make it pixelated, use
+	 * the `displayMode` function.
+	 *
+	 * Only q5.js has support for canvas options.
+	 *
+	 * @param {Number} [width]
+	 * @param {Number} [height]
+	 * @param {Object} [options] - canvas options or renderer
+	 * @returns HTML5 canvas element
+	 * @example
+	 * // fills the window
+	 * createCanvas();
+	 * // max 16:9 aspect ratio dimensions that will fit the window
+	 * createCanvas('16:9');
+	 * // 800x600 pixels
+	 * createCanvas(800, 600);
 	 */
 	this.createCanvas = function () {
 		let args = [...arguments];
@@ -9078,10 +9098,9 @@ let p5playInit = function () {
 			$.camera.x = 0;
 			$.camera.y = 0;
 			if ($._webgpu) {
-				$.p5play._renderStats = {
-					x: -c.hw + 10,
-					y: -c.hh + 20
-				};
+				let rs = $.p5play._renderStats;
+				rs.x = -c.hw + 10;
+				rs.y = -c.hh + 20;
 			}
 		}
 		p5.disableFriendlyErrors = userDisabledP5Errors;
@@ -9105,29 +9124,11 @@ let p5playInit = function () {
 	 */
 	this.Canvas = class {
 		/**
-		 * p5play adds some extra functionality to the `createCanvas`
-		 * function. See the examples below.
-		 *
-		 * Creating a canvas in p5play disables the browser's default
-		 * keydown responses for the slash, space, and arrow keys to
-		 * prevent page scrolling which is disruptive to gameplay.
-		 *
-		 * For an easy way to scale the canvas or make it pixelated, use
-		 * the `displayMode` function.
-		 *
-		 * Only q5.js has support for canvas options.
-		 *
+		 * Use of `createCanvas` preferred.
 		 * @param {Number} [width]
 		 * @param {Number} [height]
 		 * @param {Object} [options] - canvas options or renderer
 		 * @returns HTML5 canvas element
-		 * @example
-		 * // fills the window
-		 * new Canvas();
-		 * // max 16:9 aspect ratio dimensions that will fit the window
-		 * new Canvas('16:9');
-		 * // 800x600 pixels
-		 * new Canvas(800, 600);
 		 */
 		constructor(width, height, options) {
 			/**
