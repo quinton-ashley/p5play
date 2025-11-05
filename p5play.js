@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.33
+ * @version 3.34
  * @author quinton-ashley
  */
 
@@ -17,7 +17,7 @@ if (typeof planck != 'object') {
 let p5playInit = function () {
 	// START p5play.d.ts
 
-	const VERSION = '3.33';
+	const VERSION = '3.34';
 
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
@@ -6495,23 +6495,44 @@ let p5playInit = function () {
 					}
 					s.groups = s.groups.filter((g) => g._uid != this._uid);
 				}
+
+				// Only check contacts of removed sprites to find which group contacts need updating
+				// This is much faster than checking all sprites for all contacts
 				let a = this;
 				for (let eventType in eventTypes) {
-					for (let b_uid in a[eventType]) {
-						if (a[eventType][b_uid] == 0) continue;
-						let b;
-						if (b_uid >= 1000) b = $.p5play.sprites[b_uid];
-						else b = $.p5play.groups[b_uid];
-						let inContact = false;
+					let contactsToCheck = new Set();
+
+					// Collect unique contacts from removed sprites
+					for (let s of removed) {
+						if (!s) continue;
+						for (let b_uid in s[eventType]) {
+							if (s[eventType][b_uid] > 0) {
+								contactsToCheck.add(b_uid);
+							}
+						}
+					}
+
+					// Only check if group is still in contact with entities that removed sprites were touching
+					for (let b_uid of contactsToCheck) {
+						if (!a[eventType][b_uid] || a[eventType][b_uid] == 0) continue;
+
+						// Check if any remaining sprite is still in contact
+						let stillInContact = false;
 						for (let s of a) {
-							if (s[eventType][b._uid] > 0) {
-								inContact = true;
+							if (s[eventType][b_uid] > 0) {
+								stillInContact = true;
 								break;
 							}
 						}
-						if (!inContact) {
-							a[eventType][b._uid] = -2;
-							b[eventType][a._uid] = -2;
+
+						if (!stillInContact) {
+							let b;
+							if (b_uid >= 1000) b = $.p5play.sprites[b_uid];
+							else b = $.p5play.groups[b_uid];
+							if (b) {
+								a[eventType][b_uid] = -2;
+								b[eventType][a._uid] = -2;
+							}
 						}
 					}
 				}
