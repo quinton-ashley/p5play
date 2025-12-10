@@ -7160,74 +7160,45 @@ let p5playInit = function () {
 		_endContact(contact) {
 			let a = contact.m_fixtureA;
 			let b = contact.m_fixtureB;
-			let contactType = '_collisions';
-			if (a.m_isSensor) contactType = '_overlappers';
+			let t = '_collisions';
+			if (a.m_isSensor) t = '_overlappers';
 			a = a.m_body.sprite;
 			b = b.m_body.sprite;
 
-			a[contactType][b._uid] = a[contactType][b._uid] != 0 ? -2 : -4;
-			b[contactType][a._uid] = b[contactType][a._uid] != 0 ? -2 : -4;
+			a[t][b._uid] = a[t][b._uid] != 0 ? -2 : -4;
+			b[t][a._uid] = b[t][a._uid] != 0 ? -2 : -4;
 
 			for (let g of b.groups) {
 				let inContact = false;
 				for (let s of g) {
-					if (s[contactType][a._uid] >= 0) {
+					if (s[t][a._uid] >= 0) {
 						inContact = true;
 						break;
 					}
 				}
 				if (!inContact) {
-					g[contactType][a._uid] = g[contactType][a._uid] != 0 ? -2 : -4;
-					a[contactType][g._uid] = a[contactType][g._uid] != 0 ? -2 : -4;
+					g[t][a._uid] = g[t][a._uid] != 0 ? -2 : -4;
+					a[t][g._uid] = a[t][g._uid] != 0 ? -2 : -4;
 				}
 			}
 
 			for (let g of a.groups) {
 				let inContact = false;
 				for (let s of g) {
-					if (s[contactType][b._uid] >= 0) {
+					if (s[t][b._uid] >= 0) {
 						inContact = true;
 						break;
 					}
 				}
 				if (!inContact) {
-					g[contactType][b._uid] = g[contactType][b._uid] != 0 ? -2 : -4;
-					b[contactType][g._uid] = b[contactType][g._uid] != 0 ? -2 : -4;
+					g[t][b._uid] = g[t][b._uid] != 0 ? -2 : -4;
+					b[t][g._uid] = b[t][g._uid] != 0 ? -2 : -4;
 					for (let g2 of b.groups) {
-						g[contactType][g2._uid] = g[contactType][g2._uid] != 0 ? -2 : -4;
-						g2[contactType][g._uid] = g2[contactType][g._uid] != 0 ? -2 : -4;
+						g[t][g2._uid] = g[t][g2._uid] != 0 ? -2 : -4;
+						g2[t][g._uid] = g2[t][g._uid] != 0 ? -2 : -4;
 					}
 				}
 			}
-		}
-
-		/*
-		 * Used internally to find contact callbacks.
-		 *
-		 * @param type is the eventType of contact callback to find
-		 * @param s0 is the first sprite
-		 * @param s1 is the second sprite
-		 */
-		_findContact(type, s0, s1) {
-			let cb = s0[type][s1._uid];
-			if (cb) return cb;
-
-			for (let g1 of s1.groups) {
-				cb = s0[type][g1._uid];
-				if (cb) return cb;
-			}
-
-			for (let g0 of s0.groups) {
-				cb = g0[type][s1._uid];
-				if (cb) return cb;
-
-				for (let g1 of s1.groups) {
-					if (g0._uid != g1._uid) continue;
-					cb = g0[type][g1._uid];
-					if (cb) return cb;
-				}
-			}
-			return false;
 		}
 
 		/**
