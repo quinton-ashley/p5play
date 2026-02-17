@@ -28,10 +28,6 @@ Contributors: @Tezumie, Oliver Zell, Caleb Foss, and Bobby S.
 
 Testers and bug reporters: Lachlan Noble, Raj Raizada, Nathan Anil, Chayarat Wangweera, Zhiyuan Guo, Aarnav Gupta, and Carter Noa.
 
-## Contributing to p5play ✍️
-
-Take a look at the [p5play project planning page][]. Let me know what you'd like to help with! See the [p5play-web][] repo for more info.
-
 [p5play.org]: https://p5play.org
 [@quinton-ashley]: https://github.com/quinton-ashley
 [@molleindustria]: https://github.com/molleindustria
@@ -39,5 +35,3 @@ Take a look at the [p5play project planning page][]. Let me know what you'd like
 [p5play Personal License]: https://github.com/quinton-ashley/p5play/blob/main/LICENSE.md
 [p5play Educational License]: https://p5play.org/teach
 [p5play Professional License]: https://p5play.org/pro
-[p5play project planning page]: https://github.com/users/quinton-ashley/projects/5
-[p5play-web]: https://github.com/quinton-ashley/p5play-web

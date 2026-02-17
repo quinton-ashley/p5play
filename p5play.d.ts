@@ -3072,6 +3072,10 @@ class _SpriteMouse extends _Mouse {
 	 */
 	hovered(): boolean;
 }
+let pressAmt: number;
+function onmousedown(e: any): void;
+function onmousemove(e: any): void;
+function onmouseup(e: any): void;
 /**
  * @class
  * @extends InputDevice

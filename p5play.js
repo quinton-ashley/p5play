@@ -501,7 +501,7 @@ let p5playInit = function () {
 				y: 0
 			};
 
-			this._pos = $.createVector.call($);
+			this._pos = $.createVector.call($, 0, 0);
 
 			Object.defineProperty(this._pos, 'x', {
 				get() {
@@ -535,7 +535,7 @@ let p5playInit = function () {
 				}
 			});
 
-			this._canvasPos = $.createVector.call($);
+			this._canvasPos = $.createVector.call($, 0, 0);
 
 			Object.defineProperty(this._canvasPos, 'x', {
 				get() {
@@ -560,7 +560,7 @@ let p5playInit = function () {
 			};
 			this._direction = 0;
 
-			this._vel = $.createVector.call($);
+			this._vel = $.createVector.call($, 0, 0);
 
 			Object.defineProperties(this._vel, {
 				x: {
@@ -2422,7 +2422,7 @@ let p5playInit = function () {
 		 * @default 0
 		 */
 		get speed() {
-			return $.createVector(this.vel.x, this.vel.y).mag();
+			return $.createVector.call($, this.vel.x, this.vel.y).mag();
 		}
 		set speed(val) {
 			let angle = this.direction;
@@ -2507,7 +2507,7 @@ let p5playInit = function () {
 					arr[1] = fixRound(arr[1]);
 				}
 				if (internalUse) v[i] = arr;
-				else v[i] = $.createVector(arr[0], arr[1]);
+				else v[i] = $.createVector.call($, arr[0], arr[1]);
 			}
 			return v;
 		}
@@ -7325,7 +7325,7 @@ let p5playInit = function () {
 		 */
 		constructor() {
 			// camera position
-			this._pos = $.createVector.call($);
+			this._pos = $.createVector.call($, 0, 0);
 
 			// camera translation
 			this.__pos = { x: 0, y: 0, rounded: {} };
@@ -7738,7 +7738,7 @@ let p5playInit = function () {
 					if (l == 'A' && type == 'wheel') continue;
 
 					const prop = '_offset' + l;
-					this[prop] = $.createVector.call($);
+					this[prop] = $.createVector.call($, 0, 0);
 
 					for (let axis of ['x', 'y']) {
 						Object.defineProperty(this[prop], axis, {
@@ -9099,11 +9099,10 @@ let p5playInit = function () {
 
 		$.displayMode(display, renderQuality, displayScale);
 
-		let pointer = window.PointerEvent ? 'pointer' : 'mouse';
-		c.addEventListener(pointer + 'down', onpointerdown);
+		c.addEventListener('mousedown', onmousedown);
 		if (window) {
-			window.addEventListener(pointer + 'move', onpointermove);
-			window.addEventListener(pointer + 'up', onpointerup);
+			window.addEventListener('mousemove', onmousemove);
+			window.addEventListener('mouseup', onmouseup);
 		}
 
 		didCreateCanvas = true;
@@ -9756,7 +9755,7 @@ circle(25, 12.5, 16);
 			let _this = this;
 
 			// this.x and this.y store the actual position values of the mouse
-			this._pos = $.createVector.call($);
+			this._pos = $.createVector.call($, 0, 0);
 
 			Object.defineProperty(this._pos, 'x', {
 				get() {
@@ -9987,7 +9986,7 @@ circle(25, 12.5, 16);
 
 	let pressAmt = 0;
 
-	let onpointerdown = function (e) {
+	let onmousedown = function (e) {
 		if (!$._setupDone) return;
 		pressAmt++;
 
@@ -9999,6 +9998,7 @@ circle(25, 12.5, 16);
 
 		$.mouse.isActive = true;
 		$.mouse[btn]++;
+
 		if ($.world.mouseSprites.length) {
 			let msm = $.world.mouseSprite?.mouse;
 			// old mouse sprite didn't have the mouse released on it
@@ -10015,7 +10015,7 @@ circle(25, 12.5, 16);
 		}
 	};
 
-	let onpointermove = function (e) {
+	let onmousemove = function (e) {
 		if (!$._setupDone) return;
 
 		let btn = 'left';
@@ -10026,7 +10026,7 @@ circle(25, 12.5, 16);
 		if (m[btn] > 0) m._dragFrame[btn] = true;
 	};
 
-	let onpointerup = function (e) {
+	let onmouseup = function (e) {
 		if (!$._setupDone) return;
 		if (pressAmt > 0) pressAmt--;
 		else return;
@@ -10150,6 +10150,7 @@ circle(25, 12.5, 16);
 				$.mouse._update();
 				$.world.mouseSprites = $.world.getMouseSprites();
 				if (using_p5v1) $._onmousedown(e);
+				onmousedown(e);
 			}
 		}
 		if ($.touchStarted && !$.touchStarted(e)) e.preventDefault();
@@ -10167,6 +10168,7 @@ circle(25, 12.5, 16);
 				$.mouseY = $.touches[0].y;
 				$.mouse._update();
 				if (using_p5v1) $._onmousemove(e);
+				onmousemove(e);
 			}
 		}
 		if ($.touchMoved && !$.touchMoved(e)) e.preventDefault();
@@ -10190,6 +10192,7 @@ circle(25, 12.5, 16);
 				$.mouseY = $.touches[0].y;
 				$.mouse._update();
 				if (using_p5v1) $._onmouseup(e);
+				onmouseup(e);
 			}
 		}
 		if ($.touchEnded && !$.touchEnded(e)) e.preventDefault();
@@ -11204,11 +11207,11 @@ let p5playPostDraw = function () {
 	$.p5play._inPostDraw = false;
 };
 
-let recommendation = `For the best experience with p5play, use q5.js v3:
+let recommendation = `For the best experience with p5play, use q5.js:
 
 <script src="https://q5js.org/q5.js"></script>
 
-Or use p5.js v1.11.4 (tested for quality assurance):
+Or use p5.js v1.11.4:
 
 <script src="https://cdn.jsdelivr.net/npm/p5@1.11.4/lib/p5.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/p5@1.11.4/lib/addons/p5.sound.min.js"></script>
