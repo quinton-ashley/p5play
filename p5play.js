@@ -1,6 +1,6 @@
 /**
  * p5play
- * @version 3.34
+ * @version 3.35
  * @author quinton-ashley
  */
 
@@ -17,7 +17,7 @@ if (typeof planck != 'object') {
 let p5playInit = function () {
 	// START p5play.d.ts
 
-	const VERSION = '3.34';
+	const VERSION = '3.35';
 
 	const $ = this; // the p5 or q5 instance that called p5playInit
 	const pl = planck;
@@ -10116,18 +10116,22 @@ circle(25, 12.5, 16);
 		}
 
 		_update(v) {
-			let c = $.canvas;
-			const rect = c.getBoundingClientRect();
-			const sx = c.scrollWidth / c.w || 1;
-			const sy = c.scrollHeight / c.h || 1;
-			const x = (this.canvasPos.x = (v.clientX - rect.left) / sx);
-			const y = (this.canvasPos.y = (v.clientY - rect.top) / sy);
+			const c = $.canvas,
+				rect = c.getBoundingClientRect(),
+				sx = c.scrollWidth / c.w || 1,
+				sy = c.scrollHeight / c.h || 1;
+			let x = (this.canvasPos.x = (v.clientX - rect.left) / sx),
+				y = (this.canvasPos.y = (v.clientY - rect.top) / sy);
 			if ($.camera.x == c.hw && $.camera.y == c.hh && $.camera.zoom == 1) {
 				this.x = x;
 				this.y = y;
 			} else {
-				this.x = (x - c.hw) / $.camera.zoom + $.camera.x;
-				this.y = (y - c.hh) / $.camera.zoom + $.camera.y;
+				if (!$._webgpu) {
+					x -= c.hw;
+					y -= c.hh;
+				}
+				this.x = x / $.camera.zoom + $.camera.x;
+				this.y = y / $.camera.zoom + $.camera.y;
 			}
 			this.force = v.force;
 		}
@@ -10145,8 +10149,6 @@ circle(25, 12.5, 16);
 			$.touches.push(new $._Touch(touch));
 
 			if ($.touches.length == 1) {
-				$.mouseX = $.touches[0].x;
-				$.mouseY = $.touches[0].y;
 				$.mouse._update();
 				$.world.mouseSprites = $.world.getMouseSprites();
 				if (using_p5v1) $._onmousedown(e);
@@ -10164,8 +10166,6 @@ circle(25, 12.5, 16);
 			t._update(touch);
 			t._dragFrame = true;
 			if (t.id == $.touches[0].id) {
-				$.mouseX = $.touches[0].x;
-				$.mouseY = $.touches[0].y;
 				$.mouse._update();
 				if (using_p5v1) $._onmousemove(e);
 				onmousemove(e);
@@ -10188,8 +10188,6 @@ circle(25, 12.5, 16);
 			if (t.drag > 0) t.drag = -1;
 
 			if (t.id == $.touches[0].id) {
-				$.mouseX = $.touches[0].x;
-				$.mouseY = $.touches[0].y;
 				$.mouse._update();
 				if (using_p5v1) $._onmouseup(e);
 				onmouseup(e);
