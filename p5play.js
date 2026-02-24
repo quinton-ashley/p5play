@@ -10120,16 +10120,20 @@ circle(25, 12.5, 16);
 				rect = c.getBoundingClientRect(),
 				sx = c.scrollWidth / c.w || 1,
 				sy = c.scrollHeight / c.h || 1;
-			let x = (this.canvasPos.x = (v.clientX - rect.left) / sx),
+			let x = (v.clientX - rect.left) / sx,
 				y = (this.canvasPos.y = (v.clientY - rect.top) / sy);
+
+			if ($._webgpu) {
+				x -= c.hw;
+				y -= c.hh;
+			}
+			this.canvasPos.x = x;
+			this.canvasPos.y = y;
+
 			if ($.camera.x == c.hw && $.camera.y == c.hh && $.camera.zoom == 1) {
 				this.x = x;
 				this.y = y;
 			} else {
-				if (!$._webgpu) {
-					x -= c.hw;
-					y -= c.hh;
-				}
 				this.x = x / $.camera.zoom + $.camera.x;
 				this.y = y / $.camera.zoom + $.camera.y;
 			}
