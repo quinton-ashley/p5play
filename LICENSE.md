@@ -73,30 +73,24 @@ Use of the "made with p5play" Loading Screen is required for all published work 
 
 Anyone can use the Content for free under this License, provided they comply with the terms and conditions set forth herein.
 
-## 3. Privacy
-
-Licensees optionally consent to p5play using Google Analytics to track how they use p5play. To revoke this consent, you can use a browser extension to block Google Analytics or set `window._p5play_gtagged = false;` before loading p5play.
-
-## 4. No Warranty
+## 3. No Warranty
 
 The Content is provided "as is." The Licensor makes no warranties, express or implied, including without limitation any implied warranty of merchantability or fitness for a particular purpose, concerning the Content.
 
-## 5. Limitation of Liability
+## 4. Limitation of Liability
 
 The Licensor shall not be liable for any damages suffered by the Licensee resulting from the use or inability to use the Content.
 
 Licensees must comply with all applicable laws and regulations when using p5play. It is illegal to create content that infringes on the rights of others. Licensees are fully liable for any content they create with p5play.
 
-## 6. Amendments
-
-This Agreement can be amended by the Licensor at any time. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
-
-## 7. Termination
+## 5. Termination
 
 Termination of the Agreement will occur if the Licensee fails to comply with any term(s) of this Agreement. Therefore, termination can occur automatically, without notice from the Licensor.
 
 Upon termination, the Licensee must cease all use and distribution of the Content.
 
-## 8. Entire Agreement
+## 6. Entire Agreement
 
 This Agreement constitutes the entire agreement between the parties and supersedes all prior understandings and agreements, whether written or oral, relating to the subject matter of this Agreement.
+
+To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.

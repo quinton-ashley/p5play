@@ -25,29 +25,6 @@ let p5playInit = function () {
 	let userDisabledP5Errors = p5.disableFriendlyErrors;
 	p5.disableFriendlyErrors = true;
 
-	// Google Analytics collects anonymous usage data to help make p5play better.
-	// To opt out, set window._p5play_gtagged to false before loading p5play.
-	if (
-		typeof process != 'object' && // don't track in node.js
-		window._p5play_gtagged != false
-	) {
-		let script = document.createElement('script');
-		script.src = 'https://www.googletagmanager.com/gtag/js?id=G-EHXNCTSYLK';
-		script.async = true;
-		document.head.append(script);
-		window._p5play_gtagged = true;
-
-		script.onload = () => {
-			window.dataLayer ??= [];
-			window.gtag = function () {
-				dataLayer.push(arguments);
-			};
-			gtag('js', new Date());
-			gtag('config', 'G-EHXNCTSYLK');
-			gtag('event', 'p5play_v' + VERSION.replace('.', '_'));
-		};
-	}
-
 	let using_p5v1 = !$._q5 && p5.VERSION[0] == 1;
 	let using_p5v2 = !$._q5 && p5.VERSION[0] == 2;
 
@@ -10121,7 +10098,7 @@ circle(25, 12.5, 16);
 				sx = c.scrollWidth / c.w || 1,
 				sy = c.scrollHeight / c.h || 1;
 			let x = (v.clientX - rect.left) / sx,
-				y = (this.canvasPos.y = (v.clientY - rect.top) / sy);
+				y = (v.clientY - rect.top) / sy;
 
 			if ($._webgpu) {
 				x -= c.hw;
