@@ -8632,11 +8632,9 @@ let p5playInit = function () {
 		let h = g.canvas.height;
 		let data = ctx.getImageData(0, 0, w, h).data;
 		let left = w,
-			right = 0,
+			right = (bottom = 0),
 			top = h,
-			bottom = 0;
-
-		let i = 3;
+			i = 3;
 		for (let y = 0; y < h; y++) {
 			for (let x = 0; x < w; x++) {
 				if (data[i] !== 0) {
@@ -8655,6 +8653,8 @@ let p5playInit = function () {
 
 		g = g.get(left, top, right - left + 1, bottom - top + 1);
 		g.src = emoji;
+		g.defaultWidth = g.width;
+		g.defaultHeight = g.height;
 		return g;
 	};
 
